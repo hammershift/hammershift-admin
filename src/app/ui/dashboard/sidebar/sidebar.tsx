@@ -38,7 +38,7 @@ const sidebarItems = [
       },
       {
         title: "Log-out",
-        path: "/dashboard/auctions",
+        path: "/dashboard/logout",
         icon: <LogoutIcon />,
       },
     ],
