@@ -13,38 +13,38 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 const data = [
   {
     name: "Sun",
-    visit: 4000,
-    click: 2400,
+    wagers: 4000,
+    auctions: 2400,
   },
   {
     name: "Mon",
-    visit: 3000,
-    click: 1398,
+    wagers: 3000,
+    auctions: 1398,
   },
   {
     name: "Tue",
-    visit: 2000,
-    click: 3800,
+    wagers: 2000,
+    auctions: 3800,
   },
   {
     name: "Wed",
-    visit: 2780,
-    click: 3908,
+    wagers: 2780,
+    auctions: 3908,
   },
   {
     name: "Thu",
-    visit: 1890,
-    click: 4800,
+    wagers: 1890,
+    auctions: 4800,
   },
   {
     name: "Fri",
-    visit: 2390,
-    click: 3800,
+    wagers: 2390,
+    auctions: 3800,
   },
   {
     name: "Sat",
-    visit: 3490,
-    click: 4300,
+    wagers: 3490,
+    auctions: 4300,
   }
 ];
 
@@ -103,7 +103,7 @@ const DashboardPage = () => {
             <div className='tw-mb-4'>LATEST WAGERS</div>
             <Table/>
         </div>
-        <div className='section-container tw-pb-20'>
+        <div className='section-container'>
             <div className='tw-mb-4'>WEEKLY RECAP</div>
             <div className='tw-w-full tw-h-[450px]'>
                 <Chart/>
@@ -117,7 +117,7 @@ export default DashboardPage
 
 const Table = () => {
     return (
-        <table className='tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-left'>
+        <table className='tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center'>
             <thead>
                 <tr>
                     <th className='tw-p-2.5 tw-font-bold '>Wager</th>
@@ -130,13 +130,14 @@ const Table = () => {
                 {
                     list && 
                     list.map((item, index) => (
-                         <tr key={item.id} className=' tw-rounded-lg tw-m-2 tw-bg-[#fff]/5'>
-                            <td className='tw-p-2.5'>${item.wager}.00</td>
-                            <td className='tw-p-2.5'>${item.price}</td>
-                            <td className={`tw-p-2.5`}>
-                                <span className={`tw-p-2 tw-rounded ${item.status == "On Going" ? 'tw-bg-[#49C742]/20' : 'tw-bg-[#C2451E]/20'}`}>{item.status}</span>
-                                </td>
-                            <td className='tw-p-2.5'>{item.user}</td>
+                         <tr key={item.id} className=' tw-rounded-lg tw-bg-[#fff]/5'>
+                            <td className='tw-p-2.5 tw-w-1/4'>${item.wager}.00</td>
+                            <td className='tw-p-2.5 tw-w-1/4'>${item.price}</td>
+                            <td className='tw-p-2.5 tw-w-1/4'>
+                              <span className={`tw-p-2 tw-rounded ${item.status == "On Going" ? 'tw-bg-[#49C742]/20' : 'tw-bg-[#C2451E]/20'}`}>{item.status}
+                              </span>
+                            </td>
+                            <td className='tw-p-2.5 tw-w-1/4'>{item.user}</td>
                         </tr>
                     )
                     )
@@ -149,7 +150,7 @@ const Table = () => {
 
 const Chart = () => {
     return (
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="95%">
         <LineChart
           width={500}
           height={300}
@@ -166,8 +167,8 @@ const Chart = () => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="visit" stroke="#8884d8" activeDot={{ r: 8 }} />
-          <Line type="monotone" dataKey="click" stroke="#82ca9d" />
+          <Line type="monotone" dataKey="wagers" stroke="#8884d8" activeDot={{ r: 8 }} />
+          <Line type="monotone" dataKey="auctions" stroke="#82ca9d" />
         </LineChart>
       </ResponsiveContainer>
     );
