@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
+import Search from "../search/Search";
 
 interface AuctionItem {
   _id: {
@@ -61,7 +62,13 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
 
   return (
     <div className="section-container tw-mt-4">
-      <h2>Auction List</h2>
+      <div className="tw-flex tw-justify-between">
+        <h2 className="tw-font-bold tw-text-yellow-500 tw-text-xl tw-m-2">
+          Auction List
+        </h2>
+        <Search placeholder="auctions" />
+      </div>
+
       <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-left">
         <thead>
           <tr>
