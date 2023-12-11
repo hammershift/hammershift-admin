@@ -65,7 +65,6 @@ const WagersPage = () => {
 export default WagersPage
 
 
-
 const Table = () => {
     return (
         <table className='tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center'>
