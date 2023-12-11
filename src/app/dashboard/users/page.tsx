@@ -1,6 +1,4 @@
 import React from 'react'
-import SearchIcon from '@mui/icons-material/Search';
-import Image from 'next/image';
 import Search from '@/app/ui/dashboard/search/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import DvrIcon from '@mui/icons-material/Dvr';
