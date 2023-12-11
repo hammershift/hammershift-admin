@@ -1,0 +1,1319 @@
+[
+  {
+    "_id": {
+      "$oid": "656e95318727754b7cb5be74"
+    },
+    "attributes": [
+      {
+        "key": "price",
+        "value": 80000,
+        "_id": {
+          "$oid": "656e95318727754b7cb5be75"
+        }
+      },
+      {
+        "key": "year",
+        "value": "1963",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be76"
+        }
+      },
+      {
+        "key": "make",
+        "value": "Porsche",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be77"
+        }
+      },
+      {
+        "key": "model",
+        "value": "356B Super 90 Coupe",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be78"
+        }
+      },
+      {
+        "key": "category",
+        "value": "Others",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be79"
+        }
+      },
+      {
+        "key": "era",
+        "value": "1960s",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be7a"
+        }
+      },
+      {
+        "key": "chassis",
+        "value": "123816",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be7b"
+        }
+      },
+      {
+        "key": "seller",
+        "value": "roadscholars1",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be7c"
+        }
+      },
+      {
+        "key": "location",
+        "value": "East Durham, North Carolina 27703",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be7d"
+        }
+      },
+      {
+        "key": "state",
+        "value": "North Carolina",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be7e"
+        }
+      },
+      {
+        "key": "lot_num",
+        "value": "130143",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be7f"
+        }
+      },
+      {
+        "key": "listing_type",
+        "value": "Private Property",
+        "_id": {
+          "$oid": "656e95318727754b7cb5be80"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": {
+          "$date": "2023-12-13T21:39:00.000Z"
+        },
+        "_id": {
+          "$oid": "656e95318727754b7cb5be81"
+        }
+      },
+      {
+        "key": "bids",
+        "value": 8,
+        "_id": {
+          "$oid": "656e95318727754b7cb5be82"
+        }
+      },
+      {
+        "key": "status",
+        "value": 1,
+        "_id": {
+          "$oid": "656e95318727754b7cb5be83"
+        }
+      }
+    ],
+    "auction_id": "68192594",
+    "website": "Bring A Trailer",
+    "image": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_porsche_356b-super-90-coupe_1963-porsche-356b-t6-super-90-coupe-chassis-123816-4-88289.jpg?fit=940%2C627",
+    "page_url": "https://bringatrailer.com/listing/1963-porsche-356b-super-90-coupe-13/",
+    "isActive": true,
+    "description": [
+      "This 1963 Porsche 356B Super 90 is a Reutter-built coupe that was assembled on March 12, 1963, and distributed via Porsche Cars Pacific. The car is said to have been refurbished in 2010 and was acquired by the selling dealer from the original owner’s estate in 2020. Finished in Smyrna Green over tan upholstery, the car is powered by a 1.6-liter flat-four mated to a four-speed manual transaxle. Additional equipment includes chrome-finished 15″ steel wheels, finned drum brakes, Carello driving lamps, and a Blaupunkt push-button radio. Work performed in preparation for the sale is said to have involved tuning the twin Solex carburetors and replacing the rear Koni shocks. This 356B is offered by the selling dealer with car show judging sheets, handwritten service notes, a window sticker, a Porsche Certificate of Authenticity, a copy of the Kardex, and a clean North Carolina title.",
+      "The car left the factory in Smyrna Green (6210) and is said to have been stripped to metal prior to being refinished in 2010 under previous ownership. Exterior details include a left mirror, Carello driving lamps, twin engine grilles, and body-colored bumpers with chrome overriders and integrated exhaust outlets.",
+      "Silver-finished 15″ steel wheels wear polished Porsche-crest hubcaps and are mounted with Vredestein Sprint Classic tires, while a matching spare wheel is stored in the front trunk compartment. Stopping power is provided by four-wheel finned drum brakes, and the rear Koni shocks are said to have been replaced in October 2023.",
+      "The cabin features low-back bucket seats trimmed in tan leatherette that extends to the rear jump seats. The ceiling wears a perforated beige headliner, while the color-coordinated squareweave carpets are covered with black rubber floor linings. Additional appointments include latch-and-link lap belts, map pockets, a VDO clock, and a Blaupunkt push-button radio.",
+      "A three-spoke steering wheel sits ahead of a body-color dashboard housing green-letter VDO instrumentation that includes a 120-mph speedometer, a 6k-rpm tachometer, and a combination gauge. The five-digit odometer shows 82k miles, approximately 100 of which were added under current ownership.",
+      "The 1.6-liter flat-four sends power to the rear wheels through a four-speed manual transmission. Work performed in preparation for the sale is said to have included tuning the twin Solex carburetors, cleaning the ignition points, and changing the oil.",
+      "Engine-case stamping P☆806932☆ can be seen above.",
+      "Additional underside images are presented in the gallery below.",
+      "A copy of the Kardex shows delivery to California via P.C. Pacific as well as the factory colors and powertrain numbers. A Porsche Certificate of Authenticity, a window sticker, and handwritten service notes are pictured in the gallery."
+    ],
+    "images_list": [
+      {
+        "placing": 1,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_porsche_356b-super-90-coupe_1963-porsche-356b-t6-super-90-coupe-chassis-123816-37-88355.jpg"
+      },
+      {
+        "placing": 2,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_porsche_356b-super-90-coupe_1963-porsche-356b-t6-super-90-coupe-chassis-123816-7-88405.jpg"
+      },
+      {
+        "placing": 3,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963-Porsche-356B-T6-Super-90-Coupe-chassis-123816-74-19171.jpg"
+      },
+      {
+        "placing": 4,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963-Porsche-356B-T6-Super-90-Coupe-chassis-123816-50-19040.jpg"
+      },
+      {
+        "placing": 5,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963-Porsche-356B-T6-Super-90-Coupe-chassis-123816-56-19072.jpg"
+      },
+      {
+        "placing": 6,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_porsche_356b-super-90-coupe_1963-porsche-356b-t6-super-90-coupe-chassis-123816-54-88487.jpg"
+      },
+      {
+        "placing": 7,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_porsche_356b-super-90-coupe_img_4040-2-06676.jpeg"
+      },
+      {
+        "placing": 8,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_porsche_356b-super-90-coupe_a-1-90063.jpg"
+      }
+    ],
+    "listing_details": [
+      "Chassis: 123816",
+      "82k Miles Shown",
+      "1.6-Liter Flat-Four",
+      "Twin Solex Carburetors",
+      "Four-Speed Manual Transaxle",
+      "Smyrna Green Paint",
+      "Tan Upholstery",
+      "15\" Steel Wheels w/ Hubcaps",
+      "Finned Drum Brakes",
+      "Koni Shocks",
+      "Carello Driving Lamps",
+      "Twin Engine Grilles",
+      "Blaupunkt Push-Button Radio",
+      "Window Sticker",
+      "Copy of Kardex",
+      "Porsche Certificate of Authenticity"
+    ],
+    "sort": {
+      "price": 80000,
+      "bids": 8,
+      "deadline": {
+        "$date": "2023-12-13T21:39:00.000Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2023-12-05T03:12:49.729Z"
+    },
+    "updatedAt": {
+      "$date": "2023-12-10T10:39:45.808Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "656e95688727754b7cb5d243"
+    },
+    "attributes": [
+      {
+        "key": "price",
+        "value": 255000,
+        "_id": {
+          "$oid": "656e95688727754b7cb5d244"
+        }
+      },
+      {
+        "key": "year",
+        "value": "2005",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d245"
+        }
+      },
+      {
+        "key": "make",
+        "value": "Ferrari",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d246"
+        }
+      },
+      {
+        "key": "model",
+        "value": "575 Superamerica GTC",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d247"
+        }
+      },
+      {
+        "key": "category",
+        "value": "Convertibles",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d248"
+        }
+      },
+      {
+        "key": "era",
+        "value": "2000s",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d249"
+        }
+      },
+      {
+        "key": "chassis",
+        "value": "ZFFGT61A350143338",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d24a"
+        }
+      },
+      {
+        "key": "seller",
+        "value": "pacificimport",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d24b"
+        }
+      },
+      {
+        "key": "location",
+        "value": "Newport Beach, California 92660",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d24c"
+        }
+      },
+      {
+        "key": "state",
+        "value": "California",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d24d"
+        }
+      },
+      {
+        "key": "lot_num",
+        "value": "129856",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d24e"
+        }
+      },
+      {
+        "key": "listing_type",
+        "value": "Private Property",
+        "_id": {
+          "$oid": "656e95688727754b7cb5d24f"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": {
+          "$date": "2023-12-10T18:00:00.000Z"
+        },
+        "_id": {
+          "$oid": "656e95688727754b7cb5d250"
+        }
+      },
+      {
+        "key": "bids",
+        "value": 6,
+        "_id": {
+          "$oid": "656e95688727754b7cb5d251"
+        }
+      },
+      {
+        "key": "status",
+        "value": 1,
+        "_id": {
+          "$oid": "656e95688727754b7cb5d252"
+        }
+      }
+    ],
+    "auction_id": "66153436",
+    "website": "Bring A Trailer",
+    "image": "https://bringatrailer.com/wp-content/uploads/2023/10/2005_ferrari_575-superamerica_2005_ferrari_575-superamerica_495c59c9-c484-41d8-b493-f9aeb6a649b2-HS8Edr-60969-60970-scaled.jpg?fit=940%2C627",
+    "page_url": "https://bringatrailer.com/listing/2005-ferrari-575-superamerica-19/",
+    "isActive": true,
+    "description": [
+      "This 2005 Ferrari 575 is one of 559 Superamerica hardtop convertibles produced with a retractable electrochromic roof panel, and it was optioned with the GTC Package, a $21,837 option that added carbon-ceramic brakes, a titanium exhaust system, and suspension and steering upgrades. The car is finished in Grigio Silverstone over tan leather, and it is powered by a 5.75-liter F133 V12 linked with a six-speed F1 automated manual gearbox and a limited-slip differential. Additional equipment includes xenon headlights, Scuderia Ferrari fender shields, 19″ multi-piece alloy wheels, Daytona-style seats, a Ferrari-branded stereo, and automatic climate control. The current owner purchased the car in October 2005 and has since added the majority of the 22k indicated miles. This 575 Superamerica is now offered by the seller on behalf of the owner with literature, records, accessories, a clean Carfax report, and a clean California title in the owner’s name.",
+      "The car is finished in Grigio Silverstone (740) and features a power-operated Revocromico rotating glass hardtop with five tint levels that can be selected using a dial in the cabin. Additional exterior features includes xenon headlights, fog lights, a hood scoop, Scuderia Ferrari fender shields, and four exhaust outlets.",
+      "The 19″ multi-piece wheels wear yellow prancing horse center caps and are mounted with Bridgestone Potenza Sport tires. The car is equipped with Skyhook adaptive dampers, and the GTC package added suspension and steering upgrades as well as a carbon-ceramic brake system.",
+      "The cabin features adjustable Daytona-style seats trimmed in tan leather upholstery that extends to the rear bulkhead, door panels, and lower dashboard. Interior amenities include a Ferrari-branded stereo and automatic climate control.",
+      "The leather-wrapped steering wheel fronts F1 paddle shifters and frames a carbon-fiber instrument panel housing a central red 10k-rpm tachometer, a 220-mph speedometer, and auxiliary gauges for coolant temperature, oil temperature, oil pressure, and fuel level. The digital odometer indicates 22k miles, the majority of which were added under current ownership.",
+      "The 5.75-liter F133 quad-cam V12 was factory rated at 532 horsepower and 434 lb-ft of torque. Fluids services were performed in October 2020.",
+      "Power is sent to the rear wheels through a six-speed F1 automated manual gearbox and a limited-slip differential. A titanium exhaust system was included as part of the GTC package. Additional photographs of the underside are shown in the gallery below.",
+      "Manufacturer’s literature, a tool kit, records, and a Ferrari-branded battery tender, air pump, blanket, and car cover are included in the sale.",
+      "The Carfax report shows no accidents or damage and lists registration history in California since new."
+    ],
+    "images_list": [
+      {
+        "placing": 1,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/10/2005_ferrari_575-superamerica_2005_ferrari_575-superamerica_33c20394-3056-4b3f-ab44-f317a4187717-dm1ovQ-60930-60931-scaled.jpg"
+      },
+      {
+        "placing": 2,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/10/2005_ferrari_575-superamerica_2005_ferrari_575-superamerica_30c5e285-6055-449d-863a-f79bb243a437-KTsEfK-61018-61019-scaled.jpg"
+      },
+      {
+        "placing": 3,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/10/2005_ferrari_575-superamerica_2005_ferrari_575-superamerica_4f769948-bf62-496b-8ffc-b3c5a6440fca-ZeKYrK-61335-61336-scaled.jpg"
+      },
+      {
+        "placing": 4,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/10/2005_ferrari_575-superamerica_2005_ferrari_575-superamerica_a327102b-bfa7-4519-b2e0-0e7a2ee5a293-tG35Nb-61320-61321-scaled.jpg"
+      },
+      {
+        "placing": 5,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/10/2005_ferrari_575-superamerica_2005_ferrari_575-superamerica_2b4f8e41-6a46-46d8-805c-bfaf1fd1edc5-aRma8n-61697-61698-scaled.jpg"
+      },
+      {
+        "placing": 6,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/10/2005_ferrari_575-superamerica_img_0070-9-06439.jpg"
+      },
+      {
+        "placing": 7,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/10/2005_ferrari_575-superamerica_2005_ferrari_575-superamerica_07615924-1b1f-4950-923b-a38b55684e3d-brwRmX-62000-62001-scaled.jpg"
+      }
+    ],
+    "listing_details": [
+      "Chassis: ZFFGT61A350143338",
+      "22k Miles",
+      "5.75-Liter V12",
+      "Six-Speed F1 Automated Gearbox",
+      "Limited-Slip Differential",
+      "Grigio Silverstone Paint",
+      "Tan Leather Upholstery",
+      "GTC Package",
+      "Retractable Hardtop",
+      "19\" Multi-Piece Alloy Wheels",
+      "Xenon Headlights",
+      "Daytona-Style Seats",
+      "Automatic Climate Control",
+      "Ferrari-Branded Stereo",
+      "Literature & Accessories",
+      "Clean Carfax Report"
+    ],
+    "sort": {
+      "price": 255000,
+      "bids": 6,
+      "deadline": {
+        "$date": "2023-12-10T18:00:00.000Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2023-12-05T03:13:44.592Z"
+    },
+    "updatedAt": {
+      "$date": "2023-12-10T10:36:59.945Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "656e95698727754b7cb5d267"
+    },
+    "attributes": [
+      {
+        "key": "price",
+        "value": 90000,
+        "_id": {
+          "$oid": "656e95698727754b7cb5d268"
+        }
+      },
+      {
+        "key": "year",
+        "value": "1996",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d269"
+        }
+      },
+      {
+        "key": "make",
+        "value": "Ferrari",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d26a"
+        }
+      },
+      {
+        "key": "model",
+        "value": "F355 Berlinetta 6-Speed",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d26b"
+        }
+      },
+      {
+        "key": "category",
+        "value": "Others",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d26c"
+        }
+      },
+      {
+        "key": "era",
+        "value": "1990s",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d26d"
+        }
+      },
+      {
+        "key": "chassis",
+        "value": "ZFFXR41B000106632",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d26e"
+        }
+      },
+      {
+        "key": "seller",
+        "value": "thetexican",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d26f"
+        }
+      },
+      {
+        "key": "location",
+        "value": "West Lake Hills, Texas 78746",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d270"
+        }
+      },
+      {
+        "key": "state",
+        "value": "Texas",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d271"
+        }
+      },
+      {
+        "key": "lot_num",
+        "value": "130251",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d272"
+        }
+      },
+      {
+        "key": "listing_type",
+        "value": "Private Property",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d273"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": {
+          "$date": "2023-12-10T18:05:00.000Z"
+        },
+        "_id": {
+          "$oid": "656e95698727754b7cb5d274"
+        }
+      },
+      {
+        "key": "bids",
+        "value": 7,
+        "_id": {
+          "$oid": "656e95698727754b7cb5d275"
+        }
+      },
+      {
+        "key": "status",
+        "value": 1,
+        "_id": {
+          "$oid": "656e95698727754b7cb5d276"
+        }
+      }
+    ],
+    "auction_id": "68143289",
+    "website": "Bring A Trailer",
+    "image": "https://bringatrailer.com/wp-content/uploads/2023/11/1996_ferrari_f355-berlinetta_img_2799-03955.jpeg?fit=940%2C627",
+    "page_url": "https://bringatrailer.com/listing/1996-ferrari-f355-berlinetta-9/",
+    "isActive": true,
+    "description": [
+      "This 1996 Ferrari F355 Berlinetta is a European-market example that spent time in Luxembourg and British Columbia before it was acquired by the seller on BaT in December 2022. Power comes from a 3.5-liter DOHC V8 linked with a gated six-speed manual transaxle and a limited-slip differential. Finished in Rosso Corsa over tan leather, the car has 18″ five-spoke magnesium wheels, pop-up headlights, automatic climate control, a Sony stereo, and aluminum pedals. An engine-out service in July 2022 is said to have involved replacing the timing belts, tensioners, spark plugs, cam seals, and valve cover gaskets as well as the tires and axle shaft boots. Reported work during current ownership included replacing the air intake vent gate, gearbox gasket, and battery. This F355 shows 40k kilometers (~25k miles) and is now offered by the seller with a tool kit and a clean Texas title.",
+      "The Pininfarina-designed bodywork incorporates pop-up headlights, fog lights, an integrated rear decklid spoiler, quad exhaust outlets, a vented engine cover, and air intakes on the doors and rocker panels. This example is finished in Rosso Corsa, and paint correction work was completed before paint protection film was applied during current ownership according to the seller. Evidence of paintwork to the right door and quarter panels is noted along with cracking on the left rear buttress.",
+      "Five-spoke 18″ magnesium wheels are wrapped in Michelin Pilot Super Sport tires that show production date codes from 2021. Black Ferrari-branded brake calipers are mounted over vented discs at each corner, and the axle shaft boots were replaced in July 2022.",
+      "The sport seats are trimmed in tan Connolly leather, and the cabin features matching door panels, a black upper dashboard, and red carpets and floor mats. Amenities include automatic climate control, a Sony AM/FM/CD stereo, and drilled aluminum pedals. Work in September 2022 included refinishing trim pieces as well as the ashtray, power mirror switch, and dash vents.",
+      "The leather-wrapped steering wheel frames a 320-km/h speedometer, a 10k-rpm tachometer, and gauges for oil pressure and coolant temperature. Ancillary instruments in the center stack include an analog clock and gauges for fuel level and oil temperature. The six-digit odometer shows 40k kilometers (~24k miles), approximately 900 of which were added by the seller.",
+      "The mid-mounted 3.5-liter DOHC V8 features five valves per cylinder as well as dry-sump lubrication. The timing belts and accessory belts were replaced in April 2020 along with the water pump and fuel filter. A July 2022 engine-out service performed by Ferrari of Vancouver in British Columbia also included replacing the timing belts, tensioners, spark plugs, cam seals, and valve cover gaskets. The seller reports that the air intake vent gate, battery, and engine oil were replaced in 2023.",
+      "Power is sent to the rear wheels through a six-speed manual transaxle and a limited-slip differential. The gearbox gasket is said to have been replaced in October 2023.",
+      "The Carfax report lists history in British Columbia, Ohio, and Texas from its first entry in May 2022.",
+      "There is currently a lien on the vehicle, and the seller’s lender will need to be paid off before the title can be transferred to the next owner."
+    ],
+    "images_list": [
+      {
+        "placing": 1,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1996_ferrari_f355-berlinetta_img_2802-1-05812.jpeg"
+      },
+      {
+        "placing": 2,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1996_ferrari_f355-berlinetta_img_2752-05840.jpeg"
+      },
+      {
+        "placing": 3,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1996_ferrari_f355-berlinetta_img_2796-06043.jpeg"
+      },
+      {
+        "placing": 4,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1996_ferrari_f355-berlinetta_img_2774-06056.jpeg"
+      },
+      {
+        "placing": 5,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1996_ferrari_f355-berlinetta_img_2803-1-06249.jpeg"
+      },
+      {
+        "placing": 6,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1996_ferrari_f355-berlinetta_img_2781-06270.jpeg"
+      }
+    ],
+    "listing_details": [
+      "Chassis: ZFFXR41B000106632",
+      "40k Kilometers (~25k Miles) Shown",
+      "3.5-Liter DOHC V8",
+      "Six-Speed Manual Transaxle",
+      "Limited-Slip Differential",
+      "Rosso Corsa Paint",
+      "Tan Leather Upholstery",
+      "18\" Five-Spoke Magnesium Wheels",
+      "Pop-Up Headlights",
+      "Gated Shifter",
+      "Sony CD Stereo",
+      "Automatic Climate Control",
+      "Drilled Aluminum Pedals",
+      "Tool Kit"
+    ],
+    "sort": {
+      "price": 90000,
+      "bids": 7,
+      "deadline": {
+        "$date": "2023-12-10T18:05:00.000Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2023-12-05T03:13:45.052Z"
+    },
+    "updatedAt": {
+      "$date": "2023-12-10T10:37:00.411Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "656e95698727754b7cb5d2af"
+    },
+    "attributes": [
+      {
+        "key": "price",
+        "value": 5600,
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2b0"
+        }
+      },
+      {
+        "key": "year",
+        "value": "1972",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2b1"
+        }
+      },
+      {
+        "key": "make",
+        "value": "Datsun",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2b2"
+        }
+      },
+      {
+        "key": "model",
+        "value": "510 Race Car",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2b3"
+        }
+      },
+      {
+        "key": "category",
+        "value": "Race Cars",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2b4"
+        }
+      },
+      {
+        "key": "era",
+        "value": "1970s",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2b5"
+        }
+      },
+      {
+        "key": "chassis",
+        "value": "4064",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2b6"
+        }
+      },
+      {
+        "key": "seller",
+        "value": "mustangracer",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2b7"
+        }
+      },
+      {
+        "key": "location",
+        "value": "Mundelein, Illinois 60060",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2b8"
+        }
+      },
+      {
+        "key": "state",
+        "value": "Illinois",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2b9"
+        }
+      },
+      {
+        "key": "lot_num",
+        "value": "130253",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2ba"
+        }
+      },
+      {
+        "key": "listing_type",
+        "value": "Private Property",
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2bb"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": {
+          "$date": "2023-12-10T18:12:00.000Z"
+        },
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2bc"
+        }
+      },
+      {
+        "key": "bids",
+        "value": 11,
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2bd"
+        }
+      },
+      {
+        "key": "status",
+        "value": 1,
+        "_id": {
+          "$oid": "656e95698727754b7cb5d2be"
+        }
+      }
+    ],
+    "auction_id": "67292099",
+    "website": "Bring A Trailer",
+    "image": "https://bringatrailer.com/wp-content/uploads/2023/11/1972_datsun_510_dscn3358-1-47658.jpg?fit=940%2C627",
+    "page_url": "https://bringatrailer.com/listing/1972-datsun-510-77/",
+    "isActive": true,
+    "description": [
+      "This 1972 Datsun 510 was modified for track use after being sold new Canada, where it was registered with the Canadian Sports Car Club (CASC) and used for road and ice racing events in the Winnipeg area from 1973 through 2005. The car was acquired by the seller out of longterm storage in 2013 and imported to the US where recommissioning work included the installation of a 1.8-liter L18 inline-four and a Datsun roadster five-speed manual transmission. Additional modifications include Toyota four-piston front brake calipers, finned aluminum rear brake drums, and adjustable front coilovers, camber plates, and lower control arms as well as VTO 13″ alloy wheels, dual Weber carburetors, an A87 cylinder head, an MSD electronic ignition, an exhaust header, a roll cage, a Kirkey racing seat, and a RaceQuip cam-lock harness. The car was raced 11 times from 2016 through 2021 in Vintage Sports Car Drivers Association (VSCDA) and Midwestern Council of Sports Car Clubs (MCSCC) events. This 510 race car is now offered in Illinois for off-road use only with spare parts and a bill of sale.",
+      "The car was refinished in white with blue side stripes, a flat black hood, and #71 livery in 2021. Features include a chin spoiler, fiberglass front fenders and rear fender flares, headlight blanking plates, hood pins, front and rear tow hooks, dual side mirrors, C-pillar vents, and polycarbonate side back and rear windows. A Fuel Safe System eight-gallon fuel cell was mounted through the trunk floor in 2019. Close-up photos depicting seams where part of the trunk was replaced following a track incident in the 1970s can be viewed in the gallery.",
+      "VTO 13″ wheels with gray centers and machined lips are mounted with Toyo Proxes R888 tires. Braking is provided by Toyota four-piston calipers up front and finned aluminum drums at the rear. Suspension consists of adjustable coilovers, camber plates, tie-rod ends, lower control arms, and tension control rods up front along with coil springs, hydraulic dampers, and a weight jacker assembly out back.",
+      "The stripped cabin is equipped with a roll cage along with a Kirkey racing seat that was installed in 2016, a RaceQuip six-point cam-lock harness that is certified through 2024, a Motorsports Innovations single-channel EGT recorder, and a fire extinguisher.",
+      "A three-spoke steering wheel with a center pad fronts a steering-column-mounted tachometer with a 7,500-rpm redline along with gauges for oil temperature, oil pressure, and coolant temperature. Voltage and transmission-temperature gauges are mounted in an extension of the dash panel to the driver’s right. An ignition disconnect switch is proximate to the driver’s left hand.  The car is not equipped with an odometer, therefore true mileage is unknown.",
+      "The replacement 1.8-liter L18 inline-four was installed in 2016 and an overhaul performed in 2018 included decking the block, grinding and balancing the crankshaft, honing the cylinders, and replacing the pistons, pushrods, and bearings. The A87 “peanut” cylinder head that has been rebuilt with Isky valve springs. Additional equipment includes a #535 Colt camshaft, forged Wiseco pistons, an MSD ignition control box, a pair of rebuilt Weber 45 DCOE carburetors, an oil cooler, an electric fan, solid mounts, and an exhaust header flowing into a straight-through pipe with a side-exit outlet.",
+      "Power is sent to the rear wheels through a Datsun 2000 Option 2 close-ratio five-speed manual transmission fitted with a heavy-duty clutch kit as well as a welded Subaru R180 rear end with a limited-slip differential and a 4.38:1 final gear ratio.",
+      "The car is accompanied by a set of brake pads and shoes, a brake master cylinder, a clutch cylinder, an alternator, two sets of VTO wheels, a set of Toyo Proxes R888 scrub tires, a set of Hoosier rain tires, and miscellaneous other parts. Additional materials consist of a log book and several photos showing the car in action, including one on the cover of a Canada Auto Sport magazine.",
+      "The car is not road legal and does not have a title or registration. It is being sold on a bill of sale only."
+    ],
+    "images_list": [
+      {
+        "placing": 1,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1972_datsun_510_dscn3352-1-47695.jpg"
+      },
+      {
+        "placing": 2,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1972_datsun_510_dscn3356-1-47719.jpg"
+      },
+      {
+        "placing": 3,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1972_datsun_510_dscn3271-1-47750.jpg"
+      },
+      {
+        "placing": 4,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1972_datsun_510_dscn3268-1-48066.jpg"
+      },
+      {
+        "placing": 5,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1972_datsun_510_dscn3293-1-48085.jpg"
+      },
+      {
+        "placing": 6,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1972_datsun_510_dscn3304-1-48114.jpg"
+      },
+      {
+        "placing": 7,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1972_datsun_510_makephotogallery.net_1700421812544-21883.png"
+      }
+    ],
+    "listing_details": [
+      "Chassis: 4064",
+      "1.8-Liter L18 Inline-Four",
+      "Five-Speed Manual Transmission",
+      "R180 Differential",
+      "White Paint w/Blue Stripes",
+      "Toyota Four-Piston Front Brake Calipers",
+      "Finned Aluminum Rear Brake Drums",
+      "Front Camber Plates & Coilovers",
+      "Adjustable Tie Rod Ends",
+      "Adjustable Lower Control Arms",
+      "Roll Cage",
+      "Kirkey Racing Seat",
+      "RaceQuip Cam-Lock Harness",
+      "Eight-Gallon Fuel Cell",
+      "VTO 13\" Alloy Wheels",
+      "Dual Weber Carburetors",
+      "A87 Cylinder Head",
+      "Spare Parts & Tires"
+    ],
+    "sort": {
+      "price": 5600,
+      "bids": 11,
+      "deadline": {
+        "$date": "2023-12-10T18:12:00.000Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2023-12-05T03:13:45.989Z"
+    },
+    "updatedAt": {
+      "$date": "2023-12-10T10:37:01.333Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "656e95938727754b7cb5df51"
+    },
+    "attributes": [
+      {
+        "key": "price",
+        "value": 1100,
+        "_id": {
+          "$oid": "656e95938727754b7cb5df52"
+        }
+      },
+      {
+        "key": "year",
+        "value": "Mini",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df53"
+        }
+      },
+      {
+        "key": "make",
+        "value": "Vette",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df54"
+        }
+      },
+      {
+        "key": "model",
+        "value": "Go-Kart",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df55"
+        }
+      },
+      {
+        "key": "category",
+        "value": "Go-Karts",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df56"
+        }
+      },
+      {
+        "key": "era",
+        "value": "1970s",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df57"
+        }
+      },
+      {
+        "key": "chassis",
+        "value": "7014680",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df58"
+        }
+      },
+      {
+        "key": "seller",
+        "value": "KoolcarsLLC",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df59"
+        }
+      },
+      {
+        "key": "location",
+        "value": "North Eaton, Ohio 44028",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df5a"
+        }
+      },
+      {
+        "key": "state",
+        "value": "Ohio",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df5b"
+        }
+      },
+      {
+        "key": "lot_num",
+        "value": "130342",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df5c"
+        }
+      },
+      {
+        "key": "listing_type",
+        "value": "Private Property",
+        "_id": {
+          "$oid": "656e95938727754b7cb5df5d"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": {
+          "$date": "2023-12-11T18:36:00.000Z"
+        },
+        "_id": {
+          "$oid": "656e95938727754b7cb5df5e"
+        }
+      },
+      {
+        "key": "bids",
+        "value": 4,
+        "_id": {
+          "$oid": "656e95938727754b7cb5df5f"
+        }
+      },
+      {
+        "key": "status",
+        "value": 1,
+        "_id": {
+          "$oid": "656e95938727754b7cb5df60"
+        }
+      }
+    ],
+    "auction_id": "68027887",
+    "website": "Bring A Trailer",
+    "image": "https://bringatrailer.com/wp-content/uploads/2023/11/1974_fw-and-associates_corvette-c3-go-cart_c5844ae5-98f8-47aa-8d31-12b907bc493f-72495.jpeg?fit=940%2C627",
+    "page_url": "https://bringatrailer.com/listing/1974-fw-and-associates-corvette-c3-go-cart/",
+    "isActive": true,
+    "description": [
+      "This go-kart was constructed by F.W. and Associates to resemble a C3 Chevrolet Corvette and was purchased by the selling dealer five years ago. The kart wears fiberglass bodywork finished in white over a tubular steel frame, and power comes from a three-horsepower Briggs & Stratton single paired with chain drive. Features include Corvette and Stingray decals, faux taillights and door handles, and a black plastic seat. This C3-style go-kart is now offered at no reserve in North Eaton, Ohio, with a bill of sale.",
+      "The fiberglass body is finished in white and was produced by F.W. and Associates of Mansfield, Ohio. It features a black-painted air dam and faux headlight covers, door handles, and taillights. Ohio-style “Vette” license plate decals are applied front and rear. Imperfections noted by the selling dealer include cracks adjacent to the fastening screw points, paint touch-ups, and a repair inside the body, as shown in the gallery below.",
+      "The silver-painted steel wheels are mounted with 4.10/3.50–6 Hi-Run bias-ply tires. Stopping power is provided by a scrub-type brake on the rear axle.",
+      "The cockpit features a black plastic seat that sits aft of a half-circle steering wheel that has an engine cut-off switch positioned on the right side.",
+      "The tubular steel frame is finished in black, with the pedals mounted behind the front axle. The left pedal is folded backward.",
+      "The Briggs & Stratton single was factory rated at three horsepower, which is sent to the rear axle via a drive chain.",
+      "The manufacturer’s labels are applied inside the bodywork and show serial number 7014680."
+    ],
+    "images_list": [
+      {
+        "placing": 1,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1974_fw-and-associates_corvette-c3-go-cart_053ed92d-7267-40e5-89aa-8ce36737b13d-72578.jpeg"
+      },
+      {
+        "placing": 2,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1974_fw-and-associates_corvette-c3-go-cart_eb0af6bd-d380-4063-928c-00e734fa6ecb-72543.jpeg"
+      },
+      {
+        "placing": 3,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1974_fw-and-associates_corvette-c3-go-cart_fd4dd1ad-aec9-4fdc-ace0-4deadbdec4fd-72640.jpeg"
+      },
+      {
+        "placing": 4,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1974_fw-and-associates_corvette-c3-go-cart_5e4298e4-b074-46dc-9af6-928c4f1bc66c-74090.jpeg"
+      },
+      {
+        "placing": 5,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1974_fw-and-associates_corvette-c3-go-cart_d284181d-0041-47c1-b45c-e876bb645704-73692.jpeg"
+      },
+      {
+        "placing": 6,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1974_fw-and-associates_corvette-c3-go-cart_8d2d5396-7301-4aa6-a9ed-b1cbabecd999_1_201_a-73756.jpeg"
+      }
+    ],
+    "listing_details": [
+      "Chassis: 7014680",
+      "White Fiberglass Bodywork",
+      "Briggs & Stratton Single",
+      "Black Plastic Seat",
+      "Faux Taillights & Door Handles",
+      "6\" Painted Steel Wheels"
+    ],
+    "sort": {
+      "price": 1100,
+      "bids": 4,
+      "deadline": {
+        "$date": "2023-12-11T18:36:00.000Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2023-12-05T03:14:27.736Z"
+    },
+    "updatedAt": {
+      "$date": "2023-12-11T01:40:06.451Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "656e95968727754b7cb5e049"
+    },
+    "attributes": [
+      {
+        "key": "price",
+        "value": 5000,
+        "_id": {
+          "$oid": "656e95968727754b7cb5e04a"
+        }
+      },
+      {
+        "key": "year",
+        "value": "1971",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e04b"
+        }
+      },
+      {
+        "key": "make",
+        "value": "Triumph",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e04c"
+        }
+      },
+      {
+        "key": "model",
+        "value": "Trident T150",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e04d"
+        }
+      },
+      {
+        "key": "category",
+        "value": "Motorcycles",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e04e"
+        }
+      },
+      {
+        "key": "era",
+        "value": "1970s",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e04f"
+        }
+      },
+      {
+        "key": "chassis",
+        "value": "NE00238T150T",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e050"
+        }
+      },
+      {
+        "key": "seller",
+        "value": "liggett",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e051"
+        }
+      },
+      {
+        "key": "location",
+        "value": "Shingle Springs, California 95682",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e052"
+        }
+      },
+      {
+        "key": "state",
+        "value": "California",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e053"
+        }
+      },
+      {
+        "key": "lot_num",
+        "value": "130351",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e054"
+        }
+      },
+      {
+        "key": "listing_type",
+        "value": "Private Property",
+        "_id": {
+          "$oid": "656e95968727754b7cb5e055"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": {
+          "$date": "2023-12-11T19:02:00.000Z"
+        },
+        "_id": {
+          "$oid": "656e95968727754b7cb5e056"
+        }
+      },
+      {
+        "key": "bids",
+        "value": 1,
+        "_id": {
+          "$oid": "656e95968727754b7cb5e057"
+        }
+      },
+      {
+        "key": "status",
+        "value": 1,
+        "_id": {
+          "$oid": "656e95968727754b7cb5e058"
+        }
+      }
+    ],
+    "auction_id": "68432636",
+    "website": "Bring A Trailer",
+    "image": "https://bringatrailer.com/wp-content/uploads/2023/11/1971_triumph_trident-t150_dsc04190-3-62782.jpg?fit=940%2C626",
+    "page_url": "https://bringatrailer.com/listing/1971-triumph-trident-t150/",
+    "isActive": true,
+    "description": [
+      "This 1971 Triumph Trident T150 is powered by a 741cc triple paired with a four-speed transmission with a single-disc clutch and is finished in black and white. Features include a chrome three-into-two exhaust system, 19″ wire-spoke wheels, an oil cooler, a kick starter, a steering damper, dual mirrors, both center and side stands, and a black two-up seat. The seller purchased the bike in 2021, and subsequent service has included overhauling the three Amal carburetors, replacing the tires, tubes, and mufflers, changing the fluids for the engine and transmission, and repainting the fuel tank, fenders, and side covers. This Trident T150 is now offered at no reserve with a replacement parts catalog, a Hayes workshop manual, and a clean California title in the seller’s name.",
+      "The fuel tank, fenders, and side covers have been refinished in black with white accents and gold pinstriping. Features include a double-cradle frame, a two-up seat, a grab handle, a horn, folding passenger foot pegs, both center and side stands, and black rubber knee grips on the fuel tank.",
+      "The 19″ wire-spoke wheels are laced to hubs with drum brakes and were mounted with replacement Dunlop TT-100 tires and tubes per the seller. Suspension consists of a telescopic fork and dual shocks mounted to the swingarm.",
+      "The chrome handlebar sits ahead of a friction steering damper and features rubber grips and twin mirrors. Smiths instrumentation consists of a 10k-rpm tachometer and a 150-mph speedometer. The five-digit odometer shows 2k miles, approximately 60 of which were ridden under current ownership. The seller states the clutch and brake cables were lubricated.",
+      "The 741cc OHV triple was factory rated at 58 horsepower and features a kick starter, an oil cooler, and a chrome three-into-two exhaust system. Service under current ownership reportedly included overhauling the three Amal carburetors, replacing the mufflers, checking valve clearances and ignition timing, polishing the engine side covers, and changing the oil.",
+      "The number NE00238T150T is stamped on the left engine case and matches the VIN on the frame as presented in the gallery.",
+      "Power is sent to the rear wheel through a single-disc clutch, a four-speed transmission, and a drive chain. The transmission fluid was flushed under current ownership per the seller.",
+      "A replacement parts catalog, a Hayes workshop manual, and a period advertisement will accompany the motorcycle.",
+      "The bike is registered as Planned Non-operation in the state of California."
+    ],
+    "images_list": [
+      {
+        "placing": 1,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/RES-DSC04348-29747-scaled.jpg"
+      },
+      {
+        "placing": 2,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/DSC04227-1-1-30018-scaled.jpg"
+      },
+      {
+        "placing": 3,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1971_triumph_trident-t150_dsc04185-1-63152.jpg"
+      },
+      {
+        "placing": 4,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/RES-DSC04370-29611-scaled.jpg"
+      },
+      {
+        "placing": 5,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1971_triumph_trident-t150_img_0603-1-03481.jpeg"
+      },
+      {
+        "placing": 6,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1971_triumph_trident-t150_dsc04255-63240.jpg"
+      },
+      {
+        "placing": 7,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1971_triumph_trident-t150_img_0612-1-03671.jpeg"
+      }
+    ],
+    "listing_details": [
+      "Chassis: NE00238T150T",
+      "2k Miles Shown",
+      "741cc Four-Stroke Triple",
+      "Four-Speed Transmission",
+      "Black Paint w/White & Gold Accents",
+      "Black Two-Up Seat",
+      "Triple Amal Carburetors",
+      "Chrome Three-Into-Two Exhaust",
+      "19\" Wire-Spoke Wheels",
+      "Smiths Instruments",
+      "Steering Damper",
+      "Kick Starter",
+      "Center & Side Stands"
+    ],
+    "sort": {
+      "price": 5000,
+      "bids": 1,
+      "deadline": {
+        "$date": "2023-12-11T19:02:00.000Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2023-12-05T03:14:30.512Z"
+    },
+    "updatedAt": {
+      "$date": "2023-12-11T01:40:09.681Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "656e959b8727754b7cb5e1f7"
+    },
+    "attributes": [
+      {
+        "key": "price",
+        "value": 20000,
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e1f8"
+        }
+      },
+      {
+        "key": "year",
+        "value": "1963",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e1f9"
+        }
+      },
+      {
+        "key": "make",
+        "value": "Dodge",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e1fa"
+        }
+      },
+      {
+        "key": "model",
+        "value": "440 Hardtop 4-Speed",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e1fb"
+        }
+      },
+      {
+        "key": "category",
+        "value": "Others",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e1fc"
+        }
+      },
+      {
+        "key": "era",
+        "value": "1960s",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e1fd"
+        }
+      },
+      {
+        "key": "chassis",
+        "value": "6232182311",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e1fe"
+        }
+      },
+      {
+        "key": "seller",
+        "value": "OT1000",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e1ff"
+        }
+      },
+      {
+        "key": "location",
+        "value": "La Verne, California 91750",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e200"
+        }
+      },
+      {
+        "key": "state",
+        "value": "California",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e201"
+        }
+      },
+      {
+        "key": "lot_num",
+        "value": "130373",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e202"
+        }
+      },
+      {
+        "key": "listing_type",
+        "value": "Private Property",
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e203"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": {
+          "$date": "2023-12-11T19:30:00.000Z"
+        },
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e204"
+        }
+      },
+      {
+        "key": "bids",
+        "value": 19,
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e205"
+        }
+      },
+      {
+        "key": "status",
+        "value": 1,
+        "_id": {
+          "$oid": "656e959b8727754b7cb5e206"
+        }
+      }
+    ],
+    "auction_id": "68559520",
+    "website": "Bring A Trailer",
+    "image": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_dodge_440_1963_dodge_440_1963_dodge_2-door-440-with-a-426-max-wedge_img_7057-56050-scaled-9wsp6t-68250-80281.jpg?fit=940%2C626",
+    "page_url": "https://bringatrailer.com/listing/1963-dodge-440-2/",
+    "isActive": true,
+    "description": [
+      "This 1963 Dodge 440 two-door hardtop is powered by a replacement 426ci wedge-head V8 with a cross-ram intake manifold, dual Carter AFB four-barrel carburetors, and a dual exhaust system. The white paintwork is complemented by body-color staggered-diameter steel wheels, and it also has red upholstery, a four-speed manual transmission, a limited-slip differential, 4.11 gearing, a Hurst shifter, and aftermarket gauges. The car was acquired by the current owner in 2002 and was previously listed by the same seller on BaT in April 2022. This Dodge 440 is now offered at no reserve by the seller on behalf of the owner with a clean California title.",
+      "The car was repainted white under previous ownership. Exterior details include 440 badging, chrome bumpers, bright trim, and dual exhaust outlets.",
+      "This is a re-list after the vehicle was previously sold on BaT in November 2023 and the winning bidder failed to follow through with their commitment to purchase. This was not due to any fault with the vehicle. The winner’s participation on BaT has been restricted and their buyer’s fee was not refunded.",
+      "Body-color steel wheels measuring 14″ up front and 15″ at the rear wear polished hubcaps and are wrapped in 215/75 Falls Roadmaster front tires and 275/60 Mastercraft Avenger G/T rear rubber. The car rides on replacement shocks at all four corners. A spare tire as well as the battery are stowed in the trunk, which features a patterned floor liner.",
+      "The cabin features front and rear bench seats trimmed in two-tone red vinyl with textured cloth inserts and a color-coordinated dashboard and door panels. The split front seatback folds for rear-seat access, and other features include a Hurst shifter, front vent windows, and a locking glovebox. A split seam on the driver’s seatback can be viewed in the photo gallery below. The heater has been bypassed.",
+      "The two-spoke steering wheel frames a horizontal 120-mph speedometer as well as gauges for fuel level, alternator status, and coolant temperature; the seller notes that the factory temperature gauge is inoperative and the speedometer requires calibration. An AutoGage tachometer has been fitted below the dashboard along with readouts for oil pressure, coolant temperature, and voltage. The five-digit odometer shows 6k miles, approximately 500 of which were added under current ownership. True mileage is unknown.",
+      "The 426ci wedge-head V8 was reportedly installed under previous ownership and shows AAQA and 2406730 castings as well as a “426 TMP-HC” stamping. The engine is fed by dual Carter AFB Competition Series four-barrel carburetors through a cross-ram intake manifold. The rocker covers have “Super Stock 426 II” markings, and the car is equipped with cast-iron exhaust manifolds. The seller reports that the oil was changed most recently in 2022.",
+      "The four-speed manual transmission is linked to a limited-slip rear differential with 4.11 gearing. An aftermarket dual exhaust system with cutouts and Flowmaster mufflers has also been installed."
+    ],
+    "images_list": [
+      {
+        "placing": 1,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_dodge_440_1963_dodge_440_1963_dodge_2-door-440-with-a-426-max-wedge_img_7094-55548-scaled-ntc3yi-68284-80328.jpg"
+      },
+      {
+        "placing": 2,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_dodge_440_1963_dodge_440_1963_dodge_2-door-440-with-a-426-max-wedge_img_7100-55412-scaled-1bgv6c-68256-80372.jpg"
+      },
+      {
+        "placing": 3,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_dodge_440_1963_dodge_440_1963_dodge_2-door-440-with-a-426-max-wedge_img_7223-22677-scaled-xhdeh4-68375-80441.jpg"
+      },
+      {
+        "placing": 4,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/10/1963_dodge_2-door-440-with-a-426-max-wedge_img_7232-93901.jpeg"
+      },
+      {
+        "placing": 5,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/10/1963_dodge_2-door-440-with-a-426-max-wedge_img_7215-93872.jpeg"
+      },
+      {
+        "placing": 6,
+        "src": "https://bringatrailer.com/wp-content/uploads/2023/11/1963_dodge_440_1963_dodge_440_1963_dodge_2-door-440-with-a-426-max-wedge_img_7180-33411-scaled-9hwqk4-68855-80514.jpg"
+      }
+    ],
+    "listing_details": [
+      "Chassis: 6232182311",
+      "6k Miles Shown, TMU",
+      "Replacement 426ci Wedge-Head V8",
+      "Max Wedge Cross-Ram Intake Manifold",
+      "Dual Carter AFB Four-Barrel Carburetors",
+      "Four-Speed Manual Transmission",
+      "Limited-Slip Differential w/4.11 Gearing",
+      "Repainted White",
+      "Red Vinyl Upholstery w/Cloth Inserts",
+      "14\" & 15\" White Steel Wheels w/Hubcaps",
+      "Dual Exhaust System",
+      "Hurst Shifter",
+      "Aftermarket Gauges"
+    ],
+    "sort": {
+      "price": 20000,
+      "bids": 19,
+      "deadline": {
+        "$date": "2023-12-11T19:30:00.000Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2023-12-05T03:14:35.989Z"
+    },
+    "updatedAt": {
+      "$date": "2023-12-11T01:40:15.471Z"
+    },
+    "__v": 0
+  }
+]
