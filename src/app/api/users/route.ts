@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const offset = Number(req.nextUrl.searchParams.get('offset')) || 0;
     const limit = Number(req.nextUrl.searchParams.get('limit'));
 
-    // api/cars?user_id=213123 to get a specific
+    // api/users?user_id=213123 to get a specific user
     if (user_id) {
       const user = await Users.findOne({ _id: user_id });
       return NextResponse.json(user);
