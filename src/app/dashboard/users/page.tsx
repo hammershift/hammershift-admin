@@ -35,7 +35,7 @@ const list = [{
 
 const UsersPage = () => {
   return (
-    <div className='section-container tw-mt-3'>
+    <div className='section-container tw-mt-4'>
 
       <div className='tw-flex tw-justify-between'>
         <Search placeholder='users'/>
