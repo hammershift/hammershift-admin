@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       const user = await Users.findOne({ _id: user_id });
       return NextResponse.json(user);
     }
-    // api/cars to get all cars
+    // api/users to get all users
     const users = await Users.find().limit(limit).skip(offset);
     return NextResponse.json({ total: users.length, users: users  });
   } catch (error) {
