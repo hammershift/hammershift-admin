@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import Search from "../search/Search";
 
 interface CarData {
@@ -27,6 +29,10 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
   const [activeAuctions, setActiveAuctions] = useState<{
     [key: string]: boolean;
   }>({});
+  const [sort, setSort] = useState({
+    keyToSort: "auction_id",
+    direction: "asc",
+  });
 
   useEffect(() => {
     const initialActiveAuctions = data.reduce(
@@ -36,17 +42,53 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
       }),
       {}
     );
-
     setActiveAuctions(initialActiveAuctions);
   }, [data]);
 
   function handleStatusToggle(id: string) {
-    console.log("Before Toggle:", activeAuctions);
     setActiveAuctions((prevStates) => ({
       ...prevStates,
       [id]: !prevStates[id],
     }));
-    console.log("After Toggle:", activeAuctions);
+    console.log("Toggle:", activeAuctions);
+  }
+
+  const headers = [
+    { KEY: "auction_id", LABEL: "Auction ID" },
+    { KEY: "price", LABEL: "Price" },
+    { KEY: "year", LABEL: "Year" },
+    { KEY: "make", LABEL: "Make" },
+    { KEY: "model", LABEL: "Model" },
+    { KEY: "category", LABEL: "Category" },
+    { KEY: "location", LABEL: "Location" },
+    { KEY: "deadline", LABEL: "Deadline" },
+    { KEY: "bids", LABEL: "Current Bids" },
+    { KEY: "isActive", LABEL: "Status" },
+    { KEY: "toggle_status", LABEL: "Toggle Status" },
+  ];
+
+  function handleTableHeaderClick(header: { KEY: any; LABEL?: string }) {
+    setSort({
+      keyToSort: header.KEY,
+      direction:
+        header.KEY === sort.keyToSort
+          ? sort.direction === "asc"
+            ? "desc"
+            : "asc"
+          : "desc",
+    });
+  }
+
+  function sortData(rowToSort: any[]) {
+    const sortedData = [...rowToSort];
+    if (sort.direction === "asc") {
+      return sortedData.sort((a: any, b: any) =>
+        a[sort.keyToSort] > b[sort.keyToSort] ? 1 : -1
+      );
+    }
+    return sortedData.sort((a: any, b: any) =>
+      a[sort.keyToSort] > b[sort.keyToSort] ? -1 : 1
+    );
   }
 
   return (
@@ -57,54 +99,54 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
         </h2>
         <Search placeholder="auctions" />
       </div>
-
       <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-left">
         <thead>
           <tr>
-            <td className="tw-p-2.5 tw-font-bold">Auction ID</td>
-            <td className="tw-p-2.5 tw-font-bold">Price</td>
-            <td className="tw-p-2.5 tw-font-bold">Car</td>
-            <td className="tw-p-2.5 tw-font-bold">Category</td>
-            <td className="tw-p-2.5 tw-font-bold">Location</td>
-            <td className="tw-p-2.5 tw-font-bold">Deadline</td>
-            <td className="tw-p-2.5 tw-font-bold">Current Bids</td>
-            <td className="tw-p-2.5 tw-font-bold">Status</td>
-            <td className="tw-p-2.5 tw-font-bold">Toggle Status</td>
+            {headers.map((header, index) => (
+              <td
+                key={index}
+                className="tw-p-2.5 tw-font-bold"
+                onClick={() => handleTableHeaderClick(header)}
+              >
+                <span>{header.LABEL}</span>
+                {header.KEY === sort.keyToSort &&
+                  (sort.direction === "asc" ? (
+                    <ArrowDropDownIcon />
+                  ) : (
+                    <ArrowDropUpIcon />
+                  ))}
+              </td>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr
-              key={item.auction_id}
-              className=" tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
-            >
-              <td className="tw-p-2.5">{item.auction_id}</td>
-              <td className="tw-p-2.5">${item.price}</td>
-              <td className="tw-p-2.5">
-                {item.year} {item.make} {item.model}
-              </td>
-              <td className="tw-p-2.5">{item.category}</td>
-              <td className="tw-p-2.5">{item.location}</td>
-              <td className="tw-p-2.5">{item.deadline.toLocaleString()}</td>
-              <td className="tw-p-2.5">{item.bids}</td>
-              <td className="tw-p-2.5">
-                {activeAuctions[item.auction_id] ? (
-                  <p className="tw-text-green-500">Active</p>
-                ) : (
-                  <p className="tw-text-red-500">Inactive</p>
-                )}
-              </td>
-              <td className="tw-p-2.5">
-                {activeAuctions[item.auction_id] ? (
-                  <ToggleOnIcon
-                    onClick={() => handleStatusToggle(item.auction_id)}
-                  />
-                ) : (
-                  <ToggleOffIcon
-                    onClick={() => handleStatusToggle(item.auction_id)}
-                  />
-                )}
-              </td>
+          {sortData(data).map((item, index) => (
+            <tr key={index} className=" tw-rounded-lg tw-m-2 tw-bg-[#fff]/5">
+              {headers.map((header, index) => (
+                <td key={index} className="tw-p-2.5">
+                  {header.KEY === "isActive" ? (
+                    <span
+                      style={{
+                        color: activeAuctions[item.auction_id]
+                          ? "green"
+                          : "red",
+                      }}
+                    >
+                      {activeAuctions[item.auction_id] ? "Active" : "Inactive"}
+                    </span>
+                  ) : header.KEY === "toggle_status" ? (
+                    <button onClick={() => handleStatusToggle(item.auction_id)}>
+                      {activeAuctions[item.auction_id] ? (
+                        <ToggleOnIcon />
+                      ) : (
+                        <ToggleOffIcon />
+                      )}
+                    </button>
+                  ) : (
+                    item[header.KEY]
+                  )}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>
