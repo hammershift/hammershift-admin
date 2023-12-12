@@ -6,21 +6,21 @@ import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import Search from "../search/Search";
 
-interface AuctionItem {
-  _id: {
-    $oid: string;
-  };
-  attributes: {
-    key: string;
-    value: number | string | { $date: string };
-    _id: { $oid: string };
-  }[];
+interface CarData {
+  auction_id: string;
+  price: number;
+  year: string;
+  make: string;
+  model: string;
+  category: string;
+  location: string;
+  bids: number;
   isActive: boolean;
-  __v: number;
+  deadline: Date;
 }
 
 interface AuctionsPageProps {
-  data: AuctionItem[];
+  data: CarData[];
 }
 
 const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
@@ -32,7 +32,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
     const initialActiveAuctions = data.reduce(
       (acc, item) => ({
         ...acc,
-        [item._id.$oid]: item.isActive,
+        [item.auction_id]: item.isActive,
       }),
       {}
     );
@@ -40,24 +40,13 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
     setActiveAuctions(initialActiveAuctions);
   }, [data]);
 
-  function getValue(item: any, key: any) {
-    const attr = item.attributes.find((attr: any) => attr.key === key);
-    if (attr) {
-      const value = attr.value;
-      if (typeof value === "object" && "$date" in value) {
-        return value.$date;
-      } else {
-        return value.toString();
-      }
-    }
-    return "";
-  }
-
-  function handleStatusToggle(itemId: string) {
+  function handleStatusToggle(id: string) {
+    console.log("Before Toggle:", activeAuctions);
     setActiveAuctions((prevStates) => ({
       ...prevStates,
-      [itemId]: !prevStates[itemId],
+      [id]: !prevStates[id],
     }));
+    console.log("After Toggle:", activeAuctions);
   }
 
   return (
@@ -86,34 +75,33 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
         <tbody>
           {data.map((item) => (
             <tr
-              key={item._id.$oid}
+              key={item.auction_id}
               className=" tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
             >
-              <td className="tw-p-2.5">{item._id.$oid}</td>
-              <td className="tw-p-2.5">${getValue(item, "price")}</td>
+              <td className="tw-p-2.5">{item.auction_id}</td>
+              <td className="tw-p-2.5">${item.price}</td>
               <td className="tw-p-2.5">
-                {getValue(item, "year")} {getValue(item, "make")}{" "}
-                {getValue(item, "model")}
+                {item.year} {item.make} {item.model}
               </td>
-              <td className="tw-p-2.5">{getValue(item, "category")}</td>
-              <td className="tw-p-2.5">{getValue(item, "location")}</td>
-              <td className="tw-p-2.5">{getValue(item, "deadline")}</td>
-              <td className="tw-p-2.5">{getValue(item, "bids")}</td>
+              <td className="tw-p-2.5">{item.category}</td>
+              <td className="tw-p-2.5">{item.location}</td>
+              <td className="tw-p-2.5">{item.deadline.toLocaleString()}</td>
+              <td className="tw-p-2.5">{item.bids}</td>
               <td className="tw-p-2.5">
-                {activeAuctions[item._id.$oid] ? (
+                {activeAuctions[item.auction_id] ? (
                   <p className="tw-text-green-500">Active</p>
                 ) : (
                   <p className="tw-text-red-500">Inactive</p>
                 )}
               </td>
               <td className="tw-p-2.5">
-                {activeAuctions[item._id.$oid] ? (
+                {activeAuctions[item.auction_id] ? (
                   <ToggleOnIcon
-                    onClick={() => handleStatusToggle(item._id.$oid)}
+                    onClick={() => handleStatusToggle(item.auction_id)}
                   />
                 ) : (
                   <ToggleOffIcon
-                    onClick={() => handleStatusToggle(item._id.$oid)}
+                    onClick={() => handleStatusToggle(item.auction_id)}
                   />
                 )}
               </td>
