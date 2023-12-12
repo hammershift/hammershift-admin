@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { useFormState, useFormStatus } from 'react-dom';
 import { authenticate } from '@/app/lib/actions';
+import { useFormState } from "react-dom";
 
 import PersonIcon from "@mui/icons-material/Person";
 import KeyIcon from "@mui/icons-material/Key";
@@ -12,7 +12,7 @@ import hammershiftLogo from "../../../../../public/images/hammershift.svg";
 import { Button } from "@mui/material";
 
 const LoginPage = () => {
-   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const [state, formAction] = useFormState(authenticate, undefined);
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
@@ -23,13 +23,14 @@ const LoginPage = () => {
         <h1 className="tw-p-2">WELCOME</h1>
         <p className="tw-p-1">Please login to Admin Panel</p>
       </div>
-      <form action={dispatch} className="tw-flex tw-flex-col">
+      <form action={formAction} className="tw-flex tw-flex-col">
         <div className="tw-m-1">
           <label>
             <PersonIcon className="tw-mx-1" />
           </label>
           <input
             type="text"
+            name="username"
             placeholder=" Username"
             className="tw-rounded-full tw-p-1"
             style={{ color: "black" }}
@@ -43,6 +44,7 @@ const LoginPage = () => {
           </label>
           <input
             type="password"
+            name="password"
             placeholder=" Password"
             className="tw-rounded-full tw-p-1"
             style={{ color: "black" }}
