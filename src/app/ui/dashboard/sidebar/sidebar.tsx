@@ -44,7 +44,7 @@ const sidebarItems = [
       },
       {
         title: "Log-out",
-        path: "/dashboard/logout",
+        path: "/",
         icon: <LogoutIcon />,
       },
     ],

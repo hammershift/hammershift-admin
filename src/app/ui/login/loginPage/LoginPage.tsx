@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Image from "next/image";
 
 import PersonIcon from "@mui/icons-material/Person";
@@ -8,6 +10,9 @@ import hammershiftLogo from "../../../../../public/images/hammershift.svg";
 import { Button } from "@mui/material";
 
 const LoginPage = () => {
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
   return (
     <main className="section-container tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-1/3 tw-h-2/3">
       <div className="tw-mt-4 tw-flex tw-flex-col tw-items-center tw-justify-center tw-m-8">
@@ -24,6 +29,9 @@ const LoginPage = () => {
             type="text"
             placeholder=" Username"
             className="tw-rounded-full tw-p-1"
+            style={{ color: "black" }}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </div>
         <div className="tw-m-1">
@@ -34,6 +42,9 @@ const LoginPage = () => {
             type="password"
             placeholder=" Password"
             className="tw-rounded-full tw-p-1"
+            style={{ color: "black" }}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
         <div className="tw-flex tw-justify-between tw-my-2">

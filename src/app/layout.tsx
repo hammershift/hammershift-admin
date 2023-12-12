@@ -16,7 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} tw-w-screen tw-h-screen`}>
+      <body
+        className={`${inter.className} tw-w-screen tw-h-screen tw-bg-slate-900`}
+      >
         {children}
       </body>
     </html>
