@@ -121,7 +121,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
         </thead>
         <tbody>
           {sortData(data).map((item, index) => (
-            <tr key={index} className=" tw-rounded-lg tw-m-2 tw-bg-[#fff]/5">
+            <tr key={index} className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5">
               {headers.map((header, index) => (
                 <td key={index} className="tw-p-2.5">
                   {header.KEY === "isActive" ? (

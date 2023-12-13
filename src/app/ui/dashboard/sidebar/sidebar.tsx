@@ -8,6 +8,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 //images
 import userImg from "../../../../../public/images/user.svg";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
@@ -31,6 +33,21 @@ const sidebarItems = [
         title: "Wagers",
         path: "/dashboard/wagers",
         icon: <AttachMoneyIcon />,
+      },
+    ],
+  },
+  {
+    title: "Manage",
+    list: [
+      {
+        title: "Admin",
+        path: "/dashboard/admins",
+        icon: <SupervisorAccountIcon />,
+      },
+      {
+        title: "Create New Admin",
+        path: "/dashboard/create-new-admin",
+        icon: <PersonAddIcon />,
       },
     ],
   },
