@@ -54,13 +54,13 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any, user: any }) {
       console.log('JWT callback - Initial token:', token);
       console.log('JWT callback - User:', user);
       if (user) {
         token.id = user.id;
-        token.email = user.email;
-        token.image = user.image;
+        token.username = user.username ;
+        // token.image = user.image;
       }
 
       const client = await clientPromise;
@@ -70,9 +70,9 @@ export const authOptions: NextAuthOptions = {
       console.log('JWT callback - Fetched User from DB:', dbUser);
 
       if (dbUser) {
-        token.fullName = dbUser.fullName;
+        // token.fullName = dbUser.fullName;
         token.username = dbUser.username;
-        token.image = dbUser.image;
+        // token.image = dbUser.image;
       }
 
       console.log('JWT callback - Final token:', token);

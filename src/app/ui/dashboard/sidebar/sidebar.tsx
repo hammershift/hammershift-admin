@@ -56,20 +56,17 @@ const sidebarItems = [
 ];
 
 const Sidebar =  () => {
-  const [user, setUser] = useState({username: ""});
-  // const user = await getServerSession(authOptions);
-  // const getUser = async () => {
-  //   const data = await getServerSession(authOptions);
-  //   return setUser(data.user);
-  // }
-
-  // useEffect(() => {
-  //   getUser();
-  // }, []);
-
-
+  const [username, setUsername] = useState("");
+  
   const {data} = useSession();
-  console.log("data:", data)
+  
+  useEffect(() => {
+    // console.log("data:", data)
+    if (data?.user?.username) {
+      setUsername(data.user.username);
+    }
+  }, [data]);
+
 
   return (
     <div className="sticky tw-top-auto">
@@ -87,7 +84,7 @@ const Sidebar =  () => {
           className="rounded-full tw-object-cover"
         />
         <div className="tw-flex tw-flex-col tw-gap-2">
-          <p className="tw-text-xs tw-font-semibold">username</p>
+          <p className="tw-text-xs tw-font-semibold">{username}</p>
           <p className="tw-text-xs">Administrator</p>
         </div>
       </div>
