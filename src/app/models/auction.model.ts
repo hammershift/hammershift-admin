@@ -15,15 +15,15 @@ const auctionSchema = new mongoose.Schema(
               { type: "integer" },
               { type: "boolean" },
               { type: "number" },
-              { type: "null" }
-            ]
-          }
-        }
-      }
+              { type: "null" },
+            ],
+          },
+        },
+      },
     },
     description: {
       type: "array",
-      items: { type: "string" }
+      items: { type: "string" },
     },
     image: { type: "string" },
     images_list: {
@@ -32,27 +32,32 @@ const auctionSchema = new mongoose.Schema(
         type: "object",
         properties: {
           placing: { type: "integer" },
-          src: { type: "string" }
-        }
-      }
+          src: { type: "string" },
+        },
+      },
     },
     listing_details: {
       type: "array",
-      items: { type: "string" }
+      items: { type: "string" },
     },
     page_url: { type: "string" },
+    isActive: "boolean",
     website: { type: "string" },
     sort: {
       type: "object",
-      properties: { price: { type: "number" }, bids: { type: "number" }, deadline: { type: "string", format: "date-time" } }
-    }
-  }, {
-  timestamps: true
-}
-
+      properties: {
+        price: { type: "number" },
+        bids: { type: "number" },
+        deadline: { type: "string", format: "date-time" },
+      },
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
-const Auctions = mongoose.models.auctions || mongoose.model("auctions", auctionSchema);
+const Auctions =
+  mongoose.models.auctions || mongoose.model("auctions", auctionSchema);
 
 export default Auctions;
-
