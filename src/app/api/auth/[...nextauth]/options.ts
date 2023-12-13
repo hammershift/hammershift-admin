@@ -1,7 +1,16 @@
 import {NextAuthOptions} from 'next-auth';
 import CredentialsProvider from "next-auth/providers/credentials";
+import { MongoDBAdapter } from "@auth/mongodb-adapter"
+import clientPromise from '@/app/lib/mongoDB';
+import { Admin, Credentials } from '@/app/types/userTypes';
+import { ObjectId } from 'mongodb';
 
 export const authOptions: NextAuthOptions = {
+  debug: true,
+  adapter: MongoDBAdapter(clientPromise),
+  session: {
+    strategy: 'jwt',
+  },
     providers:[
         CredentialsProvider({
 
@@ -14,17 +23,17 @@ export const authOptions: NextAuthOptions = {
 
                 if (!credentials || !credentials.username || !credentials.password) {
                     return null;
-                }
+                } 
                 
-                //Should be : get the user from the database
-                const user = {id: 'user01', username: 'Sonic', password: '1234'} // sample data
-                if(credentials?.username === user.username && credentials?.password === user.password){
-                    console.log("auth returned user")
-                    return {username: user.username, id: user.id};
-                } else {
-                    console.log("auth returned null")
-                    return null;
+                const client = await clientPromise;
+                const db = client.db();
+                const user = await db.collection<Admin>('admins').findOne({ username: credentials.username });
+
+                if (!user || !user.password || credentials.password != user.password) {
+                throw new Error('Invalid credentials');
                 }
+
+                return { id: user._id, username: user.username };
             },
           
         })
@@ -34,7 +43,40 @@ export const authOptions: NextAuthOptions = {
         signIn: '/auth/signin',
         signOut: '/auth/logout',
     },
-    callbacks: {
-      
-    }
+     callbacks: {
+    async session({ session, token }) {
+      console.log('Session callback - Token:', token);
+      if (token) {
+        session.user.id = token.id;
+        session.user.username = token.username;
+      }
+      console.log('Session callback - Final Session object:', session);
+      return session;
+    },
+
+    async jwt({ token, user }) {
+      console.log('JWT callback - Initial token:', token);
+      console.log('JWT callback - User:', user);
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.image = user.image;
+      }
+
+      const client = await clientPromise;
+      const db = client.db();
+      const dbUser = await db.collection('users').findOne({ _id: new ObjectId(token.id) });
+
+      console.log('JWT callback - Fetched User from DB:', dbUser);
+
+      if (dbUser) {
+        token.fullName = dbUser.fullName;
+        token.username = dbUser.username;
+        token.image = dbUser.image;
+      }
+
+      console.log('JWT callback - Final token:', token);
+      return token;
+    },
+}
 }
