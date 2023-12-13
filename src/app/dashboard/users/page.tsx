@@ -1,37 +1,46 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Search from "@/app/ui/dashboard/search/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import DvrIcon from "@mui/icons-material/Dvr";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { getUsers } from "@/app/lib/data";
 
-const list = [
-  {
-    id: "user1",
-    username: "samantha001",
-    fullName: "samantha jones",
-    email: "sam@mail.com",
-    state: "Washington DC",
-    country: "United States of America",
-  },
-  {
-    id: "user2",
-    username: "naruto001",
-    fullName: "Naturo Uzumaki",
-    email: "ramen@mail.com",
-    state: "Florida",
-    country: "United States of America",
-  },
-  {
-    id: "user3",
-    username: "sonic001",
-    fullName: "sonic the hedgehog",
-    email: "sonic@mail.com",
-    state: "Naruto001",
-    country: "United States of America",
-  },
-];
+interface UserData {
+  id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  state: string;
+  country: string;
+}
+interface UsersPageProps {
+  data: UserData[];
+}
 
 const UsersPage = () => {
+  const [userData, setUserData] = useState<UserData[]>([]);
+
+  const fetchData = async () => {
+    try {
+      const data = await getUsers();
+
+      if (data && "users" in data) {
+        console.log(data);
+        setUserData(data.users as UserData[]);
+      } else {
+        console.error("Unexpected data structure:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <div className="section-container tw-mt-4">
       <div className="tw-flex tw-justify-between">
@@ -40,7 +49,7 @@ const UsersPage = () => {
       </div>
 
       <div className="tw-my-4">
-        <Table />
+        <Table data={userData} />
       </div>
 
       <div className="tw-flex tw-justify-end ">
@@ -56,7 +65,7 @@ const UsersPage = () => {
 
 export default UsersPage;
 
-const Table = () => {
+const Table: React.FC<UsersPageProps> = ({ data }) => {
   return (
     <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
       <thead>
@@ -70,9 +79,9 @@ const Table = () => {
         </tr>
       </thead>
       <tbody className="tw-w-full">
-        {list &&
-          list.map((item, index) => (
-            <tr key={item.id} className=" tw-rounded-lg tw-bg-[#fff]/5">
+        {data &&
+          data.map((item: UserData, index: number) => (
+            <tr key={index} className=" tw-rounded-lg tw-bg-[#fff]/5">
               <td className="tw-p-2.5 tw-w-1/8">{item.username}</td>
               <td className="tw-p-2.5 tw-w-1/8">{item.fullName}</td>
               <td className="tw-p-2.5 tw-w-1/8">{item.email}</td>

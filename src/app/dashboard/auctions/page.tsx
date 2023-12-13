@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import AuctionsPage from "@/app/ui/dashboard/auctionsPage/AuctionsPage";
-import { getCarData, getCarsWithFilter } from "../../lib/data";
-import sampleData from "../../sample_data.json";
+import { getCarsWithFilter } from "../../lib/data";
+// import sampleData from "../../sample_data.json";
 
 interface CarData {
   auction_id: string;
