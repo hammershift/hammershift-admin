@@ -48,7 +48,7 @@ const sidebarItems = [
       },
       {
         title: "Log-out",
-        path: "/",
+        path: "/logout",
         icon: <LogoutIcon />,
       },
     ],
@@ -61,10 +61,10 @@ const Sidebar =  () => {
   const {data} = useSession();
   
   useEffect(() => {
-    // console.log("data:", data)
     if (data?.user?.username) {
       setUsername(data.user.username);
     }
+    // console.log("data:", data)
   }, [data]);
 
 

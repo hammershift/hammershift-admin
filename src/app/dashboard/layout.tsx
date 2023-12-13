@@ -4,6 +4,7 @@ import Sidebar from "../ui/dashboard/sidebar/sidebar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { useSession } from "next-auth/react";
+import withAuth from "../ui/dashboard/auth/withAuth";
 
 
 
@@ -11,8 +12,9 @@ const Layout =({ children }: { children: React.ReactNode }) => {
   
   const {data} = useSession();
 
-  return (
   
+
+  return (
     <div className="tw-flex tw-h-full">
       <div className="sticky tw-top-0 flex-4 tw-bg-slate-800 tw-p-5 tw-h-auto">
         <Sidebar />
@@ -25,4 +27,4 @@ const Layout =({ children }: { children: React.ReactNode }) => {
   );
 }
 
-export default Layout;
+export default withAuth(Layout);
