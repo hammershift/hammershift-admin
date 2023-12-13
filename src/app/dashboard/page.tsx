@@ -1,7 +1,9 @@
 import React from "react";
 import DashboardPage from "../ui/dashboard/dashboardPage/DashboardPage";
 
-const Dashboard = () => {
+
+const Dashboard = async () => {
+
   return (
     <div className="tw-mt-4">
       <DashboardPage />

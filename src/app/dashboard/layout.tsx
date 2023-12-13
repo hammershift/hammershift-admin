@@ -1,7 +1,12 @@
 import Navbar from "../ui/dashboard/navbar/navbar";
 import Sidebar from "../ui/dashboard/sidebar/sidebar";
+import {auth} from'../api/auth/[...nextauth]/route';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+
+const Layout = async ({ children }: { children: React.ReactNode }) => {
+  const data = await auth();
+  console.log(data);
+
   return (
     <div className="tw-flex">
       <div className="flex-4 tw-bg-slate-800 tw-p-5 tw-h-screen">
@@ -14,3 +19,5 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+export default Layout;
