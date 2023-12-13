@@ -1,6 +1,8 @@
-import React from "react";
+"use client"
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import SidebarLink from "./sidebarLinks/sidebarLink";
+import { useSession } from "next-auth/react";
 //icons
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
@@ -11,6 +13,8 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 //images
 import userImg from "../../../../../public/images/user.svg";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
+// import { getServerSession } from "next-auth/react";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
 const sidebarItems = [
   {
@@ -51,7 +55,22 @@ const sidebarItems = [
   },
 ];
 
-const Sidebar = () => {
+const Sidebar =  () => {
+  const [user, setUser] = useState({username: ""});
+  // const user = await getServerSession(authOptions);
+  // const getUser = async () => {
+  //   const data = await getServerSession(authOptions);
+  //   return setUser(data.user);
+  // }
+
+  // useEffect(() => {
+  //   getUser();
+  // }, []);
+
+
+  const {data} = useSession();
+  console.log("data:", data)
+
   return (
     <div className="sticky tw-top-auto">
       <Image
@@ -68,7 +87,7 @@ const Sidebar = () => {
           className="rounded-full tw-object-cover"
         />
         <div className="tw-flex tw-flex-col tw-gap-2">
-          <p className="tw-text-xs tw-font-semibold">Anonymous User</p>
+          <p className="tw-text-xs tw-font-semibold">username</p>
           <p className="tw-text-xs">Administrator</p>
         </div>
       </div>

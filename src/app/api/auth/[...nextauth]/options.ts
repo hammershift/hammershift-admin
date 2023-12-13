@@ -1,7 +1,7 @@
-import NextAuth, {NextAuthConfig} from 'next-auth';
+import {NextAuthOptions} from 'next-auth';
 import CredentialsProvider from "next-auth/providers/credentials";
 
-export const authOptions: NextAuthConfig = {
+export const authOptions: NextAuthOptions = {
     providers:[
         CredentialsProvider({
 
@@ -10,29 +10,31 @@ export const authOptions: NextAuthConfig = {
                 username: { label: 'Username', type: 'text' },
                 password: { label: 'Password', type: 'password' },
             },
-            async authorize(credentials, req) {
+            async authorize(credentials) {
 
                 if (!credentials || !credentials.username || !credentials.password) {
                     return null;
                 }
                 
-                //Should be => get the user from the database
-                const user = {id: 'user01', username: 'Sonic', password: '1234'}
+                //Should be : get the user from the database
+                const user = {id: 'user01', username: 'Sonic', password: '1234'} // sample data
                 if(credentials?.username === user.username && credentials?.password === user.password){
-                    return user;
+                    console.log("auth returned user")
+                    return {username: user.username, id: user.id};
                 } else {
+                    console.log("auth returned null")
                     return null;
                 }
             },
           
         })
     ],
+    secret: process.env.AUTH_SECRET,
     pages: {
         signIn: '/auth/signin',
         signOut: '/auth/logout',
-        error: '/', // Error code passed in query string as ?error=
-        verifyRequest: '/auth/verify-request', // (used for check email message)
-        newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
     },
-    secret: process.env.AUTH_SECRET,
+    callbacks: {
+      
+    }
 }

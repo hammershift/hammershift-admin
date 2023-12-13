@@ -1,13 +1,18 @@
+"use client"
 import Navbar from "../ui/dashboard/navbar/navbar";
 import Sidebar from "../ui/dashboard/sidebar/sidebar";
-import {auth} from'../api/auth/[...nextauth]/route';
+import { getServerSession } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]/options";
+import { useSession } from "next-auth/react";
 
 
-const Layout = async ({ children }: { children: React.ReactNode }) => {
-  const data = await auth();
-  console.log(data);
+
+const Layout =({ children }: { children: React.ReactNode }) => {
+  
+  const {data} = useSession();
 
   return (
+  
     <div className="tw-flex tw-h-full">
       <div className="sticky tw-top-0 flex-4 tw-bg-slate-800 tw-p-5 tw-h-auto">
         <Sidebar />

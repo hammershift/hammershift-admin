@@ -25,7 +25,7 @@ const list = [{
     },
     auctionID: '6576875ba85d4ee4df2ae888',
 }, {
-   id: 'wager2',
+   id: 'wager3',
     priceGuessed: 7000,
     wagerAmount: 10,
     user: {
