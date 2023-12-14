@@ -1,7 +1,9 @@
+"use client";
 import Navbar from "../ui/dashboard/navbar/navbar";
 import Sidebar from "../ui/dashboard/sidebar/sidebar";
+import withAuth from "../ui/dashboard/auth/withAuth";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="tw-flex tw-h-full">
       <div className="sticky tw-top-0 flex-4 tw-bg-slate-800 tw-p-5 tw-h-auto">
@@ -14,3 +16,5 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+export default withAuth(Layout);

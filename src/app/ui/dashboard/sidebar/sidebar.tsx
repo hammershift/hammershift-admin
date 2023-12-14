@@ -1,5 +1,9 @@
-import React from "react";
+"use client"
+import React, {useState, useEffect} from "react";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+
+
 import SidebarLink from "./sidebarLinks/sidebarLink";
 //icons
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -61,7 +65,7 @@ const sidebarItems = [
       },
       {
         title: "Log-out",
-        path: "/",
+        path: "/logout",
         icon: <LogoutIcon />,
       },
     ],
@@ -69,6 +73,18 @@ const sidebarItems = [
 ];
 
 const Sidebar = () => {
+
+  const [username, setUsername] = useState("");
+  
+  const {data} = useSession();
+  
+  useEffect(() => {
+    if (data?.user?.username) {
+      setUsername(data.user.username);
+    }
+    // console.log("data:", data)
+  }, [data]);
+
   return (
     <div className="sticky tw-top-auto">
       <Image
@@ -85,7 +101,7 @@ const Sidebar = () => {
           className="rounded-full tw-object-cover"
         />
         <div className="tw-flex tw-flex-col tw-gap-2">
-          <p className="tw-text-xs tw-font-semibold">Anonymous User</p>
+          <p className="tw-text-xs tw-font-semibold">{username}</p>
           <p className="tw-text-xs">Administrator</p>
         </div>
       </div>

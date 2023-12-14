@@ -2,16 +2,44 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 import PersonIcon from "@mui/icons-material/Person";
 import KeyIcon from "@mui/icons-material/Key";
-
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
 import { Button } from "@mui/material";
+
+
 
 const LoginPage = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const router = useRouter();
+  // login function
+  const handleSignIn = async () => {
+    try {
+      console.log(`Attempting to sign in with: ${username}`);
+      const result = await signIn('credentials', {
+        redirect: false,
+        username: username,
+        password: password,
+      });
+
+      console.log('signIn result:', result);
+
+      if (result?.error) {
+        console.log({message: "unable to sign in"})
+      } else {
+        console.log('Login successful');
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('An unexpected error occurred during login:', error);
+
+    }
+  };
 
   return (
     <main className="section-container tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-1/3 tw-h-2/3">
@@ -27,6 +55,7 @@ const LoginPage = () => {
           </label>
           <input
             type="text"
+            name="username"
             placeholder=" Username"
             className="tw-rounded-full tw-p-1"
             style={{ color: "black" }}
@@ -40,6 +69,7 @@ const LoginPage = () => {
           </label>
           <input
             type="password"
+            name="password"
             placeholder=" Password"
             className="tw-rounded-full tw-p-1"
             style={{ color: "black" }}
@@ -57,6 +87,7 @@ const LoginPage = () => {
             color="primary"
             style={{ backgroundColor: "#facc15", color: "black" }}
             className="tw-my-1"
+            onClick={handleSignIn}
           >
             Login
           </Button>
