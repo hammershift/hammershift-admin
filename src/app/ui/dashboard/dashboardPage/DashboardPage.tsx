@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Image from "next/image";
 import GroupIcon from "@mui/icons-material/Group";
 import PaidIcon from "@mui/icons-material/Paid";
@@ -15,6 +15,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { getUsers, getWagers, getCarsWithFilter } from "@/app/lib/data";
 
 const data = [
   {
@@ -78,7 +79,85 @@ const list = [
   },
 ];
 
+
+
+
 const DashboardPage = () => {
+  const [userData, setUsersData] = useState({total: 0, users: []});
+  const [wagersData, setWagersData] = useState({total: 0, wagers: []});
+  const [totalWagers, setTotalWagers] = useState(0);
+  const [carsData, setCarsData] = useState({total: 0, cars: []});
+
+  // fetch user data
+  useEffect(() => {
+    const fetchUsersData = async () => {
+      try {
+        const data = await getUsers();
+  
+        if (data && "users" in data) {
+          console.log("data:", data);
+          setUsersData(data);
+        } else {
+          console.error("Unexpected data structure:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+
+
+    };
+    fetchUsersData();
+  }, []);
+
+  // fetch wagers data
+  useEffect(() => {
+    const fetchWagersData = async () => {
+      try {
+        const data = await getWagers();
+  
+        if (data && "wagers" in data) {
+          console.log("data:", data);
+          setWagersData(data);
+        } else {
+          console.error("Unexpected data structure:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchWagersData();
+  }, []);
+
+  //calculate total wagers
+  useEffect(() => {
+      let total = 0; 
+      if (wagersData.total > 0){
+        wagersData.wagers.map((wager : any) => {
+          total += wager.wagerAmount;
+        }); 
+      }
+      setTotalWagers(total);
+  },[wagersData])
+
+  // fetch cars data
+  useEffect(() => {
+    const fetchAuctionsData = async () => {
+    try {
+      const data = await getCarsWithFilter({ limit: 1 });
+
+      if (data && "cars" in data) {
+        console.log(data);
+        setCarsData(data);
+      } else {
+        console.error("Unexpected data structure:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    };
+    fetchAuctionsData();
+  }, []);
+
   return (
     <div className="tw-w-full tw-grid tw-gap-4 ">
       <div className="tw-grid tw-grid-cols-3 tw-gap-4 tw-w-full">
@@ -86,7 +165,7 @@ const DashboardPage = () => {
           <GroupIcon />
           <div className="tw-grid tw-gap-2">
             <div>Total Users</div>
-            <div className="tw-text-lg tw-font-bold">100</div>
+            <div className="tw-text-lg tw-font-bold">{userData.total}</div>
             <div>
               <span className="tw-text-[#49C742]">12%</span> more than last week
             </div>
@@ -96,7 +175,7 @@ const DashboardPage = () => {
           <PaidIcon />
           <div className="tw-grid tw-gap-2">
             <div>Wagers</div>
-            <div className="tw-text-lg tw-font-bold">100</div>
+            <div className="tw-text-lg tw-font-bold">$ {totalWagers}</div>
             <div>
               <span className="tw-text-[#49C742]">12%</span> more than last week
             </div>
@@ -106,7 +185,7 @@ const DashboardPage = () => {
           <DirectionsCarIcon />
           <div className="tw-grid tw-gap-2">
             <div>Auctions</div>
-            <div className="tw-text-lg tw-font-bold">100</div>
+            <div className="tw-text-lg tw-font-bold">{carsData.total}</div>
             <div>
               <span className="tw-text-[#49C742]">12%</span> more than last week
             </div>

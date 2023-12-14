@@ -27,7 +27,7 @@ const UsersPage = () => {
       const data = await getUsers();
 
       if (data && "users" in data) {
-        console.log(data);
+        console.log("data:", data);
         setUserData(data.users as UserData[]);
       } else {
         console.error("Unexpected data structure:", data);
