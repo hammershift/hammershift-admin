@@ -45,7 +45,7 @@ const UsersPage = () => {
   return (
     <div className="section-container tw-mt-4">
       <div className="tw-flex tw-justify-between">
-        <Search placeholder="users" />
+        <Search placeholder="users" routeName='users'/>
         <button className="btn-yellow">ADD NEW</button>
       </div>
 
