@@ -1,10 +1,10 @@
 "use client"
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation';
+import {useRouter} from 'next/navigation';
 
 const ShowUser = ({ params }: { params: { id: string } }) => {
   const [data, setData] = useState({})
-  const urlPath = useParams();
+  const router = useRouter();
   const ID = params.id;
 
   useEffect(() => {
@@ -17,9 +17,13 @@ const ShowUser = ({ params }: { params: { id: string } }) => {
   },[])
 
 
-  return (
+ return (
+  <div>
     <div>{JSON.stringify(data)}</div>
-  )
+    <button className='btn-transparent-white' onClick={() => router.push('/dashboard/users')}>back</button>
+    <button className='btn-transparent-white' onClick={() => router.push(`/dashboard/users/edit_user/${ID}`)}>edit</button>
+  </div>
+)
 }
 
 export default ShowUser

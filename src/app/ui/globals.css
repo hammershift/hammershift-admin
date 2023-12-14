@@ -55,3 +55,17 @@ a {
     color: black;
     font-weight: 700;
 }
+
+.btn-transparent-red {
+    padding: 6px 14px;
+    color: #c2451e;
+    background-color: none;
+    border-radius: 4px;
+    font-weight: 500;
+    border: 1px solid #c2451e;
+}
+.btn-transparent-red:hover {
+    background-color: #c2451e;
+    color: black;
+    font-weight: 700;
+}

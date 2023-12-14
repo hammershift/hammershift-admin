@@ -90,11 +90,15 @@ const Table: React.FC<UsersPageProps> = ({ data }) => {
               <td className="tw-p-2.5 tw-w-1/8">{item.country}</td>
               <td className="tw-p-2.5 tw-w-1/8">
                 <div className="tw-flex tw-gap-4 tw-justify-center">
-                  <EditIcon />
+                  <Link href={`/dashboard/users/edit_user/${item._id}`}>
+                    <EditIcon />
+                  </Link>
                   <Link href={`/dashboard/users/show_user/${item._id}`}>
                     <DvrIcon />
                   </Link>
-                  <DeleteIcon sx={{ color: "#C2451E" }} />
+                  <Link href={`/dashboard/users/delete_user/${item._id}`}>
+                    <DeleteIcon sx={{ color: "#C2451E" }} />
+                  </Link>
                 </div>
               </td>
             </tr>
