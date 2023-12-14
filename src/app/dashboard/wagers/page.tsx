@@ -6,9 +6,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DvrIcon from "@mui/icons-material/Dvr";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getWagers } from "@/app/lib/data";
+import Link from "next/link";
 
 interface WagerData {
-  id: string;
+  _id: string;
   priceGuessed: number;
   wagerAmount: number;
   user: {
@@ -129,9 +130,15 @@ const Table: React.FC<WagersPageProps> = ({ data }) => {
               <td className="tw-p-2.5 tw-w-1/8">{item.auctionID}</td>
               <td className="tw-p-2.5 tw-w-1/8">
                 <div className="tw-flex tw-gap-4 tw-justify-center">
-                  <EditIcon />
-                  <DvrIcon />
-                  <DeleteIcon sx={{ color: "#C2451E" }} />
+                  <Link href={`/dashboard/wagers/edit_wager/${item._id}`}>
+                    <EditIcon />
+                  </Link>
+                  <Link href={`/dashboard/wagers/show_wager/${item._id}`}>
+                    <DvrIcon />
+                  </Link>
+                  <Link href={`/dashboard/wagers/delete_wager/${item._id}`}>
+                    <DeleteIcon sx={{ color: "#C2451E" }} />
+                  </Link>
                 </div>
               </td>
             </tr>
