@@ -60,7 +60,7 @@ const sidebarItems = [
     list: [
       {
         title: "Settings",
-        path: "/dashboard/settings",
+        path: "/dashboard",
         icon: <SettingsIcon />,
       },
       {
