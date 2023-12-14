@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
     // api/users?user_id=213123 to get a specific user
     if (user_id) {
-      const user = await Users.findOne({ _id: user_id });
+      const user = await Users.findOne({ _id: user_id }).select("-password");
       return NextResponse.json(user);
     }
     // api/users to get all users
