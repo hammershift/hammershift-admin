@@ -6,9 +6,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DvrIcon from "@mui/icons-material/Dvr";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getUsers } from "@/app/lib/data";
+import Link from "next/link";
 
 interface UserData {
-  id: string;
+  _id: string;
   username: string;
   fullName: string;
   email: string;
@@ -90,7 +91,9 @@ const Table: React.FC<UsersPageProps> = ({ data }) => {
               <td className="tw-p-2.5 tw-w-1/8">
                 <div className="tw-flex tw-gap-4 tw-justify-center">
                   <EditIcon />
-                  <DvrIcon />
+                  <Link href={`/dashboard/users/show_user/${item._id}`}>
+                    <DvrIcon />
+                  </Link>
                   <DeleteIcon sx={{ color: "#C2451E" }} />
                 </div>
               </td>

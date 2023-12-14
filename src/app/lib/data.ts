@@ -77,20 +77,30 @@ export interface CreateWagerProps {
   };
 }
 
+// get all wagers
 export const getWagers = async () => {
   const res = await fetch(`/api/wagers`);
   const data = await res.json();
   return data;
 };
 
+// get all users
 export const getUsers = async () => {
   const res = await fetch("/api/users");
   const data = await res.json();
   return data;
 };
 
+//get all admins
 export const getAdmins = async () => {
   const res = await fetch("/api/admins");
+  const data = await res.json();
+  return data;
+};
+
+// get one user by id
+export const getOneUser = async (id : string) => {
+  const res = await fetch("/api/users?user_id=" + id);
   const data = await res.json();
   return data;
 };
