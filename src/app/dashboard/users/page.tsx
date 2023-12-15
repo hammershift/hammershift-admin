@@ -6,7 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DvrIcon from "@mui/icons-material/Dvr";
 import DeleteIcon from "@mui/icons-material/Delete";
 import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
-import { getUsers } from "@/app/lib/data";
+import { getUsers, getUsersWithSearch } from "@/app/lib/data";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -26,34 +26,35 @@ const UsersPage = () => {
     const [userData, setUserData] = useState<UserData[]>([]);
     const [searchValue, setSearchValue] = useState<null | string>(null);
 
-    const fetchData = async () => {
-        try {
-            const data = await getUsers();
-
-            if (data && "users" in data) {
-                console.log("data:", data); // to be removed
-                setUserData(data.users as UserData[]);
-            } else {
-                console.error("Unexpected data structure:", data);
-            }
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
-    };
-
+    // get all users data
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getUsers();
+
+                if (data && "users" in data) {
+                    // console.log("data:", data);
+                    setUserData(data.users as UserData[]);
+                } else {
+                    console.error("Unexpected data structure:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
         fetchData();
     }, []);
 
+    // get users data with search value
     useEffect(() => {
-        console.log("searchValue:", searchValue);
+        // console.log("searchValue:", searchValue);
         const getDataWithSearchValue = async () => {
             if (searchValue !== null && searchValue !== "") {
                 try {
-                    const data = await getUsers();
+                    const data = await getUsersWithSearch(searchValue);
 
                     if (data) {
-                        console.log("data:", data); // to be removed
+                        // console.log("data:", data);
                         setUserData(data.users as UserData[]);
                     } else {
                         console.error("Unexpected data structure:", data);
