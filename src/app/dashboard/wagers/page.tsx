@@ -7,6 +7,8 @@ import DvrIcon from "@mui/icons-material/Dvr";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getWagers } from "@/app/lib/data";
 import Link from "next/link";
+import Image from "next/image";
+import magnifyingGlass from '@/../public/images/magnifying-glass.svg';
 
 interface WagerData {
   _id: string;
@@ -84,17 +86,22 @@ const WagersPage = () => {
 
   return (
     <div className="section-container tw-mt-4">
-      <div className="tw-flex tw-justify-between">
-        <Search placeholder="wagers"/>
-        <button className="btn-yellow">ADD NEW</button>
-      </div>
+      <div className="tw-font-bold">Users</div>
+      <div className='tw-w-[500px] tw-my-4 tw-self-center tw-relative'>
+          <div className='tw-bg-[#fff]/20 tw-h-auto tw-flex tw-px-2 tw-py-1.5 tw-rounded tw-gap-1'>
+            <Image src={magnifyingGlass} alt='magnifying glass' width={20} height={20}/>
+            <input 
+              placeholder={`Search for users`} 
+              className='tw-bg-transparent focus:tw-outline-none' />
+          </div>
+        </div>
 
       <div className="tw-my-4">
         <Table data={wagerData} />
       </div>
 
       <div className="tw-flex tw-justify-end ">
-        <div className="tw-flex tw-items-center tw-gap-4">
+        <div className="tw-flex tw-items-center tw-gap-4 tw-py-4">
           <button className="btn-transparent-white">prev</button>
           <div className="tw-h-auto">page 1 of 1</div>
           <button className="btn-transparent-white">next</button>

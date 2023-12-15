@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
     const limit = Number(req.nextUrl.searchParams.get("limit")) || 5;
 
-    // api/wagers?wager_id=213123 to get a specific wager
+    // api/wagers?wager_id=657bd345cf53f5078c72bbc8 to get a specific wager
     if (wager_id) {
       const wager = await Wagers.findOne({ _id: wager_id });
       return NextResponse.json(wager);

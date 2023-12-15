@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const wagersSchema = new mongoose.Schema({
 
-auction_id: {type: String, required: true},
+auctionID: {type: mongoose.Schema.Types.ObjectId, required: true},
 priceGuessed: {type: Number},
 wagerAmount: {type: Number},
 user: {type: Object, properties: {
@@ -10,6 +10,7 @@ user: {type: Object, properties: {
     username: String,
     image: String,
 }},
+isActive: {type: Boolean, default: true},
 createdAt: {type: Date, default: Date.now},
 updatedAt: {type: Date},
 },
