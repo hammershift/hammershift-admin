@@ -3,7 +3,7 @@ import Users from "@/app/models/user.model";
 import { NextRequest, NextResponse } from "next/server";
 
 
-// to delete user
+// to edit user
 export async function PUT(req: NextRequest) {
   try {
     await connectToDB();
@@ -18,7 +18,7 @@ export async function PUT(req: NextRequest) {
     }
     
 
-    // api/users/delete?user_id=657ab7edd422075ea7871f65 to get a specific user
+    // api/users/edit?user_id=657ab7edd422075ea7871f65
     if (user_id) {
       const user = await Users.findOneAndUpdate(
         { _id: user_id, isActive: true }, 
