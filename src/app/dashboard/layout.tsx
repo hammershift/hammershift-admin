@@ -17,5 +17,5 @@ import withAuth from "../ui/dashboard/auth/withAuth";
   );
 }
 
-// export default withAuth(Layout);
-export default Layout;
+export default withAuth(Layout);
+// export default Layout;

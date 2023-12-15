@@ -194,7 +194,10 @@ const DashboardPage = () => {
       </div>
       <div className="section-container">
         <div className="tw-mb-4">LATEST WAGERS</div>
-        <Table />
+        {
+          wagersData.wagers.length > 0 && 
+          <Table wagersData={wagersData}/>
+        }
       </div>
       <div className="section-container">
         <div className="tw-mb-4">WEEKLY RECAP</div>
@@ -208,35 +211,31 @@ const DashboardPage = () => {
 
 export default DashboardPage;
 
-const Table = () => {
+const Table = ({wagersData} : {wagersData: any}) => {
   return (
     <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
       <thead>
         <tr>
           <th className="tw-p-2.5 tw-font-bold ">Wager</th>
           <th className="tw-p-2.5 tw-font-bold">Price</th>
-          <th className="tw-p-2.5 tw-font-bold">Status</th>
+          <th className="tw-p-2.5 tw-font-bold">Auction ID</th>
           <th className="tw-p-2.5 tw-font-bold">User</th>
         </tr>
       </thead>
       <tbody className="tw-w-full">
-        {list &&
-          list.map((item, index) => (
-            <tr key={item.id} className=" tw-rounded-lg tw-bg-[#fff]/5">
-              <td className="tw-p-2.5 tw-w-1/4">${item.wager}.00</td>
-              <td className="tw-p-2.5 tw-w-1/4">${item.price}</td>
+        {wagersData &&
+          wagersData?.wagers.map((item : any) => (
+            <tr key={item._id} className=" tw-rounded-lg tw-bg-[#fff]/5">
+              <td className="tw-p-2.5 tw-w-1/4">${item.wagerAmount}.00</td>
+              <td className="tw-p-2.5 tw-w-1/4">${item.priceGuessed}</td>
               <td className="tw-p-2.5 tw-w-1/4">
                 <span
-                  className={`tw-p-2 tw-rounded ${
-                    item.status == "On Going"
-                      ? "tw-bg-[#49C742]/20"
-                      : "tw-bg-[#C2451E]/20"
-                  }`}
+                  className={`tw-p-2 tw-rounded`}
                 >
-                  {item.status}
+                  {item.auctionID}
                 </span>
               </td>
-              <td className="tw-p-2.5 tw-w-1/4">{item.user}</td>
+              <td className="tw-p-2.5 tw-w-1/4">{item.user.username}</td>
             </tr>
           ))}
       </tbody>
