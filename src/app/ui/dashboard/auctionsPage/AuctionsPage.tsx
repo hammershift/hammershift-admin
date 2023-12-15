@@ -97,7 +97,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
         <h2 className="tw-font-bold tw-text-yellow-500 tw-text-xl tw-m-2">
           Auction List
         </h2>
-        <Search placeholder="auctions" routeName="auctions" />
+        <Search placeholder="auctions"/>
       </div>
       <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-left">
         <thead>
