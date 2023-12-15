@@ -111,3 +111,16 @@ export const getUsersWithSearch = async (searchString: string) => {
     const data = await res.json();
     return data;
 };
+
+// edit user
+export const editUserWithId = async (id: string, body: any) => {
+    const res = await fetch(`api/users/edit?user_id=${id}`, {
+        method: "PUT",
+        body: JSON.stringify(body),
+    });
+    if (res) {
+        return { message: "Edit Successful" };
+    } else {
+        console.log("Edit Unsuccessful");
+    }
+};
