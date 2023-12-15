@@ -85,7 +85,7 @@ const WagersPage = () => {
   return (
     <div className="section-container tw-mt-4">
       <div className="tw-flex tw-justify-between">
-        <Search placeholder="wagers" routeName="wagers"/>
+        <Search placeholder="wagers"/>
         <button className="btn-yellow">ADD NEW</button>
       </div>
 
