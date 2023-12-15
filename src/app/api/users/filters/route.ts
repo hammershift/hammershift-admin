@@ -1,10 +1,13 @@
 import connectToDB from "@/app/lib/mongoose";
 import Users from "@/app/models/user.model";
+import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
 
-
+// http://localhost:3000/api/users/filters?search=john
+// can also work with filter and sort
+// space are replaced with %20
 export async function GET(req: NextRequest) {
   try {
     await connectToDB();

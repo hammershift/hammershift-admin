@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic'
 
+// to get users
 export async function GET(req: NextRequest) {
   try {
     await connectToDB();
@@ -20,7 +21,8 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({message: "Cannot find User"}, {status: 404});
       }
     } 
-    // api/users to get all users
+
+    // api/users to get all users that are active
     const users = await Users.find({isActive: true}).limit(limit).skip(offset);
 
     if(users){
@@ -33,3 +35,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: "Internal server error" });
   }
 }
+
