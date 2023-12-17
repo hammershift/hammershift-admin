@@ -114,7 +114,7 @@ export const getUsersWithSearch = async (searchString: string) => {
 
 // edit user
 export const editUserWithId = async (id: string, body: any) => {
-    const res = await fetch(`api/users/edit?user_id=${id}`, {
+    const res = await fetch(`/api/users/edit?user_id=${id}`, {
         method: "PUT",
         body: JSON.stringify(body),
     });
