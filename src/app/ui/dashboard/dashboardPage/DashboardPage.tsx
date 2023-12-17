@@ -15,7 +15,8 @@ import {
     Legend,
     ResponsiveContainer,
 } from "recharts";
-import { getUsers, getWagers, getCarsWithFilter } from "@/app/lib/data";
+import { getUsers, getCarsWithFilter } from "@/app/lib/data";
+import { getWagers } from "@/app/lib/getWagers";
 
 const data = [
     {

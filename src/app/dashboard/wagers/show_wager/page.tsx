@@ -1,9 +1,9 @@
-import React from 'react'
+import React from "react";
+import { redirect } from "next/navigation";
 
-const ShowWagerRedirect = () => {
-  return (
-    <div>ShowWagerRedirect</div>
-  )
-}
+const ShowWagerRedirect = ({ params }: { params: { id: string } }) => {
+    redirect(`/dashboard/wagers`);
+    return <div></div>;
+};
 
-export default ShowWagerRedirect
+export default ShowWagerRedirect;
