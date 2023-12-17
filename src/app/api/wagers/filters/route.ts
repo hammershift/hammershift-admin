@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
                 .skip(offset);
             if (searchedWagers) {
                 return NextResponse.json(
-                    { total: searchedWagers.length, users: searchedWagers },
+                    { total: searchedWagers.length, wagers: searchedWagers },
                     { status: 200 }
                 );
             } else {

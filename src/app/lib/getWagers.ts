@@ -36,3 +36,10 @@ export const editWagerWithId = async (id: string, body: any) => {
         console.log("Edit Unsuccessful");
     }
 };
+
+// search users
+export const getWagersWithSearch = async (searchString: string) => {
+    const res = await fetch("/api/wagers/filters?search=" + searchString);
+    const data = await res.json();
+    return data;
+};

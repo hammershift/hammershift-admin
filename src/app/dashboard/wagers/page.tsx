@@ -5,7 +5,7 @@ import Search from "@/app/ui/dashboard/search/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import DvrIcon from "@mui/icons-material/Dvr";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { getWagers } from "@/app/lib/getWagers";
+import { getWagers, getWagersWithSearch } from "@/app/lib/getWagers";
 import Link from "next/link";
 import Image from "next/image";
 import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
@@ -25,64 +25,50 @@ interface WagersPageProps {
     data: WagerData[];
 }
 
-const list = [
-    {
-        id: "wager1",
-        priceGuessed: 5000,
-        wagerAmount: 10,
-        user: {
-            userId: "user1",
-            fullName: "samantha jones",
-            username: "sam001",
-        },
-        auctionID: "6576875ba85d4ee4df2ae8e1",
-    },
-    {
-        id: "wager2",
-        priceGuessed: 6000,
-        wagerAmount: 10,
-        user: {
-            userId: "user2",
-            fullName: "Naruto Uzumaki",
-            username: "naruto001",
-        },
-        auctionID: "6576875ba85d4ee4df2ae888",
-    },
-    {
-        id: "wager2",
-        priceGuessed: 7000,
-        wagerAmount: 10,
-        user: {
-            userId: "user3",
-            fullName: "sonic the hedgehog",
-            username: "sonic001",
-        },
-        auctionID: "6576875ba85d4ee4df2ae444",
-    },
-];
-
 const WagersPage = () => {
     const [wagerData, setWagerData] = useState<WagerData[]>([]);
-
-    const fetchData = async () => {
-        try {
-            const data = await getWagers();
-            console.log("Wagers", data);
-
-            if (data && "wagers" in data) {
-                console.log(data);
-                setWagerData(data.wagers as WagerData[]);
-            } else {
-                console.error("Unexpected data structure:", data);
-            }
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
-    };
+    const [searchValue, setSearchValue] = useState<null | string>(null);
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getWagers();
+                console.log("Wagers", data);
+
+                if (data && "wagers" in data) {
+                    console.log(data);
+                    setWagerData(data.wagers as WagerData[]);
+                } else {
+                    console.error("Unexpected data structure:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
         fetchData();
     }, []);
+
+    // get users data with search value
+    useEffect(() => {
+        // console.log("searchValue:", searchValue);
+        const getDataWithSearchValue = async () => {
+            if (searchValue !== null && searchValue !== "") {
+                try {
+                    const data = await getWagersWithSearch(searchValue);
+
+                    if (data) {
+                        // console.log("data:", data);
+                        setWagerData(data.wagers);
+                    } else {
+                        console.error("Unexpected data structure:", data);
+                    }
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+            }
+        };
+        getDataWithSearchValue();
+    }, [searchValue]);
 
     return (
         <div className="section-container tw-mt-4">
@@ -98,6 +84,7 @@ const WagersPage = () => {
                     <input
                         placeholder={`Search for users`}
                         className="tw-bg-transparent focus:tw-outline-none"
+                        onChange={(e) => setSearchValue(e.target.value)}
                     />
                 </div>
             </div>
