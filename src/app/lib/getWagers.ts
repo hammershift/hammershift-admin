@@ -23,3 +23,16 @@ export const getOneWager = async (id: string) => {
         throw new Error("Failed to fetch wager!");
     }
 };
+
+// edit wager
+export const editWagerWithId = async (id: string, body: any) => {
+    const res = await fetch(`/api/wagers/edit?wager_id=${id}`, {
+        method: "PUT",
+        body: JSON.stringify(body),
+    });
+    if (res) {
+        return res;
+    } else {
+        console.log("Edit Unsuccessful");
+    }
+};
