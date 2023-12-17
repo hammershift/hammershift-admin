@@ -1,6 +1,7 @@
 import connectToDB from "@/app/lib/mongoose";
 import Wagers from "@/app/models/wager.model";
 import { NextRequest, NextResponse } from "next/server";
+import { ObjectId } from "mongodb";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,6 @@ export async function GET(req: NextRequest) {
                                     $options: "i",
                                 },
                             },
-                            //{ "_id": { $regex: searchedKeyword, $options: "i" }},
                             {
                                 "user.username": {
                                     $regex: searchedKeyword,

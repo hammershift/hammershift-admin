@@ -82,7 +82,7 @@ const WagersPage = () => {
                         height={20}
                     />
                     <input
-                        placeholder={`Search for users`}
+                        placeholder={`Search wagers`}
                         className="tw-bg-transparent focus:tw-outline-none"
                         onChange={(e) => setSearchValue(e.target.value)}
                     />
