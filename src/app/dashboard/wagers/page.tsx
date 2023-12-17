@@ -33,7 +33,7 @@ const WagersPage = () => {
         const fetchData = async () => {
             try {
                 const data = await getWagers();
-                console.log("Wagers", data);
+                // console.log("Wagers", data);
 
                 if (data && "wagers" in data) {
                     console.log(data);
