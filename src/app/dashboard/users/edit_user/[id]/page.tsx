@@ -24,6 +24,16 @@ const EditUser = ({ params }: { params: { id: string } }) => {
         setNewData({ ...newData, [name]: value });
     };
 
+    const handleEmailVerificationChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        if (e.target.value === "true") {
+            setNewData({ ...newData, emailVerified: true });
+        } else {
+            setNewData({ ...newData, emailVerified: false });
+        }
+    };
+
     useEffect(() => {
         console.log(newData);
     }, [newData]);
@@ -31,15 +41,17 @@ const EditUser = ({ params }: { params: { id: string } }) => {
     const handleSubmit = async (e: any) => {
         e.preventDefault();
         const res = await editUserWithId(ID, newData);
-        if (res) {
-            alert("User Edited Successfully");
+        if (res?.message == "Edit Successful") {
+            alert("User Edit Successful");
             router.push("/dashboard/users");
+        } else {
+            alert("User Edit Failed");
         }
     };
 
-    const revertChanges = (e: any) => {
-        location.reload();
-    };
+    // const revertChanges = (e: any) => {
+    //     location.reload();
+    // };
 
     return (
         <div className="section-container tw-mt-4">
@@ -92,10 +104,34 @@ const EditUser = ({ params }: { params: { id: string } }) => {
                             <div>Email Verification</div>
 
                             <label>Verified</label>
-                            <input name="emailVerified" type="radio" />
+                            <input
+                                name="emailVerified"
+                                type="radio"
+                                value="true"
+                                checked={
+                                    newData?.emailVerified
+                                        ? newData?.emailVerified === true
+                                        : data?.emailVerified
+                                }
+                                onChange={(e) =>
+                                    handleEmailVerificationChange(e)
+                                }
+                            />
 
                             <label>Not Verified</label>
-                            <input name="emailVerified" type="radio" />
+                            <input
+                                name="emailVerified"
+                                type="radio"
+                                value="false"
+                                checked={
+                                    newData?.emailVerified
+                                        ? newData?.emailVerified === false
+                                        : !data?.emailVerified
+                                }
+                                onChange={(e) =>
+                                    handleEmailVerificationChange(e)
+                                }
+                            />
                         </div>
                         <div className="tw-flex tw-gap-4">
                             <label>About Me</label>
