@@ -2,15 +2,13 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 import PersonIcon from "@mui/icons-material/Person";
 import KeyIcon from "@mui/icons-material/Key";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
 import { Button } from "@mui/material";
-
-
 
 const LoginPage = () => {
   const [username, setUsername] = useState<string>("");
@@ -21,23 +19,22 @@ const LoginPage = () => {
   const handleSignIn = async () => {
     try {
       console.log(`Attempting to sign in with: ${username}`);
-      const result = await signIn('credentials', {
+      const result = await signIn("credentials", {
         redirect: false,
         username: username,
         password: password,
       });
 
-      console.log('signIn result:', result);
+      console.log("signIn result:", result);
 
       if (result?.error) {
-        console.log({message: "unable to sign in"})
+        console.log({ message: "unable to sign in" });
       } else {
-        console.log('Login successful');
-        router.push('/dashboard');
+        console.log("Login successful");
+        router.push("/dashboard");
       }
     } catch (error) {
-      console.error('An unexpected error occurred during login:', error);
-
+      console.error("An unexpected error occurred during login:", error);
     }
   };
 
@@ -57,7 +54,7 @@ const LoginPage = () => {
             type="text"
             name="username"
             placeholder=" Username"
-            className="tw-rounded-full tw-p-1"
+            className="tw-rounded-full tw-p-1 tw-pl-2"
             style={{ color: "black" }}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -71,7 +68,7 @@ const LoginPage = () => {
             type="password"
             name="password"
             placeholder=" Password"
-            className="tw-rounded-full tw-p-1"
+            className="tw-rounded-full tw-p-1 tw-pl-2"
             style={{ color: "black" }}
             value={password}
             onChange={(e) => setPassword(e.target.value)}

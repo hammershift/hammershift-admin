@@ -33,6 +33,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
     keyToSort: "auction_id",
     direction: "asc",
   });
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const initialActiveAuctions = data.reduce(
@@ -45,12 +46,31 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
     setActiveAuctions(initialActiveAuctions);
   }, [data]);
 
-  function handleStatusToggle(id: string) {
+  async function handleStatusToggle(id: string) {
     setActiveAuctions((prevStates) => ({
       ...prevStates,
       [id]: !prevStates[id],
     }));
-    console.log("Toggle:", activeAuctions);
+    console.log(activeAuctions)
+    try {
+      await updateAuctionStatus(id, !activeAuctions[id]);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function updateAuctionStatus(auction_id: string, isActive: boolean) {
+    const response = await fetch(`/api/auctions?auction_id=${auction_id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ isActive }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update auction status");
+    }
   }
 
   const headers = [
@@ -91,13 +111,30 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
     );
   }
 
+  const filteredData = data.filter((item) =>
+    Object.values(item).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  function handleSearch(e: {
+    target: { value: React.SetStateAction<string> };
+  }) {
+    setSearchTerm(e.target.value);
+  }
+
   return (
     <div className="section-container tw-mt-4">
       <div className="tw-flex tw-justify-between">
         <h2 className="tw-font-bold tw-text-yellow-500 tw-text-xl tw-m-2">
           Auction List
         </h2>
-        <Search placeholder="auctions"/>
+        <input
+          type="text"
+          placeholder="Search for Auctions"
+          className="tw-text-black tw-pl-2 tw-rounded-full"
+          onChange={handleSearch}
+        />
       </div>
       <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-left">
         <thead>
@@ -120,7 +157,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
           </tr>
         </thead>
         <tbody>
-          {sortData(data).map((item, index) => (
+          {sortData(filteredData).map((item, index) => (
             <tr key={index} className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5">
               {headers.map((header, index) => (
                 <td key={index} className="tw-p-2.5">

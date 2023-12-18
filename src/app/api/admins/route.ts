@@ -25,3 +25,31 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: "Internal server error" });
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    await connectToDB();
+    const { first_name, last_name, username, password } = await req.json();
+
+    const existingAdmin = await Admins.findOne({ username });
+
+    if (existingAdmin) {
+      return NextResponse.json({ message: "Admin already exists" });
+    } else if (!first_name || !last_name || !username || !password) {
+      throw new Error("Please fill out required fields");
+    } else {
+      await Admins.create({
+        first_name,
+        last_name,
+        username,
+        password,
+      });
+      return NextResponse.json({ message: "Admin account created" });
+    }
+  } catch (error) {
+    return NextResponse.json({
+      message: "Internal server error",
+      error: error,
+    });
+  }
+}
