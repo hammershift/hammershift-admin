@@ -111,7 +111,7 @@ const CreateNewAdminPage = () => {
               id="first_name"
               value={newAdmin.first_name}
               onChange={handleChange}
-              className="tw-text-black tw-w-1/3 tw-m-1 tw-pl-1 tw-border-yellow-500 tw-border-4"
+              className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1 tw-m-2"
             ></input>
             <input
               type="text"
@@ -119,7 +119,7 @@ const CreateNewAdminPage = () => {
               id="last_name"
               value={newAdmin.last_name}
               onChange={handleChange}
-              className="tw-text-black tw-w-1/3 tw-m-1 tw-pl-1 tw-border-yellow-500 tw-border-4"
+              className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1 tw-m-2"
             ></input>
           </div>
           <label className="tw-mx-1">Username</label>
@@ -129,7 +129,7 @@ const CreateNewAdminPage = () => {
             id="username"
             value={newAdmin.username}
             onChange={handleChange}
-            className="tw-text-black tw-w-1/3 tw-m-1 tw-pl-1 tw-border-yellow-500 tw-border-4"
+            className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1 tw-m-2"
           ></input>
           <label className="tw-mx-1">Password</label>
           <input
@@ -138,17 +138,17 @@ const CreateNewAdminPage = () => {
             id="password"
             value={newAdmin.password}
             onChange={handleChange}
-            className="tw-text-black tw-w-1/3 tw-m-1 tw-pl-1 tw-border-yellow-500 tw-border-4"
+            className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1 tw-m-2"
           ></input>
           <label className="tw-mx-1">Confirm Password</label>
           <input
             type="password"
             placeholder="Confirm Password *"
             onChange={handleConfirmPasswordChange}
-            className="tw-text-black tw-w-1/3 tw-m-1 tw-pl-1 tw-border-yellow-500 tw-border-4"
+            className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1 tw-m-2"
           ></input>
           <button
-            className="tw-w-1/3 tw-h-12 tw-p-1 tw-rounded-full tw-m-1 tw-bg-yellow-400 tw-text-black tw-font-bold"
+            className="tw-w-1/3 tw-h-12 tw-p-1 tw-rounded-full tw-m-1 tw-mt-4 tw-bg-yellow-400 tw-text-black tw-font-bold"
             onClick={handleCreateAccountButtonClick}
           >
             Create Account

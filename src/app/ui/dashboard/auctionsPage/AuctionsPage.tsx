@@ -51,7 +51,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({ data }) => {
       ...prevStates,
       [id]: !prevStates[id],
     }));
-    console.log(activeAuctions)
+    console.log(activeAuctions);
     try {
       await updateAuctionStatus(id, !activeAuctions[id]);
     } catch (error) {
