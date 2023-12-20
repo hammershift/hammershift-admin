@@ -166,7 +166,7 @@ const EditUser = ({ params }: { params: { id: string } }) => {
             </div>
             <div className="tw-flex tw-gap-1 tw-justify-evenly tw-w-1/3 tw-m-4">
               <Link href={`/dashboard/users/delete_user/${ID}`}>
-                <button className="btn-transparent-red">DELETE USER</button>
+                <button className="btn-transparent-red">EDIT USER</button>
               </Link>
               <button
                 className="btn-transparent-white"
