@@ -23,7 +23,7 @@ const Auctions = () => {
 
   const fetchData = async () => {
     try {
-      const data = await getCarsWithFilter({ limit: 100 });
+      const data = await getCarsWithFilter({ limit: 21 });
 
       if (data && "cars" in data) {
         console.log(data);
