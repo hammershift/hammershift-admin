@@ -2,6 +2,7 @@
 import connectToDB from "@/app/lib/mongoose";
 import Admins from "@/app/models/admin.model";
 import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcrypt";
 
 export const dynamic = "force-dynamic";
 
@@ -38,11 +39,13 @@ export async function POST(req: NextRequest) {
     } else if (!first_name || !last_name || !username || !password) {
       throw new Error("Please fill out required fields");
     } else {
+      const hash = await bcrypt.hash(password, 10);
+
       await Admins.create({
         first_name,
         last_name,
         username,
-        password,
+        password: hash,
       });
       return NextResponse.json({ message: "Admin account created" });
     }
