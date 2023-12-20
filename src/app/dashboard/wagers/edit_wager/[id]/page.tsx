@@ -51,7 +51,7 @@ const EditWager = ({ params }: { params: { id: string } }) => {
 
   return (
     <div className="section-container tw-mt-4">
-      <Link href={`/dashboard/users`}>
+      <Link href={`/dashboard/wagers`}>
         <ArrowBackIcon />
       </Link>
       <h2 className="tw-font-bold tw-m-4 tw-text-yellow-500">EDIT WAGER</h2>{" "}
