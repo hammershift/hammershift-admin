@@ -1,7 +1,6 @@
 "use client";
 import Navbar from "../ui/dashboard/navbar/navbar";
 import Sidebar from "../ui/dashboard/sidebar/sidebar";
-import withAuth from "../ui/dashboard/auth/withAuth";
 
 function Layout({ children }: { children: React.ReactNode }) {
     return (
