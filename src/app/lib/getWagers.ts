@@ -30,7 +30,7 @@ export const editWagerWithId = async (id: string, body: any) => {
         method: "PUT",
         body: JSON.stringify(body),
     });
-    if (res) {
+    if (res.status === 200) {
         return res;
     } else {
         console.log("Edit Unsuccessful");

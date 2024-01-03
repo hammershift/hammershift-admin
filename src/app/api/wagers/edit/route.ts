@@ -1,9 +1,17 @@
 import connectToDB from "@/app/lib/mongoose";
 import Wagers from "@/app/models/wager.model";
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/options";
 
 // to edit user
 export async function PUT(req: NextRequest) {
+    //check for authorization
+    const session = await getServerSession(authOptions);
+    if (!session) {
+        return NextResponse.json({ message: "Unauthorized" }, { status: 400 });
+    }
+
     try {
         await connectToDB();
         const wager_id = req.nextUrl.searchParams.get("wager_id");
