@@ -43,11 +43,11 @@ const EditUser = ({ params }: { params: { id: string } }) => {
     const handleSubmit = async (e: any) => {
         e.preventDefault();
         const res = await editUserWithId(ID, newData);
-        if (res?.message == "Edit Successful") {
+        if (res) {
             alert("User Edit Successful");
             router.push("/dashboard/users");
         } else {
-            alert("User Edit Failed");
+            alert("Unauthorized User Edit");
             console.error("unauthorized", res);
         }
     };
