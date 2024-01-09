@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
         const db = client.db();
-        await connectToDB();
+        // await connectToDB();
         const wager_id = req.nextUrl.searchParams.get("wager_id");
         const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
         const limit = Number(req.nextUrl.searchParams.get("limit"));
