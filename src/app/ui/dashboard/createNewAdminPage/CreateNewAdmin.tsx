@@ -21,11 +21,15 @@ const CreateNewAdminPage = () => {
   });
   const [requiredFieldsError, setRequiredFieldsError] = useState(false);
   const [adminList, setAdminList] = useState<newAdmin[]>([]);
+  const [emptyInputError, setEmptyInputError] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     switch (e.target.id) {
       case "first_name":
         const firstName = e.target.value;
+        if (!firstName) {
+          setEmptyInputError(true);
+        }
         setNewAdmin({ ...newAdmin, first_name: firstName });
         break;
       case "last_name":
@@ -63,23 +67,23 @@ const CreateNewAdminPage = () => {
         body: JSON.stringify(newAdmin),
       });
 
-      if (
+      const data = (await response.json()) as { message: string };
+      if (data.message === "Admin already exists") {
+        alert("Admin already exists");
+      } else if (
         !newAdmin.first_name ||
         !newAdmin.last_name ||
         !newAdmin.username ||
         !newAdmin.password ||
         !confirmPassword
       ) {
+        setEmptyInputError(true);
         setRequiredFieldsError(true);
-        alert("Please fill out required fields");
       } else if (newAdmin.password !== confirmPassword.confirm_password) {
         alert("Password does not match");
       } else if (!response.ok) {
         console.error("Error creating admin account");
       } else {
-        console.log(response);
-        console.log(adminList);
-        setAdminList([...adminList, newAdmin]);
         setConfirmPassword({ confirm_password: "" });
         setNewAdmin({
           first_name: "",
@@ -111,7 +115,9 @@ const CreateNewAdminPage = () => {
               id="first_name"
               value={newAdmin.first_name}
               onChange={handleChange}
-              className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1 tw-m-2"
+              className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+                emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+              }`}
             ></input>
             <input
               type="text"
@@ -119,7 +125,9 @@ const CreateNewAdminPage = () => {
               id="last_name"
               value={newAdmin.last_name}
               onChange={handleChange}
-              className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1 tw-m-2"
+              className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+                emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+              }`}
             ></input>
           </div>
           <label className="tw-mx-1">Username</label>
@@ -129,7 +137,9 @@ const CreateNewAdminPage = () => {
             id="username"
             value={newAdmin.username}
             onChange={handleChange}
-            className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1 tw-m-2"
+            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+              emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+            }`}
           ></input>
           <label className="tw-mx-1">Password</label>
           <input
@@ -138,15 +148,22 @@ const CreateNewAdminPage = () => {
             id="password"
             value={newAdmin.password}
             onChange={handleChange}
-            className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1 tw-m-2"
+            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+              emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+            }`}
           ></input>
           <label className="tw-mx-1">Confirm Password</label>
           <input
             type="password"
             placeholder="Confirm Password *"
             onChange={handleConfirmPasswordChange}
-            className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1 tw-m-2"
+            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+              emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+            }`}
           ></input>
+          {requiredFieldsError ? (
+            <p className="tw-text-red-500">Please fill-out required fields</p>
+          ) : null}
           <button
             className="tw-w-1/3 tw-h-12 tw-p-1 tw-rounded-full tw-m-1 tw-mt-4 tw-bg-yellow-400 tw-text-black tw-font-bold"
             onClick={handleCreateAccountButtonClick}
