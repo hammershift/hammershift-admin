@@ -137,17 +137,24 @@ const Table: React.FC<WagersPageProps> = ({ data }) => {
                 <td className="tw-p-2.5 tw-w-1/8">${item.priceGuessed}</td>
                 <td className="tw-p-2.5 tw-w-1/8">${item.wagerAmount}.00</td>
                 <td className="tw-p-2.5 tw-w-1/8">{item.user.username}</td>
-                <td className="tw-p-2.5 tw-w-1/8">{item.user._id}</td>
-                <td
-                  className="tw-p-2.5 tw-w-1/8"
-                  onClick={() => {
-                    setOpenModal(true);
-                    setSelectedAuctionId(item.auctionIdentifierId);
-                  }}
-                >
-                  {item.auctionIdentifierId
-                    ? item.auctionIdentifierId
-                    : item.auctionID}
+                <td className="tw-p-2.5 tw-w-1/8">
+                  <p>{item.user._id}</p>
+                </td>
+                <td className="tw-p-2.5 tw-w-1/8">
+                  <p>
+                    {item.auctionIdentifierId
+                      ? item.auctionIdentifierId
+                      : item.auctionID}
+                  </p>
+                  <button
+                    className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs"
+                    onClick={() => {
+                      setOpenModal(true);
+                      setSelectedAuctionId(item.auctionIdentifierId);
+                    }}
+                  >
+                    Show Auction Details
+                  </button>
                 </td>
                 <td className="tw-p-2.5 tw-w-1/8">
                   <div className="tw-flex tw-gap-4 tw-justify-center">
