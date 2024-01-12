@@ -39,7 +39,7 @@ const LoginPage = () => {
   };
 
   return (
-    <main className="section-container tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-1/3 tw-h-2/3">
+    <main className="section-container tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-2/3 sm:tw-w-full  md:tw-w-2/3 lg:tw-w-1/3 lg:tw-h-2/3 xl:tw-w-1/3 xl:tw-h-2/3">
       <div className="tw-mt-4 tw-flex tw-flex-col tw-items-center tw-justify-center tw-m-8">
         <Image alt="hammershift-logo" src={hammershiftLogo} width={360} />
         <h1 className="tw-p-2">WELCOME</h1>

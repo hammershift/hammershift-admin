@@ -1,8 +1,7 @@
-"use client"
-import React, {useState, useEffect} from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-
 
 import SidebarLink from "./sidebarLinks/sidebarLink";
 //icons
@@ -17,6 +16,7 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 //images
 import userImg from "../../../../../public/images/user.svg";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
+import { toggle } from "@nextui-org/react";
 
 const sidebarItems = [
   {
@@ -73,11 +73,11 @@ const sidebarItems = [
 ];
 
 const Sidebar = () => {
-
   const [username, setUsername] = useState("");
-  
-  const {data} = useSession();
-  
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const { data } = useSession();
+
   useEffect(() => {
     if (data?.user?.username) {
       setUsername(data.user.username);
@@ -85,36 +85,58 @@ const Sidebar = () => {
     // console.log("data:", data)
   }, [data]);
 
+  const toggleSidebar = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   return (
-    <div className="sticky tw-top-auto">
-      <Image
-        alt="hammershift-logo"
-        src={hammershiftLogo}
-        className="tw-m-1 tw-mb-5"
-      />
-      <div className="tw-flex tw-flex-row tw-items-center tw-gap-5 tw-mb-5">
-        <Image
-          src={userImg}
-          alt="user"
-          width={50}
-          height={50}
-          className="rounded-full tw-object-cover"
-        />
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          <p className="tw-text-xs tw-font-semibold">{username}</p>
-          <p className="tw-text-xs">Administrator</p>
-        </div>
-      </div>
-      <ul>
-        {sidebarItems.map((category) => (
-          <li key={category.title}>
-            <p className="tw-text-xs tw-m-2">{category.title}</p>
-            {category.list.map((item) => (
-              <SidebarLink item={item} key={item.title} />
+    <div
+      className={`tw-sticky tw-top-0 tw-bg-slate-800 tw-p-5 tw-h-full ${
+        menuOpen ? "" : "tw-pt-5 tw-p-0 tw-w-auto"
+      }`}
+    >
+      <button
+        className={`tw-w-1/4 tw-p-1 tw-bg-slate-500 ${
+          menuOpen ? "" : "tw-w-10 tw-m-0"
+        }`}
+        onClick={toggleSidebar}
+      >
+        <span className="tw-block tw-h-1 tw-m-1 tw-bg-black tw-rounded-md"></span>
+        <span className="tw-block tw-h-1 tw-m-1 tw-bg-black tw-rounded-md"></span>
+        <span className="tw-block tw-h-1 tw-m-1 tw-bg-black tw-rounded-md"></span>
+      </button>
+      {menuOpen && (
+        <div className={"tw-sticky tw-top-auto"}>
+          <Image
+            alt="hammershift-logo"
+            src={hammershiftLogo}
+            className="tw-m-1 tw-mb-5"
+          />
+          <div className="tw-flex tw-flex-row tw-items-center tw-gap-5 tw-mb-5">
+            <Image
+              src={userImg}
+              alt="user"
+              width={50}
+              height={50}
+              className="rounded-full tw-object-cover"
+            />
+            <div className="tw-flex tw-flex-col tw-gap-2">
+              <p className="tw-text-xs tw-font-semibold">{username}</p>
+              <p className="tw-text-xs">Administrator</p>
+            </div>
+          </div>
+          <ul>
+            {sidebarItems.map((category) => (
+              <li key={category.title}>
+                <p className="tw-text-xs tw-m-2">{category.title}</p>
+                {category.list.map((item) => (
+                  <SidebarLink item={item} key={item.title} />
+                ))}
+              </li>
             ))}
-          </li>
-        ))}
-      </ul>
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

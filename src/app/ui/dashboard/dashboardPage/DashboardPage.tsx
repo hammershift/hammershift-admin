@@ -112,7 +112,7 @@ const DashboardPage = () => {
         const data = await getWagers();
 
         if (data && "wagers" in data) {
-          console.log("data:", data);
+          console.log("wagers data:", data);
           setWagersData(data);
         } else {
           console.error("Unexpected data structure:", data);
@@ -213,7 +213,9 @@ const Table = ({ wagersData }: { wagersData: any }) => {
               <td className="tw-p-2.5 tw-w-1/4">${item.wagerAmount}.00</td>
               <td className="tw-p-2.5 tw-w-1/4">${item.priceGuessed}</td>
               <td className="tw-p-2.5 tw-w-1/4">
-                <span className={`tw-p-2 tw-rounded`}>{item.auctionID}</span>
+                <span className={`tw-p-2 tw-rounded`}>
+                  {item.auctionIdentifierId}
+                </span>
               </td>
               <td className="tw-p-2.5 tw-w-1/4">{item.user.username}</td>
             </tr>
