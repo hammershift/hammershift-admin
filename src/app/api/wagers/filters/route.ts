@@ -6,6 +6,7 @@ import clientPromise from "@/app/lib/mongoDB";
 
 export const dynamic = "force-dynamic";
 
+// /api/wagers/filters?limit=6
 export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
@@ -47,6 +48,29 @@ export async function GET(req: NextRequest) {
                 return NextResponse.json(
                     {
                         total: searchedWagersArray.length,
+                        wagers: searchedWagersArray,
+                    },
+                    { status: 200 }
+                );
+            } else {
+                return NextResponse.json(
+                    { message: "no search result" },
+                    { status: 404 }
+                );
+            }
+        }
+
+        if (limit) {
+            const searchedWagers = await db
+                .collection("wagers")
+                .find()
+                .limit(limit)
+                .skip(0);
+
+            const searchedWagersArray = await searchedWagers.toArray();
+            if (searchedWagers) {
+                return NextResponse.json(
+                    {
                         wagers: searchedWagersArray,
                     },
                     { status: 200 }

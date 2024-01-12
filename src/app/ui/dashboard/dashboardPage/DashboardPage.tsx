@@ -17,8 +17,11 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { getUsers, getCarsWithFilter } from "@/app/lib/data";
-import { getWagers, getWagersOnDate } from "@/app/lib/getWagers";
-import { set } from "mongoose";
+import {
+    getLimitedWagers,
+    getWagers,
+    getWagersOnDate,
+} from "@/app/lib/getWagers";
 
 const data = [
     {
@@ -83,7 +86,7 @@ const DashboardPage = () => {
     useEffect(() => {
         const fetchWagersData = async () => {
             try {
-                const data = await getWagers();
+                const data = await getLimitedWagers();
 
                 if (data && "wagers" in data) {
                     console.log("data:", data);
@@ -230,7 +233,7 @@ const DashboardPage = () => {
                 )}
             </div>
             <div className="section-container">
-                <div className="tw-mb-4">{`WEEKLY RECAP: ${dates[0].date} - ${dates[6].date}`}</div>
+                <div className="tw-mb-4">{`WEEKLY RECAP: ${dates[0]?.date} - ${dates[6]?.date}`}</div>
                 <div className="tw-w-full tw-h-[450px]">
                     {loading ? (
                         <div className="tw-flex tw-justify-center tw-items-center tw-h-[200px]">

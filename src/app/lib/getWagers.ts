@@ -9,6 +9,17 @@ export const getWagers = async () => {
     throw new Error("Failed to fetch wagers!");
 };
 
+// get 6 wagers
+export const getLimitedWagers = async () => {
+    const res = await fetch(`/api/wagers/filters?limit=6`);
+    if (res.status === 200) {
+        const data = await res.json();
+        return data;
+    }
+
+    throw new Error("Failed to fetch wagers!");
+};
+
 // get wagers Count
 export const getWagersCount = async () => {
     const res = await fetch(`/api/wagers/count`);
