@@ -6,14 +6,12 @@ import { ObjectId } from "mongodb";
 
 export const dynamic = "force-dynamic";
 
+// /api/wagers/weekly
 export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
         const db = client.db();
         // await connectToDB();
-        const wager_id = req.nextUrl.searchParams.get("wager_id");
-        const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
-        const limit = Number(req.nextUrl.searchParams.get("limit"));
         const date = req.nextUrl.searchParams.get("date");
 
         if (date) {
@@ -37,26 +35,21 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        // api/wagers?wager_id=657bd345cf53f5078c72bbc8 to get a specific wager
-        if (wager_id) {
-            const wager = await db.collection("wagers").findOne({
-                $and: [{ _id: new ObjectId(wager_id) }, { isActive: true }],
-            });
-            if (wager) {
-                return NextResponse.json(wager, { status: 200 });
-            } else {
-                return NextResponse.json(
-                    { message: "Cannot find Wager" },
-                    { status: 404 }
-                );
-            }
-        }
+        const query = {
+            $and: [
+                {
+                    createdAt: {
+                        $gte: `${date}T00:00:00Z`,
+                        $lt: `${date}T23:59:59Z`,
+                    },
+                },
+            ],
+        };
+
         // api/wagers to get all wagers
         const wagers = await db
             .collection("wagers")
-            .find({ isActive: true })
-            .limit(limit)
-            .skip(offset);
+            .find({ $and: [query, { isActive: true }] });
 
         const wagersArray = await wagers.toArray();
         if (wagers) {
