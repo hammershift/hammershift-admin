@@ -108,11 +108,11 @@ const Table: React.FC<UsersPageProps> = ({ data }) => {
     <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
       <thead>
         <tr>
-          <th className="tw-p-2.5 tw-font-bold ">Username</th>
-          <th className="tw-p-2.5 tw-font-bold ">Full Name</th>
-          <th className="tw-p-2.5 tw-font-bold">Email</th>
-          <th className="tw-p-2.5 tw-font-bold">State</th>
-          <th className="tw-p-2.5 tw-font-bold">Country</th>
+          <th className="tw-p-2.5 tw-font-bold">Username</th>
+          <th className="tw-p-2.5 tw-font-bold">Full Name</th>
+          <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Email</th>
+          <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">State</th>
+          <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Country</th>
           <th className="tw-p-2.5 tw-font-bold">Actions</th>
         </tr>
       </thead>
@@ -122,9 +122,15 @@ const Table: React.FC<UsersPageProps> = ({ data }) => {
             <tr key={index} className=" tw-rounded-lg tw-bg-[#fff]/5">
               <td className="tw-p-2.5 tw-w-1/8">{item.username}</td>
               <td className="tw-p-2.5 tw-w-1/8">{item.fullName}</td>
-              <td className="tw-p-2.5 tw-w-1/8">{item.email}</td>
-              <td className="tw-p-2.5 tw-w-1/8">{item.state}</td>
-              <td className="tw-p-2.5 tw-w-1/8">{item.country}</td>
+              <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                {item.email}
+              </td>
+              <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                {item.state}
+              </td>
+              <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                {item.country}
+              </td>
               <td className="tw-p-2.5 tw-w-1/8">
                 <div className="tw-flex tw-gap-4 tw-justify-center">
                   <Link href={`/dashboard/users/edit_user/${item._id}`}>

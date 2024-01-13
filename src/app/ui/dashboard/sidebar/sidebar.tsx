@@ -17,6 +17,8 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import userImg from "../../../../../public/images/user.svg";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
 import { toggle } from "@nextui-org/react";
+import { ToggleOff, ToggleOn } from "@mui/icons-material";
+import { blue } from "@mui/material/colors";
 
 const sidebarItems = [
   {
@@ -91,19 +93,15 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`tw-sticky tw-top-0 tw-bg-slate-800 tw-p-5 tw-h-full ${
-        menuOpen ? "" : "tw-pt-5 tw-p-0 tw-w-auto"
+      className={`tw-sticky tw-top-0 tw-bg-slate-800  tw-h-full ${
+        menuOpen ? "tw-p-5" : "tw-pt-5 tw-p-0.5 tw-w-auto"
       }`}
     >
       <button
-        className={`tw-w-1/4 tw-p-1 tw-bg-slate-500 ${
-          menuOpen ? "" : "tw-w-10 tw-m-0"
-        }`}
+        className={`tw-w-1/4 tw-p-1 ${menuOpen ? "" : "tw-w-10 tw-m-0"}`}
         onClick={toggleSidebar}
       >
-        <span className="tw-block tw-h-1 tw-m-1 tw-bg-black tw-rounded-md"></span>
-        <span className="tw-block tw-h-1 tw-m-1 tw-bg-black tw-rounded-md"></span>
-        <span className="tw-block tw-h-1 tw-m-1 tw-bg-black tw-rounded-md"></span>
+        {menuOpen ? <ToggleOn color="primary" /> : <ToggleOff />}
       </button>
       {menuOpen && (
         <div className={"tw-sticky tw-top-auto"}>

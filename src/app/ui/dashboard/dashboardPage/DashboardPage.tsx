@@ -221,6 +221,7 @@ const Table = ({ wagersData }: { wagersData: any }) => {
             </tr>
           ))}
       </tbody>
+      <h2>See All</h2>
     </table>
   );
 };
