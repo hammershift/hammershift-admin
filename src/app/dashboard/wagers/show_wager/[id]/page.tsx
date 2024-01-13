@@ -42,7 +42,7 @@ const ShowWager = ({ params }: { params: { id: string } }) => {
         </div>
         <div className="tw-flex tw-justify-between tw-w-1/2  tw-mx-4 tw-my-2 max-lg:tw-w-full">
           <h4>AUCTION ID:</h4>
-          <p className="tw-px-3">{data && data.auctionID}</p>
+          <p className="tw-px-3">{data && data.auctionIdentifierId}</p>
         </div>
         <div className="tw-flex tw-justify-between tw-w-1/2  tw-mx-4 tw-my-2 max-lg:tw-w-full">
           <h4>Full Name:</h4>

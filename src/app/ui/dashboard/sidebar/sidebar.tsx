@@ -17,7 +17,7 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import userImg from "../../../../../public/images/user.svg";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
 import { toggle } from "@nextui-org/react";
-import { ToggleOff, ToggleOn } from "@mui/icons-material";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { blue } from "@mui/material/colors";
 
 const sidebarItems = [
@@ -76,7 +76,6 @@ const sidebarItems = [
 
 const Sidebar = () => {
   const [username, setUsername] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const { data } = useSession();
 
@@ -87,54 +86,41 @@ const Sidebar = () => {
     // console.log("data:", data)
   }, [data]);
 
-  const toggleSidebar = () => {
-    setMenuOpen(!menuOpen);
-  };
-
   return (
     <div
-      className={`tw-sticky tw-top-0 tw-bg-slate-800  tw-h-full ${
-        menuOpen ? "tw-p-5" : "tw-pt-5 tw-p-0.5 tw-w-auto"
-      }`}
+      className="tw-sticky tw-top-0 tw-bg-slate-800 tw-h-full
+         tw-p-5"
     >
-      <button
-        className={`tw-w-1/4 tw-p-1 ${menuOpen ? "" : "tw-w-10 tw-m-0"}`}
-        onClick={toggleSidebar}
-      >
-        {menuOpen ? <ToggleOn color="primary" /> : <ToggleOff />}
-      </button>
-      {menuOpen && (
-        <div className={"tw-sticky tw-top-auto"}>
+      <div className={"tw-sticky tw-top-auto"}>
+        <Image
+          alt="hammershift-logo"
+          src={hammershiftLogo}
+          className="tw-m-1 tw-mb-5"
+        />
+        <div className="tw-flex tw-flex-row tw-items-center tw-gap-5 tw-mb-5">
           <Image
-            alt="hammershift-logo"
-            src={hammershiftLogo}
-            className="tw-m-1 tw-mb-5"
+            src={userImg}
+            alt="user"
+            width={50}
+            height={50}
+            className="rounded-full tw-object-cover"
           />
-          <div className="tw-flex tw-flex-row tw-items-center tw-gap-5 tw-mb-5">
-            <Image
-              src={userImg}
-              alt="user"
-              width={50}
-              height={50}
-              className="rounded-full tw-object-cover"
-            />
-            <div className="tw-flex tw-flex-col tw-gap-2">
-              <p className="tw-text-xs tw-font-semibold">{username}</p>
-              <p className="tw-text-xs">Administrator</p>
-            </div>
+          <div className="tw-flex tw-flex-col tw-gap-2">
+            <p className="tw-text-xs tw-font-semibold">{username}</p>
+            <p className="tw-text-xs">Administrator</p>
           </div>
-          <ul>
-            {sidebarItems.map((category) => (
-              <li key={category.title}>
-                <p className="tw-text-xs tw-m-2">{category.title}</p>
-                {category.list.map((item) => (
-                  <SidebarLink item={item} key={item.title} />
-                ))}
-              </li>
-            ))}
-          </ul>
         </div>
-      )}
+        <ul>
+          {sidebarItems.map((category) => (
+            <li key={category.title}>
+              <p className="tw-text-xs tw-m-2">{category.title}</p>
+              {category.list.map((item) => (
+                <SidebarLink item={item} key={item.title} />
+              ))}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
