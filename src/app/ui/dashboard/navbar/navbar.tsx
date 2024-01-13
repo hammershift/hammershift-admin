@@ -15,9 +15,9 @@ const Navbar = () => {
           <input
             type="text"
             placeholder="Search..."
-            className="tw-bg-gray-700 tw-text-white tw-py-1 tw-px-2 tw-m-2 tw-mr-0 tw-w-auto"
+            className="tw-bg-gray-700 tw-text-white tw-py-1 tw-px-2 tw-m-2 tw-mr-0 tw-w-auto tw-h-auto"
           />
-          <SearchIcon className="tw-mr-2 tw-w-5 tw-h-10 tw-ml-0 tw-mb-1 tw-py-1 tw-m-2 tw-bg-gray-700" />
+          <SearchIcon className="tw-mr-2 tw-w-5 tw-h-auto tw-ml-0 tw-mb-1 tw-py-1 tw-m-2 tw-bg-gray-700" />
         </div>
         <div className="tw-flex">
           <NotificationsIcon className="tw-m-3" />
