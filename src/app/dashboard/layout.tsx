@@ -1,8 +1,21 @@
 "use client";
 import Navbar from "../ui/dashboard/navbar/navbar";
 import Sidebar from "../ui/dashboard/sidebar/sidebar";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function Layout({ children }: { children: React.ReactNode }) {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { data: session } = useSession();
+    console.log("SESSION", session);
+    useEffect(() => {
+        setIsLoggedIn(!!session);
+        if (session === null) {
+            redirect("/");
+        }
+    }, [session]);
+
     return (
         <div className="tw-flex tw-h-full">
             <div className="sticky tw-top-0 flex-4 tw-bg-slate-800 tw-p-5 tw-h-auto">
@@ -16,5 +29,4 @@ function Layout({ children }: { children: React.ReactNode }) {
     );
 }
 
-// export default withAuth(Layout);
 export default Layout;
