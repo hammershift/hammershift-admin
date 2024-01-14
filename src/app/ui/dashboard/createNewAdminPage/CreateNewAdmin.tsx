@@ -165,7 +165,7 @@ const CreateNewAdminPage = () => {
             <p className="tw-text-red-500">Please fill-out required fields</p>
           ) : null}
           <button
-            className="tw-w-1/3 tw-h-12 tw-p-1 tw-rounded-full tw-m-1 tw-mt-4 tw-bg-yellow-400 tw-text-black tw-font-bold"
+            className="tw-w-1/3 tw-h-12 tw-p-1 tw-rounded-full tw-m-1 tw-mt-4 tw-bg-yellow-400 tw-text-black tw-font-bold max-md:tw-w-2/3"
             onClick={handleCreateAccountButtonClick}
           >
             Create Account

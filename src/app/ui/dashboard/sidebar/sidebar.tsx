@@ -74,7 +74,7 @@ const sidebarItems = [
   },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
   const [username, setUsername] = useState("");
 
   const { data } = useSession();
@@ -89,9 +89,13 @@ const Sidebar = () => {
   return (
     <div
       className="tw-sticky tw-top-0 tw-bg-slate-800 tw-h-full
-         tw-p-5"
+         tw-p-5 max-md:tw-bg-opacity-75 max-md:tw-backdrop-blur"
     >
-      <div className={"tw-sticky tw-top-auto"}>
+      <div className="tw-pb-3 tw-pt-1">
+        <ArrowBackIosIcon onClick={closeSidebar} />
+      </div>
+
+      <div className={"tw-top-auto"}>
         <Image
           alt="hammershift-logo"
           src={hammershiftLogo}

@@ -9,9 +9,11 @@ function Layout({ children }: { children: React.ReactNode }) {
   const openSidebar = () => {
     if (menuOpen === false) {
       setMenuOpen(true);
-    } else {
-      setMenuOpen(false);
     }
+  };
+
+  const closeSidebar = () => {
+    setMenuOpen(false);
   };
 
   useEffect(() => {
@@ -26,8 +28,8 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="tw-flex tw-h-auto tw-w-auto">
       {menuOpen ? (
-        <div className="tw-flex-4 tw-w-auto">
-          <Sidebar />
+        <div className="tw-flex-4 tw-z-10 tw-w-auto max-md:tw-absolute max-md:tw-w-full">
+          <Sidebar closeSidebar={closeSidebar} />
         </div>
       ) : null}
       <div className="tw-flex-1 tw-bg-slate-900 tw-m-1 tw-p-1 tw-pt-1 tw-flex tw-flex-col tw-w-auto tw-h-full">
