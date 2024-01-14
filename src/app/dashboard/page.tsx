@@ -3,7 +3,7 @@ import DashboardPage from "../ui/dashboard/dashboardPage/DashboardPage";
 import withAuth from "../ui/dashboard/auth/withAuth";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
     return (

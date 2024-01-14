@@ -73,7 +73,6 @@ const DashboardPage = () => {
                 const data = await getUsers();
 
                 if (data) {
-                    console.log("data:", data);
                     setUsersData(data);
                 } else {
                     console.error("Unexpected data structure:", data);
@@ -92,7 +91,6 @@ const DashboardPage = () => {
                 const data = await getLimitedWagers(6);
 
                 if (data && "wagers" in data) {
-                    console.log("data:", data);
                     setWagersData(data);
                 } else {
                     console.error("Unexpected data structure:", data);
@@ -130,7 +128,6 @@ const DashboardPage = () => {
 
                 if (data && "cars" in data) {
                     setTotalAuctions(data.total);
-                    console.log(data);
                 } else {
                     console.error("Unexpected data structure:", data);
                 }
@@ -198,7 +195,7 @@ const DashboardPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             const result = await getWagersPerDay();
-            console.log(result);
+
             setData(result);
         };
 

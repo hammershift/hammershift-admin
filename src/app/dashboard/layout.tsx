@@ -8,13 +8,14 @@ import { useEffect, useState } from "react";
 function Layout({ children }: { children: React.ReactNode }) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const { data: session } = useSession();
-    console.log("SESSION", session);
     useEffect(() => {
         setIsLoggedIn(!!session);
         if (session === null) {
             redirect("/");
         }
     }, [session]);
+
+    if (session === null) return null;
 
     return (
         <div className="tw-flex tw-h-full">
