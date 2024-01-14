@@ -20,6 +20,7 @@ import { getUsers, getCarsWithFilter } from "@/app/lib/data";
 import {
     getLimitedWagers,
     getWagers,
+    getWagersCount,
     getWagersOnDate,
 } from "@/app/lib/getWagers";
 
@@ -86,7 +87,7 @@ const DashboardPage = () => {
     useEffect(() => {
         const fetchWagersData = async () => {
             try {
-                const data = await getLimitedWagers();
+                const data = await getLimitedWagers(6);
 
                 if (data && "wagers" in data) {
                     console.log("data:", data);
@@ -101,15 +102,22 @@ const DashboardPage = () => {
         fetchWagersData();
     }, []);
 
-    //calculate total wagers
+    //fetch total wagers
     useEffect(() => {
-        let total = 0;
-        if (wagersData.total > 0) {
-            wagersData.wagers.map((wager: any) => {
-                total += wager.wagerAmount;
-            });
-        }
-        setTotalWagers(total);
+        const fetchTotalWagers = async () => {
+            try {
+                const data = await getWagersCount();
+
+                if (data && "total" in data) {
+                    setTotalWagers(data.total);
+                } else {
+                    console.error("Unexpected data structure:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+        fetchTotalWagers();
     }, [wagersData]);
 
     // fetch cars data
@@ -120,7 +128,6 @@ const DashboardPage = () => {
 
                 if (data && "cars" in data) {
                     console.log(data);
-                    setCarsData(data);
                 } else {
                     console.error("Unexpected data structure:", data);
                 }
@@ -152,7 +159,6 @@ const DashboardPage = () => {
             });
         }
         const datesReverse = dates.reverse();
-        console.log(datesReverse);
         setDates(datesReverse);
         return datesReverse;
     };
@@ -165,25 +171,17 @@ const DashboardPage = () => {
         const wagersPerDayPromises = dates.map(async (date: any) => {
             // gets wagers on a specific date
             const wagersOnDay = await getWagersOnDate(date.date);
-            let total = 0;
-            if (wagersOnDay.total > 0) {
-                // maps through the wagers on a specific date and calculates the total
-                wagersOnDay.wagers.map((wager: any) => {
-                    total += wager.wagerAmount;
-                });
-            } else {
-                total = 0;
-            }
+
             return {
-                date: date.day,
-                wagers: total,
+                date: `${date.day}, ${date.date}`,
+                wagers: wagersOnDay.totalAmount,
             };
         });
         const wagersPerDay = await Promise.all(wagersPerDayPromises);
         return wagersPerDay;
     };
 
-    useEffect(() => {}, []);
+    // useEffect(() => {}, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -212,7 +210,7 @@ const DashboardPage = () => {
                     <div className="tw-grid tw-gap-2">
                         <div>Total Wagers</div>
                         <div className="tw-text-lg tw-font-bold">
-                            $ {totalWagers}
+                            {totalWagers}
                         </div>
                     </div>
                 </div>

@@ -38,9 +38,13 @@ export async function GET(req: NextRequest) {
         //     .collection("wagers")
         //     .find({ $and: [query, { isActive: true }] });
 
+        const totalAmount = wagers.reduce((a, b) => a + b.wagerAmount, 0);
+
+        console.log(`totalAmount of ${date}`, totalAmount);
+
         if (wagers) {
             return NextResponse.json(
-                { total: wagers.length, wagers: wagers },
+                { total: wagers.length, totalAmount, wagers: wagers },
                 { status: 200 }
             );
         } else {
