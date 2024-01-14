@@ -40,8 +40,6 @@ export async function GET(req: NextRequest) {
 
         const totalAmount = wagers.reduce((a, b) => a + b.wagerAmount, 0);
 
-        console.log(`totalAmount of ${date}`, totalAmount);
-
         if (wagers) {
             return NextResponse.json(
                 { total: wagers.length, totalAmount, wagers: wagers },

@@ -143,13 +143,22 @@ const DashboardPage = () => {
 
     //get last week dates
     const getLastWeekDates = () => {
-        const days = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
+        const days = [
+            "Sat",
+            "Sun",
+            "Mon",
+            "Tues",
+            "Wed",
+            "Thurs",
+            "Fri",
+            "Sat",
+        ];
         const dates = [];
         const today = new Date();
         const lastSunday = new Date(
             today.getFullYear(),
             today.getMonth(),
-            today.getDate() - today.getDay() - 7
+            today.getDate() - today.getDay() - 6
         );
 
         for (let i = 0; i < 7; i++) {
