@@ -23,6 +23,7 @@ import {
     getWagersCount,
     getWagersOnDate,
 } from "@/app/lib/getWagers";
+import { set } from "mongoose";
 
 const data = [
     {
@@ -59,6 +60,7 @@ const DashboardPage = () => {
     const [userData, setUsersData] = useState({ total: 0, users: [] });
     const [wagersData, setWagersData] = useState({ total: 0, wagers: [] });
     const [totalWagers, setTotalWagers] = useState(0);
+    const [totalAuctions, setTotalAuctions] = useState(0);
     const [carsData, setCarsData] = useState({ total: 0, cars: [] });
     const [data, setData] = useState<any>([]);
     const [loading, setLoading] = useState(false);
@@ -111,22 +113,23 @@ const DashboardPage = () => {
                 if (data && "total" in data) {
                     setTotalWagers(data.total);
                 } else {
-                    console.error("Unexpected data structure:", data);
+                    console.error("Error in getting total wagers:", data);
                 }
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error("Error fetching total wagers:", error);
             }
         };
         fetchTotalWagers();
     }, [wagersData]);
 
-    // fetch cars data
+    // get total car auctions
     useEffect(() => {
         const fetchAuctionsData = async () => {
             try {
                 const data = await getCarsWithFilter({ limit: 1 });
 
                 if (data && "cars" in data) {
+                    setTotalAuctions(data.total);
                     console.log(data);
                 } else {
                     console.error("Unexpected data structure:", data);
@@ -146,21 +149,21 @@ const DashboardPage = () => {
         const lastSunday = new Date(
             today.getFullYear(),
             today.getMonth(),
-            today.getDate() - today.getDay()
+            today.getDate() - today.getDay() - 7
         );
 
         for (let i = 0; i < 7; i++) {
             const date = new Date(lastSunday);
-            date.setDate(date.getDate() - i);
+            date.setDate(date.getDate() + i);
             const day = days[date.getDay()];
             dates.push({
                 date: date.toISOString().split("T")[0],
                 day: day,
             });
         }
-        const datesReverse = dates.reverse();
-        setDates(datesReverse);
-        return datesReverse;
+
+        setDates(dates);
+        return dates;
     };
 
     const getWagersPerDay = async () => {
@@ -219,7 +222,7 @@ const DashboardPage = () => {
                     <div className="tw-grid tw-gap-2">
                         <div>Auctions</div>
                         <div className="tw-text-lg tw-font-bold">
-                            {carsData.total}
+                            {totalAuctions}
                         </div>
                     </div>
                 </div>
