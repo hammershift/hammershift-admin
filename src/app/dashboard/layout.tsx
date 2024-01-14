@@ -4,7 +4,9 @@ import Navbar from "../ui/dashboard/navbar/navbar";
 import Sidebar from "../ui/dashboard/sidebar/sidebar";
 
 function Layout({ children }: { children: React.ReactNode }) {
-  const [menuOpen, setMenuOpen] = useState(window.innerWidth >= 768);
+  const [menuOpen, setMenuOpen] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 768 : true
+  );
 
   const openSidebar = () => {
     if (menuOpen === false) {
@@ -17,12 +19,14 @@ function Layout({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    const handleResize = () => {
-      setMenuOpen(window.innerWidth >= 768);
-    };
+    if (typeof window !== "undefined") {
+      const handleResize = () => {
+        setMenuOpen(window.innerWidth >= 768);
+      };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
   }, []);
 
   return (
