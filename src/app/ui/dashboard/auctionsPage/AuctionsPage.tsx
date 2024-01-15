@@ -37,9 +37,24 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     direction: "asc",
   });
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+  const [viewportWidth, setViewportWidth] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [selectedAuctionId, setSelectedAuctionId] = useState("");
+
+  useEffect(() => {
+    setViewportWidth(window.innerWidth);
+
+    const handleResize = () => {
+      setViewportWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
