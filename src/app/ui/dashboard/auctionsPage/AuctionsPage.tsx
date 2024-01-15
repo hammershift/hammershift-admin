@@ -57,19 +57,6 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   }, []);
 
   useEffect(() => {
-    const handleResize = () => {
-      setViewportWidth(window.innerWidth);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    // Cleanup function
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
     const initialActiveAuctions = data.reduce(
       (acc, item) => ({
         ...acc,
