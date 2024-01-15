@@ -7,7 +7,7 @@ import DvrIcon from "@mui/icons-material/Dvr";
 import BlockIcon from "@mui/icons-material/Block";
 import DeleteIcon from "@mui/icons-material/Delete";
 import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
-import { getUsers, getUsersWithSearch } from "@/app/lib/data";
+import { getLimitedUsers, getUsers, getUsersWithSearch } from "@/app/lib/data";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -26,12 +26,13 @@ interface UsersPageProps {
 const UsersPage = () => {
   const [userData, setUserData] = useState<UserData[]>([]);
   const [searchValue, setSearchValue] = useState<null | string>(null);
+  const [userDisplayCount, setUserDisplayCount] = useState(7);
 
   // get all users data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getUsers();
+        const data = await getLimitedUsers(userDisplayCount);
 
         if (data && "users" in data) {
           // console.log("data:", data);
@@ -44,7 +45,7 @@ const UsersPage = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [userDisplayCount]);
 
   // get users data with search value
   useEffect(() => {
@@ -68,10 +69,14 @@ const UsersPage = () => {
     getDataWithSearchValue();
   }, [searchValue]);
 
+  const handleLoadMore = () =>{
+    setUserDisplayCount((prevCount)=> prevCount + 7)
+  }
+
   return (
     <div className="section-container tw-mt-4">
       <div className="tw-font-bold">Users</div>
-      <div className="tw-w-[500px] tw-my-4 tw-self-center tw-relative">
+      <div className="tw-w-auto tw-my-4 tw-self-center tw-relative">
         <div className="tw-bg-[#fff]/20 tw-h-auto tw-flex tw-px-2 tw-py-1.5 tw-rounded tw-gap-1">
           <Image
             src={magnifyingGlass}
@@ -90,11 +95,9 @@ const UsersPage = () => {
         <Table data={userData} />
       </div>
 
-      <div className="tw-flex tw-justify-end ">
+      <div className="tw-flex tw-justify-center ">
         <div className="tw-flex tw-items-center tw-gap-4 tw-py-4">
-          <button className="btn-transparent-white">prev</button>
-          <div className="tw-h-auto">page 1 of 1</div>
-          <button className="btn-transparent-white">next</button>
+          <button className="btn-transparent-white" onClick={handleLoadMore}>Load More</button>
         </div>
       </div>
     </div>
@@ -109,7 +112,7 @@ const Table: React.FC<UsersPageProps> = ({ data }) => {
       <thead>
         <tr>
           <th className="tw-p-2.5 tw-font-bold">Username</th>
-          <th className="tw-p-2.5 tw-font-bold">Full Name</th>
+          <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Full Name</th>
           <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Email</th>
           <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">State</th>
           <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Country</th>
@@ -121,7 +124,9 @@ const Table: React.FC<UsersPageProps> = ({ data }) => {
           data.map((item: UserData, index: number) => (
             <tr key={index} className=" tw-rounded-lg tw-bg-[#fff]/5">
               <td className="tw-p-2.5 tw-w-1/8">{item.username}</td>
-              <td className="tw-p-2.5 tw-w-1/8">{item.fullName}</td>
+              <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                {item.fullName}
+              </td>
               <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                 {item.email}
               </td>

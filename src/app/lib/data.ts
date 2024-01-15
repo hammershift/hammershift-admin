@@ -82,17 +82,6 @@ export const getOneAuction = async (auction_id: string) => {
   }
 };
 
-export interface CreateWagerProps {
-  auctionID?: string;
-  priceGuessed?: number;
-  wagerAmount?: number;
-  user?: {
-    _id: string;
-    fullName: string;
-    username: string;
-  };
-}
-
 //get all admins
 export const getAdmins = async () => {
   const res = await fetch("/api/admins");
@@ -103,6 +92,13 @@ export const getAdmins = async () => {
 // get all users
 export const getUsers = async () => {
   const res = await fetch("/api/users");
+  const data = await res.json();
+  return data;
+};
+
+//get limited users
+export const getLimitedUsers = async (limit: number) => {
+  const res = await fetch(`/api/users?limit=${limit}`);
   const data = await res.json();
   return data;
 };
