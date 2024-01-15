@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     const { username } = await req.json();
+    console.log(username);
 
     try {
         const client = await clientPromise;
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
 
         if (username) {
             const usernameCheck = await db
-                .collection("admin")
+                .collection("admins")
                 .findOne({ username });
             if (usernameCheck) {
                 response.usernameExists = true;
