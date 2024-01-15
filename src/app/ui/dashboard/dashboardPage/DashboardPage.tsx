@@ -20,8 +20,10 @@ import { getUsers, getCarsWithFilter } from "@/app/lib/data";
 import {
     getLimitedWagers,
     getWagers,
+    getWagersCount,
     getWagersOnDate,
 } from "@/app/lib/getWagers";
+import { set } from "mongoose";
 
 const data = [
     {
@@ -58,6 +60,7 @@ const DashboardPage = () => {
     const [userData, setUsersData] = useState({ total: 0, users: [] });
     const [wagersData, setWagersData] = useState({ total: 0, wagers: [] });
     const [totalWagers, setTotalWagers] = useState(0);
+    const [totalAuctions, setTotalAuctions] = useState(0);
     const [carsData, setCarsData] = useState({ total: 0, cars: [] });
     const [data, setData] = useState<any>([]);
     const [loading, setLoading] = useState(false);
@@ -70,7 +73,6 @@ const DashboardPage = () => {
                 const data = await getUsers();
 
                 if (data) {
-                    console.log("data:", data);
                     setUsersData(data);
                 } else {
                     console.error("Unexpected data structure:", data);
@@ -86,41 +88,46 @@ const DashboardPage = () => {
     useEffect(() => {
         const fetchWagersData = async () => {
             try {
-                const data = await getLimitedWagers();
+                const data = await getLimitedWagers(6);
 
-        if (data && "wagers" in data) {
-          console.log("wagers data:", data);
-          setWagersData(data);
-        } else {
-          console.error("Unexpected data structure:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchWagersData();
-  }, []);
+                if (data && "wagers" in data) {
+                    setWagersData(data);
+                } else {
+                    console.error("Unexpected data structure:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+        fetchWagersData();
+    }, []);
 
-    //calculate total wagers
+    //fetch total wagers
     useEffect(() => {
-        let total = 0;
-        if (wagersData.total > 0) {
-            wagersData.wagers.map((wager: any) => {
-                total += wager.wagerAmount;
-            });
-        }
-        setTotalWagers(total);
+        const fetchTotalWagers = async () => {
+            try {
+                const data = await getWagersCount();
+
+                if (data && "total" in data) {
+                    setTotalWagers(data.total);
+                } else {
+                    console.error("Error in getting total wagers:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching total wagers:", error);
+            }
+        };
+        fetchTotalWagers();
     }, [wagersData]);
 
-    // fetch cars data
+    // get total car auctions
     useEffect(() => {
         const fetchAuctionsData = async () => {
             try {
                 const data = await getCarsWithFilter({ limit: 1 });
 
                 if (data && "cars" in data) {
-                    console.log(data);
-                    setCarsData(data);
+                    setTotalAuctions(data.total);
                 } else {
                     console.error("Unexpected data structure:", data);
                 }
@@ -133,28 +140,36 @@ const DashboardPage = () => {
 
     //get last week dates
     const getLastWeekDates = () => {
-        const days = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
+        const days = [
+            "Sat",
+            "Sun",
+            "Mon",
+            "Tues",
+            "Wed",
+            "Thurs",
+            "Fri",
+            "Sat",
+        ];
         const dates = [];
         const today = new Date();
         const lastSunday = new Date(
             today.getFullYear(),
             today.getMonth(),
-            today.getDate() - today.getDay()
+            today.getDate() - today.getDay() - 6
         );
 
         for (let i = 0; i < 7; i++) {
             const date = new Date(lastSunday);
-            date.setDate(date.getDate() - i);
+            date.setDate(date.getDate() + i);
             const day = days[date.getDay()];
             dates.push({
                 date: date.toISOString().split("T")[0],
                 day: day,
             });
         }
-        const datesReverse = dates.reverse();
-        console.log(datesReverse);
-        setDates(datesReverse);
-        return datesReverse;
+
+        setDates(dates);
+        return dates;
     };
 
     const getWagersPerDay = async () => {
@@ -165,30 +180,22 @@ const DashboardPage = () => {
         const wagersPerDayPromises = dates.map(async (date: any) => {
             // gets wagers on a specific date
             const wagersOnDay = await getWagersOnDate(date.date);
-            let total = 0;
-            if (wagersOnDay.total > 0) {
-                // maps through the wagers on a specific date and calculates the total
-                wagersOnDay.wagers.map((wager: any) => {
-                    total += wager.wagerAmount;
-                });
-            } else {
-                total = 0;
-            }
+
             return {
-                date: date.day,
-                wagers: total,
+                date: `${date.day}, ${date.date}`,
+                wagers: wagersOnDay.totalAmount,
             };
         });
         const wagersPerDay = await Promise.all(wagersPerDayPromises);
         return wagersPerDay;
     };
 
-    useEffect(() => {}, []);
+    // useEffect(() => {}, []);
 
     useEffect(() => {
         const fetchData = async () => {
             const result = await getWagersPerDay();
-            console.log(result);
+
             setData(result);
         };
 
@@ -212,7 +219,7 @@ const DashboardPage = () => {
                     <div className="tw-grid tw-gap-2">
                         <div>Total Wagers</div>
                         <div className="tw-text-lg tw-font-bold">
-                            $ {totalWagers}
+                            {totalWagers}
                         </div>
                     </div>
                 </div>
@@ -221,7 +228,7 @@ const DashboardPage = () => {
                     <div className="tw-grid tw-gap-2">
                         <div>Auctions</div>
                         <div className="tw-text-lg tw-font-bold">
-                            {carsData.total}
+                            {totalAuctions}
                         </div>
                     </div>
                 </div>
@@ -251,34 +258,43 @@ const DashboardPage = () => {
 export default DashboardPage;
 
 const Table = ({ wagersData }: { wagersData: any }) => {
-  return (
-    <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
-      <thead>
-        <tr>
-          <th className="tw-p-2.5 tw-font-bold ">Wager</th>
-          <th className="tw-p-2.5 tw-font-bold">Price</th>
-          <th className="tw-p-2.5 tw-font-bold">Auction ID</th>
-          <th className="tw-p-2.5 tw-font-bold">User</th>
-        </tr>
-      </thead>
-      <tbody className="tw-w-full">
-        {wagersData &&
-          wagersData?.wagers.map((item: any) => (
-            <tr key={item._id} className=" tw-rounded-lg tw-bg-[#fff]/5">
-              <td className="tw-p-2.5 tw-w-1/4">${item.wagerAmount}.00</td>
-              <td className="tw-p-2.5 tw-w-1/4">${item.priceGuessed}</td>
-              <td className="tw-p-2.5 tw-w-1/4">
-                <span className={`tw-p-2 tw-rounded`}>
-                  {item.auctionIdentifierId}
-                </span>
-              </td>
-              <td className="tw-p-2.5 tw-w-1/4">{item.user.username}</td>
-            </tr>
-          ))}
-      </tbody>
-      <h2>See All</h2>
-    </table>
-  );
+    return (
+        <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
+            <thead>
+                <tr>
+                    <th className="tw-p-2.5 tw-font-bold ">Wager</th>
+                    <th className="tw-p-2.5 tw-font-bold">Price</th>
+                    <th className="tw-p-2.5 tw-font-bold">Auction ID</th>
+                    <th className="tw-p-2.5 tw-font-bold">User</th>
+                </tr>
+            </thead>
+            <tbody className="tw-w-full">
+                {wagersData &&
+                    wagersData?.wagers.map((item: any) => (
+                        <tr
+                            key={item._id}
+                            className=" tw-rounded-lg tw-bg-[#fff]/5"
+                        >
+                            <td className="tw-p-2.5 tw-w-1/4">
+                                ${item.wagerAmount}.00
+                            </td>
+                            <td className="tw-p-2.5 tw-w-1/4">
+                                ${item.priceGuessed}
+                            </td>
+                            <td className="tw-p-2.5 tw-w-1/4">
+                                <span className={`tw-p-2 tw-rounded`}>
+                                    {item.auctionIdentifierId}
+                                </span>
+                            </td>
+                            <td className="tw-p-2.5 tw-w-1/4">
+                                {item.user.username}
+                            </td>
+                        </tr>
+                    ))}
+            </tbody>
+            <h2>See All</h2>
+        </table>
+    );
 };
 
 const Chart = ({ data }: { data: any }) => {

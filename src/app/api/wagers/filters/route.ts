@@ -6,7 +6,7 @@ import clientPromise from "@/app/lib/mongoDB";
 
 export const dynamic = "force-dynamic";
 
-// /api/wagers/filters?limit=6
+// URL: /api/wagers/filters?limit=6&sort=newest&offset=0
 export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
@@ -15,6 +15,8 @@ export async function GET(req: NextRequest) {
         const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
         const limit = Number(req.nextUrl.searchParams.get("limit"));
         const searchedKeyword = req.nextUrl.searchParams.get("search");
+        const sort: string | null =
+            req.nextUrl.searchParams.get("sort") || "newest";
 
         if (searchedKeyword) {
             const searchedWagers = await db
@@ -60,27 +62,39 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        if (limit) {
-            const searchedWagers = await db
-                .collection("wagers")
-                .find()
-                .limit(limit)
-                .skip(0);
+        let sortObject;
+        switch (sort) {
+            case "newest":
+                sortObject = { createdAt: -1 };
+                break;
+            case "oldest":
+                sortObject = { createdAt: 1 };
+                break;
+            default:
+                sortObject = { createdAt: -1 };
+                break;
+        }
 
-            const searchedWagersArray = await searchedWagers.toArray();
-            if (searchedWagers) {
-                return NextResponse.json(
-                    {
-                        wagers: searchedWagersArray,
-                    },
-                    { status: 200 }
-                );
-            } else {
-                return NextResponse.json(
-                    { message: "no search result" },
-                    { status: 404 }
-                );
-            }
+        const searchedWagers = await db
+            .collection("wagers")
+            .find({})
+            .sort(sortObject as any)
+            .limit(limit)
+            .skip(0);
+
+        const searchedWagersArray = await searchedWagers.toArray();
+        if (searchedWagers) {
+            return NextResponse.json(
+                {
+                    wagers: searchedWagersArray,
+                },
+                { status: 200 }
+            );
+        } else {
+            return NextResponse.json(
+                { message: "no search result" },
+                { status: 404 }
+            );
         }
     } catch (error) {
         console.error(error);
