@@ -91,7 +91,7 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
       className="tw-sticky tw-top-0 tw-bg-slate-800 tw-h-full
          tw-p-5 max-md:tw-bg-opacity-75 max-md:tw-backdrop-blur"
     >
-      <div className="tw-pb-3 tw-pt-1">
+      <div className="tw-pb-3 tw-pt-1 md:tw-hidden">
         <ArrowBackIosIcon onClick={closeSidebar} />
       </div>
 
