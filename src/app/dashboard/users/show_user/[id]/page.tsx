@@ -28,37 +28,41 @@ const ShowUser = ({ params }: { params: { id: string } }) => {
         USER ACCOUNT DETAILS
       </h2>
       <div className="tw-flex tw-flex-col">
-        <div className="tw-flex tw-justify-between tw-w-1/3 tw-mx-4 tw-my-2">
+        <div className="tw-flex tw-justify-between tw-w-1/2 tw-mx-4 tw-my-2 max-lg:tw-w-full">
           <h4>User ID:</h4>
-          <p>{data._id}</p>
+          <p className="tw-px-3">{data._id}</p>
         </div>
-        <div className="tw-flex tw-justify-between tw-w-1/3 tw-mx-4 tw-my-2">
+        <div className="tw-flex tw-justify-between tw-w-1/2 tw-mx-4 tw-my-2 max-lg:tw-w-full">
           <h4>Full Name:</h4>
-          <p>{data.fullName}</p>
+          <p className="tw-px-3">{data.fullName}</p>
         </div>
-        <div className="tw-flex tw-justify-between tw-w-1/3 tw-mx-4 tw-my-2">
+        <div className="tw-flex tw-justify-between tw-w-1/2 tw-mx-4 tw-my-2 max-lg:tw-w-full">
           <h4>Username:</h4>
-          <p>{data.username}</p>
+          <p className="tw-px-3">{data.username}</p>
         </div>
-        <div className="tw-flex tw-justify-between tw-w-1/3 tw-mx-4 tw-my-2">
+        <div className="tw-flex tw-justify-between tw-w-1/2 tw-mx-4 tw-my-2 max-lg:tw-w-full">
           <h4>Email:</h4>
-          <p>{data.email}</p>
+          <p className="tw-px-3">{data.email}</p>
         </div>
-        <div className="tw-flex tw-justify-between tw-w-1/3 tw-mx-4 tw-my-2">
+        <div className="tw-flex tw-justify-between tw-w-1/2 tw-mx-4 tw-my-2 max-lg:tw-w-full">
           <h4>Email Verified:</h4>
-          {data.emailVerified ? <p>Verified</p> : <p>Not Verified</p>}
+          {data.emailVerified ? (
+            <p className="tw-px-3">Verified</p>
+          ) : (
+            <p className="tw-px-3">Not Verified</p>
+          )}
         </div>
-        <div className="tw-flex tw-justify-between tw-w-1/3 tw-mx-4 tw-my-2">
+        <div className="tw-flex tw-justify-between tw-w-1/2 tw-mx-4 tw-my-2 max-lg:tw-w-full">
           <h4>About:</h4>
-          <p>{data.aboutMe}</p>
+          <p className="tw-px-3">{data.aboutMe}</p>
         </div>
-        <div className="tw-flex tw-justify-between tw-w-1/3 tw-mx-4 tw-my-2">
+        <div className="tw-flex tw-justify-between tw-w-1/2 tw-mx-4 tw-my-2 max-lg:tw-w-full">
           <h4>State:</h4>
-          <p>{data.state}</p>
+          <p className="tw-px-3">{data.state}</p>
         </div>
-        <div className="tw-flex tw-justify-between tw-w-1/3 tw-mx-4 tw-my-2">
+        <div className="tw-flex tw-justify-between tw-w-1/2 tw-mx-4 tw-my-2 max-lg:tw-w-full">
           <h4>Country:</h4>
-          <p>{data.country}</p>
+          <p className="tw-px-3">{data.country}</p>
         </div>
       </div>
       <button

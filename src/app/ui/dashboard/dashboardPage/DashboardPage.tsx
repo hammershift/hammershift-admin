@@ -88,18 +88,18 @@ const DashboardPage = () => {
             try {
                 const data = await getLimitedWagers();
 
-                if (data && "wagers" in data) {
-                    console.log("data:", data);
-                    setWagersData(data);
-                } else {
-                    console.error("Unexpected data structure:", data);
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-        fetchWagersData();
-    }, []);
+        if (data && "wagers" in data) {
+          console.log("wagers data:", data);
+          setWagersData(data);
+        } else {
+          console.error("Unexpected data structure:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchWagersData();
+  }, []);
 
     //calculate total wagers
     useEffect(() => {
@@ -251,42 +251,34 @@ const DashboardPage = () => {
 export default DashboardPage;
 
 const Table = ({ wagersData }: { wagersData: any }) => {
-    return (
-        <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
-            <thead>
-                <tr>
-                    <th className="tw-p-2.5 tw-font-bold ">Wager</th>
-                    <th className="tw-p-2.5 tw-font-bold">Price</th>
-                    <th className="tw-p-2.5 tw-font-bold">Auction ID</th>
-                    <th className="tw-p-2.5 tw-font-bold">User</th>
-                </tr>
-            </thead>
-            <tbody className="tw-w-full">
-                {wagersData &&
-                    wagersData?.wagers.map((item: any) => (
-                        <tr
-                            key={item._id}
-                            className=" tw-rounded-lg tw-bg-[#fff]/5"
-                        >
-                            <td className="tw-p-2.5 tw-w-1/4">
-                                ${item.wagerAmount}.00
-                            </td>
-                            <td className="tw-p-2.5 tw-w-1/4">
-                                ${item.priceGuessed}
-                            </td>
-                            <td className="tw-p-2.5 tw-w-1/4">
-                                <span className={`tw-p-2 tw-rounded`}>
-                                    {item.auctionID}
-                                </span>
-                            </td>
-                            <td className="tw-p-2.5 tw-w-1/4">
-                                {item.user.username}
-                            </td>
-                        </tr>
-                    ))}
-            </tbody>
-        </table>
-    );
+  return (
+    <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
+      <thead>
+        <tr>
+          <th className="tw-p-2.5 tw-font-bold ">Wager</th>
+          <th className="tw-p-2.5 tw-font-bold">Price</th>
+          <th className="tw-p-2.5 tw-font-bold">Auction ID</th>
+          <th className="tw-p-2.5 tw-font-bold">User</th>
+        </tr>
+      </thead>
+      <tbody className="tw-w-full">
+        {wagersData &&
+          wagersData?.wagers.map((item: any) => (
+            <tr key={item._id} className=" tw-rounded-lg tw-bg-[#fff]/5">
+              <td className="tw-p-2.5 tw-w-1/4">${item.wagerAmount}.00</td>
+              <td className="tw-p-2.5 tw-w-1/4">${item.priceGuessed}</td>
+              <td className="tw-p-2.5 tw-w-1/4">
+                <span className={`tw-p-2 tw-rounded`}>
+                  {item.auctionIdentifierId}
+                </span>
+              </td>
+              <td className="tw-p-2.5 tw-w-1/4">{item.user.username}</td>
+            </tr>
+          ))}
+      </tbody>
+      <h2>See All</h2>
+    </table>
+  );
 };
 
 const Chart = ({ data }: { data: any }) => {

@@ -122,10 +122,14 @@ const Table: React.FC<WagersPageProps> = ({ data }) => {
       <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
         <thead>
           <tr>
-            <th className="tw-p-2.5 tw-font-bold ">Price Guessed</th>
-            <th className="tw-p-2.5 tw-font-bold ">Wager Amount</th>
+            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+              Price Guessed
+            </th>
+            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+              Wager Amount
+            </th>
             <th className="tw-p-2.5 tw-font-bold">Username</th>
-            <th className="tw-p-2.5 tw-font-bold">User ID</th>
+            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">User ID</th>
             <th className="tw-p-2.5 tw-font-bold">Auction ID</th>
             <th className="tw-p-2.5 tw-font-bold">Actions</th>
           </tr>
@@ -134,10 +138,14 @@ const Table: React.FC<WagersPageProps> = ({ data }) => {
           {data &&
             data.map((item, index) => (
               <tr key={index} className=" tw-rounded-lg tw-bg-[#fff]/5">
-                <td className="tw-p-2.5 tw-w-1/8">${item.priceGuessed}</td>
-                <td className="tw-p-2.5 tw-w-1/8">${item.wagerAmount}.00</td>
+                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                  ${item.priceGuessed}
+                </td>
+                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                  ${item.wagerAmount}.00
+                </td>
                 <td className="tw-p-2.5 tw-w-1/8">{item.user.username}</td>
-                <td className="tw-p-2.5 tw-w-1/8">
+                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                   <p>{item.user._id}</p>
                 </td>
                 <td className="tw-p-2.5 tw-w-1/8">

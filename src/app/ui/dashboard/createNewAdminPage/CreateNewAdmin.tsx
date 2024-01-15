@@ -99,16 +99,16 @@ const CreateNewAdminPage = () => {
   };
 
   return (
-    <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-justify-center tw-items-center">
+    <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-justify-center tw-items-center max-md:tw-items-start">
       <div className="tw-m-3">
         <h2 className="tw-text-yellow-500 tw-font-bold tw-text-lg">
           Create New Admin
         </h2>
       </div>
       <div className="tw-m-7 tw-mt-4">
-        <form className="tw-flex tw-flex-col tw-justify-center tw-items-center">
+        <form className="tw-flex tw-flex-col tw-justify-center tw-items-center max-md:tw-items-start">
           <label className="tw-mx-1">Name</label>
-          <div className="tw-flex tw-justify-center tw-items-center">
+          <div className="tw-flex tw-justify-center tw-items-center max-sm:tw-flex-col">
             <input
               type="text"
               placeholder="First Name *"
@@ -165,7 +165,7 @@ const CreateNewAdminPage = () => {
             <p className="tw-text-red-500">Please fill-out required fields</p>
           ) : null}
           <button
-            className="tw-w-1/3 tw-h-12 tw-p-1 tw-rounded-full tw-m-1 tw-mt-4 tw-bg-yellow-400 tw-text-black tw-font-bold"
+            className="tw-w-1/3 tw-h-12 tw-p-1 tw-rounded-full tw-m-1 tw-mt-4 tw-bg-yellow-400 tw-text-black tw-font-bold max-md:tw-w-2/3"
             onClick={handleCreateAccountButtonClick}
           >
             Create Account
