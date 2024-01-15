@@ -1,22 +1,21 @@
-"use client"
-import React, { useEffect} from 'react'
-import { redirect } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+"use client";
+import React, { useEffect } from "react";
+import { redirect } from "next/navigation";
+import { useSession } from "next-auth/react";
 
-const withAuth = (Component : any) => {
-  return function WithAuth(props: any) {
-    const session = useSession()
-    // console.log("session", session)
-    useEffect(() => {
-      if (!session.data) {
-        redirect('/')
-      }
-    }, [])
-    
-    if (!session.data) return null;
+const withAuth = (Component: any) => {
+    return function WithAuth(props: any) {
+        const { data: session } = useSession();
+        useEffect(() => {
+            if (session == null) {
+                redirect("/");
+            }
+        }, []);
 
-    return <Component {...props} />
-    }
-}
+        if (!session) return null;
 
-export default withAuth
+        return <Component {...props} />;
+    };
+};
+
+export default withAuth;

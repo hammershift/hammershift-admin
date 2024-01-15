@@ -9,9 +9,9 @@ export const getWagers = async () => {
     throw new Error("Failed to fetch wagers!");
 };
 
-// get 6 wagers
-export const getLimitedWagers = async () => {
-    const res = await fetch(`/api/wagers/filters?limit=6`);
+// get wagers with limit
+export const getLimitedWagers = async (limit: number) => {
+    const res = await fetch(`/api/wagers/filters?limit=${limit}`);
     if (res.status === 200) {
         const data = await res.json();
         return data;
@@ -23,16 +23,6 @@ export const getLimitedWagers = async () => {
 // get wagers Count
 export const getWagersCount = async () => {
     const res = await fetch(`/api/wagers/count`);
-    if (res.status === 200) {
-        const data = await res.json();
-        return data;
-    }
-    throw new Error("Failed to fetch wagers!");
-};
-
-// get wagers on Date
-export const getWagersOnDate = async (date: string) => {
-    const res = await fetch(`/api/wagers?date=${date}`);
     if (res.status === 200) {
         const data = await res.json();
         return data;
@@ -73,4 +63,14 @@ export const getWagersWithSearch = async (searchString: string) => {
     const res = await fetch("/api/wagers/filters?search=" + searchString);
     const data = await res.json();
     return data;
+};
+
+// get wagers on Date
+export const getWagersOnDate = async (date: string) => {
+    const res = await fetch(`/api/wagers/day?date=${date}`);
+    if (res.status === 200) {
+        const data = await res.json();
+        return data;
+    }
+    console.error("Failed to fetch wagers!");
 };
