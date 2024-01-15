@@ -242,7 +242,16 @@ export default LoginPage;
 const AlertMessage = ({ message }: { message: string }) => {
     return (
         <div className="tw-flex tw-justify-center tw-items-center tw-text-sm tw-text-black tw-bg-[#F2CA16] tw-py-2 tw-px-4 tw-rounded">
-            {message}
+            <div className="tw-flex tw-gap-1.5 tw-items-center tw-pl-2">
+                <Image
+                    src={RedCancel}
+                    alt="check"
+                    width={16}
+                    height={16}
+                    className="tw-w-[16px], tw-h-[16px]"
+                />
+                <p>{message}</p>
+            </div>
         </div>
     );
 };
