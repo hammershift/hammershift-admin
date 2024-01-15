@@ -1,20 +1,46 @@
+import clientPromise from "@/app/lib/mongoDB";
 import connectToDB from "@/app/lib/mongoose";
 import Wagers from "@/app/models/wager.model";
 import { NextRequest, NextResponse } from "next/server";
+import { ObjectId } from "mongodb";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
     try {
-        await connectToDB();
+        const client = await clientPromise;
+        const db = client.db();
+        // await connectToDB();
         const wager_id = req.nextUrl.searchParams.get("wager_id");
         const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
         const limit = Number(req.nextUrl.searchParams.get("limit"));
+        const date = req.nextUrl.searchParams.get("date");
+
+        if (date) {
+            const wagersOnThatDay = await db
+                .collection("wagers")
+                .find({ createdAt: { $gte: new Date(date) } });
+            const wagersOnThatDayArray = await wagersOnThatDay.toArray();
+            if (wagersOnThatDay) {
+                return NextResponse.json(
+                    {
+                        total: wagersOnThatDayArray.length,
+                        wagers: wagersOnThatDayArray,
+                    },
+                    { status: 200 }
+                );
+            } else {
+                return NextResponse.json(
+                    { message: "Cannot find Wagers" },
+                    { status: 404 }
+                );
+            }
+        }
 
         // api/wagers?wager_id=657bd345cf53f5078c72bbc8 to get a specific wager
         if (wager_id) {
-            const wager = await Wagers.findOne({
-                $and: [{ _id: wager_id }, { isActive: true }],
+            const wager = await db.collection("wagers").findOne({
+                $and: [{ _id: new ObjectId(wager_id) }, { isActive: true }],
             });
             if (wager) {
                 return NextResponse.json(wager, { status: 200 });
@@ -25,12 +51,19 @@ export async function GET(req: NextRequest) {
                 );
             }
         }
-        // api/wagers to get all users
-        const wagers = await Wagers.find({ isActive: true })
+        // api/wagers to get all wagers
+        const wagers = await db
+            .collection("wagers")
+            .find({ isActive: true })
             .limit(limit)
             .skip(offset);
+
+        const wagersArray = await wagers.toArray();
         if (wagers) {
-            return NextResponse.json({ total: wagers.length, wagers: wagers });
+            return NextResponse.json(
+                { total: wagersArray.length, wagers: wagersArray },
+                { status: 200 }
+            );
         } else {
             return NextResponse.json(
                 { message: "Cannot find Wagers" },

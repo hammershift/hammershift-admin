@@ -13,13 +13,6 @@ interface AdminsPageProps {
 }
 
 const AdminsPage: React.FC<AdminsPageProps> = ({ data }) => {
-  const headers = [
-    { KEY: "_id", LABEL: "Admin ID" },
-    { KEY: "first_name", LABEL: "First Name" },
-    { KEY: "last_name", LABEL: "Last Name" },
-    { KEY: "username", LABEL: "Username" },
-  ];
-
   return (
     <div className="section-container tw-mt-4">
       <div className="tw-flex tw-justify-between">
@@ -30,17 +23,16 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ data }) => {
       <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-left">
         <thead>
           <tr>
-            {headers.map((header, index) => (
-              <td className="tw-p-2.5 tw-font-bold" key={index}>
-                {header.LABEL}
-              </td>
-            ))}
+            <td className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Admin ID</td>
+            <td className="tw-p-2.5 tw-font-bold">First Name</td>
+            <td className="tw-p-2.5 tw-font-bold">Last Name</td>
+            <td className="tw-p-2.5 tw-font-bold">Username</td>
           </tr>
         </thead>
         <tbody>
           {data.map((item, index) => (
             <tr key={index} className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5">
-              <td className="tw-p-2.5">{item._id}</td>
+              <td className="tw-p-2.5 max-md:tw-hidden">{item._id}</td>
               <td className="tw-p-2.5">{item.first_name}</td>
               <td className="tw-p-2.5">{item.last_name}</td>
               <td className="tw-p-2.5">{item.username}</td>

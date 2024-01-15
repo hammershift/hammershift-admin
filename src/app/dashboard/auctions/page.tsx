@@ -20,27 +20,31 @@ interface CarData {
 
 const Auctions = () => {
   const [carData, setCarData] = useState<CarData[]>([]);
-
-  const fetchData = async () => {
-    try {
-      const data = await getCarsWithFilter({ limit: 21 });
-
-      if (data && "cars" in data) {
-        console.log(data);
-        setCarData(data.cars as CarData[]);
-      } else {
-        console.error("Unexpected data structure:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+  const [displayCount, setDisplayCount] = useState(7);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    const fetchData = async () => {
+      try {
+        const data = await getCarsWithFilter({ limit: displayCount });
 
-  return <AuctionsPage data={carData} />;
+        if (data && "cars" in data) {
+          console.log(data);
+          setCarData(data.cars as CarData[]);
+        } else {
+          console.error("Unexpected data structure:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, [displayCount]);
+
+  const handleLoadMore = () => {
+    setDisplayCount((prevCount) => prevCount + 7);
+  };
+
+  return <AuctionsPage data={carData} handleLoadMore={handleLoadMore} />;
 };
 
 export default Auctions;
