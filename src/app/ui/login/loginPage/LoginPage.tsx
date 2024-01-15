@@ -127,7 +127,7 @@ const LoginPage = () => {
     return (
         <main className="tw-relative section-container tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-[360px] sm:tw-w-full  md:tw-w-2/3 lg:tw-w-1/3 lg:tw-h-2/3 xl:tw-w-1/3 xl:tw-h-2/3">
             {loading ? (
-                <div className="tw-h-full tw-w-full  tw-flex tw-justify-center tw-items-center">
+                <div className="tw-h-[360px] tw-w-full tw-flex tw-justify-center tw-items-center">
                     <BounceLoader color="#F2CA16" />
                 </div>
             ) : (
