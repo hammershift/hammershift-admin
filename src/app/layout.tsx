@@ -12,18 +12,15 @@ const inter = Inter({ subsets: ["latin"] });
 // };
 
 export default function RootLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-
-  return (
-    <html lang="en">
-      <body className={`${inter.className} tw-w-screen tw-h-screen tw-bg-slate-900`}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
-      </body>
-    </html>
-  );
+    return (
+        <html lang="en">
+            <body className={`${inter.className} tw-h-screen tw-bg-slate-900`}>
+                <AuthProvider>{children}</AuthProvider>
+            </body>
+        </html>
+    );
 }
