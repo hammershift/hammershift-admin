@@ -19,9 +19,6 @@ const LoginPage = () => {
     const [alert, setAlert] = useState<boolean>(false);
     const [isUsernameValid, setIsUsernameValid] = useState<boolean>(false);
     const [isEmptyInput, setIsEmptyinput] = useState<boolean>(false);
-    const [isPasswordValid, setIsPasswordValid] = useState<boolean | null>(
-        null
-    );
 
     const router = useRouter();
 
@@ -100,19 +97,18 @@ const LoginPage = () => {
 
             if (result?.error) {
                 console.log({ message: "unable to sign in" });
-                setUsername("");
-                setPassword("");
-                setIsEmptyinput(false);
-                setIsPasswordValid(false);
-                setAlert(true);
-                handleAlertTimer();
-                setLoading(false);
+                setUsername(""); // clear username field
+                setPassword(""); // clear password field
+                setIsEmptyinput(false); // close alert message for empty input
+                setLoading(false); // close loading spinner
+                setAlert(true); // open alert message for wrong username or password
+                handleAlertTimer(); // close alert message after 2 seconds
             } else {
                 router.push("/dashboard");
                 console.log("Login successful");
                 setTimeout(() => {
                     setLoading(false);
-                }, 1000);
+                }, 5000);
             }
         } catch (error) {
             console.error("An unexpected error occurred during login:", error);

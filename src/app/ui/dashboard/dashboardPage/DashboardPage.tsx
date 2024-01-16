@@ -5,7 +5,8 @@ import GroupIcon from "@mui/icons-material/Group";
 import PaidIcon from "@mui/icons-material/Paid";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { createTheme, useTheme, ThemeProvider } from "@mui/material/styles";
-import { BounceLoader } from "react-spinners";
+import { BounceLoader, BeatLoader } from "react-spinners";
+import AuctionModal from "@/app/ui/dashboard/auction_modal";
 import {
     LineChart,
     Line,
@@ -33,6 +34,8 @@ const DashboardPage = () => {
     const [data, setData] = useState<any>([]);
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState<any>([]);
+    const [tableLoading, setTableLoading] = useState<boolean>(false);
+    const [chartLoading, setChartLoading] = useState<boolean>(false);
 
     // fetch user data
     useEffect(() => {
@@ -55,6 +58,7 @@ const DashboardPage = () => {
     // fetch wagers data
     useEffect(() => {
         const fetchWagersData = async () => {
+            setTableLoading(true);
             try {
                 const data = await getLimitedWagers(6);
 
@@ -66,6 +70,7 @@ const DashboardPage = () => {
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
+            setTableLoading(false);
         };
         fetchWagersData();
     }, []);
@@ -160,8 +165,9 @@ const DashboardPage = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            setChartLoading(true);
             const result = await getWagersPerDay();
-
+            setChartLoading(false);
             setData(result);
         };
 
@@ -170,28 +176,28 @@ const DashboardPage = () => {
 
     return (
         <div className="tw-w-full tw-grid tw-gap-4 ">
-            <div className="tw-grid tw-grid-cols-3 tw-gap-4 tw-w-full">
-                <div className="section-container tw-flex tw-flex-col sm:tw-flex-row tw-gap-2">
+            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-2 tw-w-full">
+                <div className="section-container tw-flex tw-flex-row tw-gap-2">
                     <GroupIcon />
-                    <div className="tw-grid tw-gap-2">
+                    <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-1 tw-gap-2">
                         <div>Total Users</div>
                         <div className="tw-text-lg tw-font-bold">
                             {userData.total}
                         </div>
                     </div>
                 </div>
-                <div className="section-container tw-flex tw-flex-col sm:tw-flex-row tw-gap-2">
+                <div className="section-container tw-flex tw-flex-row tw-gap-2">
                     <PaidIcon />
-                    <div className="tw-grid tw-gap-2">
+                    <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-1 tw-gap-2">
                         <div>Total Wagers</div>
                         <div className="tw-text-lg tw-font-bold">
                             {totalWagers}
                         </div>
                     </div>
                 </div>
-                <div className="section-container tw-flex tw-flex-col sm:tw-flex-row tw-gap-2">
+                <div className="section-container tw-flex tw-flex-row tw-gap-2">
                     <DirectionsCarIcon />
-                    <div className="tw-grid tw-gap-2">
+                    <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-1 tw-gap-2">
                         <div>Auctions</div>
                         <div className="tw-text-lg tw-font-bold">
                             {totalAuctions}
@@ -201,8 +207,14 @@ const DashboardPage = () => {
             </div>
             <div className="section-container">
                 <div className="tw-mb-4">LATEST WAGERS</div>
-                {wagersData.wagers.length > 0 && (
-                    <Table wagersData={wagersData} />
+                {tableLoading ? (
+                    <div className="tw-flex tw-justify-center tw-items-center tw-h-[200px]">
+                        <BeatLoader color="#F2CA16" />
+                    </div>
+                ) : (
+                    wagersData.wagers.length > 0 && (
+                        <Table wagersData={wagersData} />
+                    )
                 )}
                 <Link
                     href="../../../dashboard/wagers"
@@ -216,9 +228,9 @@ const DashboardPage = () => {
             <div className="section-container">
                 <div className="tw-mb-4">{`WEEKLY RECAP: ${dates[0]?.date} - ${dates[6]?.date}`}</div>
                 <div className="tw-w-full tw-h-[300px] sm:tw-h-[450px]">
-                    {loading ? (
+                    {chartLoading ? (
                         <div className="tw-flex tw-justify-center tw-items-center tw-h-[200px]">
-                            <BounceLoader />
+                            <BeatLoader color="#F2CA16" />
                         </div>
                     ) : (
                         data && data.length > 0 && <Chart data={data} />
@@ -232,12 +244,19 @@ const DashboardPage = () => {
 export default DashboardPage;
 
 const Table = ({ wagersData }: { wagersData: any }) => {
+    const [openModal, setOpenModal] = useState<boolean>(false);
+    const [selectedAuctionId, setSelectedAuctionId] = useState<string | null>(
+        null
+    );
+
     return (
         <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
             <thead>
                 <tr>
                     <th className="tw-p-2.5 tw-font-bold ">Wager</th>
-                    <th className="tw-p-2.5 tw-font-bold">Price</th>
+                    <th className="tw-p-2.5 tw-font-bold tw-hidden sm:tw-block">
+                        Price
+                    </th>
                     <th className="tw-p-2.5 tw-font-bold">Auction ID</th>
                     <th className="tw-p-2.5 tw-font-bold">User</th>
                 </tr>
@@ -252,13 +271,24 @@ const Table = ({ wagersData }: { wagersData: any }) => {
                             <td className="tw-p-2.5 tw-w-1/4">
                                 ${item.wagerAmount}.00
                             </td>
-                            <td className="tw-p-2.5 tw-w-1/4">
+                            <td className="tw-p-2.5 tw-w-1/4 tw-hidden sm:tw-inline-block">
                                 ${item.priceGuessed}
                             </td>
                             <td className="tw-p-2.5 tw-w-1/4">
                                 <span className={`tw-p-2 tw-rounded`}>
                                     {item.auctionIdentifierId}
                                 </span>
+                                <button
+                                    className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs"
+                                    onClick={() => {
+                                        setOpenModal(true);
+                                        setSelectedAuctionId(
+                                            item.auctionIdentifierId
+                                        );
+                                    }}
+                                >
+                                    Show Auction Details
+                                </button>
                             </td>
                             <td className="tw-p-2.5 tw-w-1/4">
                                 {item.user.username}
@@ -266,6 +296,11 @@ const Table = ({ wagersData }: { wagersData: any }) => {
                         </tr>
                     ))}
             </tbody>
+            <AuctionModal
+                isOpen={openModal}
+                onClose={() => setOpenModal(false)}
+                id={selectedAuctionId || ""}
+            />
         </table>
     );
 };
@@ -280,7 +315,7 @@ const Chart = ({ data }: { data: any }) => {
                 margin={{
                     top: 20,
                     right: 30,
-                    left: 10,
+                    left: 5,
                     bottom: 5,
                 }}
             >
