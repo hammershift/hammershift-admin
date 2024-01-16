@@ -119,7 +119,9 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
             <li key={category.title}>
               <p className="tw-text-xs tw-m-2">{category.title}</p>
               {category.list.map((item) => (
-                <SidebarLink item={item} key={item.title} />
+                <div key={item.title} onClick={closeSidebar}>
+                  <SidebarLink item={item} />
+                </div>
               ))}
             </li>
           ))}

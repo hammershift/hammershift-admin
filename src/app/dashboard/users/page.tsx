@@ -7,9 +7,15 @@ import DvrIcon from "@mui/icons-material/Dvr";
 import BlockIcon from "@mui/icons-material/Block";
 import DeleteIcon from "@mui/icons-material/Delete";
 import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
-import { getLimitedUsers, getUsers, getUsersWithSearch } from "@/app/lib/data";
+import {
+  editUserWithId,
+  getLimitedUsers,
+  getUsers,
+  getUsersWithSearch,
+} from "@/app/lib/data";
 import Link from "next/link";
 import Image from "next/image";
+import BanUserModal from "@/app/ui/dashboard/modals/ban_user_modal";
 
 interface UserData {
   _id: string;
@@ -18,9 +24,11 @@ interface UserData {
   email: string;
   state: string;
   country: string;
+  isActive: boolean;
 }
 interface UsersPageProps {
   data: UserData[];
+  banUser: (_id: string) => void;
 }
 
 const UsersPage = () => {
@@ -35,7 +43,6 @@ const UsersPage = () => {
         const data = await getLimitedUsers(userDisplayCount);
 
         if (data && "users" in data) {
-          // console.log("data:", data);
           setUserData(data.users as UserData[]);
         } else {
           console.error("Unexpected data structure:", data);
@@ -56,7 +63,6 @@ const UsersPage = () => {
           const data = await getUsersWithSearch(searchValue);
 
           if (data) {
-            // console.log("data:", data);
             setUserData(data.users as UserData[]);
           } else {
             console.error("Unexpected data structure:", data);
@@ -69,9 +75,24 @@ const UsersPage = () => {
     getDataWithSearchValue();
   }, [searchValue]);
 
-  const handleLoadMore = () =>{
-    setUserDisplayCount((prevCount)=> prevCount + 7)
-  }
+  const banUser = async (_id: string) => {
+    const updatedUser = { isActive: false };
+    const res = await editUserWithId(_id, updatedUser);
+
+    if (res && res.message === "Edit Successful") {
+      console.log(userData);
+      setUserData(
+        userData.map((user) =>
+          user._id === _id ? { ...user, ...updatedUser } : user
+        )
+      );
+      alert("User Banned Successfully");
+    }
+  };
+
+  const handleLoadMore = () => {
+    setUserDisplayCount((prevCount) => prevCount + 7);
+  };
 
   return (
     <div className="section-container tw-mt-4">
@@ -92,12 +113,14 @@ const UsersPage = () => {
         </div>
       </div>
       <div className="tw-my-4">
-        <Table data={userData} />
+        <Table data={userData} banUser={banUser} />
       </div>
 
       <div className="tw-flex tw-justify-center ">
         <div className="tw-flex tw-items-center tw-gap-4 tw-py-4">
-          <button className="btn-transparent-white" onClick={handleLoadMore}>Load More</button>
+          <button className="btn-transparent-white" onClick={handleLoadMore}>
+            Load More
+          </button>
         </div>
       </div>
     </div>
@@ -106,55 +129,83 @@ const UsersPage = () => {
 
 export default UsersPage;
 
-const Table: React.FC<UsersPageProps> = ({ data }) => {
+const Table: React.FC<UsersPageProps> = ({ data, banUser }) => {
+  const [showModal, setShowModal] = useState(false);
+  const [selectedUsername, setSelectedUsername] = useState<string>("");
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+
   return (
-    <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
-      <thead>
-        <tr>
-          <th className="tw-p-2.5 tw-font-bold">Username</th>
-          <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Full Name</th>
-          <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Email</th>
-          <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">State</th>
-          <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Country</th>
-          <th className="tw-p-2.5 tw-font-bold">Actions</th>
-        </tr>
-      </thead>
-      <tbody className="tw-w-full">
-        {data &&
-          data.map((item: UserData, index: number) => (
-            <tr key={index} className=" tw-rounded-lg tw-bg-[#fff]/5">
-              <td className="tw-p-2.5 tw-w-1/8">{item.username}</td>
-              <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
-                {item.fullName}
-              </td>
-              <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
-                {item.email}
-              </td>
-              <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
-                {item.state}
-              </td>
-              <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
-                {item.country}
-              </td>
-              <td className="tw-p-2.5 tw-w-1/8">
-                <div className="tw-flex tw-gap-4 tw-justify-center">
-                  <Link href={`/dashboard/users/edit_user/${item._id}`}>
-                    <EditIcon />
-                  </Link>
-                  <Link href={`/dashboard/users/show_user/${item._id}`}>
-                    <DvrIcon />
-                  </Link>
-                  <Link href={`/dashboard/users/delete_user/${item._id}`}>
-                    <DeleteIcon sx={{ color: "#C2451E" }} />
-                  </Link>
-                  <Link href={`/dashboard`}>
-                    <BlockIcon />
-                  </Link>
-                </div>
-              </td>
-            </tr>
-          ))}
-      </tbody>
-    </table>
+    <div>
+      {" "}
+      <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
+        <thead>
+          <tr>
+            <th className="tw-p-2.5 tw-font-bold">Username</th>
+            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+              Full Name
+            </th>
+            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Email</th>
+            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">State</th>
+            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Country</th>
+            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+              Is Active
+            </th>
+            <th className="tw-p-2.5 tw-font-bold">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="tw-w-full">
+          {data &&
+            data.map((item: UserData, index: number) => (
+              <tr key={index} className=" tw-rounded-lg tw-bg-[#fff]/5">
+                <td className="tw-p-2.5 tw-w-1/8">{item.username}</td>
+                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                  {item.fullName}
+                </td>
+                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                  {item.email}
+                </td>
+                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                  {item.state}
+                </td>
+                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                  {item.country}
+                </td>
+                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                  {item.isActive.toString()}
+                </td>
+                <td className="tw-p-2.5 tw-w-1/8">
+                  <div className="tw-flex tw-gap-4 tw-justify-center">
+                    <Link href={`/dashboard/users/edit_user/${item._id}`}>
+                      <EditIcon />
+                    </Link>
+                    <Link href={`/dashboard/users/show_user/${item._id}`}>
+                      <DvrIcon />
+                    </Link>
+                    <Link href={`/dashboard/users/delete_user/${item._id}`}>
+                      <DeleteIcon sx={{ color: "#C2451E" }} />
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setShowModal(true);
+                        setSelectedUsername(item.username);
+                        setSelectedUserId(item._id);
+                      }}
+                    >
+                      <BlockIcon />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+      <BanUserModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        username={selectedUsername || ""}
+        id={selectedUserId}
+        onConfirm={() => banUser(selectedUserId)}
+      />
+    </div>
   );
 };

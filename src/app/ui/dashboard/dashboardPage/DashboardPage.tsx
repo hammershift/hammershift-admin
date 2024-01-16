@@ -6,7 +6,7 @@ import PaidIcon from "@mui/icons-material/Paid";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { createTheme, useTheme, ThemeProvider } from "@mui/material/styles";
 import { BounceLoader, BeatLoader } from "react-spinners";
-import AuctionModal from "@/app/ui/dashboard/auction_modal";
+import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
 import {
     LineChart,
     Line,
