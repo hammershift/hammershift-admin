@@ -170,28 +170,28 @@ const DashboardPage = () => {
 
     return (
         <div className="tw-w-full tw-grid tw-gap-4 ">
-            <div className="tw-grid tw-grid-cols-3 tw-gap-4 tw-w-full">
-                <div className="section-container tw-flex tw-flex-col sm:tw-flex-row tw-gap-2">
+            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-2 tw-w-full">
+                <div className="section-container tw-flex tw-flex-row tw-gap-2">
                     <GroupIcon />
-                    <div className="tw-grid tw-gap-2">
+                    <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-1 tw-gap-2">
                         <div>Total Users</div>
                         <div className="tw-text-lg tw-font-bold">
                             {userData.total}
                         </div>
                     </div>
                 </div>
-                <div className="section-container tw-flex tw-flex-col sm:tw-flex-row tw-gap-2">
+                <div className="section-container tw-flex tw-flex-row tw-gap-2">
                     <PaidIcon />
-                    <div className="tw-grid tw-gap-2">
+                    <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-1 tw-gap-2">
                         <div>Total Wagers</div>
                         <div className="tw-text-lg tw-font-bold">
                             {totalWagers}
                         </div>
                     </div>
                 </div>
-                <div className="section-container tw-flex tw-flex-col sm:tw-flex-row tw-gap-2">
+                <div className="section-container tw-flex tw-flex-row tw-gap-2">
                     <DirectionsCarIcon />
-                    <div className="tw-grid tw-gap-2">
+                    <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-1 tw-gap-2">
                         <div>Auctions</div>
                         <div className="tw-text-lg tw-font-bold">
                             {totalAuctions}
@@ -237,7 +237,9 @@ const Table = ({ wagersData }: { wagersData: any }) => {
             <thead>
                 <tr>
                     <th className="tw-p-2.5 tw-font-bold ">Wager</th>
-                    <th className="tw-p-2.5 tw-font-bold">Price</th>
+                    <th className="tw-p-2.5 tw-font-bold tw-hidden sm:tw-block">
+                        Price
+                    </th>
                     <th className="tw-p-2.5 tw-font-bold">Auction ID</th>
                     <th className="tw-p-2.5 tw-font-bold">User</th>
                 </tr>
@@ -252,7 +254,7 @@ const Table = ({ wagersData }: { wagersData: any }) => {
                             <td className="tw-p-2.5 tw-w-1/4">
                                 ${item.wagerAmount}.00
                             </td>
-                            <td className="tw-p-2.5 tw-w-1/4">
+                            <td className="tw-p-2.5 tw-w-1/4 tw-hidden sm:tw-inline-block">
                                 ${item.priceGuessed}
                             </td>
                             <td className="tw-p-2.5 tw-w-1/4">
@@ -280,7 +282,7 @@ const Chart = ({ data }: { data: any }) => {
                 margin={{
                     top: 20,
                     right: 30,
-                    left: 10,
+                    left: 5,
                     bottom: 5,
                 }}
             >
