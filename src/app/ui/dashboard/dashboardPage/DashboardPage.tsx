@@ -171,7 +171,7 @@ const DashboardPage = () => {
     return (
         <div className="tw-w-full tw-grid tw-gap-4 ">
             <div className="tw-grid tw-grid-cols-3 tw-gap-4 tw-w-full">
-                <div className="section-container tw-flex tw-gap-2">
+                <div className="section-container tw-flex tw-flex-col sm:tw-flex-row tw-gap-2">
                     <GroupIcon />
                     <div className="tw-grid tw-gap-2">
                         <div>Total Users</div>
@@ -180,7 +180,7 @@ const DashboardPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className="section-container tw-flex tw-gap-2">
+                <div className="section-container tw-flex tw-flex-col sm:tw-flex-row tw-gap-2">
                     <PaidIcon />
                     <div className="tw-grid tw-gap-2">
                         <div>Total Wagers</div>
@@ -189,7 +189,7 @@ const DashboardPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className="section-container tw-flex tw-gap-2">
+                <div className="section-container tw-flex tw-flex-col sm:tw-flex-row tw-gap-2">
                     <DirectionsCarIcon />
                     <div className="tw-grid tw-gap-2">
                         <div>Auctions</div>
@@ -215,7 +215,7 @@ const DashboardPage = () => {
             </div>
             <div className="section-container">
                 <div className="tw-mb-4">{`WEEKLY RECAP: ${dates[0]?.date} - ${dates[6]?.date}`}</div>
-                <div className="tw-w-full tw-h-[450px]">
+                <div className="tw-w-full tw-h-[300px] sm:tw-h-[450px]">
                     {loading ? (
                         <div className="tw-flex tw-justify-center tw-items-center tw-h-[200px]">
                             <BounceLoader />
@@ -278,9 +278,9 @@ const Chart = ({ data }: { data: any }) => {
                 height={300}
                 data={data}
                 margin={{
-                    top: 5,
+                    top: 20,
                     right: 30,
-                    left: 20,
+                    left: 10,
                     bottom: 5,
                 }}
             >
