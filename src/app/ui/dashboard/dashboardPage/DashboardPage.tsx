@@ -6,6 +6,7 @@ import PaidIcon from "@mui/icons-material/Paid";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { createTheme, useTheme, ThemeProvider } from "@mui/material/styles";
 import { BounceLoader, BeatLoader } from "react-spinners";
+import AuctionModal from "@/app/ui/dashboard/auction_modal";
 import {
     LineChart,
     Line,
@@ -243,6 +244,11 @@ const DashboardPage = () => {
 export default DashboardPage;
 
 const Table = ({ wagersData }: { wagersData: any }) => {
+    const [openModal, setOpenModal] = useState<boolean>(false);
+    const [selectedAuctionId, setSelectedAuctionId] = useState<string | null>(
+        null
+    );
+
     return (
         <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
             <thead>
@@ -272,6 +278,17 @@ const Table = ({ wagersData }: { wagersData: any }) => {
                                 <span className={`tw-p-2 tw-rounded`}>
                                     {item.auctionIdentifierId}
                                 </span>
+                                <button
+                                    className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs"
+                                    onClick={() => {
+                                        setOpenModal(true);
+                                        setSelectedAuctionId(
+                                            item.auctionIdentifierId
+                                        );
+                                    }}
+                                >
+                                    Show Auction Details
+                                </button>
                             </td>
                             <td className="tw-p-2.5 tw-w-1/4">
                                 {item.user.username}
@@ -279,6 +296,11 @@ const Table = ({ wagersData }: { wagersData: any }) => {
                         </tr>
                     ))}
             </tbody>
+            <AuctionModal
+                isOpen={openModal}
+                onClose={() => setOpenModal(false)}
+                id={selectedAuctionId || ""}
+            />
         </table>
     );
 };
