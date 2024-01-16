@@ -112,7 +112,7 @@ const LoginPage = () => {
                 console.log("Login successful");
                 setTimeout(() => {
                     setLoading(false);
-                }, 1000);
+                }, 2500);
             }
         } catch (error) {
             console.error("An unexpected error occurred during login:", error);
