@@ -5,7 +5,7 @@ import GroupIcon from "@mui/icons-material/Group";
 import PaidIcon from "@mui/icons-material/Paid";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { createTheme, useTheme, ThemeProvider } from "@mui/material/styles";
-import { BounceLoader } from "react-spinners";
+import { BounceLoader, BeatLoader } from "react-spinners";
 import {
     LineChart,
     Line,
@@ -33,6 +33,8 @@ const DashboardPage = () => {
     const [data, setData] = useState<any>([]);
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState<any>([]);
+    const [tableLoading, setTableLoading] = useState<boolean>(false);
+    const [chartLoading, setChartLoading] = useState<boolean>(false);
 
     // fetch user data
     useEffect(() => {
@@ -55,6 +57,7 @@ const DashboardPage = () => {
     // fetch wagers data
     useEffect(() => {
         const fetchWagersData = async () => {
+            setTableLoading(true);
             try {
                 const data = await getLimitedWagers(6);
 
@@ -66,6 +69,7 @@ const DashboardPage = () => {
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
+            setTableLoading(false);
         };
         fetchWagersData();
     }, []);
@@ -160,8 +164,9 @@ const DashboardPage = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            setChartLoading(true);
             const result = await getWagersPerDay();
-
+            setChartLoading(false);
             setData(result);
         };
 
@@ -201,8 +206,14 @@ const DashboardPage = () => {
             </div>
             <div className="section-container">
                 <div className="tw-mb-4">LATEST WAGERS</div>
-                {wagersData.wagers.length > 0 && (
-                    <Table wagersData={wagersData} />
+                {tableLoading ? (
+                    <div className="tw-flex tw-justify-center tw-items-center tw-h-[200px]">
+                        <BeatLoader color="#F2CA16" />
+                    </div>
+                ) : (
+                    wagersData.wagers.length > 0 && (
+                        <Table wagersData={wagersData} />
+                    )
                 )}
                 <Link
                     href="../../../dashboard/wagers"
@@ -216,9 +227,9 @@ const DashboardPage = () => {
             <div className="section-container">
                 <div className="tw-mb-4">{`WEEKLY RECAP: ${dates[0]?.date} - ${dates[6]?.date}`}</div>
                 <div className="tw-w-full tw-h-[300px] sm:tw-h-[450px]">
-                    {loading ? (
+                    {chartLoading ? (
                         <div className="tw-flex tw-justify-center tw-items-center tw-h-[200px]">
-                            <BounceLoader />
+                            <BeatLoader color="#F2CA16" />
                         </div>
                     ) : (
                         data && data.length > 0 && <Chart data={data} />
