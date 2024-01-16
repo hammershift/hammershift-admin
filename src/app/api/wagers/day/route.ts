@@ -1,8 +1,5 @@
 import clientPromise from "@/app/lib/mongoDB";
-import connectToDB from "@/app/lib/mongoose";
-import Wagers from "@/app/models/wager.model";
 import { NextRequest, NextResponse } from "next/server";
-import { ObjectId } from "mongodb";
 
 export const dynamic = "force-dynamic";
 

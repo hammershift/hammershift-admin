@@ -41,7 +41,6 @@ const LoginPage = () => {
     };
 
     //check if admin exists
-
     const checkAdminExistence = async () => {
         try {
             const response = await fetch("/api/checkAdmin", {
@@ -109,9 +108,11 @@ const LoginPage = () => {
                 handleAlertTimer();
                 setLoading(false);
             } else {
-                console.log("Login successful");
                 router.push("/dashboard");
-                setLoading(false);
+                console.log("Login successful");
+                setTimeout(() => {
+                    setLoading(false);
+                }, 1000);
             }
         } catch (error) {
             console.error("An unexpected error occurred during login:", error);
