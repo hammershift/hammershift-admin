@@ -26,7 +26,11 @@ function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const closeSidebar = () => {
-    setMenuOpen(false);
+    if (window.innerWidth < 768) {
+      setMenuOpen(false);
+    } else {
+      setMenuOpen(true);
+    }
   };
 
   useEffect(() => {
