@@ -30,19 +30,26 @@ export const authOptions: NextAuthOptions = {
 
                 const client = await clientPromise;
                 const db = client.db();
-                const user = await db
+                const admin = await db
                     .collection<Admin>("admins")
                     .findOne({ username: credentials.username });
 
                 if (
-                    !user ||
-                    !user.password ||
-                    !(await bcrypt.compare(credentials.password, user.password))
+                    !admin ||
+                    !admin.password ||
+                    !(await bcrypt.compare(
+                        credentials.password,
+                        admin.password
+                    ))
                 ) {
                     throw new Error("Invalid credentials");
                 }
 
-                return { id: user._id, username: user.username };
+                return {
+                    id: admin._id,
+                    username: admin.username,
+                    role: admin.role,
+                };
             },
         }),
     ],
@@ -57,6 +64,7 @@ export const authOptions: NextAuthOptions = {
             if (token) {
                 session.user.id = token.id;
                 session.user.username = token.username;
+                session.user.role = token.role;
             }
             console.log("Session callback - Final Session object:", session);
             return session;
@@ -68,21 +76,21 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.id = user.id;
                 token.username = user.username;
-                // token.image = user.image;
+                token.role = user.role;
             }
 
             const client = await clientPromise;
             const db = client.db();
-            const dbUser = await db
-                .collection("users")
+            const dbAdmin = await db
+                .collection("admins")
                 .findOne({ _id: new ObjectId(token.id) });
 
-            console.log("JWT callback - Fetched User from DB:", dbUser);
+            console.log("JWT callback - Fetched User from DB:", dbAdmin);
 
-            if (dbUser) {
+            if (dbAdmin) {
                 // token.fullName = dbUser.fullName;
-                token.username = dbUser.username;
-                // token.image = dbUser.image;
+                token.username = dbAdmin.username;
+                token.role = dbAdmin.role;
             }
 
             console.log("JWT callback - Final token:", token);
