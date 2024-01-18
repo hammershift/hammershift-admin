@@ -30,11 +30,19 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    //check for authorization
     const session = await getServerSession(authOptions);
-    if (!session) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 400 });
+    if (session?.user.role !== "owner") {
+        return NextResponse.json(
+            {
+                message:
+                    "Unauthorized! Your role does not have access to this function",
+            },
+            { status: 400 }
+        );
     }
+
+    console.log("User is Authorized!");
+
     try {
         await connectToDB();
         const { first_name, last_name, username, password } = await req.json();
