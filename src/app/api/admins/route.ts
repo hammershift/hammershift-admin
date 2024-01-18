@@ -15,12 +15,12 @@ export async function GET(req: NextRequest) {
         const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
         const limit = Number(req.nextUrl.searchParams.get("limit"));
 
-        // api/cars?auction_id=213123 to get a single admin
+        // api/admins?auction_id=213123 to get a single admin
         if (admin_id) {
             const admin = await Admins.findOne({ _id: admin_id });
             return NextResponse.json(admin);
         }
-        // api/cars to get all admins
+        // api/admins to get all admins
         const admins = await Admins.find().limit(limit).skip(offset);
         return NextResponse.json({ total: admins.length, admins: admins });
     } catch (error) {
