@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Home() {
+    // check if logged in and has session
     const { data: session } = useSession();
     useEffect(() => {
         if (session) {
