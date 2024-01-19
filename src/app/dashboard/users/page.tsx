@@ -25,6 +25,7 @@ interface UserData {
   state: string;
   country: string;
   isActive: boolean;
+  isBanned: boolean;
 }
 interface UsersPageProps {
   data: UserData[];
@@ -76,17 +77,21 @@ const UsersPage = () => {
   }, [searchValue]);
 
   const banUser = async (_id: string) => {
-    const updatedUser = { isActive: false };
-    const res = await editUserWithId(_id, updatedUser);
+    try {
+      const updatedUser = { isBanned: true };
+      const res = await editUserWithId(_id, updatedUser);
 
-    if (res && res.message === "Edit Successful") {
-      console.log(userData);
-      setUserData(
-        userData.map((user) =>
-          user._id === _id ? { ...user, ...updatedUser } : user
-        )
-      );
-      alert("User Banned Successfully");
+      if (res && res.message === "Edit Successful") {
+        console.log(userData);
+        setUserData(
+          userData.map((user) =>
+            user._id === _id ? { ...user, ...updatedUser } : user
+          )
+        );
+        alert("User Banned Successfully");
+      }
+    } catch (error) {
+      alert("Error banning user");
     }
   };
 
@@ -147,9 +152,7 @@ const Table: React.FC<UsersPageProps> = ({ data, banUser }) => {
             <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Email</th>
             <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">State</th>
             <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Country</th>
-            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
-              Is Active
-            </th>
+            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Status</th>
             <th className="tw-p-2.5 tw-font-bold">Actions</th>
           </tr>
         </thead>
@@ -171,7 +174,11 @@ const Table: React.FC<UsersPageProps> = ({ data, banUser }) => {
                   {item.country}
                 </td>
                 <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
-                  {item.isActive.toString()}
+                  {item.isBanned.toString() == "true" ? (
+                    <p className="tw-text-red-700">Banned</p>
+                  ) : (
+                    <p className="tw-text-green-700">Active</p>
+                  )}
                 </td>
                 <td className="tw-p-2.5 tw-w-1/8">
                   <div className="tw-flex tw-gap-4 tw-justify-center">
