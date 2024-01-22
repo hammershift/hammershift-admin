@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(
-    typeof window !== "undefined" ? window.innerWidth >= 768 : true
+    typeof window !== "undefined" ? window.innerWidth >= 768 : false
   );
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -26,7 +26,11 @@ function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const closeSidebar = () => {
-    setMenuOpen(false);
+    if (window.innerWidth < 768) {
+      setMenuOpen(false);
+    } else {
+      setMenuOpen(true);
+    }
   };
 
   useEffect(() => {

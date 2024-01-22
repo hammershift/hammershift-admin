@@ -13,7 +13,8 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
-import AuctionModal from "@/app/ui/dashboard/auction_modal";
+import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
+import { useSession } from "next-auth/react";
 
 interface WagerData {
     _id: string;
@@ -35,6 +36,9 @@ const WagersPage = () => {
     const [wagerData, setWagerData] = useState<WagerData[]>([]);
     const [searchValue, setSearchValue] = useState<null | string>(null);
     const [displayCount, setDisplayCount] = useState(7);
+    const { data: session } = useSession(); // to get session
+
+    console.log("Admin-role:", session?.user.role); // to get role
 
     useEffect(() => {
         const fetchData = async () => {

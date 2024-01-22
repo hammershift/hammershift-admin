@@ -5,7 +5,7 @@ import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import AuctionModal from "../auction_modal";
+import AuctionModal from "../modals/auction_modal";
 
 interface CarData {
   auction_id: string;
