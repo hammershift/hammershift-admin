@@ -5,7 +5,9 @@ interface AdminData {
   _id: string;
   first_name: string;
   last_name: string;
+  email: string;
   username: string;
+  role: string;
 }
 
 interface AdminsPageProps {
@@ -26,7 +28,9 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ data }) => {
             <td className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Admin ID</td>
             <td className="tw-p-2.5 tw-font-bold">First Name</td>
             <td className="tw-p-2.5 tw-font-bold">Last Name</td>
+            <td className="tw-p-2.5 tw-font-bold">Email</td>
             <td className="tw-p-2.5 tw-font-bold">Username</td>
+            <td className="tw-p-2.5 tw-font-bold">Admin Role</td>
           </tr>
         </thead>
         <tbody>
@@ -35,7 +39,9 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ data }) => {
               <td className="tw-p-2.5 max-md:tw-hidden">{item._id}</td>
               <td className="tw-p-2.5">{item.first_name}</td>
               <td className="tw-p-2.5">{item.last_name}</td>
+              <td className="tw-p-2.5">{item.email}</td>
               <td className="tw-p-2.5">{item.username}</td>
+              <td className="tw-p-2.5">{item.role}</td>
             </tr>
           ))}
         </tbody>

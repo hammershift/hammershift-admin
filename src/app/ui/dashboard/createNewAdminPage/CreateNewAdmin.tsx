@@ -5,16 +5,20 @@ import React, { useState } from "react";
 type newAdmin = {
   first_name: string;
   last_name: string;
+  email: string;
   username: string;
   password: string;
+  role: string;
 };
 
 const CreateNewAdminPage = () => {
   const [newAdmin, setNewAdmin] = useState({
     first_name: "",
     last_name: "",
+    email: "",
     username: "",
     password: "",
+    role: "",
   });
   const [confirmPassword, setConfirmPassword] = useState({
     confirm_password: "",
@@ -40,6 +44,10 @@ const CreateNewAdminPage = () => {
         const username = e.target.value;
         setNewAdmin({ ...newAdmin, username: username });
         break;
+      case "email":
+        const email = e.target.value;
+        setNewAdmin({ ...newAdmin, email: email });
+        break;
       case "password":
         const password = e.target.value;
         setNewAdmin({ ...newAdmin, password: password });
@@ -47,6 +55,10 @@ const CreateNewAdminPage = () => {
       default:
         break;
     }
+  };
+
+  const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewAdmin({ ...newAdmin, role: event.target.value });
   };
 
   const handleConfirmPasswordChange = (
@@ -59,6 +71,7 @@ const CreateNewAdminPage = () => {
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
+    console.log("Admin:", newAdmin);
 
     try {
       const response = await fetch("/api/admins", {
@@ -73,8 +86,10 @@ const CreateNewAdminPage = () => {
       } else if (
         !newAdmin.first_name ||
         !newAdmin.last_name ||
+        !newAdmin.email ||
         !newAdmin.username ||
         !newAdmin.password ||
+        !newAdmin.role ||
         !confirmPassword
       ) {
         setEmptyInputError(true);
@@ -88,10 +103,13 @@ const CreateNewAdminPage = () => {
         setNewAdmin({
           first_name: "",
           last_name: "",
+          email: "",
           username: "",
           password: "",
+          role: "",
         });
         alert("Admin account created successfully!");
+        console.log("Success:", newAdmin);
       }
     } catch (error) {
       return console.error("Internal server error", error);
@@ -130,6 +148,17 @@ const CreateNewAdminPage = () => {
               }`}
             ></input>
           </div>
+          <label className="tw-mx-1">Email</label>
+          <input
+            type="email"
+            placeholder=" Email *"
+            id="email"
+            value={newAdmin.email}
+            onChange={handleChange}
+            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+              emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+            }`}
+          ></input>
           <label className="tw-mx-1">Username</label>
           <input
             type="text"
@@ -161,6 +190,49 @@ const CreateNewAdminPage = () => {
               emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
             }`}
           ></input>
+          <label className="tw-mx-1">Admin Role:</label>
+          <div>
+            <div className="tw-flex">
+              <input
+                type="radio"
+                name="role"
+                value={"owner"}
+                checked={newAdmin.role === "owner"}
+                onChange={handleRoleChange}
+              ></input>
+              <label className="tw-px-2">Owner</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                name="role"
+                value="admin"
+                checked={newAdmin.role === "admin"}
+                onChange={handleRoleChange}
+              ></input>
+              <label className="tw-px-2">Admin</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                name="role"
+                value="moderator"
+                checked={newAdmin.role === "moderator"}
+                onChange={handleRoleChange}
+              ></input>
+              <label className="tw-px-2">Moderator</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                name="role"
+                value="guest"
+                checked={newAdmin.role === "guest"}
+                onChange={handleRoleChange}
+              ></input>
+              <label className="tw-px-2">Guest</label>
+            </div>
+          </div>
           {requiredFieldsError ? (
             <p className="tw-text-red-500">Please fill-out required fields</p>
           ) : null}
