@@ -20,60 +20,6 @@ import { toggle } from "@nextui-org/react";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { blue } from "@mui/material/colors";
 
-const sidebarItems = [
-  {
-    title: "Pages",
-    list: [
-      { title: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
-      {
-        title: "Auctions",
-        path: "/dashboard/auctions",
-        icon: <DirectionsCarIcon />,
-      },
-      {
-        title: "Users",
-        path: "/dashboard/users",
-        icon: <PersonIcon />,
-      },
-      {
-        title: "Wagers",
-        path: "/dashboard/wagers",
-        icon: <AttachMoneyIcon />,
-      },
-    ],
-  },
-  {
-    title: "Manage",
-    list: [
-      {
-        title: "Admin",
-        path: "/dashboard/admins",
-        icon: <SupervisorAccountIcon />,
-      },
-      {
-        title: "Create New Admin",
-        path: "/dashboard/create-new-admin",
-        icon: <PersonAddIcon />,
-      },
-    ],
-  },
-  {
-    title: "User",
-    list: [
-      {
-        title: "Settings",
-        path: "/dashboard",
-        icon: <SettingsIcon />,
-      },
-      {
-        title: "Log-out",
-        path: "/logout",
-        icon: <LogoutIcon />,
-      },
-    ],
-  },
-];
-
 const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
   const [username, setUsername] = useState("");
 
@@ -85,6 +31,64 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
     }
     // console.log("data:", data)
   }, [data]);
+
+  const sidebarItems = [
+    {
+      title: "Pages",
+      list: [
+        { title: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
+        {
+          title: "Auctions",
+          path: "/dashboard/auctions",
+          icon: <DirectionsCarIcon />,
+        },
+        {
+          title: "Users",
+          path: "/dashboard/users",
+          icon: <PersonIcon />,
+        },
+        {
+          title: "Wagers",
+          path: "/dashboard/wagers",
+          icon: <AttachMoneyIcon />,
+        },
+      ],
+    },
+    {
+      title: "Manage",
+      list: [
+        {
+          title: "Admin",
+          path: "/dashboard/admins",
+          icon: <SupervisorAccountIcon />,
+        },
+        ...(data?.user?.role === "owner"
+          ? [
+              {
+                title: "Create New Admin",
+                path: "/dashboard/create-new-admin",
+                icon: <PersonAddIcon />,
+              },
+            ]
+          : []),
+      ],
+    },
+    {
+      title: "User",
+      list: [
+        {
+          title: "Settings",
+          path: "/dashboard",
+          icon: <SettingsIcon />,
+        },
+        {
+          title: "Log-out",
+          path: "/logout",
+          icon: <LogoutIcon />,
+        },
+      ],
+    },
+  ];
 
   return (
     <div
@@ -111,7 +115,7 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           />
           <div className="tw-flex tw-flex-col tw-gap-2">
             <p className="tw-text-xs tw-font-semibold">{username}</p>
-            <p className="tw-text-xs">Administrator</p>
+            <p className="tw-text-xs">{data?.user.role}</p>
           </div>
         </div>
         <ul>

@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import BanUserModal from "@/app/ui/dashboard/modals/ban_user_modal";
+import { useSession } from "next-auth/react";
 
 interface UserData {
   _id: string;
@@ -28,7 +29,7 @@ interface UserData {
   isBanned: boolean;
 }
 interface UsersPageProps {
-  data: UserData[];
+  userData: UserData[];
   banUser: (_id: string) => void;
 }
 
@@ -61,12 +62,12 @@ const UsersPage = () => {
     const getDataWithSearchValue = async () => {
       if (searchValue !== null && searchValue !== "") {
         try {
-          const data = await getUsersWithSearch(searchValue);
+          const userData = await getUsersWithSearch(searchValue);
 
-          if (data) {
-            setUserData(data.users as UserData[]);
+          if (userData) {
+            setUserData(userData.users as UserData[]);
           } else {
-            console.error("Unexpected data structure:", data);
+            console.error("Unexpected data structure:", userData);
           }
         } catch (error) {
           console.error("Error fetching data:", error);
@@ -118,7 +119,7 @@ const UsersPage = () => {
         </div>
       </div>
       <div className="tw-my-4">
-        <Table data={userData} banUser={banUser} />
+        <Table userData={userData} banUser={banUser} />
       </div>
 
       <div className="tw-flex tw-justify-center ">
@@ -134,10 +135,12 @@ const UsersPage = () => {
 
 export default UsersPage;
 
-const Table: React.FC<UsersPageProps> = ({ data, banUser }) => {
+const Table: React.FC<UsersPageProps> = ({ userData, banUser }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUsername, setSelectedUsername] = useState<string>("");
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+
+  const { data } = useSession();
 
   return (
     <div>
@@ -157,8 +160,8 @@ const Table: React.FC<UsersPageProps> = ({ data, banUser }) => {
           </tr>
         </thead>
         <tbody className="tw-w-full">
-          {data &&
-            data.map((item: UserData, index: number) => (
+          {userData &&
+            userData.map((item: UserData, index: number) => (
               <tr key={index} className=" tw-rounded-lg tw-bg-[#fff]/5">
                 <td className="tw-p-2.5 tw-w-1/8">{item.username}</td>
                 <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
@@ -181,25 +184,33 @@ const Table: React.FC<UsersPageProps> = ({ data, banUser }) => {
                   )}
                 </td>
                 <td className="tw-p-2.5 tw-w-1/8">
-                  <div className="tw-flex tw-gap-4 tw-justify-center">
-                    <Link href={`/dashboard/users/edit_user/${item._id}`}>
-                      <EditIcon />
-                    </Link>
-                    <Link href={`/dashboard/users/show_user/${item._id}`}>
-                      <DvrIcon />
-                    </Link>
-                    <Link href={`/dashboard/users/delete_user/${item._id}`}>
-                      <DeleteIcon sx={{ color: "#C2451E" }} />
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setShowModal(true);
-                        setSelectedUsername(item.username);
-                        setSelectedUserId(item._id);
-                      }}
-                    >
-                      <BlockIcon />
-                    </button>
+                  <div className="tw-flex tw-justify-center">
+                    {data?.user.role === "guest" ? (
+                      <Link href={`/dashboard/users/show_user/${item._id}`}>
+                        <DvrIcon />
+                      </Link>
+                    ) : (
+                      <div className="tw-flex tw-gap-2 tw-justify-center">
+                        <Link href={`/dashboard/users/edit_user/${item._id}`}>
+                          <EditIcon />
+                        </Link>
+                        <Link href={`/dashboard/users/show_user/${item._id}`}>
+                          <DvrIcon />
+                        </Link>
+                        <Link href={`/dashboard/users/delete_user/${item._id}`}>
+                          <DeleteIcon sx={{ color: "#C2451E" }} />
+                        </Link>
+                        <button
+                          onClick={() => {
+                            setShowModal(true);
+                            setSelectedUsername(item.username);
+                            setSelectedUserId(item._id);
+                          }}
+                        >
+                          <BlockIcon />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </td>
               </tr>

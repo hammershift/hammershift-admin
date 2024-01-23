@@ -18,7 +18,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({ isOpen, onClose, id }) => {
     return null;
   }
   return (
-    <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center">
+    <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
       <div className="tw-w-[600px] tw-flex tw-flex-col">
         <button
           className="tw-text-white tw-text-xl tw-place-self-end tw-rounded-full tw-border-2 tw-w-8 hover:tw-bg-yellow-400"
