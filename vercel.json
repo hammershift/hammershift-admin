@@ -2,7 +2,7 @@
     "crons": [
         {
             "path": "/api/cron?user_id=658253aa0389e2739141ae4d",
-            "schedule": "30 9 * * *"
+            "schedule": "0 16 * * *"
         }
     ]
 }
