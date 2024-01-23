@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
         // }
 
         const editData = {
-            username: `Cron Job Successful! ${date}`,
+            username: `Cron Job Test! ${date}`,
         };
 
         // api/users/edit?user_id=658253aa0389e2739141ae4d
