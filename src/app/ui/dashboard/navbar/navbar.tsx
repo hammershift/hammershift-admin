@@ -9,7 +9,7 @@ import { Menu } from "@mui/icons-material";
 
 const Navbar = ({ openSidebar }: { openSidebar: () => void }) => {
   return (
-    <nav className="tw-flex tw-flex-row tw-h-auto tw-w-auto tw-justify-between tw-items-center tw-bg-slate-800 tw-px-5 tw-rounded-l ">
+    <div className="tw-flex tw-flex-row tw-h-auto tw-w-auto tw-justify-between tw-items-center tw-bg-slate-800 tw-px-5 tw-rounded-l ">
       <div className="md:tw-hidden tw-mr-5" onClick={openSidebar}>
         <Menu />
       </div>
@@ -27,7 +27,7 @@ const Navbar = ({ openSidebar }: { openSidebar: () => void }) => {
           <SettingsIcon className="tw-m-3" />
         </div>
       </div>
-    </nav>
+    </div>
   );
 };
 

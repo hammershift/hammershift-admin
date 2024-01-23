@@ -20,10 +20,12 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({ item }) => {
   }`;
 
   return (
-    <Link href={item.path} className={linkStyles}>
-      {item.icon}
-      {item.title}
-    </Link>
+    <div>
+      <Link href={item.path} className={linkStyles}>
+        {item.icon}
+        {item.title}
+      </Link>
+    </div>
   );
 };
 

@@ -36,7 +36,7 @@ interface UsersPageProps {
 const UsersPage = () => {
   const [userData, setUserData] = useState<UserData[]>([]);
   const [searchValue, setSearchValue] = useState<null | string>(null);
-  const [userDisplayCount, setUserDisplayCount] = useState(7);
+  const [userDisplayCount, setUserDisplayCount] = useState(11);
 
   // get all users data
   useEffect(() => {

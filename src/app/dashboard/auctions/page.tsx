@@ -20,7 +20,7 @@ interface CarData {
 
 const Auctions = () => {
   const [carData, setCarData] = useState<CarData[]>([]);
-  const [displayCount, setDisplayCount] = useState(7);
+  const [displayCount, setDisplayCount] = useState(8);
 
   useEffect(() => {
     const fetchData = async () => {
