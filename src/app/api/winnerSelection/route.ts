@@ -7,6 +7,8 @@ import clientPromise from "@/app/lib/mongoDB";
 import prizeDistribution from "@/app/lib/prizeDistribution";
 import { ObjectId } from "mongodb";
 
+export const dynamic = "force-dynamic";
+
 // URL: /api/winnerSelection?auction_id=68490202
 export async function GET(req: NextRequest) {
     try {

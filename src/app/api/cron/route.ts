@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/options";
 import { date } from "zod";
 
+export const dynamic = "force-dynamic";
+
 // to edit user URL: /api/cron?user_id=658253aa0389e2739141ae4d
 export async function GET(req: NextRequest) {
     const date = new Date();
