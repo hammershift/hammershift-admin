@@ -1,7 +1,7 @@
 {
     "crons": [
         {
-            "path": "/api/cron?user_id=658253aa0389e2739141ae4d",
+            "path": "/api/cron",
             "schedule": "0 16 * * *"
         }
     ]
