@@ -44,7 +44,7 @@ const BanUserModal: React.FC<BanUserModalProps> = ({
           </div>
           <div className="tw-flex tw-justify-evenly">
             <button
-              className="tw-bg-yellow-500 tw-text-black tw-font-bold tw-w-1/5 tw-rounded-md"
+              className="tw-bg-yellow-500 tw-text-red-700 tw-font-bold tw-w-1/5 tw-h-8 tw-rounded-md"
               onClick={() => username && onConfirm(id)}
             >
               Confirm

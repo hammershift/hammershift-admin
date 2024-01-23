@@ -44,7 +44,7 @@ const Auctions = () => {
     setDisplayCount((prevCount) => prevCount + 7);
   };
 
-  return <AuctionsPage data={carData} handleLoadMore={handleLoadMore} />;
+  return <AuctionsPage auctionData={carData} handleLoadMore={handleLoadMore} />;
 };
 
 export default Auctions;

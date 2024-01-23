@@ -6,6 +6,7 @@ import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import AuctionModal from "../modals/auction_modal";
+import { useSession } from "next-auth/react";
 
 interface CarData {
   auction_id: string;
@@ -21,12 +22,12 @@ interface CarData {
 }
 
 interface AuctionsPageProps {
-  data: CarData[];
+  auctionData: CarData[];
   handleLoadMore: () => void;
 }
 
 const AuctionsPage: React.FC<AuctionsPageProps> = ({
-  data,
+  auctionData: auctionData,
   handleLoadMore,
 }) => {
   const [activeAuctions, setActiveAuctions] = useState<{
@@ -40,6 +41,8 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   const [viewportWidth, setViewportWidth] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [selectedAuctionId, setSelectedAuctionId] = useState("");
+
+  const { data } = useSession();
 
   useEffect(() => {
     setViewportWidth(window.innerWidth);
@@ -57,7 +60,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   }, []);
 
   useEffect(() => {
-    const initialActiveAuctions = data.reduce(
+    const initialActiveAuctions = auctionData.reduce(
       (acc, item) => ({
         ...acc,
         [item.auction_id]: item.isActive,
@@ -65,7 +68,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
       {}
     );
     setActiveAuctions(initialActiveAuctions);
-  }, [data]);
+  }, [auctionData]);
 
   async function handleStatusToggle(id: string) {
     setActiveAuctions((prevStates) => ({
@@ -107,12 +110,16 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
           { KEY: "deadline", LABEL: "Deadline" },
           { KEY: "bids", LABEL: "Current Bids" },
           { KEY: "isActive", LABEL: "Status" },
-          { KEY: "toggle_status", LABEL: "Toggle Status" },
+          ...(data?.user?.role !== "guest" && data?.user?.role !== "moderator"
+            ? [{ KEY: "toggle_status", LABEL: "Toggle Status" }]
+            : []),
         ]
       : [
           { KEY: "auction_id", LABEL: "Auction ID" },
           { KEY: "isActive", LABEL: "Status" },
-          { KEY: "toggle_status", LABEL: "Toggle Status" },
+          ...(data?.user?.role !== "guest" && data?.user?.role !== "moderator"
+            ? [{ KEY: "toggle_status", LABEL: "Toggle Status" }]
+            : []),
         ];
 
   function handleTableHeaderClick(header: { KEY: any; LABEL?: string }) {
@@ -139,7 +146,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     );
   }
 
-  const filteredData = data.filter((item) =>
+  const filteredData = auctionData.filter((item) =>
     Object.values(item).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -195,6 +202,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                         setShowModal(true);
                         setSelectedAuctionId(item.auction_id);
                       }}
+                      className="hover: tw-cursor-pointer"
                     >
                       {item[header.KEY]}
                     </span>
