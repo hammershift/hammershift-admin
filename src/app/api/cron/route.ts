@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const date = new Date();
     try {
         await connectToDB();
-        const user_id = req.nextUrl.searchParams.get("user_id");
+        const user_id = "658253aa0389e2739141ae4d";
 
         // const requestBody = await req.json();
         // const editData: { [key: string]: string | boolean | number } = {};
