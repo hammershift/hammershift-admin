@@ -89,6 +89,19 @@ export const getAdmins = async () => {
   return data;
 };
 
+// edit admin
+export const editAdminWithId = async (id: string, body: any) => {
+  const res = await fetch(`/api/admins/edit?admin_id=${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+  if (res.status === 200) {
+    return { message: "Edit Successful" };
+  } else {
+    console.error("Edit Unsuccessful");
+  }
+};
+
 // get all users
 export const getUsers = async () => {
   const res = await fetch("/api/users");

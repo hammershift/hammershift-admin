@@ -57,8 +57,8 @@ const CreateNewAdminPage = () => {
     }
   };
 
-  const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewAdmin({ ...newAdmin, role: event.target.value });
+  const handleRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewAdmin({ ...newAdmin, role: e?.target.value });
   };
 
   const handleConfirmPasswordChange = (

@@ -1,10 +1,10 @@
 import connectToDB from "@/app/lib/mongoose";
-import Users from "@/app/models/user.model";
+import Admins from "@/app/models/admin.model";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/options";
 
-// to edit admin account
+// to edit admin
 export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (session?.user.role !== "owner" && session?.user.role !== "admin") {
@@ -31,13 +31,11 @@ export async function PUT(req: NextRequest) {
       });
     }
 
-    // api/users/edit?admin_id=657ab7edd422075ea7871f65
+    // api/admin/edit?admin_id=657ab7edd422075ea7871f65
     if (admin_id) {
-      const admin = await Users.findOneAndUpdate(
-        { _id: admin_id },
-        editData,
-        { new: true }
-      ).select("-password");
+      const admin = await Admins.findOneAndUpdate({ _id: admin_id }, editData, {
+        new: true,
+      }).select("-password");
 
       if (admin) {
         return NextResponse.json(admin, { status: 200 });
