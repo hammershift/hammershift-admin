@@ -10,6 +10,8 @@ import { editAdminWithId } from "@/app/lib/data";
 const EditAdmin = ({ params }: { params: { id: string } }) => {
   const [adminData, setAdminData] = useState<any>(null);
   const [newAdminData, setNewAdminData] = useState<any>({});
+  const [selectedRole, setSelectedRole] = useState("");
+
   const router = useRouter();
   const ID = params.id;
 
@@ -31,6 +33,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewAdminData({ ...newAdminData, role: e?.target.value });
+    setSelectedRole(e.target.value);
   };
 
   const handleSubmit = async (e: any) => {
@@ -48,7 +51,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
   };
 
   return (
-    <div className="section-container tw-mt-4">
+    <div className="section-container tw-mt-4 tw-flex tw-flex-col max-md:tw-items-start">
       <Link href={`/dashboard/admins`}>
         <ArrowBackIcon />
       </Link>
@@ -56,9 +59,9 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
         EDIT ADMIN ACCOUNT
       </h2>{" "}
       {adminData && (
-        <form>
+        <form className="tw-flex tw-flex-col max-md:tw-items-start">
           <div className="tw-flex tw-flex-col tw-justify-between tw-gap-4 tw-m-6">
-            <div className="tw-flex tw-justify-between tw-w-1/2">
+            <div className="tw-flex tw-justify-between tw-w-1/2 max-md:tw-w-full">
               <label className="tw-px-6">Admin ID:</label>
               <input
                 type="text"
@@ -68,7 +71,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 disabled
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-1/2">
+            <div className="tw-flex tw-justify-between tw-w-1/2 max-md:tw-w-full">
               <label className="tw-px-6">First Name:</label>
               <input
                 type="text"
@@ -78,7 +81,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-1/2">
+            <div className="tw-flex tw-justify-between tw-w-1/2 max-md:tw-w-full">
               <label className="tw-px-6">Last Name:</label>
               <input
                 name="last_name"
@@ -88,7 +91,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-1/2">
+            <div className="tw-flex tw-justify-between tw-w-1/2 max-md:tw-w-full">
               <label className="tw-px-6">Email:</label>
               <input
                 name="email"
@@ -98,7 +101,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-1/2">
+            <div className="tw-flex tw-justify-between tw-w-1/2 max-md:tw-w-full">
               <label className="tw-px-6">Username:</label>
               <input
                 name="username"
@@ -108,7 +111,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-1/2">
+            <div className="tw-flex tw-justify-between tw-w-1/2 max-md:tw-w-full">
               <label className="tw-px-6">Password:</label>
               <input
                 name="password"
@@ -118,52 +121,100 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
+            <div className="tw-flex tw-justify-between tw-w-1/2 tw-pr-24 max-md:tw-w-full">
               <label className="tw-px-6">Role:</label>
-              <div className="">
-                <div className="tw-flex tw-justify-between tw-border-yellow-500 tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2">
+              <div>
+                <div
+                  className={`tw-flex tw-justify-start tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2 hover:tw-cursor-pointer hover:tw-bg-gray-800 ${
+                    selectedRole === "owner"
+                      ? "tw-bg-gray-800 tw-border-yellow-500"
+                      : "tw-bg-[#fff]/20 tw-border-gray-500"
+                  }`}
+                >
                   <input
                     type="radio"
+                    id="owner"
                     name="role"
                     value={"owner"}
                     checked={newAdminData.role === "owner"}
                     onChange={handleRoleChange}
                   ></input>
-                  <label>Owner</label>
+                  <label
+                    htmlFor="owner"
+                    className="tw-px-2 hover:tw-cursor-pointer"
+                  >
+                    Owner
+                  </label>
                 </div>
-                <div className="tw-flex tw-justify-between tw-border-yellow-500 tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2">
+                <div
+                  className={`tw-flex tw-justify-start tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2 hover:tw-cursor-pointer hover:tw-bg-gray-800 ${
+                    selectedRole === "admin"
+                      ? "tw-bg-gray-800 tw-border-yellow-500"
+                      : "tw-bg-[#fff]/20 tw-border-gray-500"
+                  }`}
+                >
                   <input
                     type="radio"
+                    id="admin"
                     name="role"
                     value="admin"
                     checked={newAdminData.role === "admin"}
                     onChange={handleRoleChange}
                   ></input>
-                  <label>Admin</label>
+                  <label
+                    htmlFor="admin"
+                    className="tw-px-2 hover:tw-cursor-pointer"
+                  >
+                    Admin
+                  </label>
                 </div>
-                <div className="tw-flex tw-justify-between tw-border-yellow-500 tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2">
+                <div
+                  className={`tw-flex tw-justify-between tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2 hover:tw-cursor-pointer hover:tw-bg-gray-800 ${
+                    selectedRole === "moderator"
+                      ? "tw-bg-gray-800 tw-border-yellow-500"
+                      : "tw-bg-[#fff]/20 tw-border-gray-500"
+                  }`}
+                >
                   <input
                     type="radio"
+                    id="moderator"
                     name="role"
                     value="moderator"
                     checked={newAdminData.role === "moderator"}
                     onChange={handleRoleChange}
                   ></input>
-                  <label>Moderator</label>
+                  <label
+                    htmlFor="moderator"
+                    className="tw-px-2 hover:tw-cursor-pointer"
+                  >
+                    Moderator
+                  </label>
                 </div>
-                <div className="tw-flex tw-justify-between tw-border-yellow-500 tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2">
+                <div
+                  className={`tw-flex tw-justify-start tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2 hover:tw-cursor-pointer hover:tw-bg-gray-800 ${
+                    selectedRole === "guest"
+                      ? "tw-bg-gray-800 tw-border-yellow-500"
+                      : "tw-bg-[#fff]/20 tw-border-gray-500"
+                  }`}
+                >
                   <input
                     type="radio"
+                    id="guest"
                     name="role"
                     value="guest"
                     checked={newAdminData.role === "guest"}
                     onChange={handleRoleChange}
                   ></input>
-                  <label>Guest</label>
+                  <label
+                    htmlFor="guest"
+                    className="tw-px-2 hover:tw-cursor-pointer"
+                  >
+                    Guest
+                  </label>
                 </div>
               </div>
             </div>
-            <div className="tw-flex tw-gap-1 tw-justify-evenly tw-w-2/5 tw-m-4">
+            <div className="tw-flex tw-gap-1 tw-justify-start tw-w-2/5 tw-m-4 max-md:tw-w-full">
               <button
                 className="btn-transparent-white"
                 type="submit"
