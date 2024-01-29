@@ -26,6 +26,7 @@ const CreateNewAdminPage = () => {
   const [requiredFieldsError, setRequiredFieldsError] = useState(false);
   const [adminList, setAdminList] = useState<newAdmin[]>([]);
   const [emptyInputError, setEmptyInputError] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     switch (e.target.id) {
@@ -59,6 +60,7 @@ const CreateNewAdminPage = () => {
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewAdmin({ ...newAdmin, role: e?.target.value });
+    setSelectedRole(e.target.value);
   };
 
   const handleConfirmPasswordChange = (
@@ -133,7 +135,7 @@ const CreateNewAdminPage = () => {
               id="first_name"
               value={newAdmin.first_name}
               onChange={handleChange}
-              className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+              className={`tw-rounded-sm tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
                 emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
               }`}
             ></input>
@@ -143,7 +145,7 @@ const CreateNewAdminPage = () => {
               id="last_name"
               value={newAdmin.last_name}
               onChange={handleChange}
-              className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+              className={`tw-rounded-sm tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
                 emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
               }`}
             ></input>
@@ -155,7 +157,7 @@ const CreateNewAdminPage = () => {
             id="email"
             value={newAdmin.email}
             onChange={handleChange}
-            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+            className={`tw-rounded-sm tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
               emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
             }`}
           ></input>
@@ -166,7 +168,7 @@ const CreateNewAdminPage = () => {
             id="username"
             value={newAdmin.username}
             onChange={handleChange}
-            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+            className={`tw-rounded-sm tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
               emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
             }`}
           ></input>
@@ -177,7 +179,7 @@ const CreateNewAdminPage = () => {
             id="password"
             value={newAdmin.password}
             onChange={handleChange}
-            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+            className={`tw-rounded-sm tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
               emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
             }`}
           ></input>
@@ -186,51 +188,99 @@ const CreateNewAdminPage = () => {
             type="password"
             placeholder="Confirm Password *"
             onChange={handleConfirmPasswordChange}
-            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
+            className={`tw-rounded-sm tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
               emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
             }`}
           ></input>
           <label className="tw-mx-1">Admin Role:</label>
           <div>
-            <div className="tw-flex">
+            <div
+              className={`tw-flex tw-justify-start tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2 hover:tw-cursor-pointer hover:tw-bg-gray-800 ${
+                selectedRole === "owner"
+                  ? "tw-bg-gray-800 tw-border-yellow-500"
+                  : "tw-bg-[#fff]/20 tw-border-gray-500"
+              }`}
+            >
               <input
                 type="radio"
+                id="owner"
                 name="role"
                 value={"owner"}
                 checked={newAdmin.role === "owner"}
                 onChange={handleRoleChange}
               ></input>
-              <label className="tw-px-2">Owner</label>
+              <label
+                htmlFor="owner"
+                className="tw-px-2 hover:tw-cursor-pointer"
+              >
+                Owner
+              </label>
             </div>
-            <div>
+            <div
+              className={`tw-flex tw-justify-start tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2 hover:tw-cursor-pointer hover:tw-bg-gray-800 ${
+                selectedRole === "admin"
+                  ? "tw-bg-gray-800 tw-border-yellow-500"
+                  : "tw-bg-[#fff]/20 tw-border-gray-500"
+              }`}
+            >
               <input
                 type="radio"
+                id="admin"
                 name="role"
                 value="admin"
                 checked={newAdmin.role === "admin"}
                 onChange={handleRoleChange}
               ></input>
-              <label className="tw-px-2">Admin</label>
+              <label
+                htmlFor="admin"
+                className="tw-px-2 hover:tw-cursor-pointer"
+              >
+                Admin
+              </label>
             </div>
-            <div>
+            <div
+              className={`tw-flex tw-justify-start tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2 hover:tw-cursor-pointer hover:tw-bg-gray-800 ${
+                selectedRole === "moderator"
+                  ? "tw-bg-gray-800 tw-border-yellow-500"
+                  : "tw-bg-[#fff]/20 tw-border-gray-500"
+              }`}
+            >
               <input
                 type="radio"
+                id="moderator"
                 name="role"
                 value="moderator"
                 checked={newAdmin.role === "moderator"}
                 onChange={handleRoleChange}
               ></input>
-              <label className="tw-px-2">Moderator</label>
+              <label
+                htmlFor="moderator"
+                className="tw-px-2 hover:tw-cursor-pointer"
+              >
+                Moderator
+              </label>
             </div>
-            <div>
+            <div
+              className={`tw-flex tw-justify-start tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2 hover:tw-cursor-pointer hover:tw-bg-gray-800 ${
+                selectedRole === "guest"
+                  ? "tw-bg-gray-800 tw-border-yellow-500"
+                  : "tw-bg-[#fff]/20 tw-border-gray-500"
+              }`}
+            >
               <input
                 type="radio"
+                id="guest"
                 name="role"
                 value="guest"
                 checked={newAdmin.role === "guest"}
                 onChange={handleRoleChange}
               ></input>
-              <label className="tw-px-2">Guest</label>
+              <label
+                htmlFor="guest"
+                className="tw-px-2 hover:tw-cursor-pointer"
+              >
+                Guest
+              </label>
             </div>
           </div>
           {requiredFieldsError ? (

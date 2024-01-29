@@ -3,6 +3,7 @@ import Admins from "@/app/models/admin.model";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/options";
+import bcrypt from "bcrypt";
 
 // to edit admin
 export async function PUT(req: NextRequest) {
@@ -26,9 +27,19 @@ export async function PUT(req: NextRequest) {
     const requestBody = await req.json();
     const editData: { [key: string]: string | boolean | number } = {};
     if (requestBody) {
-      Object.keys(requestBody).forEach((key) => {
-        editData[key] = requestBody[key] as string | boolean | number;
-      });
+      for (let key of Object.keys(requestBody)) {
+        if (key === "password") {
+          // Hash the password before saving it
+          const saltRounds = 10;
+          const hashedPassword = await bcrypt.hash(
+            requestBody[key],
+            saltRounds
+          );
+          editData[key] = hashedPassword;
+        } else {
+          editData[key] = requestBody[key] as string | boolean | number;
+        }
+      }
     }
 
     // api/admin/edit?admin_id=657ab7edd422075ea7871f65

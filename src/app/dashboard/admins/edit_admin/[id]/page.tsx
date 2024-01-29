@@ -58,7 +58,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
       {adminData && (
         <form>
           <div className="tw-flex tw-flex-col tw-justify-between tw-gap-4 tw-m-6">
-            <div className="tw-flex tw-justify-between tw-w-2/5">
+            <div className="tw-flex tw-justify-between tw-w-1/2">
               <label className="tw-px-6">Admin ID:</label>
               <input
                 type="text"
@@ -68,7 +68,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 disabled
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
+            <div className="tw-flex tw-justify-between tw-w-1/2">
               <label className="tw-px-6">First Name:</label>
               <input
                 type="text"
@@ -78,7 +78,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
+            <div className="tw-flex tw-justify-between tw-w-1/2">
               <label className="tw-px-6">Last Name:</label>
               <input
                 name="last_name"
@@ -88,7 +88,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
+            <div className="tw-flex tw-justify-between tw-w-1/2">
               <label className="tw-px-6">Email:</label>
               <input
                 name="email"
@@ -98,7 +98,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
+            <div className="tw-flex tw-justify-between tw-w-1/2">
               <label className="tw-px-6">Username:</label>
               <input
                 name="username"
@@ -108,7 +108,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
+            <div className="tw-flex tw-justify-between tw-w-1/2">
               <label className="tw-px-6">Password:</label>
               <input
                 name="password"
@@ -118,10 +118,10 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-1/4">
+            <div className="tw-flex tw-justify-between tw-w-2/5">
               <label className="tw-px-6">Role:</label>
-              <div>
-                <div>
+              <div className="">
+                <div className="tw-flex tw-justify-between tw-border-yellow-500 tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2">
                   <input
                     type="radio"
                     name="role"
@@ -131,7 +131,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                   ></input>
                   <label>Owner</label>
                 </div>
-                <div>
+                <div className="tw-flex tw-justify-between tw-border-yellow-500 tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2">
                   <input
                     type="radio"
                     name="role"
@@ -141,7 +141,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                   ></input>
                   <label>Admin</label>
                 </div>
-                <div>
+                <div className="tw-flex tw-justify-between tw-border-yellow-500 tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2">
                   <input
                     type="radio"
                     name="role"
@@ -151,7 +151,7 @@ const EditAdmin = ({ params }: { params: { id: string } }) => {
                   ></input>
                   <label>Moderator</label>
                 </div>
-                <div>
+                <div className="tw-flex tw-justify-between tw-border-yellow-500 tw-border-2 tw-bg-[#fff]/20 tw-rounded-sm tw-w-auto tw-m-1 tw-px-2">
                   <input
                     type="radio"
                     name="role"
