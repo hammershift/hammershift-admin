@@ -16,6 +16,7 @@ import Image from "next/image";
 import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
 import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
 import { useSession } from "next-auth/react";
+import { BounceLoader, BeatLoader } from "react-spinners";
 
 interface WagerData {
     _id: string;
@@ -38,6 +39,7 @@ const WagersPage = () => {
     const [wagerData, setWagerData] = useState<WagerData[]>([]);
     const [searchValue, setSearchValue] = useState<null | string>(null);
     const [displayCount, setDisplayCount] = useState(7);
+    const [isLoading, setIsLoading] = useState(true);
 
     const { data: session } = useSession(); // to get session
 
@@ -50,6 +52,7 @@ const WagersPage = () => {
                 const data = await getLimitedWagers(displayCount);
                 if (data && "wagers" in data) {
                     setWagerData(data.wagers as WagerData[]);
+                    setIsLoading(false);
                 } else {
                     console.error("Unexpected data structure:", data);
                 }
@@ -106,7 +109,13 @@ const WagersPage = () => {
                     </div>
                 </div>
                 <div className="tw-my-4">
-                    <Table wagerData={wagerData} />
+                    {isLoading ? (
+                        <div className="tw-flex tw-justify-center tw-items-center tw-h-[592px]">
+                            <BeatLoader color="#F2CA16" />
+                        </div>
+                    ) : (
+                        <Table wagerData={wagerData} />
+                    )}
                 </div>
                 <div className="tw-flex tw-justify-center ">
                     <div className="tw-flex tw-items-center tw-gap-4 tw-py-4">
