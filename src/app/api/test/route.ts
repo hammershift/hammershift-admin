@@ -12,7 +12,6 @@ export async function GET(req: NextRequest) {
     if (!session) {
         return NextResponse.json({ message: "Unauthorized" }, { status: 400 });
     }
-    console.log("session:", session);
     try {
         // await connectToDB();
 
