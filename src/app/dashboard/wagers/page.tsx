@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Fragment, useEffect, useState } from "react";
+import { DateTime } from "luxon";
 import Search from "@/app/ui/dashboard/search/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import DvrIcon from "@mui/icons-material/Dvr";
@@ -15,6 +16,7 @@ import Image from "next/image";
 import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
 import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
 import { useSession } from "next-auth/react";
+import { BounceLoader, BeatLoader } from "react-spinners";
 
 interface WagerData {
     _id: string;
@@ -27,6 +29,7 @@ interface WagerData {
         username: string;
     };
     auctionID: string;
+    createdAt: string;
 }
 interface WagersPageProps {
     wagerData: WagerData[];
@@ -36,6 +39,7 @@ const WagersPage = () => {
     const [wagerData, setWagerData] = useState<WagerData[]>([]);
     const [searchValue, setSearchValue] = useState<null | string>(null);
     const [displayCount, setDisplayCount] = useState(7);
+    const [isLoading, setIsLoading] = useState(true);
 
     const { data: session } = useSession(); // to get session
 
@@ -48,6 +52,7 @@ const WagersPage = () => {
                 const data = await getLimitedWagers(displayCount);
                 if (data && "wagers" in data) {
                     setWagerData(data.wagers as WagerData[]);
+                    setIsLoading(false);
                 } else {
                     console.error("Unexpected data structure:", data);
                 }
@@ -104,7 +109,13 @@ const WagersPage = () => {
                     </div>
                 </div>
                 <div className="tw-my-4">
-                    <Table wagerData={wagerData} />
+                    {isLoading ? (
+                        <div className="tw-flex tw-justify-center tw-items-center tw-h-[592px]">
+                            <BeatLoader color="#F2CA16" />
+                        </div>
+                    ) : (
+                        <Table wagerData={wagerData} />
+                    )}
                 </div>
                 <div className="tw-flex tw-justify-center ">
                     <div className="tw-flex tw-items-center tw-gap-4 tw-py-4">
@@ -137,6 +148,9 @@ const Table: React.FC<WagersPageProps> = ({ wagerData }) => {
                 <thead>
                     <tr>
                         <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+                            Date
+                        </th>
+                        <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
                             Price Guessed
                         </th>
                         <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
@@ -157,6 +171,11 @@ const Table: React.FC<WagersPageProps> = ({ wagerData }) => {
                                 key={index}
                                 className=" tw-rounded-lg tw-bg-[#fff]/5"
                             >
+                                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                                    {DateTime.fromISO(item.createdAt).toFormat(
+                                        "MM/dd/yy"
+                                    )}
+                                </td>
                                 <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                                     ${item.priceGuessed}
                                 </td>
