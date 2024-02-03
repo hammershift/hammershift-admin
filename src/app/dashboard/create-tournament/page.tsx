@@ -65,40 +65,43 @@ const sampleData = [
 const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState([]); // data for list of auctions
     return (
-        <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-5">
+        <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-justify-between">
-                <div className="tw-text-xl tw-font-bold">Create Tournament</div>
+                <div className="tw-text-2xl tw-font-bold">
+                    Create Tournament
+                </div>
                 <button className="btn-yellow">CREATE TOURNAMENT</button>
             </div>
             <div className="tw-flex tw-w-full tw-gap-4">
                 <div className="tw-w-1/3 tw-min-h-[200px] tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4 ">
-                    <div className="tw-text-lg tw-font-bold">
+                    <div className="tw-text-xl tw-font-bold">
                         Tournament Information
                     </div>
                     <div className="tw-flex tw-flex-col tw-gap-1.5">
-                        <label>Category</label>
+                        <label>Title</label>
                         <input
-                            placeholder="category"
-                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded"
+                            placeholder="title"
+                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
                         />
                     </div>
                     <div className="tw-flex tw-flex-col tw-gap-1.5">
                         <label>Deadline</label>
                         <input
+                            type="datetime-local"
                             placeholder="deadline"
-                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded"
+                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
                         />
                     </div>
                     <div className="tw-flex tw-flex-col tw-gap-1.5">
                         <label>Buy-in Price</label>
                         <input
                             placeholder="buy-in price"
-                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded"
+                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
                         />
                     </div>
                 </div>
                 <div className="tw-w-2/3 tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4">
-                    <div className="tw-text-lg  tw-font-bold">
+                    <div className="tw-text-xl tw-font-bold">
                         List of Selected Auctions
                     </div>
                     <SelectedCard />
@@ -108,7 +111,8 @@ const CreateTournamentsPage = () => {
                     <SelectedCard />
                 </div>
             </div>
-            <div className="tw-flex tw-flex-col tw-w-full tw-gap-4">
+            {/* auctions and filter section */}
+            <div className="tw-flex tw-flex-col tw-w-full tw-gap-4 tw-bg-white/5 tw-py-6 tw-px-8">
                 <div className="tw-text-lg  tw-font-bold">Auctions</div>
                 <div className="tw-flex tw-gap-4">
                     <div>Filters:</div>
