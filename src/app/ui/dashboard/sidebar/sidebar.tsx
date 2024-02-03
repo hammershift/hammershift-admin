@@ -13,6 +13,8 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 //images
 import userImg from "../../../../../public/images/user.svg";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
@@ -59,12 +61,12 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
                 {
                     title: "Tournaments",
                     path: "/dashboard/tournaments",
-                    icon: <AttachMoneyIcon />,
+                    icon: <EmojiEventsIcon />,
                 },
                 {
                     title: "Create Tournament",
                     path: "/dashboard/create-tournament",
-                    icon: <AttachMoneyIcon />,
+                    icon: <AddBoxIcon />,
                 },
             ],
         },

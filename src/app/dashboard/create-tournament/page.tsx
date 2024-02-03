@@ -68,10 +68,10 @@ const CreateTournamentsPage = () => {
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-5">
             <div className="tw-flex tw-justify-between">
                 <div className="tw-text-xl tw-font-bold">Create Tournament</div>
-                <button>CREATE TOURNAMENT</button>
+                <button className="btn-yellow">CREATE TOURNAMENT</button>
             </div>
             <div className="tw-flex tw-w-full tw-gap-4">
-                <div className="tw-w-1/2 tw-min-h-[200px] tw-bg-white/5 tw-rounded tw-py-6 tw-flex tw-flex-col tw-gap-4 tw-px-4">
+                <div className="tw-w-1/3 tw-min-h-[200px] tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4 ">
                     <div className="tw-text-lg tw-font-bold">
                         Tournament Information
                     </div>
@@ -79,26 +79,33 @@ const CreateTournamentsPage = () => {
                         <label>Category</label>
                         <input
                             placeholder="category"
-                            className="tw-px-2 tw-flex-grow tw-rounded"
+                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded"
                         />
                     </div>
                     <div className="tw-flex tw-flex-col tw-gap-1.5">
                         <label>Deadline</label>
                         <input
                             placeholder="deadline"
-                            className="tw-px-2 tw-flex-grow tw-rounded"
+                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded"
                         />
                     </div>
                     <div className="tw-flex tw-flex-col tw-gap-1.5">
                         <label>Buy-in Price</label>
                         <input
                             placeholder="buy-in price"
-                            className="tw-px-2 tw-flex-grow tw-rounded"
+                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded"
                         />
                     </div>
                 </div>
-                <div className="tw-w-1/2 tw-bg-white/5 tw-rounded tw-py-4 tw-px-4 tw-text-lg  tw-font-bold ">
-                    List of Selected Auctions
+                <div className="tw-w-2/3 tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4">
+                    <div className="tw-text-lg  tw-font-bold">
+                        List of Selected Auctions
+                    </div>
+                    <SelectedCard />
+                    <SelectedCard />
+                    <SelectedCard />
+                    <SelectedCard />
+                    <SelectedCard />
                 </div>
             </div>
             <div className="tw-flex tw-flex-col tw-w-full tw-gap-4">
@@ -152,15 +159,6 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     description,
     deadline,
 }) => {
-    const tournamentsListCardData = {
-        id: "1TLC",
-        image: CarPhoto,
-        name: "1974 Maserati Bora 4.9",
-        description:
-            "Nisi anim cupidatat elit proident ipsum reprehenderit adipisicing ullamco do pariatur quis sunt exercitation officia. Tempor magna duis mollit culpa. Laborum esse eu occaecat dolor laborum exercitation. Sunt labore et sunt consequat culpa velit non do culpa ex tempor irure. Deserunt est exercitation consectetur nisi id.",
-        deadline: "05:16:00",
-    };
-
     return (
         <div>
             <div className="tw-flex tw-gap-8 tw-mt-6">
@@ -205,6 +203,16 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
             </div>
 
             <div className="tw-bg-white/5 tw-h-[1.5px] tw-mt-6"></div>
+        </div>
+    );
+};
+
+type SelectedCardData = {};
+
+const SelectedCard: React.FC<SelectedCardData> = () => {
+    return (
+        <div className="tw-border-solid tw-border-2 tw-border-white tw-border tw-py-3 tw-px-2 tw-rounded">
+            Card
         </div>
     );
 };
