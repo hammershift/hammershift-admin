@@ -5,10 +5,65 @@ import CarPhoto from "../../../../public/images/car-photo.svg";
 import HourGlass from "../../../../public/images/hourglass.svg";
 import Checkbox from "@mui/material/Checkbox";
 
-const sampleData = [];
+const sampleData = [
+    {
+        id: "1TLC",
+        auctionID: "27326382",
+        image: CarPhoto,
+        name: "1974 Maserati Bora 4.9",
+        description:
+            "Nisi anim cupidatat elit proident ipsum reprehenderit adipisicing ullamco do pariatur quis sunt exercitation officia. Tempor magna duis mollit culpa. Laborum esse eu occaecat dolor laborum exercitation. Sunt labore et sunt consequat culpa velit non do culpa ex tempor irure. Deserunt est exercitation consectetur nisi id.",
+        deadline: "05:16:00",
+    },
+    {
+        id: "2TLC",
+        auctionID: "27326382",
+        image: CarPhoto,
+        name: "1974 Maserati Bora 4.91",
+        description:
+            "Nisi anim cupidatat elit proident ipsum reprehenderit adipisicing ullamco do pariatur quis sunt exercitation officia. Tempor magna duis mollit culpa. Laborum esse eu occaecat dolor laborum exercitation. Sunt labore et sunt consequat culpa velit non do culpa ex tempor irure. Deserunt est exercitation consectetur nisi id.",
+        deadline: "05:16:00",
+    },
+    {
+        id: "3TLC",
+        auctionID: "27326382",
+        image: CarPhoto,
+        name: "1974 Maserati Bora 4.92",
+        description:
+            "Nisi anim cupidatat elit proident ipsum reprehenderit adipisicing ullamco do pariatur quis sunt exercitation officia. Tempor magna duis mollit culpa. Laborum esse eu occaecat dolor laborum exercitation. Sunt labore et sunt consequat culpa velit non do culpa ex tempor irure. Deserunt est exercitation consectetur nisi id.",
+        deadline: "05:16:00",
+    },
+    {
+        id: "4TLC",
+        auctionID: "27326382",
+        image: CarPhoto,
+        name: "1974 Maserati Bora 4.93",
+        description:
+            "Nisi anim cupidatat elit proident ipsum reprehenderit adipisicing ullamco do pariatur quis sunt exercitation officia. Tempor magna duis mollit culpa. Laborum esse eu occaecat dolor laborum exercitation. Sunt labore et sunt consequat culpa velit non do culpa ex tempor irure. Deserunt est exercitation consectetur nisi id.",
+        deadline: "05:16:00",
+    },
+    {
+        id: "5TLC",
+        auctionID: "27326382",
+        image: CarPhoto,
+        name: "1974 Maserati Bora 4.94",
+        description:
+            "Nisi anim cupidatat elit proident ipsum reprehenderit adipisicing ullamco do pariatur quis sunt exercitation officia. Tempor magna duis mollit culpa. Laborum esse eu occaecat dolor laborum exercitation. Sunt labore et sunt consequat culpa velit non do culpa ex tempor irure. Deserunt est exercitation consectetur nisi id.",
+        deadline: "05:16:00",
+    },
+    {
+        id: "6TLC",
+        auctionID: "27326382",
+        image: CarPhoto,
+        name: "1974 Maserati Bora 4.95",
+        description:
+            "Nisi anim cupidatat elit proident ipsum reprehenderit adipisicing ullamco do pariatur quis sunt exercitation officia. Tempor magna duis mollit culpa. Laborum esse eu occaecat dolor laborum exercitation. Sunt labore et sunt consequat culpa velit non do culpa ex tempor irure. Deserunt est exercitation consectetur nisi id.",
+        deadline: "05:16:00",
+    },
+];
 
 const CreateTournamentsPage = () => {
-    const [auctionsData, setAuctionsData] = useState([]);
+    const [auctionsData, setAuctionsData] = useState([]); // data for list of auctions
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-5">
             <div className="tw-flex tw-justify-between">
@@ -58,10 +113,20 @@ const CreateTournamentsPage = () => {
                     <div>Dropdown Sort 1</div>
                 </div>
                 <div>
-                    <TournamentsListCard />
-                    <TournamentsListCard />
-                    <TournamentsListCard />
-                    <TournamentsListCard />
+                    {sampleData &&
+                        sampleData.map((item, index) => {
+                            return (
+                                <TournamentsListCard
+                                    key={index + "TLC"}
+                                    auctionID={item.auctionID}
+                                    id={item.id}
+                                    image={item.image}
+                                    name={item.name}
+                                    description={item.description}
+                                    deadline={item.deadline}
+                                />
+                            );
+                        })}
                 </div>
             </div>
         </div>
@@ -70,8 +135,26 @@ const CreateTournamentsPage = () => {
 
 export default CreateTournamentsPage;
 
-export const TournamentsListCard = () => {
+type tournamentsListCardData = {
+    auctionID: string;
+    id: string;
+    image: string;
+    name: string;
+    description: string;
+    deadline: string;
+};
+
+export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
+    auctionID,
+    id,
+    image,
+    name,
+    description,
+    deadline,
+}) => {
     const tournamentsListCardData = {
+        id: "1TLC",
+        image: CarPhoto,
         name: "1974 Maserati Bora 4.9",
         description:
             "Nisi anim cupidatat elit proident ipsum reprehenderit adipisicing ullamco do pariatur quis sunt exercitation officia. Tempor magna duis mollit culpa. Laborum esse eu occaecat dolor laborum exercitation. Sunt labore et sunt consequat culpa velit non do culpa ex tempor irure. Deserunt est exercitation consectetur nisi id.",
@@ -90,7 +173,7 @@ export const TournamentsListCard = () => {
                     />
                 </div>
                 <Image
-                    src={CarPhoto}
+                    src={image}
                     width={416}
                     height={240}
                     alt="car"
@@ -98,13 +181,13 @@ export const TournamentsListCard = () => {
                 />
                 <div>
                     <div className="tw-opacity-30 tw-text-lg tw-font-bold">
-                        Auction ID: 27326382
+                        Auction ID: {auctionID}
                     </div>
                     <div className="tw-text-2xl tw-font-bold tw-mt-3">
-                        {tournamentsListCardData.name}
+                        {name}
                     </div>
                     <div className="tw-h-[72px] tw-ellipsis tw-overflow-hidden">
-                        {tournamentsListCardData.description}
+                        {description}
                     </div>
                     <div className="tw-flex tw-mt-4">
                         <Image
@@ -115,7 +198,7 @@ export const TournamentsListCard = () => {
                             className="tw-w-5 tw-h-5"
                         />
                         <span className="tw-text-[#F2CA16] tw-font-bold tw-ml-2">
-                            deadline
+                            {deadline}
                         </span>
                     </div>
                 </div>
