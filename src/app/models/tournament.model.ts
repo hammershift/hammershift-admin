@@ -12,12 +12,6 @@ const winnerSchema = new mongoose.Schema(
 
 const tournamentSchema = new mongoose.Schema(
     {
-        auctionID: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Auction",
-            },
-        ],
         // winner: [winnerSchema],
         buyInFee: {
             type: Number,
@@ -45,6 +39,6 @@ const tournamentSchema = new mongoose.Schema(
 
 const Tournaments =
     mongoose.models.tournaments ||
-    mongoose.model("tournament", tournamentSchema);
+    mongoose.model("tournaments", tournamentSchema);
 
 export default Tournaments;

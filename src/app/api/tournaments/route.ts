@@ -1,8 +1,11 @@
 import connectToDB from "@/app/lib/mongoose";
 import Tournaments from "@/app/models/tournament.model";
+import Auctions from "@/app/models/auction.model";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
+import { CarData } from "@/app/dashboard/auctions/page";
+import { ObjectId } from "mongodb";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +75,17 @@ export async function GET(req: NextRequest) {
 }
 
 // to POST tournament data
+// sample request body:
+/*{
+    "auctionID": ["65b06c9a5860b968d880c6e9", "65b309b0990459fcb7461e02", "65b309b1990459fcb7461e34", "65b309b1990459fcb7461e66", "65b38cc682288dfdce7db1c9" ],
+    "buyInFee": 50,
+    "finalPrize": 88,
+    "isActive": true,
+    "startTime": "2024-02-05T07:34:45.337Z",
+    "endTime": "2024-02-10T07:34:45.337Z"
+
+
+}*/
 export async function POST(req: NextRequest) {
     // check if user is authorized to access this function(owner, admin, moderator)
     // const session = await getServerSession(authOptions);
@@ -116,10 +130,36 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Access the 'auctionID' property from the parsed request body
-        const tournament = await Tournaments.create(tournamentData);
-        if (tournament) {
-            return NextResponse.json(tournament, { status: 200 });
+        const { auctionID, ...newTournamentData } = tournamentData;
+
+        // Create tournament
+        const tournament = await Tournaments.create(newTournamentData);
+        let auctionsData: CarData[] = [];
+        if (tournament && auctionID.length > 0) {
+            await Promise.all(
+                auctionID.map(async (id: string) => {
+                    const updatedAuction = await Auctions.findOneAndUpdate(
+                        { _id: new ObjectId(id) },
+                        { tournamentID: tournament._id },
+                        { new: true }
+                    );
+                    if (updatedAuction !== null) {
+                        auctionsData.push(updatedAuction);
+                    }
+                })
+            );
+
+            if (auctionsData.length > 0) {
+                return NextResponse.json(
+                    { tournament, auctionsData },
+                    { status: 200 }
+                );
+            } else {
+                return NextResponse.json(
+                    { message: "Error in updating Auctions" },
+                    { status: 404 }
+                );
+            }
         } else {
             return NextResponse.json(
                 { message: "Cannot post tournament" },

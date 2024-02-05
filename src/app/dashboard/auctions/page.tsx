@@ -5,7 +5,7 @@ import AuctionsPage from "@/app/ui/dashboard/auctionsPage/AuctionsPage";
 import { getCarsWithFilter } from "../../lib/data";
 // import sampleData from "../../sample_data.json";
 
-interface CarData {
+export interface CarData {
     auction_id: string;
     price: number;
     year: string;

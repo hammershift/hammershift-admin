@@ -1,9 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import CarPhoto from "../../../../public/images/car-photo.svg";
 import HourGlass from "../../../../public/images/hourglass.svg";
 import Checkbox from "@mui/material/Checkbox";
+import { getCarsWithFilter } from "@/app/lib/data";
+import { CarData } from "@/app/dashboard/auctions/page";
 
 const sampleData = [
     {
@@ -63,7 +65,30 @@ const sampleData = [
 ];
 
 const CreateTournamentsPage = () => {
-    const [auctionsData, setAuctionsData] = useState([]); // data for list of auctions
+    const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
+    const [displayCount, setDisplayCount] = useState(7);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // fetch auctions data
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getCarsWithFilter({ limit: displayCount });
+
+                if (data && "cars" in data) {
+                    console.log(data);
+                    setAuctionsData(data.cars as CarData[]);
+                    setIsLoading(false);
+                } else {
+                    console.error("Unexpected data structure:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+        fetchData();
+    }, [displayCount]);
+
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-justify-between">
@@ -72,72 +97,82 @@ const CreateTournamentsPage = () => {
                 </div>
                 <button className="btn-yellow">CREATE TOURNAMENT</button>
             </div>
-            <div className="tw-flex tw-w-full tw-gap-4">
-                <div className="tw-w-1/3 tw-min-h-[200px] tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4 ">
-                    <div className="tw-text-xl tw-font-bold">
-                        Tournament Information
+            <div className="tw-flex tw-gap-4">
+                <div className="tw-flex tw-flex-col tw-w-2/5 tw-gap-4">
+                    <div className="tw-w-full tw-min-h-[200px] tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4 ">
+                        <div className="tw-text-xl tw-font-bold">
+                            Tournament Information
+                        </div>
+                        <div className="tw-flex tw-flex-col tw-gap-1.5">
+                            <label>Title</label>
+                            <input
+                                placeholder="title"
+                                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                            />
+                        </div>
+                        <div className="tw-flex tw-flex-col tw-gap-1.5">
+                            <label>Start Date and Time</label>
+                            <input
+                                type="datetime-local"
+                                placeholder="deadline"
+                                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                            />
+                        </div>
+                        <div className="tw-flex tw-flex-col tw-gap-1.5">
+                            <label>End Date and Time</label>
+                            <input
+                                type="datetime-local"
+                                placeholder="deadline"
+                                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                            />
+                        </div>
+                        <div className="tw-flex tw-flex-col tw-gap-1.5">
+                            <label>Buy-in Price</label>
+                            <input
+                                placeholder="buy-in price"
+                                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                            />
+                        </div>
                     </div>
-                    <div className="tw-flex tw-flex-col tw-gap-1.5">
-                        <label>Title</label>
-                        <input
-                            placeholder="title"
-                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
-                        />
-                    </div>
-                    <div className="tw-flex tw-flex-col tw-gap-1.5">
-                        <label>Deadline</label>
-                        <input
-                            type="datetime-local"
-                            placeholder="deadline"
-                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
-                        />
-                    </div>
-                    <div className="tw-flex tw-flex-col tw-gap-1.5">
-                        <label>Buy-in Price</label>
-                        <input
-                            placeholder="buy-in price"
-                            className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
-                        />
+                    <div className="tw-w-full tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4">
+                        <div className="tw-text-xl tw-font-bold">
+                            List of Selected Auctions
+                        </div>
+                        <SelectedCard />
+                        <SelectedCard />
+                        <SelectedCard />
+                        <SelectedCard />
+                        <SelectedCard />
                     </div>
                 </div>
-                <div className="tw-w-2/3 tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4">
-                    <div className="tw-text-xl tw-font-bold">
-                        List of Selected Auctions
+                {/* auctions and filter section */}
+                <div className="tw-flex tw-flex-col tw-w-3/5 tw-gap-4 tw-bg-white/5 tw-py-6 tw-px-8">
+                    <div className="tw-text-lg  tw-font-bold">Auctions</div>
+                    <div className="tw-flex tw-gap-4">
+                        <div>Filters:</div>
+                        <div>Dropdown Filter 1</div>
+                        <div>Dropdown Filter 2</div>
+                        <div>Dropdown Filter 3</div>
+                        <div>Dropdown Filter 4</div>
+                        <div>Sort:</div>
+                        <div>Dropdown Sort 1</div>
                     </div>
-                    <SelectedCard />
-                    <SelectedCard />
-                    <SelectedCard />
-                    <SelectedCard />
-                    <SelectedCard />
-                </div>
-            </div>
-            {/* auctions and filter section */}
-            <div className="tw-flex tw-flex-col tw-w-full tw-gap-4 tw-bg-white/5 tw-py-6 tw-px-8">
-                <div className="tw-text-lg  tw-font-bold">Auctions</div>
-                <div className="tw-flex tw-gap-4">
-                    <div>Filters:</div>
-                    <div>Dropdown Filter 1</div>
-                    <div>Dropdown Filter 2</div>
-                    <div>Dropdown Filter 3</div>
-                    <div>Dropdown Filter 4</div>
-                    <div>Sort:</div>
-                    <div>Dropdown Sort 1</div>
-                </div>
-                <div>
-                    {sampleData &&
-                        sampleData.map((item, index) => {
-                            return (
-                                <TournamentsListCard
-                                    key={index + "TLC"}
-                                    auctionID={item.auctionID}
-                                    id={item.id}
-                                    image={item.image}
-                                    name={item.name}
-                                    description={item.description}
-                                    deadline={item.deadline}
-                                />
-                            );
-                        })}
+                    <div className=" tw-h-screen tw-rounded-xl tw-bg-white/20 tw-overflow-scroll">
+                        {sampleData &&
+                            sampleData.map((item, index) => {
+                                return (
+                                    <TournamentsListCard
+                                        key={index + "TLC"}
+                                        auctionID={item.auctionID}
+                                        id={item.id}
+                                        image={item.image}
+                                        name={item.name}
+                                        description={item.description}
+                                        deadline={item.deadline}
+                                    />
+                                );
+                            })}
+                    </div>
                 </div>
             </div>
         </div>
@@ -165,7 +200,7 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
 }) => {
     return (
         <div>
-            <div className="tw-flex tw-gap-8 tw-mt-6">
+            <div className="tw-flex tw-gap-6 tw-mt-6 tw-pl-4">
                 <div>
                     <Checkbox
                         sx={{
@@ -213,10 +248,22 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
 
 type SelectedCardData = {};
 
-const SelectedCard: React.FC<SelectedCardData> = () => {
+const SelectedCard: React.FC<SelectedCardData> = (data?) => {
     return (
         <div className="tw-border-solid tw-border-2 tw-border-white tw-border tw-py-3 tw-px-2 tw-rounded">
-            Card
+            {data ? (
+                <div>
+                    <div>
+                        Auction ID: <span>insert data</span>
+                    </div>
+                    <div>
+                        Title: <span>insert data</span>
+                    </div>
+                    <button></button>
+                </div>
+            ) : (
+                <div>Card</div>
+            )}
         </div>
     );
 };
