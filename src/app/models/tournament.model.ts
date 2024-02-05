@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import TournamentsPage from "../dashboard/tournaments/page";
 
 const winnerSchema = new mongoose.Schema(
     {
@@ -24,24 +25,26 @@ const tournamentSchema = new mongoose.Schema(
         },
         finalPrize: {
             type: Number,
-            required: true,
+            required: false,
         },
         isActive: {
             type: Boolean,
             default: true,
         },
         startTime: {
-            type: Date,
+            type: String,
             required: true,
         },
         endTime: {
-            type: Date,
+            type: String,
             required: true,
         },
     },
     { timestamps: true }
 );
 
-const Tournament = mongoose.model("Tournament", tournamentSchema);
+const Tournaments =
+    mongoose.models.tournaments ||
+    mongoose.model("tournament", tournamentSchema);
 
-export default Tournament;
+export default Tournaments;
