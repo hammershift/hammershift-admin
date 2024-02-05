@@ -1,6 +1,8 @@
 import connectToDB from "@/app/lib/mongoose";
 import Tournaments from "@/app/models/tournament.model";
 import { NextRequest, NextResponse } from "next/server";
+import { authOptions } from "../auth/[...nextauth]/options";
+import { getServerSession } from "next-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +73,22 @@ export async function GET(req: NextRequest) {
 
 // to POST tournament data
 export async function POST(req: NextRequest) {
+    // check if user is authorized to access this function(owner, admin, moderator)
+    // const session = await getServerSession(authOptions);
+    // if (
+    //     session?.user.role !== "owner" &&
+    //     session?.user.role !== "admin" &&
+    //     session?.user.role !== "moderator"
+    // ) {
+    //     return NextResponse.json(
+    //         {
+    //             message:
+    //                 "Unauthorized! Your role does not have access to this function",
+    //         },
+    //         { status: 400 }
+    //     );
+    // }
+
     try {
         await connectToDB();
         const tournamentData = await req.json();
