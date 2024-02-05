@@ -16,6 +16,58 @@ type TournamentData = {
 // to GET tournament data
 // URL = /api/tournaments?id=<insert id>    fetch one tournaments
 // URL = /api/tournaments                   fetch all tournaments
+export async function GET(req: NextRequest) {
+    try {
+        await connectToDB();
+        const id = req.nextUrl.searchParams.get("id");
+        const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
+        const limit = Number(req.nextUrl.searchParams.get("limit"));
+
+        // check if there is a request body
+        if (id) {
+            const tournament = await Tournaments.findOne({ _id: id });
+            if (tournament) {
+                return NextResponse.json(tournament, { status: 200 });
+            } else {
+                return NextResponse.json(
+                    { message: "Cannot find tournament" },
+                    { status: 404 }
+                );
+            }
+        }
+
+        // To get all auctions with isActive = true
+        const tournaments = await Tournaments.find({ isActive: true })
+            .limit(limit)
+            .skip(offset);
+        const tournamentsCount = await Tournaments.countDocuments({
+            isActive: true,
+        });
+
+        if (tournaments) {
+            return NextResponse.json(
+                { total: tournamentsCount, tournaments },
+                { status: 200 }
+            );
+        } else {
+            return NextResponse.json(
+                { message: "Cannot post tournament" },
+                { status: 404 }
+            );
+        }
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            {
+                message: "Internal server error",
+                error,
+            },
+            { status: 500 }
+        );
+    }
+}
+
+// to POST tournament data
 export async function POST(req: NextRequest) {
     try {
         await connectToDB();
