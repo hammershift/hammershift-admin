@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
         await connectToDB();
         const tournamentData = await req.json();
 
-        console.log("tournamentData", tournamentData);
         // check if there is a request body
         if (!tournamentData) {
             return NextResponse.json({
@@ -35,7 +34,7 @@ export async function POST(req: NextRequest) {
             !tournamentData.auctionID ||
             !tournamentData.buyInFee ||
             !tournamentData.finalPrize ||
-            tournamentData.isActive ||
+            !tournamentData.isActive ||
             !tournamentData.startTime ||
             !tournamentData.endTime
         ) {
@@ -51,7 +50,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json(tournament, { status: 200 });
         } else {
             return NextResponse.json(
-                { message: "Cannot save tournament" },
+                { message: "Cannot post tournament" },
                 { status: 404 }
             );
         }
