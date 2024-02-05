@@ -40,10 +40,12 @@ export async function GET(req: NextRequest) {
         const tournaments = await Tournaments.find({ isActive: true })
             .limit(limit)
             .skip(offset);
+        // count all tournaments with isActive = true
         const tournamentsCount = await Tournaments.countDocuments({
             isActive: true,
         });
 
+        //response {total, tournaments}
         if (tournaments) {
             return NextResponse.json(
                 { total: tournamentsCount, tournaments },
