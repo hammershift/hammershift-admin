@@ -190,7 +190,7 @@ type tournamentsListCardData = {
     deadline: string;
 };
 
-export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
+const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     auctionID,
     id,
     image,
@@ -248,22 +248,18 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
 
 type SelectedCardData = {};
 
-const SelectedCard: React.FC<SelectedCardData> = (data?) => {
+const SelectedCard: React.FC<SelectedCardData> = () => {
     return (
         <div className="tw-border-solid tw-border-2 tw-border-white tw-border tw-py-3 tw-px-2 tw-rounded">
-            {data ? (
+            <div>
                 <div>
-                    <div>
-                        Auction ID: <span>insert data</span>
-                    </div>
-                    <div>
-                        Title: <span>insert data</span>
-                    </div>
-                    <button></button>
+                    Auction ID: <span>insert data</span>
                 </div>
-            ) : (
-                <div>Card</div>
-            )}
+                <div>
+                    Title: <span>insert data</span>
+                </div>
+                <button></button>
+            </div>
         </div>
     );
 };
