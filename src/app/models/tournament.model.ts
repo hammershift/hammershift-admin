@@ -1,5 +1,14 @@
 import mongoose from "mongoose";
 
+const winnerSchema = new mongoose.Schema(
+    {
+        id: mongoose.Types.ObjectId,
+        username: String,
+        winnings: Number,
+    },
+    { _id: false }
+);
+
 const tournamentSchema = new mongoose.Schema(
     {
         auctionID: [
@@ -8,12 +17,7 @@ const tournamentSchema = new mongoose.Schema(
                 ref: "Auction",
             },
         ],
-        winner: [
-            {
-                type: mongoose.Types.ObjectId,
-                ref: "User",
-            },
-        ],
+        // winner: [winnerSchema],
         buyInFee: {
             type: Number,
             required: true,
@@ -33,10 +37,6 @@ const tournamentSchema = new mongoose.Schema(
         endTime: {
             type: Date,
             required: true,
-        },
-        totalWagers: {
-            type: Number,
-            default: 0,
         },
     },
     { timestamps: true }
