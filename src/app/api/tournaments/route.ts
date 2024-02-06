@@ -10,7 +10,7 @@ import { ObjectId } from "mongodb";
 export const dynamic = "force-dynamic";
 
 type TournamentData = {
-    auctionID: string[];
+    title: string;
     buyInFee: number;
     finalPrize: number;
     isActive: boolean;
@@ -77,6 +77,7 @@ export async function GET(req: NextRequest) {
 // to POST tournament data
 // sample request body:
 /*{
+    "title": "Random Collections Tournament"
     "auctionID": ["65b06c9a5860b968d880c6e9", "65b309b0990459fcb7461e02", "65b309b1990459fcb7461e34", "65b309b1990459fcb7461e66", "65b38cc682288dfdce7db1c9" ],
     "buyInFee": 50,
     "finalPrize": 88,
@@ -118,6 +119,7 @@ export async function POST(req: NextRequest) {
         // check if required fields are present
         if (
             !tournamentData.auctionID ||
+            !tournamentData.title ||
             !tournamentData.buyInFee ||
             !tournamentData.finalPrize ||
             !tournamentData.isActive ||

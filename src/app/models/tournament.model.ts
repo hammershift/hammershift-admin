@@ -12,6 +12,10 @@ const winnerSchema = new mongoose.Schema(
 
 const tournamentSchema = new mongoose.Schema(
     {
+        title: {
+            type: String,
+            required: true,
+        },
         // winner: [winnerSchema],
         buyInFee: {
             type: Number,
