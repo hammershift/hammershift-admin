@@ -23,7 +23,8 @@ const tournamentSchema = new mongoose.Schema(
         },
         pot: {
             type: Number,
-            required: false,
+            default: 0,
+            required: true,
         },
         isActive: {
             type: Boolean,

@@ -126,10 +126,9 @@ export async function POST(req: NextRequest) {
         }
 
         const { auctionID, ...newTournamentData } = tournamentData;
-        newTournamentData.pot = 0; // initial pot
-        newTournamentData.isActive = true; // isActive = true
 
         //Create tournament
+        // added pot and isActive
         const tournament = await Tournaments.create(newTournamentData);
         let auctionsData: CarData[] = [];
         if (tournament && auctionID.length > 0) {
