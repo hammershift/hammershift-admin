@@ -21,7 +21,7 @@ const tournamentSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        finalPrize: {
+        pot: {
             type: Number,
             required: false,
         },

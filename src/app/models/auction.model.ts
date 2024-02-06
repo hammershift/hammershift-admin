@@ -51,11 +51,13 @@ const auctionSchema = new mongoose.Schema(
                 deadline: { type: "string", format: "date-time" },
             },
         },
-        tournamentID: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Tournament",
-            required: false,
-        },
+        tournamentID: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Tournaments",
+                required: false,
+            },
+        ],
     },
     {
         timestamps: true,

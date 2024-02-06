@@ -12,7 +12,6 @@ export const dynamic = "force-dynamic";
 type TournamentData = {
     title: string;
     buyInFee: number;
-    finalPrize: number;
     isActive: boolean;
     startTime: string;
     endTime: string;
@@ -80,12 +79,8 @@ export async function GET(req: NextRequest) {
     "title": "Random Collections Tournament"
     "auctionID": ["65b06c9a5860b968d880c6e9", "65b309b0990459fcb7461e02", "65b309b1990459fcb7461e34", "65b309b1990459fcb7461e66", "65b38cc682288dfdce7db1c9" ],
     "buyInFee": 50,
-    "finalPrize": 88,
-    "isActive": true,
     "startTime": "2024-02-05T07:34:45.337Z",
     "endTime": "2024-02-10T07:34:45.337Z"
-
-
 }*/
 export async function POST(req: NextRequest) {
     // check if user is authorized to access this function(owner, admin, moderator)
@@ -121,8 +116,6 @@ export async function POST(req: NextRequest) {
             !tournamentData.auctionID ||
             !tournamentData.title ||
             !tournamentData.buyInFee ||
-            !tournamentData.finalPrize ||
-            !tournamentData.isActive ||
             !tournamentData.startTime ||
             !tournamentData.endTime
         ) {
@@ -133,8 +126,10 @@ export async function POST(req: NextRequest) {
         }
 
         const { auctionID, ...newTournamentData } = tournamentData;
+        newTournamentData.pot = 0; // initial pot
+        newTournamentData.isActive = true; // isActive = true
 
-        // Create tournament
+        //Create tournament
         const tournament = await Tournaments.create(newTournamentData);
         let auctionsData: CarData[] = [];
         if (tournament && auctionID.length > 0) {
@@ -142,7 +137,7 @@ export async function POST(req: NextRequest) {
                 auctionID.map(async (id: string) => {
                     const updatedAuction = await Auctions.findOneAndUpdate(
                         { _id: new ObjectId(id) },
-                        { tournamentID: tournament._id },
+                        { $push: { tournamentID: tournament._id } },
                         { new: true }
                     );
                     if (updatedAuction !== null) {
