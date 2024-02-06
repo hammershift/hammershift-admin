@@ -84,6 +84,7 @@ export async function GET(req: NextRequest) {
 }*/
 export async function POST(req: NextRequest) {
     // check if user is authorized to access this function(owner, admin, moderator)
+    // TODO: uncomment this after testing
     // const session = await getServerSession(authOptions);
     // if (
     //     session?.user.role !== "owner" &&
