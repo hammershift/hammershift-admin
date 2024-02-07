@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { RefObject, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import CarPhoto from "../../../../public/images/car-photo.svg";
 import HourGlass from "../../../../public/images/hourglass.svg";
@@ -188,13 +188,36 @@ const LocationDropdownContent = [
     "Wyoming",
 ];
 
+const SortDropdownContent = [
+    "Top Performers",
+    "Newly Listed",
+    "Most Expensive",
+    "Least Expensive",
+    "Most Bids",
+    "Least Bids",
+    "Ending Soon",
+];
+
 const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
     const [isLoading, setIsLoading] = useState(true);
+    const [makeDropdown, setMakeDropdown] = useState(false);
+    const [categoryDropdown, setCategoryDropdown] = useState(false);
+    const [eraDropdown, setEraDropdown] = useState(false);
+    const [locationDropdown, setLocationDropdown] = useState(false);
+    const [sortDropdown, setSortDropdown] = useState(false);
     const [selectedData, setSelectedData] = useState<SelectedDataType[] | null>(
         null
     );
+    const [filters, setFilters] = useState({
+        make: "All",
+        category: "All",
+        era: "All",
+        location: "All",
+        sort: "Newly Listed",
+    });
+    const filterRef = useRef();
 
     // fetch auctions data
     useEffect(() => {
@@ -284,6 +307,27 @@ const CreateTournamentsPage = () => {
         return;
     };
 
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (filterRef.current && !filterRef.current.contains(e.target)) {
+                setMakeDropdown(false);
+                setCategoryDropdown(false);
+                setEraDropdown(false);
+                setLocationDropdown(false);
+                setSortDropdown(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+
+        return () => {
+            document.removeEventListener("mousedown", handler);
+        };
+    });
+
+    const handleCheckboxFilters = () => {
+        console.log("clicked");
+    };
+
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-justify-between">
@@ -369,14 +413,116 @@ const CreateTournamentsPage = () => {
                 {/* auctions and filter section */}
                 <div className="tw-flex tw-flex-col tw-w-3/5 tw-gap-4 tw-bg-white/5 tw-py-6 tw-px-8">
                     <div className="tw-text-lg  tw-font-bold">Auctions</div>
-                    <div className="tw-flex tw-gap-4">
+                    <div
+                        className="tw-flex tw-gap-4"
+                        ref={
+                            filterRef as unknown as
+                                | RefObject<HTMLDivElement>
+                                | undefined
+                        }
+                    >
                         <div>Filters:</div>
-                        <div>Dropdown Filter 1</div>
-                        <div>Dropdown Filter 2</div>
-                        <div>Dropdown Filter 3</div>
-                        <div>Dropdown Filter 4</div>
+                        <div>
+                            <div
+                                onClick={() => setMakeDropdown((prev) => !prev)}
+                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                            >
+                                Make
+                            </div>
+                            {makeDropdown && (
+                                <DropdownComponent
+                                    filterKey="make"
+                                    content={MakeDropdownContent}
+                                    columns={3}
+                                    handleCheckboxFilters={
+                                        handleCheckboxFilters
+                                    }
+                                    selected={false}
+                                />
+                            )}
+                        </div>
+                        <div>
+                            <div
+                                onClick={() =>
+                                    setCategoryDropdown((prev) => !prev)
+                                }
+                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                            >
+                                Category
+                            </div>
+                            {categoryDropdown && (
+                                <DropdownComponent
+                                    filterKey="category"
+                                    content={CategoryDropdownContent}
+                                    columns={3}
+                                    handleCheckboxFilters={
+                                        handleCheckboxFilters
+                                    }
+                                    selected={false}
+                                />
+                            )}
+                        </div>
+                        <div>
+                            <div
+                                onClick={() => setEraDropdown((prev) => !prev)}
+                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                            >
+                                Era
+                            </div>
+                            {eraDropdown && (
+                                <DropdownComponent
+                                    filterKey="era"
+                                    content={EraDropdownContent}
+                                    columns={2}
+                                    handleCheckboxFilters={
+                                        handleCheckboxFilters
+                                    }
+                                    selected={false}
+                                />
+                            )}
+                        </div>
+                        <div>
+                            <div
+                                onClick={() =>
+                                    setLocationDropdown((prev) => !prev)
+                                }
+                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                            >
+                                Location
+                            </div>
+                            {locationDropdown && (
+                                <DropdownComponent
+                                    filterKey="location"
+                                    content={LocationDropdownContent}
+                                    columns={3}
+                                    handleCheckboxFilters={
+                                        handleCheckboxFilters
+                                    }
+                                    selected={false}
+                                />
+                            )}
+                        </div>
                         <div>Sort:</div>
-                        <div>Dropdown Sort 1</div>
+                        <div>
+                            <div
+                                onClick={() => setSortDropdown((prev) => !prev)}
+                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                            >
+                                Sort
+                            </div>
+                            {sortDropdown && (
+                                <DropdownComponent
+                                    filterKey="sort"
+                                    content={SortDropdownContent}
+                                    columns={1}
+                                    handleCheckboxFilters={
+                                        handleCheckboxFilters
+                                    }
+                                    selected={false}
+                                />
+                            )}
+                        </div>
+                        <button className="btn-white">FILTER</button>
                     </div>
                     <div className=" tw-h-screen tw-rounded-xl tw-bg-white/20 tw-overflow-scroll">
                         {auctionsData &&
@@ -543,6 +689,38 @@ const SelectedCard: React.FC<SelectedCardProps> = ({
                     Remove?
                 </button>
             </div>
+        </div>
+    );
+};
+
+type DropdownComponentProps = {
+    filterKey: string;
+    content: string[];
+    columns: number;
+    handleCheckboxFilters: any;
+    selected: boolean;
+};
+// dropdown component
+const DropdownComponent: React.FC<DropdownComponentProps> = ({
+    filterKey,
+    content,
+    columns,
+    handleCheckboxFilters,
+    selected,
+}) => {
+    return (
+        <div className="tw-absolute tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg">
+            <ul className={`tw-grid tw-grid-cols-${columns} tw-gap-3 `}>
+                {content.map((item: string, index: number) => (
+                    <li key={String(index + item)}>
+                        <Checkbox
+                            checked={selected}
+                            onClick={() => handleCheckboxFilters()}
+                        />
+                        <span>{item}</span>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 };
