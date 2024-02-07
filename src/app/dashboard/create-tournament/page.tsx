@@ -51,6 +51,143 @@ type HandleCheckboxType = (
     image: string
 ) => void;
 
+const MakeDropdownContent = [
+    "All",
+    "Acura",
+    "Audi",
+    "BMW",
+    "Alfa Romeo",
+    "Aston Martin",
+    "Honda",
+    "Jaguar",
+    "Jeep",
+    "Kia",
+    "Lamborghini",
+    "Land Rover",
+    "Lexus",
+    "Chrysler",
+    "Chevrolet",
+    "Cadillac",
+    "Buick",
+    "Bugatti",
+    "Bentley",
+    "Hyundai",
+    "Lincoln",
+    "Lotus",
+    "Lucid",
+    "Maserati",
+    "Mazda",
+    "McLaren",
+    "Genesis",
+    "GMX",
+    "Ford",
+    "Fiat",
+    "Ferrari",
+    "Dodge",
+    "Infiniti",
+    "Mercedes-Benz",
+    "Mini",
+    "Mitsubishi",
+    "Nissan",
+    "Polestar",
+    "Porsche",
+];
+
+const CategoryDropdownContent = [
+    "All",
+    "Coupes",
+    "Crossovers",
+    "EVs and Hybrids",
+    "Hatchbacks",
+    "Luxury Cars",
+    "Minivans & Vans",
+    "Pickup Trucks",
+    "SUVs",
+    "Sedans",
+    "Small Cars",
+    "Sports Cars",
+    "Station Wagons",
+];
+
+const EraDropdownContent = [
+    "All",
+    "2020s",
+    "2010s",
+    "2000s",
+    "1990s",
+    "1980s",
+    "1970s",
+    "1960s",
+    "1950s",
+    "1940s",
+    "1930s",
+    "1920s",
+    "1910s",
+    "1900 and older",
+];
+
+const LocationDropdownContent = [
+    "Alabama",
+    "Alaska",
+    "American Samoa",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "District of Columbia",
+    "Federated States of Micronesia",
+    "Florida",
+    "Georgia",
+    "Guam",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Marshall Islands",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Northern Mariana Islands",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Palau",
+    "Pennsylvania",
+    "Puerto Rico",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virgin Islands",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+];
+
 const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
@@ -112,9 +249,12 @@ const CreateTournamentsPage = () => {
         auction_id: string,
         image: string
     ) => {
-        setSelectedData(() => {
+        if (selectedData !== null && selectedData.length >= 5) {
+            return;
+        }
+        setSelectedData((prevSelectedData) => {
             // if no data, add new data
-            if (!selectedData) {
+            if (!prevSelectedData) {
                 return [
                     {
                         _id,
@@ -126,12 +266,12 @@ const CreateTournamentsPage = () => {
                 ];
             }
             // remove if already selected
-            if (selectedData.some((item) => item._id === _id)) {
-                return selectedData.filter((item) => item._id !== _id);
+            if (prevSelectedData.some((item) => item._id === _id)) {
+                return prevSelectedData.filter((item) => item._id !== _id);
             }
             // add new data
             return [
-                ...selectedData,
+                ...prevSelectedData,
                 {
                     _id: _id,
                     title: title,
@@ -141,6 +281,7 @@ const CreateTournamentsPage = () => {
                 },
             ];
         });
+        return;
     };
 
     return (
