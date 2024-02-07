@@ -6,6 +6,7 @@ import HourGlass from "../../../../public/images/hourglass.svg";
 import Checkbox from "@mui/material/Checkbox";
 import { getCarsWithFilter } from "@/app/lib/data";
 import { boolean, number } from "zod";
+import { Button } from "@mui/material";
 
 interface CarData {
     _id: string;
@@ -39,6 +40,7 @@ interface SelectedDataType {
     title: string;
     deadline: string;
     auction_id: string;
+    image: string;
 }
 
 const selectedDataSample = [
@@ -47,6 +49,7 @@ const selectedDataSample = [
         title: "2006 Spyker C8 Spyder",
         deadline: "2024-02-17T18:17:00.000Z",
         auction_id: "69824733",
+        image: CarPhoto,
     },
 ];
 
@@ -55,7 +58,7 @@ const CreateTournamentsPage = () => {
     const [displayCount, setDisplayCount] = useState(7);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedData, setSelectedData] = useState<SelectedDataType[] | null>(
-        selectedDataSample
+        []
     );
 
     // fetch auctions data
@@ -79,8 +82,28 @@ const CreateTournamentsPage = () => {
 
     // check if data is fetched
     useEffect(() => {
-        console.log(auctionsData);
-    }, [auctionsData]);
+        console.log("auctionData:", auctionsData);
+        console.log("selectedData:", selectedData);
+    }, [auctionsData, selectedData]);
+
+    // removes all auctions from selectedData
+    const handleRemoveAuctions = () => {
+        setSelectedData(null);
+    };
+
+    const handleRemoveSelectedAuction = (id: string) => {
+        if (selectedData) {
+            const newSelectedData = selectedData.filter(
+                (item) => item._id !== id
+            );
+            setSelectedData(newSelectedData);
+        }
+    };
+
+    function convertDateStringToDateTime(dateString: string) {
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    }
 
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
@@ -131,6 +154,13 @@ const CreateTournamentsPage = () => {
                         <div className="tw-text-xl tw-font-bold">
                             List of Selected Auctions
                         </div>
+                        <button
+                            className="btn-transparent-red"
+                            onClick={handleRemoveAuctions}
+                        >
+                            Remove All Auctions
+                        </button>
+                        {/* Selected Auctions Card */}
                         {selectedData &&
                             selectedData?.length > 0 &&
                             selectedData.map((item, index) => (
@@ -140,8 +170,14 @@ const CreateTournamentsPage = () => {
                                         title={item.title}
                                         deadline={item.deadline}
                                         auction_id={item.auction_id}
+                                        image={item.image}
+                                        handleRemoveSelectedAuction={
+                                            handleRemoveSelectedAuction
+                                        }
+                                        convertDateStringToDateTime={
+                                            convertDateStringToDateTime
+                                        }
                                     />
-                                    ,
                                 </div>
                             ))}
                     </div>
@@ -167,18 +203,11 @@ const CreateTournamentsPage = () => {
                                         auctionID={item.auction_id}
                                         id={item._id}
                                         image={item.image}
-                                        name={`${item.year} ${item.make} ${item.model}`}
+                                        title={`${item.year} ${item.make} ${item.model}`}
                                         description={item.description}
                                         deadline={item.deadline}
-                                        selected={
-                                            selectedData?.length == 0 ||
-                                            selectedData == null
-                                                ? false
-                                                : selectedData?.some(
-                                                      (data) =>
-                                                          data._id === item._id
-                                                  )
-                                        }
+                                        selectedData={selectedData}
+                                        setSelectedData={setSelectedData}
                                     />
                                 );
                             })}
@@ -195,20 +224,24 @@ type tournamentsListCardData = {
     auctionID: string;
     id: string;
     image: string;
-    name: string;
+    title: string;
     description: string[];
     deadline: string;
-    selected: boolean;
+    selectedData: SelectedDataType[] | null;
+    setSelectedData: React.Dispatch<
+        React.SetStateAction<SelectedDataType[] | null>
+    >;
 };
 
 const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     auctionID,
     id,
     image,
-    name,
+    title,
     description,
     deadline,
-    selected,
+    selectedData,
+    setSelectedData,
 }) => {
     function convertDateStringToDateTime(dateString: string) {
         const date = new Date(dateString);
@@ -216,16 +249,49 @@ const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     }
 
     const dateTime = convertDateStringToDateTime(deadline);
+
+    const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSelectedData((prev) => {
+            if (!prev) {
+                return [
+                    {
+                        _id: id,
+                        title,
+                        deadline: dateTime,
+                        auction_id: auctionID,
+                        image,
+                    },
+                ];
+            }
+            if (prev.some((item) => item._id === id)) {
+                return prev.filter((item) => item._id !== id);
+            }
+            return [
+                {
+                    _id: id,
+                    title,
+                    deadline: dateTime,
+                    auction_id: auctionID,
+                    image,
+                },
+                ...prev,
+            ];
+        });
+    };
+
+    useEffect(() => {}, []);
     return (
         <div>
             <div className="tw-flex tw-gap-6 tw-mt-6 tw-pl-4">
                 <div>
                     <Checkbox
-                        checked={selected}
+                        id={id}
+                        value={auctionID}
                         sx={{
                             "& .MuiSvgIcon-root": { fontSize: 28 },
                             color: "white",
                         }}
+                        onChange={handleCheckbox}
                     />
                 </div>
                 <img
@@ -240,7 +306,7 @@ const TournamentsListCard: React.FC<tournamentsListCardData> = ({
                         Auction ID: {auctionID}
                     </div>
                     <div className="tw-text-2xl tw-font-bold tw-mt-3">
-                        {name}
+                        {title}
                     </div>
                     <div className="tw-h-[72px] tw-ellipsis tw-overflow-hidden">
                         {description.map((item, index) => (
@@ -267,21 +333,33 @@ const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     );
 };
 
-const SelectedCard: React.FC<SelectedDataType> = ({
+type SelectedCardProps = SelectedDataType & {
+    handleRemoveSelectedAuction: (id: string) => void;
+    convertDateStringToDateTime: (dateString: string) => string;
+};
+
+// card for selected auctions
+const SelectedCard: React.FC<SelectedCardProps> = ({
     _id,
     title,
     deadline,
     auction_id,
+    image,
+    handleRemoveSelectedAuction,
+    convertDateStringToDateTime,
 }) => {
-    function convertDateStringToDateTime(dateString: string) {
-        const date = new Date(dateString);
-        return date.toLocaleString();
-    }
-
     const dateTime = convertDateStringToDateTime(deadline);
+
     return (
-        <div className="tw-border-solid tw-border-2 tw-border-white tw-border tw-py-3 tw-px-2 tw-rounded">
-            <div>
+        <div className="tw-flex tw-gap-4 tw-border-solid tw-border-2 tw-border-white tw-border tw-py-3 tw-px-2 tw-rounded">
+            <img
+                src={image}
+                alt={title}
+                width={100}
+                height={100}
+                className="tw-w-[100px] tw-h-[100px] tw-object-cover"
+            />
+            <div className="tw-grid tw-gap-2">
                 <div>
                     Auction ID: <span>{auction_id}</span>
                 </div>
@@ -291,7 +369,12 @@ const SelectedCard: React.FC<SelectedDataType> = ({
                 <div>
                     Deadline: <span>{dateTime}</span>
                 </div>
-                <button className="tw-bg-white/10">Remove?</button>
+                <button
+                    className="btn-transparent-red"
+                    onClick={() => handleRemoveSelectedAuction(_id)}
+                >
+                    Remove?
+                </button>
             </div>
         </div>
     );
