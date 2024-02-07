@@ -199,7 +199,7 @@ const CreateTournamentsPage = () => {
                             Remove All Auctions
                         </button>
                         {/* Selected Auctions Card */}
-                        {selectedData &&
+                        {selectedData !== null && selectedData.length > 0 ? (
                             selectedData?.length > 0 &&
                             selectedData.map((item, index) => (
                                 <div key={item._id + "SD"}>
@@ -217,7 +217,12 @@ const CreateTournamentsPage = () => {
                                         }
                                     />
                                 </div>
-                            ))}
+                            ))
+                        ) : (
+                            <div className="tw-h-[50px] tw-flex tw-items-center tw-justify-center">
+                                No Auctions Selected
+                            </div>
+                        )}
                     </div>
                 </div>
                 {/* auctions and filter section */}
@@ -248,6 +253,14 @@ const CreateTournamentsPage = () => {
                                             convertDateStringToDateTime
                                         }
                                         handleCheckbox={handleCheckbox}
+                                        selected={
+                                            selectedData
+                                                ? selectedData.some(
+                                                      (data) =>
+                                                          data._id === item._id
+                                                  )
+                                                : false
+                                        }
                                     />
                                 );
                             })}
@@ -269,6 +282,7 @@ type tournamentsListCardData = {
     deadline: string;
     convertDateStringToDateTime: (dateString: string) => string;
     handleCheckbox: HandleCheckboxType;
+    selected: boolean;
 };
 
 const TournamentsListCard: React.FC<tournamentsListCardData> = ({
@@ -280,6 +294,7 @@ const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     deadline,
     convertDateStringToDateTime,
     handleCheckbox,
+    selected,
 }) => {
     const dateTime = convertDateStringToDateTime(deadline);
 
@@ -288,6 +303,7 @@ const TournamentsListCard: React.FC<tournamentsListCardData> = ({
             <div className="tw-flex tw-gap-6 tw-mt-6 tw-pl-4">
                 <div>
                     <Checkbox
+                        checked={selected}
                         value={auctionID}
                         sx={{
                             "& .MuiSvgIcon-root": { fontSize: 28 },
