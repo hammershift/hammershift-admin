@@ -43,22 +43,20 @@ interface SelectedDataType {
     image: string;
 }
 
-const selectedDataSample = [
-    {
-        _id: "XL9AA11G06Z363154",
-        title: "2006 Spyker C8 Spyder",
-        deadline: "2024-02-17T18:17:00.000Z",
-        auction_id: "69824733",
-        image: CarPhoto,
-    },
-];
+type HandleCheckboxType = (
+    _id: string,
+    title: string,
+    deadline: string,
+    auction_id: string,
+    image: string
+) => void;
 
 const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedData, setSelectedData] = useState<SelectedDataType[] | null>(
-        []
+        null
     );
 
     // fetch auctions data
@@ -91,6 +89,7 @@ const CreateTournamentsPage = () => {
         setSelectedData(null);
     };
 
+    // remove button on selected auctions card
     const handleRemoveSelectedAuction = (id: string) => {
         if (selectedData) {
             const newSelectedData = selectedData.filter(
@@ -100,10 +99,49 @@ const CreateTournamentsPage = () => {
         }
     };
 
+    // convert date string to date time
     function convertDateStringToDateTime(dateString: string) {
         const date = new Date(dateString);
         return date.toLocaleString();
     }
+
+    const handleCheckbox = (
+        _id: string,
+        title: string,
+        deadline: string,
+        auction_id: string,
+        image: string
+    ) => {
+        setSelectedData(() => {
+            // if no data, add new data
+            if (!selectedData) {
+                return [
+                    {
+                        _id,
+                        title,
+                        deadline,
+                        auction_id,
+                        image,
+                    },
+                ];
+            }
+            // remove if already selected
+            if (selectedData.some((item) => item._id === _id)) {
+                return selectedData.filter((item) => item._id !== _id);
+            }
+            // add new data
+            return [
+                ...selectedData,
+                {
+                    _id: _id,
+                    title: title,
+                    deadline: deadline,
+                    auction_id: auction_id,
+                    image: image,
+                },
+            ];
+        });
+    };
 
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
@@ -201,13 +239,15 @@ const CreateTournamentsPage = () => {
                                     <TournamentsListCard
                                         key={index + "TLC"}
                                         auctionID={item.auction_id}
-                                        id={item._id}
+                                        _id={item._id}
                                         image={item.image}
                                         title={`${item.year} ${item.make} ${item.model}`}
                                         description={item.description}
                                         deadline={item.deadline}
-                                        selectedData={selectedData}
-                                        setSelectedData={setSelectedData}
+                                        convertDateStringToDateTime={
+                                            convertDateStringToDateTime
+                                        }
+                                        handleCheckbox={handleCheckbox}
                                     />
                                 );
                             })}
@@ -222,76 +262,46 @@ export default CreateTournamentsPage;
 
 type tournamentsListCardData = {
     auctionID: string;
-    id: string;
+    _id: string;
     image: string;
     title: string;
     description: string[];
     deadline: string;
-    selectedData: SelectedDataType[] | null;
-    setSelectedData: React.Dispatch<
-        React.SetStateAction<SelectedDataType[] | null>
-    >;
+    convertDateStringToDateTime: (dateString: string) => string;
+    handleCheckbox: HandleCheckboxType;
 };
 
 const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     auctionID,
-    id,
+    _id,
     image,
     title,
     description,
     deadline,
-    selectedData,
-    setSelectedData,
+    convertDateStringToDateTime,
+    handleCheckbox,
 }) => {
-    function convertDateStringToDateTime(dateString: string) {
-        const date = new Date(dateString);
-        return date.toLocaleString();
-    }
-
     const dateTime = convertDateStringToDateTime(deadline);
 
-    const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSelectedData((prev) => {
-            if (!prev) {
-                return [
-                    {
-                        _id: id,
-                        title,
-                        deadline: dateTime,
-                        auction_id: auctionID,
-                        image,
-                    },
-                ];
-            }
-            if (prev.some((item) => item._id === id)) {
-                return prev.filter((item) => item._id !== id);
-            }
-            return [
-                {
-                    _id: id,
-                    title,
-                    deadline: dateTime,
-                    auction_id: auctionID,
-                    image,
-                },
-                ...prev,
-            ];
-        });
-    };
-
-    useEffect(() => {}, []);
     return (
         <div>
             <div className="tw-flex tw-gap-6 tw-mt-6 tw-pl-4">
                 <div>
                     <Checkbox
-                        id={id}
                         value={auctionID}
                         sx={{
                             "& .MuiSvgIcon-root": { fontSize: 28 },
                             color: "white",
                         }}
-                        onChange={handleCheckbox}
+                        onClick={(e) =>
+                            handleCheckbox(
+                                _id,
+                                title,
+                                dateTime,
+                                auctionID,
+                                image
+                            )
+                        }
                     />
                 </div>
                 <img
