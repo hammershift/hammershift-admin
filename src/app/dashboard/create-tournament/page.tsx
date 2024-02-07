@@ -198,6 +198,22 @@ const SortDropdownContent = [
     "Ending Soon",
 ];
 
+const FilterInitialState = {
+    make: ["All"],
+    category: ["All"],
+    era: ["All"],
+    location: ["All"],
+    sort: "Newly Listed",
+};
+
+type FiltersType = {
+    make: string[];
+    category: string[];
+    era: string[];
+    location: string[];
+    sort: string;
+};
+
 const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
@@ -210,13 +226,7 @@ const CreateTournamentsPage = () => {
     const [selectedData, setSelectedData] = useState<SelectedDataType[] | null>(
         null
     );
-    const [filters, setFilters] = useState({
-        make: "All",
-        category: "All",
-        era: "All",
-        location: "All",
-        sort: "Newly Listed",
-    });
+    const [filters, setFilters] = useState(FilterInitialState);
     const filterRef = useRef();
 
     // fetch auctions data
@@ -265,6 +275,7 @@ const CreateTournamentsPage = () => {
         return date.toLocaleString();
     }
 
+    // adds auction to selectedData
     const handleCheckbox = (
         _id: string,
         title: string,
@@ -307,9 +318,13 @@ const CreateTournamentsPage = () => {
         return;
     };
 
+    // handle clicking outside of dropdown
     useEffect(() => {
         const handler = (e: MouseEvent) => {
-            if (filterRef.current && !filterRef.current.contains(e.target)) {
+            if (
+                filterRef.current &&
+                !filterRef.current.contains(e.target as Node)
+            ) {
                 setMakeDropdown(false);
                 setCategoryDropdown(false);
                 setEraDropdown(false);
@@ -322,11 +337,46 @@ const CreateTournamentsPage = () => {
         return () => {
             document.removeEventListener("mousedown", handler);
         };
-    });
+    }, []);
 
-    const handleCheckboxFilters = () => {
-        console.log("clicked");
+    // handle checkbox filters, adds to filters state
+    const handleCheckboxFilters = (key: string, value: string) => {
+        setFilters((prev: any) => {
+            console.log("prev", prev);
+            if (prev == undefined || !prev[key] === undefined) {
+                console.log("!prev");
+                return { ...prev };
+            }
+            if (prev[key]?.includes("All")) {
+                console.log("All is included in prev", key, value);
+                return {
+                    ...prev,
+                    [key]: prev[key]
+                        .filter((item: any) => item !== "All")
+                        .concat(value),
+                };
+            }
+            if (!prev[key]?.includes(value)) {
+                console.log("value is not included in prev", key, value);
+                return {
+                    ...prev,
+                    [key]: prev[key].concat(value),
+                };
+            }
+            if (prev[key]?.includes(value)) {
+                console.log("value is included in prev", key, value);
+                return {
+                    ...prev,
+                    [key]: prev[key].filter((item: any) => item !== value),
+                };
+            }
+        });
     };
+
+    // check for filters
+    useEffect(() => {
+        console.log("filters:", filters);
+    }, [filters]);
 
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
@@ -437,7 +487,7 @@ const CreateTournamentsPage = () => {
                                     handleCheckboxFilters={
                                         handleCheckboxFilters
                                     }
-                                    selected={false}
+                                    filters={filters}
                                 />
                             )}
                         </div>
@@ -458,7 +508,7 @@ const CreateTournamentsPage = () => {
                                     handleCheckboxFilters={
                                         handleCheckboxFilters
                                     }
-                                    selected={false}
+                                    filters={filters}
                                 />
                             )}
                         </div>
@@ -477,7 +527,7 @@ const CreateTournamentsPage = () => {
                                     handleCheckboxFilters={
                                         handleCheckboxFilters
                                     }
-                                    selected={false}
+                                    filters={filters}
                                 />
                             )}
                         </div>
@@ -498,7 +548,7 @@ const CreateTournamentsPage = () => {
                                     handleCheckboxFilters={
                                         handleCheckboxFilters
                                     }
-                                    selected={false}
+                                    filters={filters}
                                 />
                             )}
                         </div>
@@ -518,7 +568,7 @@ const CreateTournamentsPage = () => {
                                     handleCheckboxFilters={
                                         handleCheckboxFilters
                                     }
-                                    selected={false}
+                                    filters={filters}
                                 />
                             )}
                         </div>
@@ -698,7 +748,7 @@ type DropdownComponentProps = {
     content: string[];
     columns: number;
     handleCheckboxFilters: any;
-    selected: boolean;
+    filters: any;
 };
 // dropdown component
 const DropdownComponent: React.FC<DropdownComponentProps> = ({
@@ -706,7 +756,7 @@ const DropdownComponent: React.FC<DropdownComponentProps> = ({
     content,
     columns,
     handleCheckboxFilters,
-    selected,
+    filters,
 }) => {
     return (
         <div className="tw-absolute tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg">
@@ -714,8 +764,14 @@ const DropdownComponent: React.FC<DropdownComponentProps> = ({
                 {content.map((item: string, index: number) => (
                     <li key={String(index + item)}>
                         <Checkbox
-                            checked={selected}
-                            onClick={() => handleCheckboxFilters()}
+                            checked={
+                                filters
+                                    ? filters[filterKey]?.includes(item)
+                                    : false
+                            }
+                            onClick={() =>
+                                handleCheckboxFilters(filterKey, item)
+                            }
                         />
                         <span>{item}</span>
                     </li>
