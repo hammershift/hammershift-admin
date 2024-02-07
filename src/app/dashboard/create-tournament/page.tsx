@@ -341,12 +341,21 @@ const CreateTournamentsPage = () => {
 
     // handle checkbox filters, adds to filters state
     const handleCheckboxFilters = (key: string, value: string) => {
+        if (key === "sort") {
+            // TODO: handle sort differently
+        }
         setFilters((prev: any) => {
-            console.log("prev", prev);
+            // check for prev and if key exists
             if (prev == undefined || !prev[key] === undefined) {
                 console.log("!prev");
                 return { ...prev };
             }
+            // if value is 'All', remove all other items and add 'All' to the array
+            if (value === "All") {
+                console.log("All");
+                return { ...prev, [key]: ["All"] };
+            }
+            // if 'All' is included in the array, remove it and add the value
             if (prev[key]?.includes("All")) {
                 console.log("All is included in prev", key, value);
                 return {
@@ -356,6 +365,7 @@ const CreateTournamentsPage = () => {
                         .concat(value),
                 };
             }
+            // if value is not included in the array, add it
             if (!prev[key]?.includes(value)) {
                 console.log("value is not included in prev", key, value);
                 return {
@@ -363,12 +373,18 @@ const CreateTournamentsPage = () => {
                     [key]: prev[key].concat(value),
                 };
             }
+            // if value is included in the array, remove it
             if (prev[key]?.includes(value)) {
                 console.log("value is included in prev", key, value);
-                return {
+                const newFilter = {
                     ...prev,
                     [key]: prev[key].filter((item: any) => item !== value),
                 };
+                // if array is empty, add 'All' to the array
+                if (newFilter[key]?.length === 0) {
+                    newFilter[key] = ["All"];
+                }
+                return newFilter;
             }
         });
     };
