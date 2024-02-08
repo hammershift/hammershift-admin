@@ -223,6 +223,7 @@ type FiltersType = {
 const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
+    const [tournamentObject, setTournamentObject] = useState({});
     const [totalAuctions, setTotalAuctions] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(true);
     const [loadmoreLoading, setLoadmoreLoading] = useState(true);
@@ -314,6 +315,27 @@ const CreateTournamentsPage = () => {
         console.log("auctionData:", auctionsData);
         console.log("selectedData:", selectedData);
     }, [auctionsData, selectedData]);
+
+    //TODO: creates tournament
+    const handleCreateTournament = () => {};
+
+    // combine the selectedData and other inputs
+    const createTournamentObject = () => {
+        console.log("Tournament Object:", tournamentObject);
+    };
+
+    // onChange of input, saves data to tournamentObject
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let value: string | number = e.target.value;
+        //turn to number type if buyInFee
+        if (e.target.name == "buyInFee") {
+            value = Number(value);
+        }
+        setTournamentObject((prev) => ({
+            ...prev,
+            [e.target.name]: value,
+        }));
+    };
 
     // removes all auctions from selectedData
     const handleRemoveAuctions = () => {
@@ -508,7 +530,9 @@ const CreateTournamentsPage = () => {
                 <div className="tw-text-2xl tw-font-bold">
                     Create Tournament
                 </div>
-                <button className="btn-yellow">CREATE TOURNAMENT</button>
+                <button className="btn-yellow" onClick={createTournamentObject}>
+                    CREATE TOURNAMENT
+                </button>
             </div>
             <div className="tw-flex tw-gap-4">
                 <div className="tw-flex tw-flex-col tw-w-2/5 tw-gap-4">
@@ -517,33 +541,47 @@ const CreateTournamentsPage = () => {
                             Tournament Information
                         </div>
                         <div className="tw-flex tw-flex-col tw-gap-1.5">
-                            <label>Title</label>
+                            <label htmlFor="title">Title</label>
                             <input
+                                id="title"
+                                name="title"
                                 placeholder="title"
                                 className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                onChange={handleInputChange}
                             />
                         </div>
                         <div className="tw-flex tw-flex-col tw-gap-1.5">
-                            <label>Start Date and Time</label>
+                            <label htmlFor="startTime">
+                                Start Date and Time
+                            </label>
                             <input
+                                id="startTime"
+                                name="startTime"
                                 type="datetime-local"
-                                placeholder="deadline"
+                                placeholder="Start Time"
                                 className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                onChange={handleInputChange}
                             />
                         </div>
                         <div className="tw-flex tw-flex-col tw-gap-1.5">
-                            <label>End Date and Time</label>
+                            <label htmlFor="endTime">End Date and Time</label>
                             <input
+                                id="endTime"
+                                name="endTime"
                                 type="datetime-local"
-                                placeholder="deadline"
+                                placeholder="end Time"
                                 className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                onChange={handleInputChange}
                             />
                         </div>
                         <div className="tw-flex tw-flex-col tw-gap-1.5">
-                            <label>Buy-in Price</label>
+                            <label htmlFor="buyInFee">Buy-in Price</label>
                             <input
+                                id="buyInFee"
+                                name="buyInFee"
                                 placeholder="buy-in price"
                                 className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                onChange={handleInputChange}
                             />
                         </div>
                     </div>

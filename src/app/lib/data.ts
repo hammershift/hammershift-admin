@@ -130,3 +130,24 @@ export const editUserWithId = async (id: string, body: any) => {
         console.error("Edit Unsuccessful");
     }
 };
+
+// create tournament
+/*{
+    "title": "Random Collections Tournament"
+    "auctionID": ["65b06c9a5860b968d880c6e9", "65b309b0990459fcb7461e02", "65b309b1990459fcb7461e34", "65b309b1990459fcb7461e66", "65b38cc682288dfdce7db1c9" ],
+    "buyInFee": 50,
+    "startTime": "2024-02-05T07:34:45.337Z",
+    "endTime": "2024-02-10T07:34:45.337Z"
+}*/
+export const createTournament = async (body: any) => {
+    console.log("body:", body);
+    // const res = await fetch(`/api/tournament`, {
+    //     method: "POST",
+    //     body: JSON.stringify(body),
+    // });
+    // if (res.status === 200) {
+    //     return { message: "Created Tournament" };
+    // } else {
+    //     console.error("Edit Unsuccessful");
+    // }
+};
