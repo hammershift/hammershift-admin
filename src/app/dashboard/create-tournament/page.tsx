@@ -51,6 +51,7 @@ type HandleCheckboxType = (
     image: string
 ) => void;
 
+// dropdown content arrays
 const MakeDropdownContent = [
     "All",
     "Acura",
@@ -127,6 +128,7 @@ const EraDropdownContent = [
 ];
 
 const LocationDropdownContent = [
+    "All",
     "Alabama",
     "Alaska",
     "American Samoa",
@@ -198,41 +200,7 @@ const SortDropdownContent = [
     "Ending Soon",
 ];
 
-const FiltersDataContent: {
-    [key: string]: {
-        filterKey: string;
-        dropdown: any;
-        content: string[];
-        columns: number;
-    };
-} = {
-    make: {
-        filterKey: "make",
-        dropdown: "makeDropdown",
-        content: MakeDropdownContent,
-        columns: 3,
-    },
-    category: {
-        filterKey: "category",
-        dropdown: "categoryDropdown",
-        content: CategoryDropdownContent,
-        columns: 3,
-    },
-    era: {
-        filterKey: "era",
-        dropdown: "eraDropdown",
-        content: EraDropdownContent,
-        columns: 2,
-    },
-    location: {
-        filterKey: "location",
-        dropdown: "locationDropdown",
-        content: LocationDropdownContent,
-        columns: 3,
-    },
-};
-
-const ListOfFilters = ["make", "category", "era", "location", "sort"];
+const ListOfFilters = ["make", "category", "era", "location"];
 
 /*
  <div>
@@ -287,6 +255,41 @@ const CreateTournamentsPage = () => {
     );
     const [filters, setFilters] = useState(FilterInitialState);
     const filterRef = useRef();
+
+    // dropdown data
+    const FiltersDataContent: {
+        [key: string]: {
+            filterKey: string;
+            dropdown: any;
+            content: string[];
+            columns: number;
+        };
+    } = {
+        make: {
+            filterKey: "make",
+            dropdown: makeDropdown,
+            content: MakeDropdownContent,
+            columns: 3,
+        },
+        category: {
+            filterKey: "category",
+            dropdown: categoryDropdown,
+            content: CategoryDropdownContent,
+            columns: 3,
+        },
+        era: {
+            filterKey: "era",
+            dropdown: eraDropdown,
+            content: EraDropdownContent,
+            columns: 2,
+        },
+        location: {
+            filterKey: "location",
+            dropdown: locationDropdown,
+            content: LocationDropdownContent,
+            columns: 3,
+        },
+    };
 
     // fetch auctions data
     useEffect(() => {
@@ -387,20 +390,21 @@ const CreateTournamentsPage = () => {
     };
 
     const handleToggleDropdown = (dropdown: string) => {
-        if (dropdown === "make") {
-            setMakeDropdown((prev) => !prev);
-        }
-        if (dropdown === "category") {
-            setCategoryDropdown((prev) => !prev);
-        }
-        if (dropdown === "era") {
-            setEraDropdown((prev) => !prev);
-        }
-        if (dropdown === "location") {
-            setLocationDropdown((prev) => !prev);
-        }
-        if (dropdown === "sort") {
-            setSortDropdown((prev) => !prev);
+        switch (dropdown) {
+            case "make":
+                setMakeDropdown((prev) => !prev);
+                break;
+            case "category":
+                setCategoryDropdown((prev) => !prev);
+                break;
+            case "era":
+                setEraDropdown((prev) => !prev);
+                break;
+            case "location":
+                setLocationDropdown((prev) => !prev);
+                break;
+            default:
+                closeAllDropdowns();
         }
     };
 
@@ -424,51 +428,54 @@ const CreateTournamentsPage = () => {
     // handle checkbox filters, adds to filters state
     const handleCheckboxFilters = (key: string, value: string) => {
         if (key === "sort") {
-            // TODO: handle sort differently
-        }
-        setFilters((prev: any) => {
-            // check for prev and if key exists
-            if (prev == undefined || !prev[key] === undefined) {
-                console.log("!prev");
-                return { ...prev };
-            }
-            // if value is 'All', remove all other items and add 'All' to the array
-            if (value === "All") {
-                console.log("All");
-                return { ...prev, [key]: ["All"] };
-            }
-            // if 'All' is included in the array, remove it and add the value
-            if (prev[key]?.includes("All")) {
-                console.log("All is included in prev", key, value);
-                return {
-                    ...prev,
-                    [key]: prev[key]
-                        .filter((item: any) => item !== "All")
-                        .concat(value),
-                };
-            }
-            // if value is not included in the array, add it
-            if (!prev[key]?.includes(value)) {
-                console.log("value is not included in prev", key, value);
-                return {
-                    ...prev,
-                    [key]: prev[key].concat(value),
-                };
-            }
-            // if value is included in the array, remove it
-            if (prev[key]?.includes(value)) {
-                console.log("value is included in prev", key, value);
-                const newFilter = {
-                    ...prev,
-                    [key]: prev[key].filter((item: any) => item !== value),
-                };
-                // if array is empty, add 'All' to the array
-                if (newFilter[key]?.length === 0) {
-                    newFilter[key] = ["All"];
+            setFilters((prev: any) => {
+                return { ...prev, [key]: value };
+            });
+        } else {
+            setFilters((prev: any) => {
+                // check for prev and if key exists
+                if (prev == undefined || !prev[key] === undefined) {
+                    console.log("!prev");
+                    return { ...prev };
                 }
-                return newFilter;
-            }
-        });
+                // if value is 'All', remove all other items and add 'All' to the array
+                if (value === "All") {
+                    console.log("All");
+                    return { ...prev, [key]: ["All"] };
+                }
+                // if 'All' is included in the array, remove it and add the value
+                if (prev[key]?.includes("All")) {
+                    console.log("All is included in prev", key, value);
+                    return {
+                        ...prev,
+                        [key]: prev[key]
+                            .filter((item: any) => item !== "All")
+                            .concat(value),
+                    };
+                }
+                // if value is not included in the array, add it
+                if (!prev[key]?.includes(value)) {
+                    console.log("value is not included in prev", key, value);
+                    return {
+                        ...prev,
+                        [key]: prev[key].concat(value),
+                    };
+                }
+                // if value is included in the array, remove it
+                if (prev[key]?.includes(value)) {
+                    console.log("value is included in prev", key, value);
+                    const newFilter = {
+                        ...prev,
+                        [key]: prev[key].filter((item: any) => item !== value),
+                    };
+                    // if array is empty, add 'All' to the array
+                    if (newFilter[key]?.length === 0) {
+                        newFilter[key] = ["All"];
+                    }
+                    return newFilter;
+                }
+            });
+        }
         closeAllDropdowns();
     };
 
@@ -571,9 +578,9 @@ const CreateTournamentsPage = () => {
                         }
                     >
                         <div>Filters:</div>
+                        {/* Dropdowns for make, category, era and filter */}
                         {ListOfFilters.map((item: string, index: number) => {
                             const data = FiltersDataContent[item];
-                            console.log("data:", data);
                             return (
                                 <div key={String(index + item)}>
                                     <div
@@ -584,9 +591,9 @@ const CreateTournamentsPage = () => {
                                     >
                                         {item}
                                     </div>
-                                    {/* {makeDropdown && (
+                                    {data.dropdown && (
                                         <DropdownComponent
-                                            filterKey={item}
+                                            filterKey={data.filterKey}
                                             content={data.content}
                                             columns={data.columns}
                                             handleCheckboxFilters={
@@ -594,91 +601,11 @@ const CreateTournamentsPage = () => {
                                             }
                                             filters={filters}
                                         />
-                                    )} */}
+                                    )}
                                 </div>
                             );
                         })}
 
-                        {/* <div>
-                            <div
-                                onClick={() => setMakeDropdown((prev) => !prev)}
-                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
-                            >
-                                Make
-                            </div>
-                            {makeDropdown && (
-                                <DropdownComponent
-                                    filterKey="make"
-                                    content={MakeDropdownContent}
-                                    columns={3}
-                                    handleCheckboxFilters={
-                                        handleCheckboxFilters
-                                    }
-                                    filters={filters}
-                                />
-                            )}
-                        </div>
-                        <div>
-                            <div
-                                onClick={() =>
-                                    setCategoryDropdown((prev) => !prev)
-                                }
-                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
-                            >
-                                Category
-                            </div>
-                            {categoryDropdown && (
-                                <DropdownComponent
-                                    filterKey="category"
-                                    content={CategoryDropdownContent}
-                                    columns={3}
-                                    handleCheckboxFilters={
-                                        handleCheckboxFilters
-                                    }
-                                    filters={filters}
-                                />
-                            )}
-                        </div>
-                        <div>
-                            <div
-                                onClick={() => setEraDropdown((prev) => !prev)}
-                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
-                            >
-                                Era
-                            </div>
-                            {eraDropdown && (
-                                <DropdownComponent
-                                    filterKey="era"
-                                    content={EraDropdownContent}
-                                    columns={2}
-                                    handleCheckboxFilters={
-                                        handleCheckboxFilters
-                                    }
-                                    filters={filters}
-                                />
-                            )}
-                        </div>
-                        <div>
-                            <div
-                                onClick={() =>
-                                    setLocationDropdown((prev) => !prev)
-                                }
-                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
-                            >
-                                Location
-                            </div>
-                            {locationDropdown && (
-                                <DropdownComponent
-                                    filterKey="location"
-                                    content={LocationDropdownContent}
-                                    columns={3}
-                                    handleCheckboxFilters={
-                                        handleCheckboxFilters
-                                    }
-                                    filters={filters}
-                                />
-                            )}
-                        </div> */}
                         <div>Sort:</div>
                         <div>
                             <div
