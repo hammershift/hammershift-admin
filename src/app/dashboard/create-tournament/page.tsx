@@ -7,6 +7,8 @@ import Checkbox from "@mui/material/Checkbox";
 import { getCarsWithFilter } from "@/app/lib/data";
 import { boolean, number } from "zod";
 import { Button } from "@mui/material";
+import { BounceLoader } from "react-spinners";
+import { set } from "mongoose";
 
 interface CarData {
     _id: string;
@@ -202,29 +204,6 @@ const SortDropdownContent = [
 
 const ListOfFilters = ["make", "category", "era", "location"];
 
-/*
- <div>
-                            <div
-                                onClick={() => setMakeDropdown((prev) => !prev)}
-                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
-                            >
-                                Make
-                            </div>
-                            {makeDropdown && (
-                                <DropdownComponent
-                                    filterKey="make"
-                                    content={MakeDropdownContent}
-                                    columns={3}
-                                    handleCheckboxFilters={
-                                        handleCheckboxFilters
-                                    }
-                                    filters={filters}
-                                />
-                            )}
-                        </div>
-
-*/
-
 const FilterInitialState = {
     make: ["All"],
     category: ["All"],
@@ -244,7 +223,9 @@ type FiltersType = {
 const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
+    const [totalAuctions, setTotalAuctions] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [loadmoreLoading, setLoadmoreLoading] = useState(true);
     const [makeDropdown, setMakeDropdown] = useState(false);
     const [categoryDropdown, setCategoryDropdown] = useState(false);
     const [eraDropdown, setEraDropdown] = useState(false);
@@ -255,6 +236,11 @@ const CreateTournamentsPage = () => {
     );
     const [filters, setFilters] = useState(FilterInitialState);
     const filterRef = useRef();
+
+    const handleLoadMore = () => {
+        setLoadmoreLoading(true);
+        setDisplayCount((prev) => prev + 7);
+    };
 
     // dropdown data
     const FiltersDataContent: {
@@ -291,24 +277,37 @@ const CreateTournamentsPage = () => {
         },
     };
 
+    //function to fetch data
+    const fetchData = async (filterData: FiltersType) => {
+        try {
+            const data = await getCarsWithFilter({
+                limit: displayCount,
+                ...filterData,
+            });
+
+            if (data && "cars" in data) {
+                setAuctionsData(data.cars as CarData[]);
+                setIsLoading(false);
+                setLoadmoreLoading(false);
+            } else {
+                console.error("Unexpected data structure:", data);
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+
     // fetch auctions data
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const data = await getCarsWithFilter({ limit: displayCount });
-
-                if (data && "cars" in data) {
-                    setAuctionsData(data.cars as CarData[]);
-                    setIsLoading(false);
-                } else {
-                    console.error("Unexpected data structure:", data);
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-        fetchData();
+        fetchData(filters);
     }, [displayCount]);
+
+    // fetch auctions data when filters change
+    const handleFilterButton = () => {
+        setIsLoading(true);
+        setDisplayCount(7);
+        fetchData(filters);
+    };
 
     // check if data is fetched
     useEffect(() => {
@@ -389,6 +388,7 @@ const CreateTournamentsPage = () => {
         setSortDropdown(false);
     };
 
+    // handle toggle dropdown, only one is open at all times
     const handleToggleDropdown = (dropdown: string) => {
         switch (dropdown) {
             case "make":
@@ -403,8 +403,26 @@ const CreateTournamentsPage = () => {
             case "location":
                 setLocationDropdown((prev) => !prev);
                 break;
+            case "sort":
+                setSortDropdown((prev) => !prev);
+                break;
             default:
                 closeAllDropdowns();
+        }
+        if (dropdown !== "make") {
+            setMakeDropdown(false);
+        }
+        if (dropdown !== "category") {
+            setCategoryDropdown(false);
+        }
+        if (dropdown !== "era") {
+            setEraDropdown(false);
+        }
+        if (dropdown !== "location") {
+            setLocationDropdown(false);
+        }
+        if (dropdown !== "sort") {
+            setSortDropdown(false);
         }
     };
 
@@ -568,7 +586,12 @@ const CreateTournamentsPage = () => {
                 </div>
                 {/* auctions and filter section */}
                 <div className="tw-flex tw-flex-col tw-w-3/5 tw-gap-4 tw-bg-white/5 tw-py-6 tw-px-8">
-                    <div className="tw-text-lg  tw-font-bold">Auctions</div>
+                    <div className="tw-text-lg tw-font-bold">
+                        Auctions
+                        <span className="tw-opacity-20 tw-ml-2">
+                            {totalAuctions}
+                        </span>
+                    </div>
                     <div
                         className="tw-flex tw-gap-4"
                         ref={
@@ -609,7 +632,7 @@ const CreateTournamentsPage = () => {
                         <div>Sort:</div>
                         <div>
                             <div
-                                onClick={() => setSortDropdown((prev) => !prev)}
+                                onClick={() => handleToggleDropdown("sort")}
                                 className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
                             >
                                 Sort
@@ -626,35 +649,62 @@ const CreateTournamentsPage = () => {
                                 />
                             )}
                         </div>
-                        <button className="btn-white">FILTER</button>
+                        <button
+                            className="btn-white"
+                            onClick={handleFilterButton}
+                        >
+                            FILTER
+                        </button>
                     </div>
-                    <div className=" tw-h-screen tw-rounded-xl tw-bg-white/20 tw-overflow-scroll">
-                        {auctionsData &&
-                            auctionsData.map((item, index) => {
-                                return (
-                                    <TournamentsListCard
-                                        key={index + "TLC"}
-                                        auctionID={item.auction_id}
-                                        _id={item._id}
-                                        image={item.image}
-                                        title={`${item.year} ${item.make} ${item.model}`}
-                                        description={item.description}
-                                        deadline={item.deadline}
-                                        convertDateStringToDateTime={
-                                            convertDateStringToDateTime
-                                        }
-                                        handleCheckbox={handleCheckbox}
-                                        selected={
-                                            selectedData
-                                                ? selectedData.some(
-                                                      (data) =>
-                                                          data._id === item._id
-                                                  )
-                                                : false
-                                        }
-                                    />
-                                );
-                            })}
+                    {/* Auctions List */}
+                    <div className=" tw-h-[1000px] tw-rounded-xl tw-bg-white/20 tw-overflow-scroll">
+                        {!isLoading ? (
+                            <>
+                                {auctionsData &&
+                                    auctionsData.map((item, index) => {
+                                        return (
+                                            <TournamentsListCard
+                                                key={index + "TLC"}
+                                                auctionID={item.auction_id}
+                                                _id={item._id}
+                                                image={item.image}
+                                                title={`${item.year} ${item.make} ${item.model}`}
+                                                description={item.description}
+                                                deadline={item.deadline}
+                                                convertDateStringToDateTime={
+                                                    convertDateStringToDateTime
+                                                }
+                                                handleCheckbox={handleCheckbox}
+                                                selected={
+                                                    selectedData
+                                                        ? selectedData.some(
+                                                              (data) =>
+                                                                  data._id ===
+                                                                  item._id
+                                                          )
+                                                        : false
+                                                }
+                                            />
+                                        );
+                                    })}
+                            </>
+                        ) : (
+                            <LoadingComponent height={500} />
+                        )}
+                        {!isLoading && !loadmoreLoading ? (
+                            <div className="tw-h-[100px] tw-flex tw-flex-col tw-justify-center tw-items-center">
+                                <div className="tw-pb-2">{`Showing ${displayCount} out of ${totalAuctions}`}</div>
+                                <button
+                                    className="btn-white"
+                                    onClick={handleLoadMore}
+                                >
+                                    Load More
+                                </button>
+                            </div>
+                        ) : (
+                            !isLoading &&
+                            loadmoreLoading && <LoadingComponent height={100} />
+                        )}
                     </div>
                 </div>
             </div>
@@ -663,6 +713,16 @@ const CreateTournamentsPage = () => {
 };
 
 export default CreateTournamentsPage;
+
+const LoadingComponent = ({ height }: { height: number }) => {
+    return (
+        <div
+            className={`tw-h-[${height}px] tw-flex tw-justify-center tw-items-center`}
+        >
+            <BounceLoader color="#F2CA16" />
+        </div>
+    );
+};
 
 type tournamentsListCardData = {
     auctionID: string;
