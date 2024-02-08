@@ -220,9 +220,18 @@ type FiltersType = {
     sort: string;
 };
 
+type TournamentObjType = {
+    title: string;
+    auctionID: string[];
+    buyInFee: number;
+    startTime: Date;
+    endTime: Date;
+};
+
 const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
+    const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
     const [tournamentObject, setTournamentObject] = useState({});
     const [totalAuctions, setTotalAuctions] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -337,6 +346,21 @@ const CreateTournamentsPage = () => {
         }));
     };
 
+    // check if tournamentObject is complete
+    useEffect(() => {
+        const checkValidity = () => {
+            if (
+                Object.keys(tournamentObject).length === 4 &&
+                Object.values(tournamentObject).every(
+                    (item) => item !== "" && selectedData?.length === 5
+                )
+            ) {
+                setTounamentObjIsValid(true);
+            }
+        };
+        checkValidity();
+    }, [tournamentObject, selectedData]);
+
     // removes all auctions from selectedData
     const handleRemoveAuctions = () => {
         setSelectedData(null);
@@ -397,6 +421,20 @@ const CreateTournamentsPage = () => {
                     image: image,
                 },
             ];
+        });
+
+        // update tournamentObject
+        setTournamentObject((prevTournamentObj: TournamentObjType) => {
+            if (!prevTournamentObj.auctionID) {
+                return { ...prevTournamentObj, auctionID: [_id] };
+            }
+            let auctionArray = [...prevTournamentObj.auctionID];
+            if (auctionArray.includes(_id)) {
+                auctionArray = auctionArray.filter((itemID) => itemID !== _id);
+            } else {
+                auctionArray.push(_id);
+            }
+            return { ...prevTournamentObj, auctionID: auctionArray };
         });
         return;
     };
@@ -519,18 +557,16 @@ const CreateTournamentsPage = () => {
         closeAllDropdowns();
     };
 
-    // check for filters
-    useEffect(() => {
-        console.log("filters:", filters);
-    }, [filters]);
-
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-justify-between">
                 <div className="tw-text-2xl tw-font-bold">
                     Create Tournament
                 </div>
-                <button className="btn-yellow" onClick={createTournamentObject}>
+                <button
+                    className={tounamentObjIsValid ? "btn-yellow" : "btn-gray"}
+                    onClick={createTournamentObject}
+                >
                     CREATE TOURNAMENT
                 </button>
             </div>

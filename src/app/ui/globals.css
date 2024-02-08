@@ -80,3 +80,11 @@ a {
     color: black;
     font-weight: 700;
 }
+
+.btn-gray {
+    padding: 0.625rem 0.75rem;
+    color: black;
+    background-color: #dce0d9;
+    border-radius: 0.25rem;
+    font-weight: 700;
+}
