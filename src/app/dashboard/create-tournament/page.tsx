@@ -348,17 +348,21 @@ const CreateTournamentsPage = () => {
 
     // check if tournamentObject is complete
     useEffect(() => {
-        const checkValidity = () => {
+        const checkValidity = (objectData: TournamentObjType) => {
             if (
-                Object.keys(tournamentObject).length === 4 &&
-                Object.values(tournamentObject).every(
-                    (item) => item !== "" && selectedData?.length === 5
-                )
+                Object.keys(objectData).length === 5 &&
+                objectData["title"] &&
+                objectData["buyInFee"] &&
+                objectData["startTime"] &&
+                objectData["endTime"] &&
+                objectData["auctionID"].length === 5
             ) {
                 setTounamentObjIsValid(true);
+            } else {
+                setTounamentObjIsValid(false);
             }
         };
-        checkValidity();
+        checkValidity(tournamentObject as TournamentObjType);
     }, [tournamentObject, selectedData]);
 
     // removes all auctions from selectedData
