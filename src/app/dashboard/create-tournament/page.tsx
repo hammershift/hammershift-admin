@@ -198,6 +198,65 @@ const SortDropdownContent = [
     "Ending Soon",
 ];
 
+const FiltersDataContent: {
+    [key: string]: {
+        filterKey: string;
+        dropdown: any;
+        content: string[];
+        columns: number;
+    };
+} = {
+    make: {
+        filterKey: "make",
+        dropdown: "makeDropdown",
+        content: MakeDropdownContent,
+        columns: 3,
+    },
+    category: {
+        filterKey: "category",
+        dropdown: "categoryDropdown",
+        content: CategoryDropdownContent,
+        columns: 3,
+    },
+    era: {
+        filterKey: "era",
+        dropdown: "eraDropdown",
+        content: EraDropdownContent,
+        columns: 2,
+    },
+    location: {
+        filterKey: "location",
+        dropdown: "locationDropdown",
+        content: LocationDropdownContent,
+        columns: 3,
+    },
+};
+
+const ListOfFilters = ["make", "category", "era", "location", "sort"];
+
+/*
+ <div>
+                            <div
+                                onClick={() => setMakeDropdown((prev) => !prev)}
+                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                            >
+                                Make
+                            </div>
+                            {makeDropdown && (
+                                <DropdownComponent
+                                    filterKey="make"
+                                    content={MakeDropdownContent}
+                                    columns={3}
+                                    handleCheckboxFilters={
+                                        handleCheckboxFilters
+                                    }
+                                    filters={filters}
+                                />
+                            )}
+                        </div>
+
+*/
+
 const FilterInitialState = {
     make: ["All"],
     category: ["All"],
@@ -318,6 +377,33 @@ const CreateTournamentsPage = () => {
         return;
     };
 
+    // close all dropdowns
+    const closeAllDropdowns = () => {
+        setMakeDropdown(false);
+        setCategoryDropdown(false);
+        setEraDropdown(false);
+        setLocationDropdown(false);
+        setSortDropdown(false);
+    };
+
+    const handleToggleDropdown = (dropdown: string) => {
+        if (dropdown === "make") {
+            setMakeDropdown((prev) => !prev);
+        }
+        if (dropdown === "category") {
+            setCategoryDropdown((prev) => !prev);
+        }
+        if (dropdown === "era") {
+            setEraDropdown((prev) => !prev);
+        }
+        if (dropdown === "location") {
+            setLocationDropdown((prev) => !prev);
+        }
+        if (dropdown === "sort") {
+            setSortDropdown((prev) => !prev);
+        }
+    };
+
     // handle clicking outside of dropdown
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -325,11 +411,7 @@ const CreateTournamentsPage = () => {
                 filterRef.current &&
                 !filterRef.current.contains(e.target as Node)
             ) {
-                setMakeDropdown(false);
-                setCategoryDropdown(false);
-                setEraDropdown(false);
-                setLocationDropdown(false);
-                setSortDropdown(false);
+                closeAllDropdowns();
             }
         };
         document.addEventListener("mousedown", handler);
@@ -387,6 +469,7 @@ const CreateTournamentsPage = () => {
                 return newFilter;
             }
         });
+        closeAllDropdowns();
     };
 
     // check for filters
@@ -488,7 +571,35 @@ const CreateTournamentsPage = () => {
                         }
                     >
                         <div>Filters:</div>
-                        <div>
+                        {ListOfFilters.map((item: string, index: number) => {
+                            const data = FiltersDataContent[item];
+                            console.log("data:", data);
+                            return (
+                                <div key={String(index + item)}>
+                                    <div
+                                        onClick={() =>
+                                            handleToggleDropdown(data.filterKey)
+                                        }
+                                        className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                                    >
+                                        {item}
+                                    </div>
+                                    {/* {makeDropdown && (
+                                        <DropdownComponent
+                                            filterKey={item}
+                                            content={data.content}
+                                            columns={data.columns}
+                                            handleCheckboxFilters={
+                                                handleCheckboxFilters
+                                            }
+                                            filters={filters}
+                                        />
+                                    )} */}
+                                </div>
+                            );
+                        })}
+
+                        {/* <div>
                             <div
                                 onClick={() => setMakeDropdown((prev) => !prev)}
                                 className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
@@ -567,7 +678,7 @@ const CreateTournamentsPage = () => {
                                     filters={filters}
                                 />
                             )}
-                        </div>
+                        </div> */}
                         <div>Sort:</div>
                         <div>
                             <div
