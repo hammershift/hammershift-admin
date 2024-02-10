@@ -139,8 +139,11 @@ export const editUserWithId = async (id: string, body: any) => {
     "startTime": "2024-02-05T07:34:45.337Z",
     "endTime": "2024-02-10T07:34:45.337Z"
 }*/
+
 export const createTournament = async (body: any) => {
-    console.log("body:", body);
+    return { message: "Successful", body };
+    // TODO: uncomment this when the API is ready
+
     // const res = await fetch(`/api/tournament`, {
     //     method: "POST",
     //     body: JSON.stringify(body),

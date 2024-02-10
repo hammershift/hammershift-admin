@@ -4,7 +4,7 @@ import Image from "next/image";
 import CarPhoto from "../../../../public/images/car-photo.svg";
 import HourGlass from "../../../../public/images/hourglass.svg";
 import Checkbox from "@mui/material/Checkbox";
-import { getCarsWithFilter } from "@/app/lib/data";
+import { createTournament, getCarsWithFilter } from "@/app/lib/data";
 import { boolean, number } from "zod";
 import { Button } from "@mui/material";
 import { BounceLoader } from "react-spinners";
@@ -15,6 +15,7 @@ import {
     SelectedCard,
     TournamentsListCard,
 } from "@/app/ui/dashboard/createTournament/CreateTournament";
+import TournamentModal from "@/app/ui/dashboard/modals/TournamentModal";
 
 interface CarData {
     _id: string;
@@ -218,7 +219,7 @@ type FiltersType = {
     sort: string;
 };
 
-type TournamentObjType = {
+export type TournamentObjType = {
     title: string;
     auctionID: string[];
     buyInFee: number;
@@ -232,6 +233,7 @@ const CreateTournamentsPage = () => {
     const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
     const [tournamentObject, setTournamentObject] = useState({});
     const [totalAuctions, setTotalAuctions] = useState<number>(0);
+    const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [loadmoreLoading, setLoadmoreLoading] = useState(true);
     const [makeDropdown, setMakeDropdown] = useState(false);
@@ -324,11 +326,12 @@ const CreateTournamentsPage = () => {
     }, [auctionsData, selectedData]);
 
     //TODO: creates tournament
-    const handleCreateTournament = () => {};
-
-    // combine the selectedData and other inputs
-    const createTournamentObject = () => {
-        console.log("Tournament Object:", tournamentObject);
+    const handleCreateTournament = async () => {
+        const res = await createTournament(tournamentObject);
+        if (res) {
+            console.log("Tournament created successfully");
+        }
+        return { message: "Tournament created successfully" };
     };
 
     // onChange of input, saves data to tournamentObject
@@ -559,6 +562,10 @@ const CreateTournamentsPage = () => {
         closeAllDropdowns();
     };
 
+    useEffect(() => {
+        console.log("tournament modal:", isTournamentModalOpen);
+    }, [isTournamentModalOpen]);
+
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-justify-between">
@@ -567,7 +574,7 @@ const CreateTournamentsPage = () => {
                 </div>
                 <button
                     className={tounamentObjIsValid ? "btn-yellow" : "btn-gray"}
-                    onClick={createTournamentObject}
+                    onClick={() => setIsTournamentModalOpen(true)}
                 >
                     CREATE TOURNAMENT
                 </button>
@@ -784,6 +791,15 @@ const CreateTournamentsPage = () => {
                     </div>
                 </div>
             </div>
+            {/* Tournament Modal */}
+            {tournamentObject && (
+                <TournamentModal
+                    isOpen={isTournamentModalOpen}
+                    onClose={() => setIsTournamentModalOpen(false)}
+                    data={tournamentObject as TournamentObjType}
+                    handleCreateTournament={handleCreateTournament}
+                />
+            )}
         </div>
     );
 };
