@@ -45,11 +45,6 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
                     x
                 </button>
                 <div className="tw-flex tw-flex-col tw-gap-2 tw-p-4 tw-bg-[#1A2C3D] tw-rounded-lg tw-border-2 tw-mt-4">
-                    {successfullyPosted && (
-                        <div className="tw-bg-[#F2CA16]">
-                            Tournament Successfully Posted
-                        </div>
-                    )}
                     <h2 className="tw-font-bold tw-text-yellow-500">
                         TOURNAMENT DETAILS
                     </h2>
@@ -80,18 +75,26 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
                         </div>
                     </div>
                     <div className="tw-bg-white/10 tw-h-[2px] tw-my-2"></div>
-                    <div className="tw-flex tw-flex-col tw-gap-3">
-                        <div>Post Tournament?</div>
-                        <div className="tw-flex tw-gap-4">
-                            <button onClick={() => onClose()}>Cancel</button>
-                            <button
-                                onClick={() => handleCreateTournament()}
-                                className="btn-yellow"
-                            >
-                                Confirm
-                            </button>
+                    {successfullyPosted ? (
+                        <div className="tw-bg-[#F2CA16] tw-p-2 tw-text-black tw-text-xl tw-font-bold tw-text-center ">
+                            Tournament Successfully Posted! 🎉
                         </div>
-                    </div>
+                    ) : (
+                        <div className="tw-flex tw-flex-col tw-gap-3">
+                            <div>Post Tournament?</div>
+                            <div className="tw-flex tw-gap-4">
+                                <button onClick={() => onClose()}>
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => handleCreateTournament()}
+                                    className="btn-yellow"
+                                >
+                                    Confirm
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

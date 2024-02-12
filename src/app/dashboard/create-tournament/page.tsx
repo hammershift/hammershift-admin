@@ -225,7 +225,7 @@ const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
     const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
-    const [successfullyPosted, setSuccessfullyPosted] = useState(false); // if tournament is successfully posted
+    const [successfullyPosted, setSuccessfullyPosted] = useState(true); // if tournament is successfully posted
     const [tournamentObject, setTournamentObject] = useState({});
     const [totalAuctions, setTotalAuctions] = useState<number>(0);
     const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
@@ -372,7 +372,7 @@ const CreateTournamentsPage = () => {
                 objectData["buyInFee"] &&
                 objectData["startTime"] &&
                 objectData["endTime"] &&
-                objectData["auctionID"].length === 5
+                objectData["auctionID"]?.length === 5
             ) {
                 setTounamentObjIsValid(true);
             } else {
