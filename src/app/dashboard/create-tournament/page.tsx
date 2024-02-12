@@ -313,11 +313,11 @@ const CreateTournamentsPage = () => {
     }, [displayCount]);
 
     // fetch auctions data when filters change
-    const handleFilterButton = () => {
+    useEffect(() => {
         setIsLoading(true);
         setDisplayCount(7);
         fetchData(filters);
-    };
+    }, [filters]);
 
     // check if data is fetched
     useEffect(() => {
@@ -732,12 +732,6 @@ const CreateTournamentsPage = () => {
                                 />
                             )}
                         </div>
-                        <button
-                            className="btn-white"
-                            onClick={handleFilterButton}
-                        >
-                            FILTER
-                        </button>
                     </div>
                     {/* Auctions List */}
                     <div className=" tw-h-[1000px] tw-rounded-xl tw-bg-white/20 tw-overflow-scroll">
