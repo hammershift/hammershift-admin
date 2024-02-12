@@ -242,7 +242,7 @@ const CreateTournamentsPage = () => {
     );
     const [selectedAuctionId, setSelectedAuctionId] = useState("");
     const [filters, setFilters] = useState(FilterInitialState);
-    const filterRef = useRef();
+    const filterRef = useRef<HTMLElement | null>(null);
 
     // adds 7 to displayCount
     const handleLoadMore = () => {
