@@ -296,7 +296,11 @@ const CreateTournamentsPage = () => {
             });
 
             if (data && "cars" in data) {
+                if (data.total < displayCount) {
+                    setDisplayCount(data.total);
+                }
                 setAuctionsData(data.cars as CarData[]);
+                setTotalAuctions(data.total);
                 setIsLoading(false);
                 setLoadmoreLoading(false);
             } else {
@@ -307,8 +311,11 @@ const CreateTournamentsPage = () => {
         }
     };
 
-    // fetch auctions data
+    // fetch auctions data / show more
     useEffect(() => {
+        if (totalAuctions - displayCount <= 7) {
+            setDisplayCount(totalAuctions);
+        }
         fetchData(filters);
     }, [displayCount]);
 
@@ -579,7 +586,7 @@ const CreateTournamentsPage = () => {
                     CREATE TOURNAMENT
                 </button>
             </div>
-            <div className="tw-flex tw-gap-4">
+            <div className="tw-flex tw-flex-col sm:tw-flex-row tw-gap-4">
                 <div className="tw-flex tw-flex-col tw-w-2/5 tw-gap-4">
                     <div className="tw-w-full tw-min-h-[200px] tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4 ">
                         <div className="tw-text-xl tw-font-bold">
@@ -693,7 +700,7 @@ const CreateTournamentsPage = () => {
                                         onClick={() =>
                                             handleToggleDropdown(data.filterKey)
                                         }
-                                        className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                                        className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
                                     >
                                         {item}
                                     </div>
@@ -771,12 +778,14 @@ const CreateTournamentsPage = () => {
                         {!isLoading && !loadmoreLoading ? (
                             <div className="tw-h-[100px] tw-flex tw-flex-col tw-justify-center tw-items-center">
                                 <div className="tw-pb-2">{`Showing ${displayCount} out of ${totalAuctions}`}</div>
-                                <button
-                                    className="btn-white"
-                                    onClick={handleLoadMore}
-                                >
-                                    Load More
-                                </button>
+                                {displayCount !== totalAuctions && (
+                                    <button
+                                        className="btn-white"
+                                        onClick={handleLoadMore}
+                                    >
+                                        Load More
+                                    </button>
+                                )}
                             </div>
                         ) : (
                             !isLoading &&
