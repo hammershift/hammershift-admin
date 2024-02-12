@@ -26,6 +26,8 @@ type tournamentsListCardData = {
     convertDateStringToDateTime: (dateString: string) => string;
     handleCheckbox: HandleCheckboxType;
     selected: boolean;
+    selectAuctionModalID: (id: string) => void;
+    setAuctionModalOpen: () => void;
 };
 
 export interface SelectedDataType {
@@ -57,8 +59,15 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     convertDateStringToDateTime,
     handleCheckbox,
     selected,
+    selectAuctionModalID,
+    setAuctionModalOpen,
 }) => {
     const dateTime = convertDateStringToDateTime(deadline);
+
+    const handleClick = () => {
+        selectAuctionModalID(auctionID);
+        setAuctionModalOpen();
+    };
 
     return (
         <div>
@@ -87,7 +96,8 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
                     width={416}
                     height={240}
                     alt="car"
-                    className="tw-w-[200px] tw-h-auto tw-object-cover tw-aspect-auto"
+                    className="tw-w-[200px] tw-h-auto tw-object-cover tw-aspect-auto tw-cursor-pointer"
+                    onClick={handleClick}
                 />
                 <div>
                     <div className="tw-opacity-30 tw-text-lg tw-font-bold">
@@ -124,6 +134,8 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
 type SelectedCardProps = SelectedDataType & {
     handleRemoveSelectedAuction: (id: string) => void;
     convertDateStringToDateTime: (dateString: string) => string;
+    selectAuctionModalID: (id: string) => void;
+    setAuctionModalOpen: () => void;
 };
 
 // card for selected auctions
@@ -133,10 +145,17 @@ export const SelectedCard: React.FC<SelectedCardProps> = ({
     deadline,
     auction_id,
     image,
+    selectAuctionModalID,
+    setAuctionModalOpen,
     handleRemoveSelectedAuction,
     convertDateStringToDateTime,
 }) => {
     const dateTime = convertDateStringToDateTime(deadline);
+
+    const handleClick = () => {
+        selectAuctionModalID(auction_id);
+        setAuctionModalOpen();
+    };
 
     return (
         <div className="tw-flex tw-gap-4 tw-border-solid tw-border-2 tw-border-white tw-border tw-py-3 tw-px-2 tw-rounded">
@@ -145,7 +164,8 @@ export const SelectedCard: React.FC<SelectedCardProps> = ({
                 alt={title}
                 width={100}
                 height={100}
-                className="tw-w-[100px] tw-h-[100px] tw-object-cover"
+                className="tw-w-[100px] tw-h-[100px] tw-object-cover tw-cursor-pointer"
+                onClick={handleClick}
             />
             <div className="tw-grid tw-gap-2">
                 <div>

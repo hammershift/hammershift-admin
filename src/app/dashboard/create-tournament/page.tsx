@@ -1,14 +1,7 @@
 "use client";
 import React, { RefObject, useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import CarPhoto from "../../../../public/images/car-photo.svg";
-import HourGlass from "../../../../public/images/hourglass.svg";
-import Checkbox from "@mui/material/Checkbox";
 import { createTournament, getCarsWithFilter } from "@/app/lib/data";
-import { boolean, number } from "zod";
-import { Button } from "@mui/material";
 import { BounceLoader } from "react-spinners";
-import { set } from "mongoose";
 import {
     DropdownComponent,
     LoadingComponent,
@@ -16,6 +9,7 @@ import {
     TournamentsListCard,
 } from "@/app/ui/dashboard/createTournament/CreateTournament";
 import TournamentModal from "@/app/ui/dashboard/modals/TournamentModal";
+import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
 
 interface CarData {
     _id: string;
@@ -235,6 +229,7 @@ const CreateTournamentsPage = () => {
     const [tournamentObject, setTournamentObject] = useState({});
     const [totalAuctions, setTotalAuctions] = useState<number>(0);
     const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
+    const [isAuctionModalOpen, setIsAuctionModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [loadmoreLoading, setLoadmoreLoading] = useState(true);
     const [makeDropdown, setMakeDropdown] = useState(false);
@@ -245,13 +240,25 @@ const CreateTournamentsPage = () => {
     const [selectedData, setSelectedData] = useState<SelectedDataType[] | null>(
         null
     );
+    const [selectedAuctionId, setSelectedAuctionId] = useState("");
     const [filters, setFilters] = useState(FilterInitialState);
     const filterRef = useRef();
 
+    // adds 7 to displayCount
     const handleLoadMore = () => {
         setLoadmoreLoading(true);
         setDisplayCount((prev) => prev + 7);
     };
+
+    // change selected auction Id
+    const selectAuctionID = (id: string) => {
+        setSelectedAuctionId(id);
+    };
+
+    // check selected Auction ID
+    useEffect(() => {
+        console.log("selected ID for modal:", selectedAuctionId);
+    }, [selectAuctionID]);
 
     // dropdown data
     const FiltersDataContent: {
@@ -661,6 +668,10 @@ const CreateTournamentsPage = () => {
                                         deadline={item.deadline}
                                         auction_id={item.auction_id}
                                         image={item.image}
+                                        selectAuctionModalID={selectAuctionID}
+                                        setAuctionModalOpen={() =>
+                                            setIsAuctionModalOpen(true)
+                                        }
                                         handleRemoveSelectedAuction={
                                             handleRemoveSelectedAuction
                                         }
@@ -771,6 +782,12 @@ const CreateTournamentsPage = () => {
                                                           )
                                                         : false
                                                 }
+                                                selectAuctionModalID={
+                                                    selectAuctionID
+                                                }
+                                                setAuctionModalOpen={() =>
+                                                    setIsAuctionModalOpen(true)
+                                                }
                                             />
                                         );
                                     })}
@@ -806,6 +823,13 @@ const CreateTournamentsPage = () => {
                     data={tournamentObject as TournamentObjType}
                     successfullyPosted={successfullyPosted}
                     handleCreateTournament={handleCreateTournament}
+                />
+            )}
+            {isAuctionModalOpen && (
+                <AuctionModal
+                    isOpen={isAuctionModalOpen}
+                    onClose={() => setIsAuctionModalOpen(false)}
+                    id={selectedAuctionId}
                 />
             )}
         </div>
