@@ -28,7 +28,7 @@ type tournamentsListCardData = {
     selected: boolean;
 };
 
-interface SelectedDataType {
+export interface SelectedDataType {
     _id: string;
     title: string;
     deadline: string;

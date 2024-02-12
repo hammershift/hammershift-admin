@@ -802,6 +802,7 @@ const CreateTournamentsPage = () => {
                 <TournamentModal
                     isOpen={isTournamentModalOpen}
                     onClose={() => setIsTournamentModalOpen(false)}
+                    selectedData={selectedData as SelectedDataType[]}
                     data={tournamentObject as TournamentObjType}
                     successfullyPosted={successfullyPosted}
                     handleCreateTournament={handleCreateTournament}
