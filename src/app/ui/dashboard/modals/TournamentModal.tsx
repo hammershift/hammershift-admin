@@ -45,6 +45,11 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
                     x
                 </button>
                 <div className="tw-flex tw-flex-col tw-gap-2 tw-p-4 tw-bg-[#1A2C3D] tw-rounded-lg tw-border-2 tw-mt-4">
+                    {successfullyPosted && (
+                        <div className="tw-bg-[#F2CA16]">
+                            Tournament Successfully Posted
+                        </div>
+                    )}
                     <h2 className="tw-font-bold tw-text-yellow-500">
                         TOURNAMENT DETAILS
                     </h2>

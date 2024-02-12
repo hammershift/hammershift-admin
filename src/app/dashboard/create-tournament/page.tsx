@@ -368,7 +368,6 @@ const CreateTournamentsPage = () => {
     useEffect(() => {
         const checkValidity = (objectData: TournamentObjType) => {
             if (
-                Object.keys(objectData).length === 5 &&
                 objectData["title"] &&
                 objectData["buyInFee"] &&
                 objectData["startTime"] &&
@@ -412,9 +411,6 @@ const CreateTournamentsPage = () => {
         auction_id: string,
         image: string
     ) => {
-        if (selectedData !== null && selectedData.length >= 5) {
-            return;
-        }
         setSelectedData((prevSelectedData) => {
             // if no data, add new data
             if (!prevSelectedData) {
@@ -433,20 +429,24 @@ const CreateTournamentsPage = () => {
                 return prevSelectedData.filter((item) => item._id !== _id);
             }
             // add new data
-            return [
-                ...prevSelectedData,
-                {
-                    _id: _id,
-                    title: title,
-                    deadline: deadline,
-                    auction_id: auction_id,
-                    image: image,
-                },
-            ];
+            if (prevSelectedData.length < 5) {
+                return [
+                    ...prevSelectedData,
+                    {
+                        _id: _id,
+                        title: title,
+                        deadline: deadline,
+                        auction_id: auction_id,
+                        image: image,
+                    },
+                ];
+            }
+            return prevSelectedData;
         });
 
         // update tournamentObject
         setTournamentObject((prevTournamentObj: TournamentObjType) => {
+            //if there is no auctionID field, add and include current auctionID
             if (!prevTournamentObj.auctionID) {
                 return { ...prevTournamentObj, auctionID: [_id] };
             }
@@ -454,7 +454,9 @@ const CreateTournamentsPage = () => {
             if (auctionArray.includes(_id)) {
                 auctionArray = auctionArray.filter((itemID) => itemID !== _id);
             } else {
-                auctionArray.push(_id);
+                if (auctionArray.length < 5) {
+                    auctionArray.push(_id);
+                }
             }
             return { ...prevTournamentObj, auctionID: auctionArray };
         });
