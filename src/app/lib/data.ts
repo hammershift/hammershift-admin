@@ -141,16 +141,16 @@ export const editUserWithId = async (id: string, body: any) => {
 }*/
 
 export const createTournament = async (body: any) => {
-    return { message: "Successful", body };
+    // return { message: "Successful", body };
     // TODO: uncomment this when the API is ready
 
-    // const res = await fetch(`/api/tournament`, {
-    //     method: "POST",
-    //     body: JSON.stringify(body),
-    // });
-    // if (res.status === 200) {
-    //     return { message: "Created Tournament" };
-    // } else {
-    //     console.error("Edit Unsuccessful");
-    // }
+    const res = await fetch(`/api/tournaments`, {
+        method: "POST",
+        body: JSON.stringify(body),
+    });
+    if (res.status === 200) {
+        return { message: "Created Tournament" };
+    } else {
+        console.error("Edit Unsuccessful");
+    }
 };

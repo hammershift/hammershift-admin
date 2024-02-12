@@ -231,6 +231,7 @@ const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
     const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
+    const [successfullyPosted, setSuccessfullyPosted] = useState(false); // if tournament is successfully posted
     const [tournamentObject, setTournamentObject] = useState({});
     const [totalAuctions, setTotalAuctions] = useState<number>(0);
     const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
@@ -337,6 +338,8 @@ const CreateTournamentsPage = () => {
         const res = await createTournament(tournamentObject);
         if (res) {
             console.log("Tournament created successfully");
+            setIsTournamentModalOpen(false);
+            setSuccessfullyPosted(true);
         }
         return { message: "Tournament created successfully" };
     };
@@ -800,6 +803,7 @@ const CreateTournamentsPage = () => {
                     isOpen={isTournamentModalOpen}
                     onClose={() => setIsTournamentModalOpen(false)}
                     data={tournamentObject as TournamentObjType}
+                    successfullyPosted={successfullyPosted}
                     handleCreateTournament={handleCreateTournament}
                 />
             )}

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 //types / interfaces
 import { TournamentObjType } from "@/app/dashboard/create-tournament/page";
@@ -8,6 +8,7 @@ interface TournamentModalProps {
     isOpen: boolean;
     onClose: () => void;
     data: TournamentObjType;
+    successfullyPosted: boolean;
     handleCreateTournament: () => Promise<{ message: string }>;
 }
 
@@ -15,11 +16,15 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
     isOpen,
     onClose,
     data,
+    successfullyPosted,
     handleCreateTournament,
 }) => {
     if (!isOpen) {
         return null;
     }
+
+    if (successfullyPosted) alert("Successfully created tournament");
+
     return (
         <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
             <div className="tw-w-[600px] tw-flex tw-flex-col">
@@ -30,6 +35,7 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
                     x
                 </button>
                 <div></div>
+
                 <TournamentShowModal data={data} />
                 <div>Post Tournament?</div>
                 <button onClick={() => handleCreateTournament()}>
@@ -52,4 +58,8 @@ const TournamentShowModal = ({ data }: { data: TournamentObjType }) => {
             <div>{JSON.stringify(data)}</div>
         </div>
     );
+};
+
+const SuccessfullyCreatedTournament = () => {
+    return <div>Successful!</div>;
 };
