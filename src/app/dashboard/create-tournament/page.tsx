@@ -221,17 +221,27 @@ export type TournamentObjType = {
     endTime: Date;
 };
 
+const tournamentObjectInitialState: TournamentObjType = {
+    title: "",
+    auctionID: [],
+    buyInFee: 0,
+    startTime: new Date(),
+    endTime: new Date(),
+};
+
 const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
     const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
-    const [successfullyPosted, setSuccessfullyPosted] = useState(true); // if tournament is successfully posted
+    const [successfullyPosted, setSuccessfullyPosted] = useState(false); // if tournament is successfully posted
     const [tournamentObject, setTournamentObject] = useState({});
     const [totalAuctions, setTotalAuctions] = useState<number>(0);
     const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
     const [isAuctionModalOpen, setIsAuctionModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [loadmoreLoading, setLoadmoreLoading] = useState(true);
+    const [createTournamentLoading, setCreateTournamentLoading] =
+        useState(false);
     const [makeDropdown, setMakeDropdown] = useState(false);
     const [categoryDropdown, setCategoryDropdown] = useState(false);
     const [eraDropdown, setEraDropdown] = useState(false);
@@ -254,11 +264,6 @@ const CreateTournamentsPage = () => {
     const selectAuctionID = (id: string) => {
         setSelectedAuctionId(id);
     };
-
-    // check selected Auction ID
-    useEffect(() => {
-        console.log("selected ID for modal:", selectedAuctionId);
-    }, [selectAuctionID]);
 
     // dropdown data
     const FiltersDataContent: {
@@ -342,13 +347,25 @@ const CreateTournamentsPage = () => {
 
     //TODO: creates tournament
     const handleCreateTournament = async () => {
+        setCreateTournamentLoading(true);
         const res = await createTournament(tournamentObject);
         if (res) {
             console.log("Tournament created successfully");
-            setIsTournamentModalOpen(false);
             setSuccessfullyPosted(true);
+            setCreateTournamentLoading(false);
+            handleSuccessfulPost();
         }
         return { message: "Tournament created successfully" };
+    };
+
+    //timer for when tournament is created
+    const handleSuccessfulPost = () => {
+        setTimeout(() => {
+            setSuccessfullyPosted(false);
+            setTournamentObject({});
+            setSelectedData([]);
+            setIsTournamentModalOpen(false);
+        }, 5000);
     };
 
     // onChange of input, saves data to tournamentObject
@@ -825,6 +842,7 @@ const CreateTournamentsPage = () => {
                     data={tournamentObject as TournamentObjType}
                     successfullyPosted={successfullyPosted}
                     handleCreateTournament={handleCreateTournament}
+                    createTournamentLoading={createTournamentLoading}
                 />
             )}
             {isAuctionModalOpen && (

@@ -4,6 +4,7 @@ import { SelectedDataType } from "../createTournament/CreateTournament";
 
 //types / interfaces
 import { TournamentObjType } from "@/app/dashboard/create-tournament/page";
+import { BounceLoader } from "react-spinners";
 
 // convert date string to date time
 function convertDateStringToDateTime(dateString: string | Date) {
@@ -18,6 +19,7 @@ interface TournamentModalProps {
     data: TournamentObjType;
     successfullyPosted: boolean;
     handleCreateTournament: () => Promise<{ message: string }>;
+    createTournamentLoading: boolean;
 }
 
 const TournamentModal: React.FC<TournamentModalProps> = ({
@@ -27,6 +29,7 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
     data,
     successfullyPosted,
     handleCreateTournament,
+    createTournamentLoading,
 }) => {
     if (!isOpen) {
         return null;
@@ -75,7 +78,11 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
                         </div>
                     </div>
                     <div className="tw-bg-white/10 tw-h-[2px] tw-my-2"></div>
-                    {successfullyPosted ? (
+                    {createTournamentLoading ? (
+                        <div className="tw-w-full tw-h-[80px] tw-flex tw-justify-center tw-items-center">
+                            <BounceLoader color="#F2CA16" />
+                        </div>
+                    ) : successfullyPosted ? (
                         <div className="tw-bg-[#F2CA16] tw-p-2 tw-text-black tw-text-xl tw-font-bold tw-text-center ">
                             Tournament Successfully Posted! 🎉
                         </div>
@@ -102,10 +109,6 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
 };
 
 export default TournamentModal;
-
-const SuccessfullyCreatedTournament = () => {
-    return <div>Successful!</div>;
-};
 
 const AuctionsCard: React.FC<SelectedDataType> = ({
     _id,
