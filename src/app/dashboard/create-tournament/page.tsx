@@ -2,6 +2,8 @@
 import React, { RefObject, useEffect, useRef, useState } from "react";
 import { createTournament, getCarsWithFilter } from "@/app/lib/data";
 import { BounceLoader } from "react-spinners";
+import FunnelFilter from "../../../../public/images/filter-funnel-02.svg";
+import ArrowDown from "../../../../public/images/arrows-down.svg";
 import {
     DropdownComponent,
     LoadingComponent,

@@ -4,7 +4,7 @@ import { SelectedDataType } from "../createTournament/CreateTournament";
 
 //types / interfaces
 import { TournamentObjType } from "@/app/dashboard/create-tournament/page";
-import { BounceLoader } from "react-spinners";
+import { BeatLoader } from "react-spinners";
 
 // convert date string to date time
 function convertDateStringToDateTime(dateString: string | Date) {
@@ -79,8 +79,8 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
                     </div>
                     <div className="tw-bg-white/10 tw-h-[2px] tw-my-2"></div>
                     {createTournamentLoading ? (
-                        <div className="tw-w-full tw-h-[80px] tw-flex tw-justify-center tw-items-center">
-                            <BounceLoader color="#F2CA16" />
+                        <div className="tw-w-full tw-h-[60px] tw-flex tw-justify-center tw-items-center">
+                            <BeatLoader color="#F2CA16" />
                         </div>
                     ) : successfullyPosted ? (
                         <div className="tw-bg-[#F2CA16] tw-p-2 tw-text-black tw-text-xl tw-font-bold tw-text-center ">
