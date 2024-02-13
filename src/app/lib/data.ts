@@ -151,6 +151,18 @@ export const createTournament = async (body: any) => {
     if (res.status === 200) {
         return { message: "Created Tournament" };
     } else {
-        console.error("Edit Unsuccessful");
+        console.error("Create Tournament Unsuccessful");
+    }
+};
+
+export const getLimitedTournaments = async (limit: number) => {
+    // return { message: "Successful", body };
+    // TODO: uncomment this when the API is ready
+
+    const res = await fetch(`/api/tournaments?limit=${limit}`);
+    if (res.status === 200) {
+        return await res.json();
+    } else {
+        console.error("Get Tournaments Unsuccessful");
     }
 };
