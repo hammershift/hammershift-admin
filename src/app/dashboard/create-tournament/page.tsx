@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React, { RefObject, useEffect, useRef, useState } from "react";
 import { createTournament, getCarsWithFilter } from "@/app/lib/data";
 import { BounceLoader } from "react-spinners";
@@ -618,8 +619,10 @@ const CreateTournamentsPage = () => {
                 </button>
             </div>
             <div className="tw-flex tw-flex-col sm:tw-flex-row tw-gap-4">
-                <div className="tw-flex tw-flex-col tw-w-2/5 tw-gap-4">
-                    <div className="tw-w-full tw-min-h-[200px] tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4 ">
+                {/* left column */}
+                <div className="tw-flex tw-flex-col tw-w-full md:tw-w-2/5 tw-gap-4">
+                    {/* tournament information */}
+                    <div className="tw-w-full tw-min-h-[200px] tw-bg-white/5 tw-rounded tw-p-4 md:tw-p-8 tw-flex tw-flex-col tw-gap-4 ">
                         <div className="tw-text-xl tw-font-bold">
                             Tournament Information
                         </div>
@@ -668,7 +671,7 @@ const CreateTournamentsPage = () => {
                             />
                         </div>
                     </div>
-                    <div className="tw-w-full tw-bg-white/5 tw-rounded tw-py-8 tw-px-8 tw-flex tw-flex-col tw-gap-4">
+                    <div className="tw-w-full tw-bg-white/5 tw-rounded tw-p-4 md:tw-p-8 tw-flex tw-flex-col tw-gap-4">
                         <div className="tw-text-xl tw-font-bold">
                             List of Selected Auctions
                         </div>
@@ -710,7 +713,7 @@ const CreateTournamentsPage = () => {
                     </div>
                 </div>
                 {/* auctions and filter section */}
-                <div className="tw-flex tw-flex-col tw-w-3/5 tw-gap-4 tw-bg-white/5 tw-py-6 tw-px-8">
+                <div className="tw-flex tw-flex-col tw-w-full md:tw-w-3/5 tw-gap-4 tw-bg-white/5 tw-p-4 md:tw-p-8">
                     <div className="tw-text-lg tw-font-bold">
                         Auctions
                         <span className="tw-opacity-20 tw-ml-2">
@@ -727,41 +730,67 @@ const CreateTournamentsPage = () => {
                     >
                         <div>Filters:</div>
                         {/* Dropdowns for make, category, era and filter */}
-                        {ListOfFilters.map((item: string, index: number) => {
-                            const data = FiltersDataContent[item];
-                            return (
-                                <div key={String(index + item)}>
-                                    <div
-                                        onClick={() =>
-                                            handleToggleDropdown(data.filterKey)
-                                        }
-                                        className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
-                                    >
-                                        {item}
-                                    </div>
-                                    {data.dropdown && (
-                                        <DropdownComponent
-                                            filterKey={data.filterKey}
-                                            content={data.content}
-                                            columns={data.columns}
-                                            handleCheckboxFilters={
-                                                handleCheckboxFilters
+                        {window.innerWidth >= 1080 ? (
+                            ListOfFilters.map((item: string, index: number) => {
+                                const data = FiltersDataContent[item];
+                                return (
+                                    <div key={String(index + item)}>
+                                        <div
+                                            onClick={() =>
+                                                handleToggleDropdown(
+                                                    data.filterKey
+                                                )
                                             }
-                                            filters={filters}
-                                        />
-                                    )}
-                                </div>
-                            );
-                        })}
+                                            className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                                        >
+                                            {item}
+                                        </div>
+                                        {data.dropdown && (
+                                            <DropdownComponent
+                                                filterKey={data.filterKey}
+                                                content={data.content}
+                                                columns={data.columns}
+                                                handleCheckboxFilters={
+                                                    handleCheckboxFilters
+                                                }
+                                                filters={filters}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div>
+                                <Image
+                                    src={FunnelFilter}
+                                    alt="funnel filter"
+                                    width={24}
+                                    height={24}
+                                    className="tw-w-6 tw-h-6"
+                                />
+                                {/* create a new component for dropdown */}
+                            </div>
+                        )}
 
                         <div>Sort:</div>
                         <div>
-                            <div
-                                onClick={() => handleToggleDropdown("sort")}
-                                className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
-                            >
-                                Sort
-                            </div>
+                            {window.innerWidth >= 1080 ? (
+                                <div
+                                    onClick={() => handleToggleDropdown("sort")}
+                                    className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                                >
+                                    Sort
+                                </div>
+                            ) : (
+                                <Image
+                                    src={ArrowDown}
+                                    alt="arrow down"
+                                    width={24}
+                                    height={24}
+                                    className="tw-w-6 tw-h-6"
+                                    onClick={() => handleToggleDropdown("sort")}
+                                />
+                            )}
                             {sortDropdown && (
                                 <DropdownComponent
                                     filterKey="sort"
@@ -776,7 +805,7 @@ const CreateTournamentsPage = () => {
                         </div>
                     </div>
                     {/* Auctions List */}
-                    <div className=" tw-h-[1000px] tw-rounded-xl tw-bg-white/20 tw-overflow-scroll">
+                    <div className=" md:tw-h-[1000px] tw-rounded-xl tw-bg-white/20 md:tw-overflow-scroll">
                         {!isLoading ? (
                             <>
                                 {auctionsData &&
@@ -814,7 +843,9 @@ const CreateTournamentsPage = () => {
                                     })}
                             </>
                         ) : (
-                            <LoadingComponent height={500} />
+                            <div className="tw-py-[200px]">
+                                <LoadingComponent />
+                            </div>
                         )}
                         {!isLoading && !loadmoreLoading ? (
                             <div className="tw-h-[100px] tw-flex tw-flex-col tw-justify-center tw-items-center">
@@ -830,7 +861,7 @@ const CreateTournamentsPage = () => {
                             </div>
                         ) : (
                             !isLoading &&
-                            loadmoreLoading && <LoadingComponent height={100} />
+                            loadmoreLoading && <LoadingComponent />
                         )}
                     </div>
                 </div>

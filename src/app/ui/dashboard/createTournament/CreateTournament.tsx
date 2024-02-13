@@ -39,10 +39,10 @@ export interface SelectedDataType {
 }
 
 // loading spinner
-export const LoadingComponent = ({ height }: { height: number }) => {
+export const LoadingComponent = () => {
     return (
         <div
-            className={`tw-h-[${height}px] tw-flex tw-justify-center tw-items-center`}
+            className={`tw-h-[100px] tw-flex tw-justify-center tw-items-center`}
         >
             <BounceLoader color="#F2CA16" />
         </div>
@@ -71,8 +71,8 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
 
     return (
         <div>
-            <div className="tw-flex tw-gap-6 tw-mt-6 tw-pl-4">
-                <div>
+            <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-6 tw-mt-6 tw-pl-4">
+                <div className="tw-w-1/3 tw-flex tw-items-center tw-gap-2">
                     <Checkbox
                         checked={selected}
                         value={auctionID}
@@ -90,16 +90,16 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
                             )
                         }
                     />
+                    <img
+                        src={image}
+                        width={416}
+                        height={240}
+                        alt="car"
+                        className="tw-w-[100px] md:tw-w-[200px] tw-h-[100px] md:tw-h-auto tw-object-cover tw-aspect-auto tw-cursor-pointer"
+                        onClick={handleClick}
+                    />
                 </div>
-                <img
-                    src={image}
-                    width={416}
-                    height={240}
-                    alt="car"
-                    className="tw-w-[200px] tw-h-auto tw-object-cover tw-aspect-auto tw-cursor-pointer"
-                    onClick={handleClick}
-                />
-                <div>
+                <div className="tw-w-2/3 tw-flex tw-flex-col">
                     <div className="tw-opacity-30 tw-text-lg tw-font-bold">
                         Auction ID: {auctionID}
                     </div>
