@@ -235,6 +235,7 @@ const tournamentObjectInitialState: TournamentObjType = {
 const CreateTournamentsPage = () => {
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
+    const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
     const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
     const [successfullyPosted, setSuccessfullyPosted] = useState(false); // if tournament is successfully posted
     const [tournamentObject, setTournamentObject] = useState({});
@@ -767,8 +768,57 @@ const CreateTournamentsPage = () => {
                                     width={24}
                                     height={24}
                                     className="tw-w-6 tw-h-6"
+                                    onClick={() =>
+                                        setIsMobileDropdownOpen((prev) => !prev)
+                                    }
                                 />
-                                {/* create a new component for dropdown */}
+                                {isMobileDropdownOpen && (
+                                    <div className="tw-absolute tw-bg-[#DCE0D9] tw-rounded-xl">
+                                        {ListOfFilters.map(
+                                            (item: string, index: number) => {
+                                                const data =
+                                                    FiltersDataContent[item];
+                                                return (
+                                                    <div
+                                                        key={String(
+                                                            index + item
+                                                        )}
+                                                    >
+                                                        <div
+                                                            onClick={() =>
+                                                                handleToggleDropdown(
+                                                                    data.filterKey
+                                                                )
+                                                            }
+                                                            className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                                                        >
+                                                            {item}
+                                                        </div>
+                                                        {data.dropdown && (
+                                                            <DropdownComponent
+                                                                filterKey={
+                                                                    data.filterKey
+                                                                }
+                                                                content={
+                                                                    data.content
+                                                                }
+                                                                columns={
+                                                                    data.columns
+                                                                }
+                                                                handleCheckboxFilters={
+                                                                    handleCheckboxFilters
+                                                                }
+                                                                filters={
+                                                                    filters
+                                                                }
+                                                            />
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
 
