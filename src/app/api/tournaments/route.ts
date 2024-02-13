@@ -84,20 +84,21 @@ export async function GET(req: NextRequest) {
 }*/
 export async function POST(req: NextRequest) {
     // check if user is authorized to access this function(owner, admin, moderator)
-    // const session = await getServerSession(authOptions);
-    // if (
-    //     session?.user.role !== "owner" &&
-    //     session?.user.role !== "admin" &&
-    //     session?.user.role !== "moderator"
-    // ) {
-    //     return NextResponse.json(
-    //         {
-    //             message:
-    //                 "Unauthorized! Your role does not have access to this function",
-    //         },
-    //         { status: 400 }
-    //     );
-    // }
+    // TODO: uncomment this after testing
+    const session = await getServerSession(authOptions);
+    if (
+        session?.user.role !== "owner" &&
+        session?.user.role !== "admin" &&
+        session?.user.role !== "moderator"
+    ) {
+        return NextResponse.json(
+            {
+                message:
+                    "Unauthorized! Your role does not have access to this function",
+            },
+            { status: 400 }
+        );
+    }
 
     try {
         await connectToDB();
