@@ -258,6 +258,14 @@ const CreateTournamentsPage = () => {
     const [filters, setFilters] = useState(FilterInitialState);
     const filterRef = useRef<HTMLElement | null>(null);
 
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
     // adds 7 to displayCount
     const handleLoadMore = () => {
         setLoadmoreLoading(true);
