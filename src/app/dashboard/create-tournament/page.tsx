@@ -607,8 +607,8 @@ const CreateTournamentsPage = () => {
 
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-flex tw-justify-between">
-                <div className="tw-text-2xl tw-font-bold">
+            <div className="tw-flex tw-flex-col sm:tw-flex-row tw-justify-between tw-gap-4">
+                <div className="tw-text-xl md:tw-text-2xl tw-font-bold">
                     Create Tournament
                 </div>
                 <button
@@ -618,7 +618,7 @@ const CreateTournamentsPage = () => {
                     CREATE TOURNAMENT
                 </button>
             </div>
-            <div className="tw-flex tw-flex-col sm:tw-flex-row tw-gap-4">
+            <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-4">
                 {/* left column */}
                 <div className="tw-flex tw-flex-col tw-w-full md:tw-w-2/5 tw-gap-4">
                     {/* tournament information */}
@@ -805,7 +805,7 @@ const CreateTournamentsPage = () => {
                         </div>
                     </div>
                     {/* Auctions List */}
-                    <div className=" md:tw-h-[1000px] tw-rounded-xl tw-bg-white/20 md:tw-overflow-scroll">
+                    <div className=" md:tw-h-[1000px] tw-rounded-xl tw-bg-white/20 md:tw-overflow-scroll tw-px-4">
                         {!isLoading ? (
                             <>
                                 {auctionsData &&

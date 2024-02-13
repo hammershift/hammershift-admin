@@ -71,8 +71,8 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
 
     return (
         <div>
-            <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-6 tw-mt-6 tw-pl-4">
-                <div className="tw-w-1/3 tw-flex tw-items-center tw-gap-2">
+            <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-6 tw-mt-6 md:tw-pl-4">
+                <div className="tw-w-1/3 tw-flex tw-items-center tw-gap-2 md:tw-gap-4">
                     <Checkbox
                         checked={selected}
                         value={auctionID}
@@ -94,24 +94,24 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
                         src={image}
                         width={416}
                         height={240}
-                        alt="car"
-                        className="tw-w-[100px] md:tw-w-[200px] tw-h-[100px] md:tw-h-auto tw-object-cover tw-aspect-auto tw-cursor-pointer"
+                        alt={title}
+                        className="tw-w-4/5 tw-h-[100px] md:tw-h-[200px] tw-object-cover tw-aspect-auto tw-cursor-pointer"
                         onClick={handleClick}
                     />
                 </div>
-                <div className="tw-w-2/3 tw-flex tw-flex-col">
-                    <div className="tw-opacity-30 tw-text-lg tw-font-bold">
+                <div className="tw-w-full lg:tw-w-2/3 tw-flex tw-flex-col">
+                    <div className="tw-opacity-30 tw-text-md md:tw-text-lg tw-font-bold">
                         Auction ID: {auctionID}
                     </div>
-                    <div className="tw-text-2xl tw-font-bold tw-mt-3">
+                    <div className="tw-text-lg md:tw-text-2xl tw-font-bold tw-mt-3">
                         {title}
                     </div>
-                    <div className="tw-h-[72px] tw-ellipsis tw-overflow-hidden">
+                    <div className="tw-text-sm md:tw-text-md tw-h-[4rem] tw-ellipsis tw-overflow-hidden">
                         {description.map((item, index) => (
                             <p key={index}>{item}</p>
                         ))}
                     </div>
-                    <div className="tw-flex tw-mt-4">
+                    <div className="tw-text-sm md:tw-text-md tw-flex tw-mt-4">
                         <Image
                             src={HourGlass}
                             width={20}
