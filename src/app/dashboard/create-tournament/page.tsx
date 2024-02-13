@@ -731,108 +731,124 @@ const CreateTournamentsPage = () => {
                     >
                         <div>Filters:</div>
                         {/* Dropdowns for make, category, era and filter */}
-                        {typeof window !== "undefined" &&
-                        window.innerWidth >= 1080 ? (
-                            ListOfFilters.map((item: string, index: number) => {
-                                const data = FiltersDataContent[item];
-                                return (
-                                    <div key={String(index + item)}>
-                                        <div
-                                            onClick={() =>
-                                                handleToggleDropdown(
-                                                    data.filterKey
-                                                )
-                                            }
-                                            className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
-                                        >
-                                            {item}
-                                        </div>
-                                        {data.dropdown && (
-                                            <DropdownComponent
-                                                filterKey={data.filterKey}
-                                                content={data.content}
-                                                columns={data.columns}
-                                                handleCheckboxFilters={
-                                                    handleCheckboxFilters
+                        {/* desktop view */}
+                        <div className="tw-hidden lg:tw-flex tw-gap-3">
+                            {ListOfFilters.map(
+                                (item: string, index: number) => {
+                                    const data = FiltersDataContent[item];
+                                    return (
+                                        <div key={String(index + item)}>
+                                            <div
+                                                onClick={() =>
+                                                    handleToggleDropdown(
+                                                        data.filterKey
+                                                    )
                                                 }
-                                                filters={filters}
-                                            />
-                                        )}
-                                    </div>
-                                );
-                            })
-                        ) : (
-                            <div>
-                                <Image
-                                    src={FunnelFilter}
-                                    alt="funnel filter"
-                                    width={24}
-                                    height={24}
-                                    className="tw-w-6 tw-h-6"
-                                    onClick={() =>
-                                        setIsMobileDropdownOpen((prev) => !prev)
-                                    }
-                                />
-                                {isMobileDropdownOpen && (
-                                    <div className="tw-absolute tw-bg-[#DCE0D9] tw-rounded-xl">
-                                        {ListOfFilters.map(
-                                            (item: string, index: number) => {
-                                                const data =
-                                                    FiltersDataContent[item];
-                                                return (
-                                                    <div
-                                                        key={String(
-                                                            index + item
-                                                        )}
-                                                    >
+                                                className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                                            >
+                                                {item}
+                                            </div>
+                                            {data.dropdown && (
+                                                <DropdownComponent
+                                                    filterKey={data.filterKey}
+                                                    content={data.content}
+                                                    columns={data.columns}
+                                                    handleCheckboxFilters={
+                                                        handleCheckboxFilters
+                                                    }
+                                                    filters={filters}
+                                                />
+                                            )}
+                                        </div>
+                                    );
+                                }
+                            )}
+                        </div>
+                        {/* mobile view */}
+                        <div className="tw-block lg:tw-hidden">
+                            {
+                                <div>
+                                    <Image
+                                        src={FunnelFilter}
+                                        alt="funnel filter"
+                                        width={24}
+                                        height={24}
+                                        className="tw-w-6 tw-h-6"
+                                        onClick={() =>
+                                            setIsMobileDropdownOpen(
+                                                (prev) => !prev
+                                            )
+                                        }
+                                    />
+                                    {isMobileDropdownOpen && (
+                                        <div className="tw-absolute tw-bg-[#DCE0D9] tw-rounded-xl">
+                                            {ListOfFilters.map(
+                                                (
+                                                    item: string,
+                                                    index: number
+                                                ) => {
+                                                    const data =
+                                                        FiltersDataContent[
+                                                            item
+                                                        ];
+                                                    return (
                                                         <div
-                                                            onClick={() =>
-                                                                handleToggleDropdown(
-                                                                    data.filterKey
-                                                                )
-                                                            }
-                                                            className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                                                            key={String(
+                                                                index + item
+                                                            )}
                                                         >
-                                                            {item}
+                                                            <div
+                                                                onClick={() =>
+                                                                    handleToggleDropdown(
+                                                                        data.filterKey
+                                                                    )
+                                                                }
+                                                                className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                                                            >
+                                                                {item}
+                                                            </div>
+                                                            {data.dropdown && (
+                                                                <DropdownComponent
+                                                                    filterKey={
+                                                                        data.filterKey
+                                                                    }
+                                                                    content={
+                                                                        data.content
+                                                                    }
+                                                                    columns={
+                                                                        data.columns
+                                                                    }
+                                                                    handleCheckboxFilters={
+                                                                        handleCheckboxFilters
+                                                                    }
+                                                                    filters={
+                                                                        filters
+                                                                    }
+                                                                />
+                                                            )}
                                                         </div>
-                                                        {data.dropdown && (
-                                                            <DropdownComponent
-                                                                filterKey={
-                                                                    data.filterKey
-                                                                }
-                                                                content={
-                                                                    data.content
-                                                                }
-                                                                columns={
-                                                                    data.columns
-                                                                }
-                                                                handleCheckboxFilters={
-                                                                    handleCheckboxFilters
-                                                                }
-                                                                filters={
-                                                                    filters
-                                                                }
-                                                            />
-                                                        )}
-                                                    </div>
-                                                );
-                                            }
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                                                    );
+                                                }
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            }
+                        </div>
 
                         <div>Sort:</div>
                         <div>
-                            {window.innerWidth >= 1080 ? (
+                            {/* desktop view */}
+                            <div className="tw-hidden lg:tw-flex">
                                 <div
                                     onClick={() => handleToggleDropdown("sort")}
                                     className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
                                 >
                                     Sort
                                 </div>
-                            ) : (
+                            </div>
+                            {/* mobile view */}
+                            <div className="tw-block lg:tw-hidden">
                                 <Image
                                     src={ArrowDown}
                                     alt="arrow down"
@@ -841,7 +857,7 @@ const CreateTournamentsPage = () => {
                                     className="tw-w-6 tw-h-6"
                                     onClick={() => handleToggleDropdown("sort")}
                                 />
-                            )}
+                            </div>
                             {sortDropdown && (
                                 <DropdownComponent
                                     filterKey="sort"
