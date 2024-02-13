@@ -30,16 +30,22 @@ const TournamentsPage = () => {
     const [searchValue, setSearchValue] = useState<null | string>(null);
     const [displayCount, setDisplayCount] = useState(7);
     const [isLoading, setIsLoading] = useState(false);
+    const [totalTournaments, setTotalTournaments] = useState<number>(0);
 
     // adds 7 to the display count
     const handleNextClick = () => {
-        setDisplayCount((prevCount) => prevCount + 7);
+        if (totalTournaments - displayCount >= 7) {
+            setDisplayCount((prevCount) => prevCount + 7);
+        } else {
+            setDisplayCount(totalTournaments);
+        }
     };
 
     const fetchData = async () => {
         try {
             const data = await getLimitedTournaments(displayCount);
             if (data) {
+                setTotalTournaments(data.total);
                 setTournamentData(data.tournaments as TournamentType[]);
                 setIsLoading(false);
             } else {
@@ -52,7 +58,7 @@ const TournamentsPage = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [displayCount]);
 
     useEffect(() => {
         console.log("tournamentData:", tournamentData);
@@ -86,15 +92,14 @@ const TournamentsPage = () => {
                         <Table tournamentData={tournamentData} />
                     )}
                 </div>
-                <div className="tw-flex tw-justify-center ">
-                    <div className="tw-flex tw-items-center tw-gap-4 tw-py-4">
-                        <button
-                            className="btn-transparent-white"
-                            onClick={handleNextClick}
-                        >
-                            Load More
-                        </button>
-                    </div>
+                <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-py-4">
+                    <div>{`Showing ${displayCount} out of ${totalTournaments}`}</div>
+                    <button
+                        className="btn-transparent-white"
+                        onClick={handleNextClick}
+                    >
+                        Load More
+                    </button>
                 </div>
             </div>
         </Fragment>
