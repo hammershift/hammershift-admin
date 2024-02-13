@@ -344,10 +344,10 @@ const CreateTournamentsPage = () => {
     }, [filters]);
 
     // check if data is fetched
-    useEffect(() => {
-        console.log("auctionData:", auctionsData);
-        console.log("selectedData:", selectedData);
-    }, [auctionsData, selectedData]);
+    // useEffect(() => {
+    //     console.log("auctionData:", auctionsData);
+    //     console.log("selectedData:", selectedData);
+    // }, [auctionsData, selectedData]);
 
     //TODO: creates tournament
     const handleCreateTournament = async () => {
@@ -700,9 +700,6 @@ const CreateTournamentsPage = () => {
                                         handleRemoveSelectedAuction={
                                             handleRemoveSelectedAuction
                                         }
-                                        convertDateStringToDateTime={
-                                            convertDateStringToDateTime
-                                        }
                                     />
                                 </div>
                             ))
@@ -886,9 +883,6 @@ const CreateTournamentsPage = () => {
                                                 title={`${item.year} ${item.make} ${item.model}`}
                                                 description={item.description}
                                                 deadline={item.deadline}
-                                                convertDateStringToDateTime={
-                                                    convertDateStringToDateTime
-                                                }
                                                 handleCheckbox={handleCheckbox}
                                                 selected={
                                                     selectedData

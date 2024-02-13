@@ -6,7 +6,7 @@ import { getCarsWithFilter } from "@/app/lib/data";
 import { boolean, number } from "zod";
 import { Button } from "@mui/material";
 import { BounceLoader } from "react-spinners";
-import { set } from "mongoose";
+import { DateTime } from "luxon";
 
 type HandleCheckboxType = (
     _id: string,
@@ -23,7 +23,6 @@ type tournamentsListCardData = {
     title: string;
     description: string[];
     deadline: string;
-    convertDateStringToDateTime: (dateString: string) => string;
     handleCheckbox: HandleCheckboxType;
     selected: boolean;
     selectAuctionModalID: (id: string) => void;
@@ -56,13 +55,13 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     title,
     description,
     deadline,
-    convertDateStringToDateTime,
     handleCheckbox,
     selected,
     selectAuctionModalID,
     setAuctionModalOpen,
 }) => {
-    const dateTime = convertDateStringToDateTime(deadline);
+    // convert deadline to date format
+    const dateTime = DateTime.fromISO(deadline).toFormat("MM/dd/yy hh:mm a");
 
     const handleClick = () => {
         selectAuctionModalID(auctionID);
@@ -133,7 +132,6 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
 
 type SelectedCardProps = SelectedDataType & {
     handleRemoveSelectedAuction: (id: string) => void;
-    convertDateStringToDateTime: (dateString: string) => string;
     selectAuctionModalID: (id: string) => void;
     setAuctionModalOpen: () => void;
 };
@@ -148,10 +146,7 @@ export const SelectedCard: React.FC<SelectedCardProps> = ({
     selectAuctionModalID,
     setAuctionModalOpen,
     handleRemoveSelectedAuction,
-    convertDateStringToDateTime,
 }) => {
-    const dateTime = convertDateStringToDateTime(deadline);
-
     const handleClick = () => {
         selectAuctionModalID(auction_id);
         setAuctionModalOpen();
@@ -175,7 +170,7 @@ export const SelectedCard: React.FC<SelectedCardProps> = ({
                     Title: <span>{title}</span>
                 </div>
                 <div>
-                    Deadline: <span>{dateTime}</span>
+                    Deadline: <span>{deadline}</span>
                 </div>
                 <button
                     className="btn-transparent-red"
