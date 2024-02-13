@@ -731,7 +731,8 @@ const CreateTournamentsPage = () => {
                     >
                         <div>Filters:</div>
                         {/* Dropdowns for make, category, era and filter */}
-                        {window.innerWidth >= 1080 ? (
+                        {typeof window !== "undefined" &&
+                        window.innerWidth >= 1080 ? (
                             ListOfFilters.map((item: string, index: number) => {
                                 const data = FiltersDataContent[item];
                                 return (
