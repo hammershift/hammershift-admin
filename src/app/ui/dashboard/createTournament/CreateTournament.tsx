@@ -83,7 +83,7 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
                             handleCheckbox(
                                 _id,
                                 title,
-                                dateTime,
+                                deadline,
                                 auctionID,
                                 image
                             )
@@ -170,7 +170,12 @@ export const SelectedCard: React.FC<SelectedCardProps> = ({
                     Title: <span>{title}</span>
                 </div>
                 <div>
-                    Deadline: <span>{deadline}</span>
+                    Deadline:{" "}
+                    <span>
+                        {DateTime.fromISO(deadline).toFormat(
+                            "MM/dd/yy hh:mm a"
+                        )}
+                    </span>
                 </div>
                 <button
                     className="btn-transparent-red"
