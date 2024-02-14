@@ -257,6 +257,12 @@ const CreateTournamentsPage = () => {
     const [selectedAuctionId, setSelectedAuctionId] = useState("");
     const [filters, setFilters] = useState(FilterInitialState);
     const filterRef = useRef<HTMLElement | null>(null);
+    const [dateLimit, setDateLimit] = useState(() => {
+        const start = new Date();
+        const end = new Date();
+        end.setDate(start.getDate() + 14);
+        return { start, end };
+    });
 
     // adds 7 to displayCount
     const handleLoadMore = () => {
@@ -418,12 +424,6 @@ const CreateTournamentsPage = () => {
         }
     };
 
-    // convert date string to date time
-    function convertDateStringToDateTime(dateString: string) {
-        const date = new Date(dateString);
-        return date.toLocaleString();
-    }
-
     // adds auction to selectedData
     const handleCheckbox = (
         _id: string,
@@ -483,6 +483,23 @@ const CreateTournamentsPage = () => {
         });
         return;
     };
+
+    // sets max date for endTime
+    useEffect(() => {
+        const changeMaxDateTimeOption = () => {
+            if (selectedData != null && selectedData.length > 0) {
+                const earliestDate = selectedData.reduce(
+                    (acc: Date, curr: SelectedDataType) => {
+                        const currDate = new Date(curr.deadline);
+                        return currDate < acc ? currDate : acc;
+                    },
+                    new Date(selectedData[0].deadline)
+                );
+                setDateLimit((prev) => ({ ...prev, end: earliestDate }));
+            }
+        };
+        changeMaxDateTimeOption();
+    }, [selectedData]);
 
     // close all dropdowns
     const closeAllDropdowns = () => {
@@ -647,6 +664,10 @@ const CreateTournamentsPage = () => {
                                 type="datetime-local"
                                 placeholder="Start Time"
                                 className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                min={
+                                    dateLimit.start.toISOString().split(".")[0]
+                                }
+                                max={dateLimit.end.toISOString().split(".")[0]}
                                 onChange={handleInputChange}
                             />
                         </div>
@@ -658,6 +679,10 @@ const CreateTournamentsPage = () => {
                                 type="datetime-local"
                                 placeholder="end Time"
                                 className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                min={
+                                    dateLimit.start.toISOString().split(".")[0]
+                                }
+                                max={dateLimit.end.toISOString().split(".")[0]}
                                 onChange={handleInputChange}
                             />
                         </div>
