@@ -174,3 +174,58 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+// to PUT tournament data
+export async function PUT(req: NextRequest) {
+    //   const session = await getServerSession(authOptions);
+    //   if (session?.user.role !== "owner" && session?.user.role !== "admin") {
+    //     return NextResponse.json(
+    //       {
+    //         message:
+    //           "Unauthorized! Your role does not have access to this function",
+    //       },
+    //       { status: 400 }
+    //     );
+    //   }
+
+    console.log("User is Authorized!");
+
+    try {
+        await connectToDB();
+        const tournament_id = req.nextUrl.searchParams.get("id");
+
+        const requestBody = await req.json();
+        const editData: { [key: string]: string | boolean | number } = {};
+        if (requestBody) {
+            Object.keys(requestBody).forEach((key) => {
+                editData[key] = requestBody[key] as string | boolean | number;
+            });
+        }
+
+        // api/users/edit?user_id=657ab7edd422075ea7871f65
+        if (tournament_id) {
+            const tournament = await Tournaments.findOneAndUpdate(
+                { _id: tournament_id },
+                editData,
+                { new: true }
+            );
+
+            if (tournament) {
+                return NextResponse.json(tournament, { status: 200 });
+            } else {
+                return NextResponse.json(
+                    { message: "Cannot find tournament" },
+                    { status: 404 }
+                );
+            }
+        } else {
+            return NextResponse.json(
+                { message: "No ID has been provided" },
+                { status: 400 }
+            );
+        }
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ message: "Internal server error" });
+    }
+}

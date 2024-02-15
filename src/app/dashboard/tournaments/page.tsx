@@ -8,7 +8,7 @@ import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
 import { TournamentObjType } from "../../dashboard/create-tournament/page";
 import { BeatLoader } from "react-spinners";
 import { useSession } from "next-auth/react";
-import { getLimitedTournaments } from "@/app/lib/data";
+import { deleteTournament, getLimitedTournaments } from "@/app/lib/data";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import { AuctionIDDropdown } from "@/app/ui/dashboard/tournamentsPage/TournamentsPage";
@@ -57,6 +57,18 @@ const TournamentsPage = () => {
         }
     };
 
+    const handleDeletetournamnt = async (id: string) => {
+        try {
+            const res = await deleteTournament(id);
+            const data = await res.json();
+            if (data) {
+                console.log("Deleted tournament:", data);
+            }
+        } catch (error) {
+            console.error("Error deleting tournament:", error);
+        }
+    };
+
     useEffect(() => {
         fetchData();
     }, [displayCount]);
@@ -90,7 +102,10 @@ const TournamentsPage = () => {
                             <BeatLoader color="#F2CA16" />
                         </div>
                     ) : (
-                        <Table tournamentData={tournamentData} />
+                        <Table
+                            tournamentData={tournamentData}
+                            handleDeleteTournament={handleDeletetournamnt}
+                        />
                     )}
                 </div>
                 <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-py-4">
@@ -112,9 +127,13 @@ export default TournamentsPage;
 // Define a type for the props
 type TableProps = {
     tournamentData: TournamentType[];
+    handleDeleteTournament: (id: string) => void;
 };
 
-const Table: React.FC<TableProps> = ({ tournamentData }) => {
+const Table: React.FC<TableProps> = ({
+    tournamentData,
+    handleDeleteTournament,
+}) => {
     const [openModal, setOpenModal] = useState<string | null>(
         "65c19d06a45af695cc2092c0"
     );
@@ -123,6 +142,7 @@ const Table: React.FC<TableProps> = ({ tournamentData }) => {
     );
 
     const { data } = useSession();
+
     return (
         <div>
             {" "}

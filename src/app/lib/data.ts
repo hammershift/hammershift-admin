@@ -166,3 +166,19 @@ export const getLimitedTournaments = async (limit: number) => {
         console.error("Get Tournaments Unsuccessful");
     }
 };
+
+// delete tournament
+export const deleteTournament = async (id: string) => {
+    // return { message: "Successful", body };
+    // TODO: uncomment this when the API is ready
+
+    const res = await fetch(`/api/tournaments`, {
+        method: "PUT",
+        body: JSON.stringify({ isActive: false }),
+    });
+    if (res.status === 200) {
+        return await res.json();
+    } else {
+        console.error("Get Tournaments Unsuccessful");
+    }
+};
