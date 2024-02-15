@@ -41,9 +41,7 @@ export async function GET(req: NextRequest) {
         }
 
         // To get all auctions with isActive = true
-        const tournaments = await Tournaments.find({ isActive: true })
-            .limit(limit)
-            .skip(offset);
+        const tournaments = await Tournaments.find().limit(limit).skip(offset);
         // count all tournaments with isActive = true
         const tournamentsCount = await Tournaments.countDocuments({
             isActive: true,
@@ -188,7 +186,7 @@ export async function PUT(req: NextRequest) {
     //     );
     //   }
 
-    console.log("User is Authorized!");
+    // console.log("User is Authorized!");
 
     try {
         await connectToDB();
@@ -211,6 +209,7 @@ export async function PUT(req: NextRequest) {
             );
 
             if (tournament) {
+                console.log("message: Tournament deleted successfully");
                 return NextResponse.json(tournament, { status: 200 });
             } else {
                 return NextResponse.json(

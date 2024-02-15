@@ -127,12 +127,11 @@ const TournamentsPage = () => {
 
 export default TournamentsPage;
 
-// Define a type for the props
 type TableProps = {
     tournamentData: TournamentType[];
     handleDeleteTournament: (id: string) => void;
 };
-
+// table component
 const Table: React.FC<TableProps> = ({
     tournamentData,
     handleDeleteTournament,
@@ -217,17 +216,17 @@ const Table: React.FC<TableProps> = ({
                                     data?.user.role !== "moderator" ? (
                                         <div className="tw-flex tw-gap-4 tw-justify-center">
                                             <Link
-                                                href={`/dashboard/wagers/edit_wager/${item._id}`}
+                                                href={`/dashboard/tournaments/edit_tournament/${item._id}`}
                                             >
                                                 <EditIcon />
                                             </Link>
                                             <Link
-                                                href={`/dashboard/wagers/show_wager/${item._id}`}
+                                                href={`/dashboard/tournaments/show_tournament/${item._id}`}
                                             >
                                                 <DvrIcon />
                                             </Link>
                                             <Link
-                                                href={`/dashboard/wagers/delete_wager/${item._id}`}
+                                                href={`/dashboard/tournaments/delete_tournament/${item._id}`}
                                             >
                                                 <DeleteIcon
                                                     sx={{ color: "#C2451E" }}
