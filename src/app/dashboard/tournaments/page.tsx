@@ -110,12 +110,15 @@ const TournamentsPage = () => {
                 </div>
                 <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-py-4">
                     <div>{`Showing ${displayCount} out of ${totalTournaments}`}</div>
-                    <button
-                        className="btn-transparent-white"
-                        onClick={handleNextClick}
-                    >
-                        Load More
-                    </button>
+
+                    {displayCount >= totalTournaments ? null : (
+                        <button
+                            className="btn-transparent-white"
+                            onClick={handleNextClick}
+                        >
+                            Load More
+                        </button>
+                    )}
                 </div>
             </div>
         </Fragment>
