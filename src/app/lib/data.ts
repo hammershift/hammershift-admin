@@ -189,3 +189,14 @@ export const deleteTournament = async (id: string) => {
         console.error("Get Tournaments Unsuccessful");
     }
 };
+
+//fetch all auctions for auctions
+export const getAuctionsForTournaments = async (id: string) => {
+    // const res = await fetch(`/api/auctions/filter?tournament_id=${id}}`);
+    const res = await fetch(`/api/auctions/filter?tournament_id=${id}`);
+    if (res) {
+        return res;
+    } else {
+        console.log("cannot fetch auctions");
+    }
+};

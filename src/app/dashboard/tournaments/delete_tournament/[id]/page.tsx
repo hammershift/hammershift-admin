@@ -3,6 +3,9 @@ import { deleteTournament, getTournamentData } from "@/app/lib/data";
 import { set } from "mongoose";
 import React, { useEffect, useState } from "react";
 import { BeatLoader, BounceLoader } from "react-spinners";
+import { ShowTournamentDetails } from "@/app/ui/dashboard/tournamentsPage/TournamentsPage";
+import Link from "next/link";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const DeleteTournamentPage = ({ params }: { params: { id: string } }) => {
     const [deletionSuccessful, setDeletionSuccessful] = useState(false);
@@ -35,12 +38,19 @@ const DeleteTournamentPage = ({ params }: { params: { id: string } }) => {
     }, []);
 
     return (
-        <div>
-            DeleteTournamentPage
+        <div className="section-container tw-mt-4">
+            <Link href={`/dashboard/tournaments`}>
+                <ArrowBackIcon />
+            </Link>
+            <h2 className="tw-font-bold tw-m-4 tw-text-yellow-500">
+                DELETE TOURNAMENT
+            </h2>
             {isDataLoading ? (
                 <BounceLoader color="#F2CA16" />
             ) : (
-                tournamentData && <div>{JSON.stringify(tournamentData)}</div>
+                tournamentData && (
+                    <ShowTournamentDetails tournamentData={tournamentData} />
+                )
             )}
             <div className="tw-flex tw-mt-4 tw-gap-4">
                 {isLoading ? (
