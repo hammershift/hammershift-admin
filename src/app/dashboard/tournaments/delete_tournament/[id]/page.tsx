@@ -45,13 +45,7 @@ const DeleteTournamentPage = ({ params }: { params: { id: string } }) => {
             <h2 className="tw-font-bold tw-m-4 tw-text-yellow-500">
                 DELETE TOURNAMENT
             </h2>
-            {isDataLoading ? (
-                <BounceLoader color="#F2CA16" />
-            ) : (
-                tournamentData && (
-                    <ShowTournamentDetails tournamentData={tournamentData} />
-                )
-            )}
+            <ShowTournamentDetails tournamentID={ID} />
             <div className="tw-flex tw-mt-4 tw-gap-4">
                 {isLoading ? (
                     <BeatLoader color="#F2CA16" />

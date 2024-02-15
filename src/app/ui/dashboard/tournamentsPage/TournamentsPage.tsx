@@ -1,4 +1,4 @@
-import { getAuctionsForTournaments } from "@/app/lib/data";
+import { getAuctionsForTournaments, getTournamentData } from "@/app/lib/data";
 import { set } from "mongoose";
 import React, { useEffect, useState } from "react";
 
@@ -23,11 +23,28 @@ export const AuctionIDDropdown = ({ list }: { list: string[] | string }) => {
 };
 
 export const ShowTournamentDetails = ({
-    tournamentData,
+    tournamentID,
 }: {
-    tournamentData: any;
+    tournamentID: string;
 }) => {
     const [auctions, setAuctions] = useState([]);
+    const [tournamentData, setTournamentData] = useState(null);
+    const [isDataLoading, setIsDataLoading] = useState(false);
+
+    // fetch Tournament Data
+    useEffect(() => {
+        const fetchTournamentData = async () => {
+            setIsDataLoading(true);
+            const res = await getTournamentData(tournamentID);
+            if (res) {
+                setTournamentData(res);
+            }
+            setIsDataLoading(false);
+        };
+
+        fetchTournamentData();
+    }, []);
+
     useEffect(() => {
         const fetchAuctionsOfTournament = async (id: string) => {
             try {
@@ -41,8 +58,12 @@ export const ShowTournamentDetails = ({
                 console.error(error);
             }
         };
-        fetchAuctionsOfTournament(tournamentData._id);
+        fetchAuctionsOfTournament(tournamentID);
     }, []);
+
+    if (tournamentData == null) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="tw-flex tw-flex-col">

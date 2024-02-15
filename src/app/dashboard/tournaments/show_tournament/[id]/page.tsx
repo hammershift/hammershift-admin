@@ -20,20 +20,6 @@ const ShowTournamentPage = ({ params }: { params: { id: string } }) => {
 
     const { data } = useSession();
 
-    // fetch Tournament Data
-    useEffect(() => {
-        const fetchTournamentData = async () => {
-            setIsDataLoading(true);
-            const res = await getTournamentData(ID);
-            if (res) {
-                setTournamentData(res);
-            }
-            setIsDataLoading(false);
-        };
-
-        fetchTournamentData();
-    }, []);
-
     return (
         <div className="section-container tw-mt-4">
             <Link href={`/dashboard/tournaments`}>
@@ -42,11 +28,7 @@ const ShowTournamentPage = ({ params }: { params: { id: string } }) => {
             <h2 className="tw-font-bold tw-m-4 tw-text-yellow-500">
                 TOURNAMENT DETAILS
             </h2>
-            {tournamentData ? (
-                <ShowTournamentDetails tournamentData={tournamentData} />
-            ) : (
-                <BounceLoader color="#F2CA16" />
-            )}
+            <ShowTournamentDetails tournamentID={ID} />
             {data?.user.role !== "guest" && data?.user.role !== "moderator" ? (
                 <button
                     className="btn-transparent-white tw-m-4"
