@@ -5,7 +5,7 @@ import Checkbox from "@mui/material/Checkbox";
 import { getCarsWithFilter } from "@/app/lib/data";
 import { boolean, number } from "zod";
 import { Button } from "@mui/material";
-import { BounceLoader } from "react-spinners";
+import { BounceLoader, BeatLoader } from "react-spinners";
 import { DateTime } from "luxon";
 
 type HandleCheckboxType = (
@@ -38,12 +38,20 @@ export interface SelectedDataType {
 }
 
 // loading spinner
-export const LoadingComponent = () => {
+export const LoadingComponent = ({
+    loaderType,
+}: {
+    loaderType: "bounceLoader" | "beatLoader";
+}) => {
     return (
         <div
             className={`tw-h-[100px] tw-flex tw-justify-center tw-items-center`}
         >
-            <BounceLoader color="#F2CA16" />
+            {loaderType == "bounceLoader" ? (
+                <BounceLoader color="#F2CA16" />
+            ) : (
+                <BeatLoader color="#F2CA16" />
+            )}
         </div>
     );
 };

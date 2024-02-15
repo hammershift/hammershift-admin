@@ -930,7 +930,7 @@ const CreateTournamentsPage = () => {
                             </>
                         ) : (
                             <div className="tw-py-[200px]">
-                                <LoadingComponent />
+                                <LoadingComponent loaderType="bounceLoader" />
                             </div>
                         )}
                         {!isLoading && !loadmoreLoading ? (
@@ -947,7 +947,9 @@ const CreateTournamentsPage = () => {
                             </div>
                         ) : (
                             !isLoading &&
-                            loadmoreLoading && <LoadingComponent />
+                            loadmoreLoading && (
+                                <LoadingComponent loaderType="beatLoader" />
+                            )
                         )}
                     </div>
                 </div>
