@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { getLimitedTournaments } from "@/app/lib/data";
 import { DateTime } from "luxon";
 import Link from "next/link";
+import { AuctionIDDropdown } from "@/app/ui/dashboard/tournamentsPage/TournamentsPage";
 
 type TournamentType = {
     _id: string;
@@ -114,7 +115,9 @@ type TableProps = {
 };
 
 const Table: React.FC<TableProps> = ({ tournamentData }) => {
-    const [openModal, setOpenModal] = useState<boolean>(false);
+    const [openModal, setOpenModal] = useState<string | null>(
+        "65c19d06a45af695cc2092c0"
+    );
     const [selectedAuctionId, setSelectedAuctionId] = useState<string | null>(
         null
     );
@@ -174,22 +177,14 @@ const Table: React.FC<TableProps> = ({ tournamentData }) => {
                                     </p>
                                 </td>
                                 <td className="tw-p-2.5 tw-w-1/8">
-                                    <p>
-                                        {item.auctionIdentifierId
-                                            ? item.auctionIdentifierId
-                                            : item.auctionID}
-                                    </p>
-                                    <button
-                                        className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs"
-                                        onClick={() => {
-                                            setOpenModal(true);
-                                            setSelectedAuctionId(
-                                                item.auctionIdentifierId
-                                            );
-                                        }}
-                                    >
-                                        Show Auction Details
+                                    <button className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs">
+                                        Show Auctions
                                     </button>
+                                    {openModal === item._id && (
+                                        <AuctionIDDropdown
+                                            list={item.auctionID}
+                                        />
+                                    )}
                                 </td>
                                 <td className="tw-p-2.5 tw-w-1/8">
                                     <p>{item.isActive ? "true" : "false"}</p>
