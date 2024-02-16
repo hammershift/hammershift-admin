@@ -13,6 +13,7 @@ import { DateTime } from "luxon";
 import Link from "next/link";
 import { AuctionIDDropdown } from "@/app/ui/dashboard/tournamentsPage/TournamentsPage";
 import { TournamentType } from "@/app/types/tournamentTypes";
+import { set } from "mongoose";
 
 const TournamentsPage = () => {
     const [tournamentData, setTournamentData] = useState<TournamentType[]>([]);
@@ -97,7 +98,9 @@ const TournamentsPage = () => {
                     )}
                 </div>
                 <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-py-4">
-                    <div>{`Showing ${displayCount} out of ${totalTournaments}`}</div>
+                    <div>{`Showing ${
+                        totalTournaments <= 7 ? totalTournaments : displayCount
+                    } out of ${totalTournaments}`}</div>
 
                     {displayCount >= totalTournaments ? null : (
                         <button
