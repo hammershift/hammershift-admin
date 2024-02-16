@@ -12,7 +12,7 @@ export interface AuctionType {
     description: string[];
     image_list: { placing: number; src: string }[];
     listing_details: string[];
-    sort: { price: number; bids: number; deadline: Date };
+    sort: { price: number; bids: number; deadline: string };
     createdAt: Date;
     updatedAt: Date;
     tournament_id?: string[];

@@ -203,7 +203,7 @@ export async function PUT(req: NextRequest) {
             });
         }
 
-        // api/users/edit?user_id=657ab7edd422075ea7871f65
+        // api/tournaments?id=657ab7edd422075ea7871f65
         if (tournament_id) {
             const tournament = await Tournaments.findOneAndUpdate(
                 { _id: tournament_id },

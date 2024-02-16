@@ -200,3 +200,16 @@ export const getAuctionsForTournaments = async (id: string) => {
         console.log("cannot fetch auctions");
     }
 };
+
+// edit tournament
+export const editTournament = async (id: string, body: any) => {
+    const res = await fetch(`api/tournaments?id=${id}`, {
+        method: "PUT",
+        body: JSON.stringify(body),
+    });
+    if (res.status === 200) {
+        return res;
+    } else {
+        console.log("Edit Unsuccessful");
+    }
+};

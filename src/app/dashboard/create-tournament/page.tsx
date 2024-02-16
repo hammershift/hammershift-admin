@@ -355,7 +355,7 @@ const CreateTournamentsPage = () => {
     //     console.log("selectedData:", selectedData);
     // }, [auctionsData, selectedData]);
 
-    //TODO: creates tournament
+    //creates tournament
     const handleCreateTournament = async () => {
         setCreateTournamentLoading(true);
         const res = await createTournament(tournamentObject);

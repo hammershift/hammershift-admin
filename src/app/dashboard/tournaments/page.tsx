@@ -124,9 +124,7 @@ const Table: React.FC<TableProps> = ({
     tournamentData,
     handleDeleteTournament,
 }) => {
-    const [openModal, setOpenModal] = useState<string | null>(
-        "65c19d06a45af695cc2092c0"
-    );
+    const [openModal, setOpenModal] = useState<string | null>(null);
     const [selectedAuctionId, setSelectedAuctionId] = useState<string | null>(
         null
     );
@@ -187,12 +185,19 @@ const Table: React.FC<TableProps> = ({
                                     </p>
                                 </td>
                                 <td className="tw-p-2.5 tw-w-1/8">
-                                    <button className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs">
+                                    <button
+                                        className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs"
+                                        onClick={() =>
+                                            setOpenModal((prev) =>
+                                                prev == null ? item._id : null
+                                            )
+                                        }
+                                    >
                                         Show Auctions
                                     </button>
                                     {openModal === item._id && (
                                         <AuctionIDDropdown
-                                            list={item.auctionID}
+                                            tournamentID={item._id}
                                         />
                                     )}
                                 </td>

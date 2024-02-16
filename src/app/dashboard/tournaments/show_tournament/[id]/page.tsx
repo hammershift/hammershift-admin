@@ -34,7 +34,7 @@ const ShowTournamentPage = ({ params }: { params: { id: string } }) => {
                     className="btn-transparent-white tw-m-4"
                     onClick={() =>
                         router.push(
-                            `/dashboard/tournaments/edit_tournaments/${ID}`
+                            `/dashboard/tournaments/edit_tournament/${ID}`
                         )
                     }
                 >
