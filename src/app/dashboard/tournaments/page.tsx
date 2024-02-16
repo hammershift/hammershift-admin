@@ -12,19 +12,7 @@ import { deleteTournament, getLimitedTournaments } from "@/app/lib/data";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import { AuctionIDDropdown } from "@/app/ui/dashboard/tournamentsPage/TournamentsPage";
-
-type TournamentType = {
-    _id: string;
-    title: string;
-    pot: string;
-    buyInFee: number;
-    startTime: string;
-    endTime: string;
-    auctionIdentifierId: string;
-    auctionID: string;
-    isActive: boolean;
-    createdAt: string;
-};
+import { TournamentType } from "@/app/types/tournamentTypes";
 
 const TournamentsPage = () => {
     const [tournamentData, setTournamentData] = useState<TournamentType[]>([]);

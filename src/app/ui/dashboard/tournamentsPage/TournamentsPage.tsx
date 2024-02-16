@@ -1,6 +1,8 @@
 import { getAuctionsForTournaments, getTournamentData } from "@/app/lib/data";
 import { set } from "mongoose";
 import React, { useEffect, useState } from "react";
+import { AuctionType } from "@/app/types/auctionTypes";
+import { TournamentType } from "@/app/types/tournamentTypes";
 
 const TournamentsPage = () => {
     return <div>TournamentsPage</div>;
@@ -28,7 +30,9 @@ export const ShowTournamentDetails = ({
     tournamentID: string;
 }) => {
     const [auctions, setAuctions] = useState([]);
-    const [tournamentData, setTournamentData] = useState(null);
+    const [tournamentData, setTournamentData] = useState<TournamentType | null>(
+        null
+    );
     const [isDataLoading, setIsDataLoading] = useState(false);
 
     // fetch Tournament Data

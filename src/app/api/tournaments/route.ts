@@ -41,7 +41,10 @@ export async function GET(req: NextRequest) {
         }
 
         // To get all auctions with isActive = true
-        const tournaments = await Tournaments.find().limit(limit).skip(offset);
+        const tournaments = await Tournaments.find()
+            .sort({ createdAt: -1 }) //newest first
+            .limit(limit)
+            .skip(offset);
         // count all tournaments with isActive = true
         const tournamentsCount = await Tournaments.countDocuments({
             isActive: true,
