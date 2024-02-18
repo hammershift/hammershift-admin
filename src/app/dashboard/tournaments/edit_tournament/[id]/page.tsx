@@ -62,10 +62,11 @@ const EditTournamentPage = ({ params }: { params: { id: string } }) => {
         setIsLoading(true);
         const res = await editTournament(ID, editTournamentObject);
         if (res) {
+            setIsLoading(false);
             setEditSuccessful(true);
             setTimeout(() => {
                 router.push("/dashboard/tournaments");
-            }, 5000);
+            }, 8000);
         } else {
             console.log("Unauthorized Edit");
         }

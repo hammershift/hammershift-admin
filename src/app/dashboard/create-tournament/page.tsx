@@ -264,10 +264,15 @@ const CreateTournamentsPage = () => {
         return { start, end };
     });
 
+    // useEffect(() => {
+    //     console.log("display count:", displayCount);
+    // }, [displayCount]);
+
     // adds 7 to displayCount
     const handleLoadMore = () => {
         setLoadmoreLoading(true);
         setDisplayCount((prev) => prev + 7);
+        console.log("display count:", displayCount);
     };
 
     // change selected auction Id
@@ -321,6 +326,7 @@ const CreateTournamentsPage = () => {
             if (data && "cars" in data) {
                 if (data.total < displayCount) {
                     setDisplayCount(data.total);
+                    console.log("display count:", displayCount);
                 }
                 setAuctionsData(data.cars as CarData[]);
                 setTotalAuctions(data.total);
@@ -334,20 +340,21 @@ const CreateTournamentsPage = () => {
         }
     };
 
-    // fetch auctions data / show more
-    useEffect(() => {
-        if (totalAuctions - displayCount <= 7) {
-            setDisplayCount(totalAuctions);
-        }
-        fetchData(filters);
-    }, [displayCount]);
-
     // fetch auctions data when filters change
     useEffect(() => {
         setIsLoading(true);
-        setDisplayCount(7);
+        //check if total auctions is less than 7
+        if (totalAuctions - displayCount <= 7) {
+            setDisplayCount(totalAuctions);
+            console.log("display count:", displayCount);
+        } else {
+            setDisplayCount(7);
+        }
         fetchData(filters);
     }, [filters]);
+    useEffect(() => {
+        fetchData(filters);
+    }, [displayCount]);
 
     // check if data is fetched
     // useEffect(() => {
@@ -575,17 +582,14 @@ const CreateTournamentsPage = () => {
             setFilters((prev: any) => {
                 // check for prev and if key exists
                 if (prev == undefined || !prev[key] === undefined) {
-                    console.log("!prev");
                     return { ...prev };
                 }
                 // if value is 'All', remove all other items and add 'All' to the array
                 if (value === "All") {
-                    console.log("All");
                     return { ...prev, [key]: ["All"] };
                 }
                 // if 'All' is included in the array, remove it and add the value
                 if (prev[key]?.includes("All")) {
-                    console.log("All is included in prev", key, value);
                     return {
                         ...prev,
                         [key]: prev[key]
@@ -595,7 +599,6 @@ const CreateTournamentsPage = () => {
                 }
                 // if value is not included in the array, add it
                 if (!prev[key]?.includes(value)) {
-                    console.log("value is not included in prev", key, value);
                     return {
                         ...prev,
                         [key]: prev[key].concat(value),
@@ -603,7 +606,6 @@ const CreateTournamentsPage = () => {
                 }
                 // if value is included in the array, remove it
                 if (prev[key]?.includes(value)) {
-                    console.log("value is included in prev", key, value);
                     const newFilter = {
                         ...prev,
                         [key]: prev[key].filter((item: any) => item !== value),
@@ -618,10 +620,6 @@ const CreateTournamentsPage = () => {
         }
         closeAllDropdowns();
     };
-
-    useEffect(() => {
-        console.log("tournament modal:", isTournamentModalOpen);
-    }, [isTournamentModalOpen]);
 
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
