@@ -203,7 +203,7 @@ export const getAuctionsForTournaments = async (id: string) => {
 
 // edit tournament
 export const editTournament = async (id: string, body: any) => {
-    const res = await fetch(`api/tournaments?id=${id}`, {
+    const res = await fetch(`/api/tournaments?id=${id}`, {
         method: "PUT",
         body: JSON.stringify(body),
     });

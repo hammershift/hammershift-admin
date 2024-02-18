@@ -212,7 +212,7 @@ export async function PUT(req: NextRequest) {
             );
 
             if (tournament) {
-                console.log("message: Tournament deleted successfully");
+                console.log("message: Tournament edited successfully");
                 return NextResponse.json(tournament, { status: 200 });
             } else {
                 return NextResponse.json(

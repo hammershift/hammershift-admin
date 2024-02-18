@@ -26,7 +26,7 @@ const EditTournamentPage = ({ params }: { params: { id: string } }) => {
     const router = useRouter();
     const ID = params.id;
 
-    // onChange of input, saves data to tournamentObject
+    // onChange of input, saves data to editTournamentObject
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let value: string | number = e.target.value;
         //turn to number type if buyInFee
@@ -96,9 +96,7 @@ const EditTournamentPage = ({ params }: { params: { id: string } }) => {
                         <p className="tw-mb-4">Edit Tournament Details?</p>
                         <button
                             className="btn-yellow"
-                            onClick={() =>
-                                console.log("editInput:", editTournamentObject)
-                            }
+                            onClick={handleEditTournament}
                         >
                             EDIT TOURNAMENT
                         </button>
@@ -190,6 +188,7 @@ export const EditTournamentDetails = ({
                         name="title"
                         className="tw-px-3 tw-text-black"
                         placeholder={tournamentData.title}
+                        onChange={handleInputChange}
                     />
                     <div className="tw-font-bold">Buy-In Fee:</div>
                     <input
