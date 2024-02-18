@@ -330,11 +330,11 @@ const CreateTournamentsPage = () => {
                 }
                 setAuctionsData(data.cars as CarData[]);
                 setTotalAuctions(data.total);
-                setIsLoading(false);
                 setLoadmoreLoading(false);
             } else {
                 console.error("Unexpected data structure:", data);
             }
+            setIsLoading(false);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
@@ -350,7 +350,6 @@ const CreateTournamentsPage = () => {
         } else {
             setDisplayCount(7);
         }
-        fetchData(filters);
     }, [filters]);
     useEffect(() => {
         fetchData(filters);
