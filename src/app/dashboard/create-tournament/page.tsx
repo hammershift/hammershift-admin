@@ -272,7 +272,6 @@ const CreateTournamentsPage = () => {
     const handleLoadMore = () => {
         setLoadmoreLoading(true);
         setDisplayCount((prev) => prev + 7);
-        console.log("display count:", displayCount);
     };
 
     // change selected auction Id
@@ -334,10 +333,10 @@ const CreateTournamentsPage = () => {
             } else {
                 console.error("Unexpected data structure:", data);
             }
-            setIsLoading(false);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
+        setIsLoading(false);
     };
 
     // fetch auctions data when filters change

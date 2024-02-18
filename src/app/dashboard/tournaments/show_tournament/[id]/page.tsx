@@ -10,10 +10,6 @@ import { BounceLoader } from "react-spinners";
 import { ShowTournamentDetails } from "@/app/ui/dashboard/tournamentsPage/TournamentsPage";
 
 const ShowTournamentPage = ({ params }: { params: { id: string } }) => {
-    const [deletionSuccessful, setDeletionSuccessful] = useState(false);
-    const [isDataLoading, setIsDataLoading] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [tournamentData, setTournamentData] = useState<any>(null);
     const router = useRouter();
 
     const ID = params.id;
@@ -28,7 +24,7 @@ const ShowTournamentPage = ({ params }: { params: { id: string } }) => {
             <h2 className="tw-font-bold tw-m-4 tw-text-yellow-500">
                 TOURNAMENT DETAILS
             </h2>
-            <ShowTournamentDetails tournamentID={ID} />
+            <ShowTournamentDetails tournamentID={ID} key="ShowTournament" />
             {data?.user.role !== "guest" && data?.user.role !== "moderator" ? (
                 <button
                     className="btn-transparent-white tw-m-4"
@@ -38,7 +34,7 @@ const ShowTournamentPage = ({ params }: { params: { id: string } }) => {
                         )
                     }
                 >
-                    Edit User
+                    Edit Tournament
                 </button>
             ) : null}
         </div>
