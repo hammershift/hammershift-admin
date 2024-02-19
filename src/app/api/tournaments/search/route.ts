@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
         const db = client.db();
         const searchKeyword = req.nextUrl.searchParams.get("search");
 
+        //TODO: search sensitivity
         if (searchKeyword) {
             const searchedTournaments = await db
                 .collection("tournaments")
@@ -18,9 +19,11 @@ export async function GET(req: NextRequest) {
                             index: "tournamentSearch",
                             text: {
                                 query: searchKeyword,
-                                path: "title",
+                                path: ["title", "buyInFee"],
                                 fuzzy: {
-                                    prefixLength: 3,
+                                    maxEdits: 1,
+                                    prefixLength: 0,
+                                    maxExpansions: 50,
                                 },
                             },
                         },
