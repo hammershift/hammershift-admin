@@ -213,3 +213,15 @@ export const editTournament = async (id: string, body: any) => {
         console.log("Edit Unsuccessful");
     }
 };
+
+// search tournament
+export const searchTournaments = async (searchWord: string) => {
+    const res = await fetch(`/api/tournaments/search?search=${searchWord}`, {
+        method: "GET",
+    });
+    if (res.status === 200) {
+        return res;
+    } else {
+        console.log("search Unsuccessful");
+    }
+};
