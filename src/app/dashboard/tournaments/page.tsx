@@ -50,7 +50,7 @@ const TournamentsPage = () => {
         }
     };
 
-    const handleDeletetournamnt = async (id: string) => {
+    const handleDeletetournament = async (id: string) => {
         try {
             const res = await deleteTournament(id);
             const data = await res.json();
@@ -66,6 +66,7 @@ const TournamentsPage = () => {
         fetchData();
     }, [displayCount]);
 
+    // search functionality
     useEffect(() => {
         const handleSearchTournaments = async (word: string) => {
             try {
@@ -85,9 +86,9 @@ const TournamentsPage = () => {
         }
     }, [searchValue]);
 
-    useEffect(() => {
-        console.log("tournamentData:", tournamentData);
-    }, [tournamentData]);
+    // useEffect(() => {
+    //     console.log("tournamentData:", tournamentData);
+    // }, [tournamentData]);
 
     return (
         <Fragment>
@@ -116,7 +117,7 @@ const TournamentsPage = () => {
                     ) : (
                         <Table
                             tournamentData={tournamentData}
-                            handleDeleteTournament={handleDeletetournamnt}
+                            handleDeleteTournament={handleDeletetournament}
                         />
                     )}
                 </div>
