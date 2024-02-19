@@ -116,7 +116,7 @@ const EditTournamentPage = ({ params }: { params: { id: string } }) => {
 
 export default EditTournamentPage;
 
-export const EditTournamentDetails = ({
+const EditTournamentDetails = ({
     tournamentID,
     tournamentData,
     handleInputChange,
