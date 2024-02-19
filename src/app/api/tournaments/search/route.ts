@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+// search for tournaments by title or buyInFee
+// URL = /api/tournaments/search?search=<insert search keyword>
 export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
@@ -23,15 +25,17 @@ export async function GET(req: NextRequest) {
                                 query: searchKeyword,
                                 path: ["title", "buyInFee"],
                                 fuzzy: {
-                                    maxEdits: 1,
-                                    prefixLength: 0,
-                                    maxExpansions: 50,
+                                    prefixLength: 1,
                                 },
                             },
                         },
                     },
+                    {
+                        $limit: 7,
+                    },
                 ])
                 .toArray();
+
             return NextResponse.json(
                 {
                     total: searchedTournaments.length,

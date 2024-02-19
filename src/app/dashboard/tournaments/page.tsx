@@ -8,7 +8,11 @@ import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
 import { TournamentObjType } from "../../dashboard/create-tournament/page";
 import { BeatLoader } from "react-spinners";
 import { useSession } from "next-auth/react";
-import { deleteTournament, getLimitedTournaments } from "@/app/lib/data";
+import {
+    deleteTournament,
+    getLimitedTournaments,
+    searchTournaments,
+} from "@/app/lib/data";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import { AuctionIDDropdown } from "@/app/ui/dashboard/tournamentsPage/TournamentsPage";
@@ -17,7 +21,7 @@ import { set } from "mongoose";
 
 const TournamentsPage = () => {
     const [tournamentData, setTournamentData] = useState<TournamentType[]>([]);
-    const [searchValue, setSearchValue] = useState<null | string>(null);
+    const [searchValue, setSearchValue] = useState<string>("");
     const [displayCount, setDisplayCount] = useState(7);
     const [isLoading, setIsLoading] = useState(false);
     const [totalTournaments, setTotalTournaments] = useState<number>(0);
@@ -46,7 +50,7 @@ const TournamentsPage = () => {
         }
     };
 
-    const handleDeletetournamnt = async (id: string) => {
+    const handleDeletetournament = async (id: string) => {
         try {
             const res = await deleteTournament(id);
             const data = await res.json();
@@ -62,9 +66,29 @@ const TournamentsPage = () => {
         fetchData();
     }, [displayCount]);
 
+    // search functionality
     useEffect(() => {
-        console.log("tournamentData:", tournamentData);
-    }, [tournamentData]);
+        const handleSearchTournaments = async (word: string) => {
+            try {
+                const res = await searchTournaments(word);
+                if (res) {
+                    const data = await res.json();
+                    setTournamentData(data.tournaments as TournamentType[]);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+        if (searchValue.length > 0) {
+            handleSearchTournaments(searchValue);
+        } else {
+            fetchData();
+        }
+    }, [searchValue]);
+
+    // useEffect(() => {
+    //     console.log("tournamentData:", tournamentData);
+    // }, [tournamentData]);
 
     return (
         <Fragment>
@@ -93,7 +117,7 @@ const TournamentsPage = () => {
                     ) : (
                         <Table
                             tournamentData={tournamentData}
-                            handleDeleteTournament={handleDeletetournamnt}
+                            handleDeleteTournament={handleDeletetournament}
                         />
                     )}
                 </div>
