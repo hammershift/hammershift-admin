@@ -3,6 +3,8 @@ import connectToDB from "@/app/lib/mongoose";
 import Tournaments from "@/app/models/tournament.model";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
