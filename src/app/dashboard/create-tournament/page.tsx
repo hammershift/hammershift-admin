@@ -257,6 +257,16 @@ const CreateTournamentsPage = () => {
     const [selectedAuctionId, setSelectedAuctionId] = useState("");
     const [filters, setFilters] = useState(FilterInitialState);
     const filterRef = useRef<HTMLElement | null>(null);
+    const [dateLimit, setDateLimit] = useState(() => {
+        const start = new Date();
+        const end = new Date();
+        end.setDate(start.getDate() + 14);
+        return { start, end };
+    });
+
+    // useEffect(() => {
+    //     console.log("display count:", displayCount);
+    // }, [displayCount]);
 
     // adds 7 to displayCount
     const handleLoadMore = () => {
@@ -315,10 +325,10 @@ const CreateTournamentsPage = () => {
             if (data && "cars" in data) {
                 if (data.total < displayCount) {
                     setDisplayCount(data.total);
+                    console.log("display count:", displayCount);
                 }
                 setAuctionsData(data.cars as CarData[]);
                 setTotalAuctions(data.total);
-                setIsLoading(false);
                 setLoadmoreLoading(false);
             } else {
                 console.error("Unexpected data structure:", data);
@@ -326,30 +336,31 @@ const CreateTournamentsPage = () => {
         } catch (error) {
             console.error("Error fetching data:", error);
         }
+        setIsLoading(false);
     };
-
-    // fetch auctions data / show more
-    useEffect(() => {
-        if (totalAuctions - displayCount <= 7) {
-            setDisplayCount(totalAuctions);
-        }
-        fetchData(filters);
-    }, [displayCount]);
 
     // fetch auctions data when filters change
     useEffect(() => {
         setIsLoading(true);
-        setDisplayCount(7);
-        fetchData(filters);
+        //check if total auctions is less than 7
+        if (totalAuctions - displayCount <= 7) {
+            setDisplayCount(totalAuctions);
+            console.log("display count:", displayCount);
+        } else {
+            setDisplayCount(7);
+        }
     }, [filters]);
+    useEffect(() => {
+        fetchData(filters);
+    }, [displayCount]);
 
     // check if data is fetched
-    useEffect(() => {
-        console.log("auctionData:", auctionsData);
-        console.log("selectedData:", selectedData);
-    }, [auctionsData, selectedData]);
+    // useEffect(() => {
+    //     console.log("auctionData:", auctionsData);
+    //     console.log("selectedData:", selectedData);
+    // }, [auctionsData, selectedData]);
 
-    //TODO: creates tournament
+    //creates tournament
     const handleCreateTournament = async () => {
         setCreateTournamentLoading(true);
         const res = await createTournament(tournamentObject);
@@ -418,12 +429,6 @@ const CreateTournamentsPage = () => {
         }
     };
 
-    // convert date string to date time
-    function convertDateStringToDateTime(dateString: string) {
-        const date = new Date(dateString);
-        return date.toLocaleString();
-    }
-
     // adds auction to selectedData
     const handleCheckbox = (
         _id: string,
@@ -483,6 +488,23 @@ const CreateTournamentsPage = () => {
         });
         return;
     };
+
+    // sets max date for endTime
+    useEffect(() => {
+        const changeMaxDateTimeOption = () => {
+            if (selectedData != null && selectedData.length > 0) {
+                const earliestDate = selectedData.reduce(
+                    (acc: Date, curr: SelectedDataType) => {
+                        const currDate = new Date(curr.deadline);
+                        return currDate < acc ? currDate : acc;
+                    },
+                    new Date(selectedData[0].deadline)
+                );
+                setDateLimit((prev) => ({ ...prev, end: earliestDate }));
+            }
+        };
+        changeMaxDateTimeOption();
+    }, [selectedData]);
 
     // close all dropdowns
     const closeAllDropdowns = () => {
@@ -558,17 +580,14 @@ const CreateTournamentsPage = () => {
             setFilters((prev: any) => {
                 // check for prev and if key exists
                 if (prev == undefined || !prev[key] === undefined) {
-                    console.log("!prev");
                     return { ...prev };
                 }
                 // if value is 'All', remove all other items and add 'All' to the array
                 if (value === "All") {
-                    console.log("All");
                     return { ...prev, [key]: ["All"] };
                 }
                 // if 'All' is included in the array, remove it and add the value
                 if (prev[key]?.includes("All")) {
-                    console.log("All is included in prev", key, value);
                     return {
                         ...prev,
                         [key]: prev[key]
@@ -578,7 +597,6 @@ const CreateTournamentsPage = () => {
                 }
                 // if value is not included in the array, add it
                 if (!prev[key]?.includes(value)) {
-                    console.log("value is not included in prev", key, value);
                     return {
                         ...prev,
                         [key]: prev[key].concat(value),
@@ -586,7 +604,6 @@ const CreateTournamentsPage = () => {
                 }
                 // if value is included in the array, remove it
                 if (prev[key]?.includes(value)) {
-                    console.log("value is included in prev", key, value);
                     const newFilter = {
                         ...prev,
                         [key]: prev[key].filter((item: any) => item !== value),
@@ -601,10 +618,6 @@ const CreateTournamentsPage = () => {
         }
         closeAllDropdowns();
     };
-
-    useEffect(() => {
-        console.log("tournament modal:", isTournamentModalOpen);
-    }, [isTournamentModalOpen]);
 
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
@@ -647,6 +660,10 @@ const CreateTournamentsPage = () => {
                                 type="datetime-local"
                                 placeholder="Start Time"
                                 className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                min={
+                                    dateLimit.start.toISOString().split(".")[0]
+                                }
+                                max={dateLimit.end.toISOString().split(".")[0]}
                                 onChange={handleInputChange}
                             />
                         </div>
@@ -658,6 +675,10 @@ const CreateTournamentsPage = () => {
                                 type="datetime-local"
                                 placeholder="end Time"
                                 className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                min={
+                                    dateLimit.start.toISOString().split(".")[0]
+                                }
+                                max={dateLimit.end.toISOString().split(".")[0]}
                                 onChange={handleInputChange}
                             />
                         </div>
@@ -699,9 +720,6 @@ const CreateTournamentsPage = () => {
                                         }
                                         handleRemoveSelectedAuction={
                                             handleRemoveSelectedAuction
-                                        }
-                                        convertDateStringToDateTime={
-                                            convertDateStringToDateTime
                                         }
                                     />
                                 </div>
@@ -886,9 +904,6 @@ const CreateTournamentsPage = () => {
                                                 title={`${item.year} ${item.make} ${item.model}`}
                                                 description={item.description}
                                                 deadline={item.deadline}
-                                                convertDateStringToDateTime={
-                                                    convertDateStringToDateTime
-                                                }
                                                 handleCheckbox={handleCheckbox}
                                                 selected={
                                                     selectedData
@@ -911,7 +926,7 @@ const CreateTournamentsPage = () => {
                             </>
                         ) : (
                             <div className="tw-py-[200px]">
-                                <LoadingComponent />
+                                <LoadingComponent loaderType="bounceLoader" />
                             </div>
                         )}
                         {!isLoading && !loadmoreLoading ? (
@@ -928,7 +943,9 @@ const CreateTournamentsPage = () => {
                             </div>
                         ) : (
                             !isLoading &&
-                            loadmoreLoading && <LoadingComponent />
+                            loadmoreLoading && (
+                                <LoadingComponent loaderType="beatLoader" />
+                            )
                         )}
                     </div>
                 </div>

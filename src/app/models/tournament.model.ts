@@ -30,6 +30,10 @@ const tournamentSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
+        status: {
+            type: Number,
+            default: 1,
+        },
         startTime: {
             type: String,
             required: true,

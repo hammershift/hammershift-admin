@@ -140,6 +140,7 @@ export const editUserWithId = async (id: string, body: any) => {
     "endTime": "2024-02-10T07:34:45.337Z"
 }*/
 
+// create tournament
 export const createTournament = async (body: any) => {
     // return { message: "Successful", body };
     // TODO: uncomment this when the API is ready
@@ -151,6 +152,64 @@ export const createTournament = async (body: any) => {
     if (res.status === 200) {
         return { message: "Created Tournament" };
     } else {
-        console.error("Edit Unsuccessful");
+        console.error("Create Tournament Unsuccessful");
+    }
+};
+
+// fetch multiple tournaments
+export const getLimitedTournaments = async (limit: number) => {
+    const res = await fetch(`/api/tournaments?limit=${limit}`);
+    if (res.status === 200) {
+        return await res.json();
+    } else {
+        console.error("Get Tournaments Unsuccessful");
+    }
+};
+
+//fetch one tournament
+export const getTournamentData = async (id: string) => {
+    const res = await fetch(`/api/tournaments?id=${id}`);
+    if (res.status === 200) {
+        return await res.json();
+    } else {
+        console.error("Get Tournament Unsuccessful");
+    }
+};
+
+// delete tournament
+export const deleteTournament = async (id: string) => {
+    const res = await fetch(`/api/tournaments?id=${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ isActive: false }),
+    });
+    if (res.status === 200) {
+        console.log("Tournament Deleted");
+        return await res.json();
+    } else {
+        console.error("Get Tournaments Unsuccessful");
+    }
+};
+
+//fetch all auctions for auctions
+export const getAuctionsForTournaments = async (id: string) => {
+    // const res = await fetch(`/api/auctions/filter?tournament_id=${id}}`);
+    const res = await fetch(`/api/auctions/filter?tournament_id=${id}`);
+    if (res) {
+        return res;
+    } else {
+        console.log("cannot fetch auctions");
+    }
+};
+
+// edit tournament
+export const editTournament = async (id: string, body: any) => {
+    const res = await fetch(`/api/tournaments?id=${id}`, {
+        method: "PUT",
+        body: JSON.stringify(body),
+    });
+    if (res.status === 200) {
+        return res;
+    } else {
+        console.log("Edit Unsuccessful");
     }
 };
