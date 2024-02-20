@@ -13,6 +13,7 @@ import {
 } from "@/app/ui/dashboard/createTournament/CreateTournament";
 import TournamentModal from "@/app/ui/dashboard/modals/TournamentModal";
 import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
+import { DateTime } from "luxon";
 
 interface CarData {
     _id: string;
@@ -222,14 +223,7 @@ export type TournamentObjType = {
     buyInFee: number;
     startTime: Date;
     endTime: Date;
-};
-
-const tournamentObjectInitialState: TournamentObjType = {
-    title: "",
-    auctionID: [],
-    buyInFee: 0,
-    startTime: new Date(),
-    endTime: new Date(),
+    tournamentEndTime: Date;
 };
 
 const CreateTournamentsPage = () => {
@@ -263,6 +257,7 @@ const CreateTournamentsPage = () => {
         end.setDate(start.getDate() + 14);
         return { start, end };
     });
+    const [tournamentEndTime, setTournamentEndTime] = useState<Date | null>();
 
     // useEffect(() => {
     //     console.log("display count:", displayCount);
@@ -490,6 +485,7 @@ const CreateTournamentsPage = () => {
     };
 
     // sets max date for endTime
+    // FIXME:sets tournamentEndTime to the latest deadline plus one day
     useEffect(() => {
         const changeMaxDateTimeOption = () => {
             if (selectedData != null && selectedData.length > 0) {
@@ -503,6 +499,27 @@ const CreateTournamentsPage = () => {
                 setDateLimit((prev) => ({ ...prev, end: earliestDate }));
             }
         };
+
+        const changetournamentEndTime = () => {
+            if (selectedData != null && selectedData.length > 0) {
+                let latestDate = selectedData.reduce(
+                    (acc: Date, curr: SelectedDataType) => {
+                        const currDate = new Date(curr.deadline);
+                        return currDate > acc ? currDate : acc;
+                    },
+                    new Date(selectedData[0].deadline)
+                );
+                // Add one day to latestDate
+                latestDate.setDate(latestDate.getDate() + 1);
+                setTournamentEndTime(latestDate);
+                setTournamentObject((prev) => ({
+                    ...prev,
+                    tournamentEndTime: latestDate,
+                }));
+            }
+        };
+
+        changetournamentEndTime();
         changeMaxDateTimeOption();
     }, [selectedData]);
 
@@ -682,6 +699,7 @@ const CreateTournamentsPage = () => {
                                 onChange={handleInputChange}
                             />
                         </div>
+
                         <div className="tw-flex tw-flex-col tw-gap-1.5">
                             <label htmlFor="buyInFee">Buy-in Price</label>
                             <input
@@ -690,6 +708,23 @@ const CreateTournamentsPage = () => {
                                 placeholder="buy-in price"
                                 className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
                                 onChange={handleInputChange}
+                            />
+                        </div>
+                        <div className="tw-flex tw-flex-col tw-gap-1.5">
+                            <label htmlFor="tournamentEndTime">
+                                Tournament End Time
+                            </label>
+                            <input
+                                id="tournamentEndTime"
+                                name="tournamentEndTime"
+                                placeholder="tournament end time"
+                                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                value={
+                                    tournamentEndTime
+                                        ?.toISOString()
+                                        .split(".")[0]
+                                }
+                                disabled
                             />
                         </div>
                     </div>

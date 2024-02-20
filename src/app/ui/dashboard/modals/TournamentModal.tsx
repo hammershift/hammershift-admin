@@ -5,6 +5,7 @@ import { SelectedDataType } from "../createTournament/CreateTournament";
 //types / interfaces
 import { TournamentObjType } from "@/app/dashboard/create-tournament/page";
 import { BeatLoader } from "react-spinners";
+import { DateTime } from "luxon";
 
 // convert date string to date time
 function convertDateStringToDateTime(dateString: string | Date) {
@@ -35,8 +36,15 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
         return null;
     }
 
-    const startTimeString = convertDateStringToDateTime(data.startTime);
-    const endTimeString = convertDateStringToDateTime(data.endTime);
+    const startTimeString = DateTime.fromISO(
+        data.startTime.toISOString()
+    ).toFormat("MM/dd/yy hh:mm a");
+    const endTimeString = DateTime.fromISO(data.endTime.toISOString()).toFormat(
+        "MM/dd/yy hh:mm a"
+    );
+    const tournamentEndTimeString = DateTime.fromISO(
+        data.tournamentEndTime.toISOString()
+    ).toFormat("MM/dd/yy hh:mm a");
 
     return (
         <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
@@ -58,6 +66,9 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
                         <div>Start Time : {startTimeString}</div>
                         <div>End Time : {endTimeString}</div>
                         <div>Buy-In Fee : {data.buyInFee}</div>
+                        <div>
+                            Tournament End Time : {tournamentEndTimeString}
+                        </div>
                         <div>Auctions : </div>
                         <div className="tw-grid tw-grid-cols-2 tw-mt-2">
                             {selectedData.map((item) => {

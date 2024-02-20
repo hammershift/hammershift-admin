@@ -141,9 +141,23 @@ export const ShowTournamentDetails = ({
                     <div className="tw-font-bold">Buy-In Fee:</div>
                     <p className="tw-px-3">{tournamentData.buyInFee}</p>
                     <div className="tw-font-bold">Start Time:</div>
-                    <p className="tw-px-3">{tournamentData.startTime}</p>
+                    <p className="tw-px-3">
+                        {DateTime.fromISO(tournamentData.startTime).toFormat(
+                            "MM/dd/yy hh:mm a"
+                        )}
+                    </p>
                     <div className="tw-font-bold">End Time:</div>
-                    <p className="tw-px-3">{tournamentData.endTime}</p>
+                    <p className="tw-px-3">
+                        {DateTime.fromISO(tournamentData.endTime).toFormat(
+                            "MM/dd/yy hh:mm a"
+                        )}
+                    </p>
+                    <div className="tw-font-bold">Tournament End Time:</div>
+                    <p className="tw-px-3">
+                        {DateTime.fromISO(
+                            tournamentData.tournamentEndTime
+                        ).toFormat("MM/dd/yy hh:mm a")}
+                    </p>
                     <div className="tw-font-bold">Pot:</div>
                     <p className="tw-px-3">{tournamentData.pot}</p>
                     <div className="tw-font-bold">isActive:</div>
