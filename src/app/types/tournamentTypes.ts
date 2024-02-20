@@ -5,6 +5,7 @@ export interface TournamentType {
     buyInFee: number;
     startTime: string;
     endTime: string;
+    tournamentEndTime: string;
     status: number;
     auctionIdentifierId: string;
     auctionID: string;

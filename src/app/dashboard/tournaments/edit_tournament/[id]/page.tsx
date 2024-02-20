@@ -5,7 +5,7 @@ import {
     getAuctionsForTournaments,
     getTournamentData,
 } from "@/app/lib/data";
-import { set } from "mongoose";
+import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { BeatLoader, BounceLoader } from "react-spinners";
@@ -225,6 +225,14 @@ const EditTournamentDetails = ({
                             max={dateLimit.end.toISOString().split(".")[0]}
                             onChange={handleInputChange}
                         />
+                    </div>
+                    <div className="tw-font-bold">
+                        Tournament End Date and Time:
+                    </div>
+                    <div className="tw-px-3">
+                        {DateTime.fromISO(
+                            tournamentData.tournamentEndTime
+                        ).toFormat("MM/dd/yy hh:mm a")}
                     </div>
                     <div className="tw-font-bold">Pot:</div>
                     <div className="tw-px-3">{tournamentData.pot}</div>
