@@ -284,7 +284,6 @@ const CreateTournamentsPage = () => {
     // FIXME:
     useEffect(() => {
         fetchData();
-        console.log("CALLED FETCH DATA");
     }, [displayCount, filters]);
 
     // check if data is fetched
