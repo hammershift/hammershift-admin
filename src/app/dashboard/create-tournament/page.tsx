@@ -15,6 +15,7 @@ import TournamentModal from "@/app/ui/dashboard/modals/TournamentModal";
 import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
+import { TournamentObject } from "@/app/types/tournamentTypes";
 
 interface CarData {
     _id: string;
@@ -994,7 +995,7 @@ const CreateTournamentsPage = () => {
                     isOpen={isTournamentModalOpen}
                     onClose={() => setIsTournamentModalOpen(false)}
                     selectedData={selectedData as SelectedDataType[]}
-                    data={tournamentObject as TournamentObjType}
+                    data={tournamentObject as TournamentObject}
                     successfullyPosted={successfullyPosted}
                     handleCreateTournament={handleCreateTournament}
                     createTournamentLoading={createTournamentLoading}

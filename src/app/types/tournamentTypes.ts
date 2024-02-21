@@ -15,8 +15,8 @@ export interface TournamentType {
 export interface TournamentObject {
     title: string;
     buyInFee: number;
-    startTime: string | Date;
-    endTime: string | Date;
-    tournamentEndTime: string | Date;
+    startTime: string;
+    endTime: string;
+    tournamentEndTime: string;
     auctionID: string[];
 }
