@@ -233,7 +233,7 @@ const CreateTournamentsPage = () => {
     const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
     const [successfullyPosted, setSuccessfullyPosted] = useState(false); // if tournament is successfully posted
     const [tournamentObject, setTournamentObject] = useState({});
-    const [totalAuctions, setTotalAuctions] = useState<number>(0);
+    const [totalAuctions, setTotalAuctions] = useState<number | null>(null);
     const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
     const [isAuctionModalOpen, setIsAuctionModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -257,7 +257,9 @@ const CreateTournamentsPage = () => {
         end.setDate(start.getDate() + 14);
         return { start, end };
     });
-    const [tournamentEndTime, setTournamentEndTime] = useState<Date | null>();
+    const [tournamentEndTime, setTournamentEndTime] = useState<Date | null>(
+        null
+    );
 
     // useEffect(() => {
     //     console.log("display count:", displayCount);
@@ -268,6 +270,28 @@ const CreateTournamentsPage = () => {
         setLoadmoreLoading(true);
         setDisplayCount((prev) => prev + 7);
     };
+
+    // FIXME: fetch auctions data when filters change
+    useEffect(() => {
+        setIsLoading(true);
+        if (totalAuctions != null && totalAuctions - displayCount <= 7) {
+            setDisplayCount(totalAuctions);
+            console.log("display count:", displayCount);
+        } else {
+            setDisplayCount(7);
+        }
+    }, [filters]);
+
+    useEffect(() => {
+        fetchData(filters);
+    }, [displayCount]);
+
+    // check if data is fetched
+    useEffect(() => {
+        console.log("auctionData:", auctionsData);
+        console.log("selectedData:", selectedData);
+        console.log("tournamentOBJ:", tournamentObject);
+    }, [auctionsData, selectedData, tournamentObject]);
 
     // change selected auction Id
     const selectAuctionID = (id: string) => {
@@ -329,29 +353,6 @@ const CreateTournamentsPage = () => {
         }
         setIsLoading(false);
     };
-
-    // fetch auctions data when filters change
-    useEffect(() => {
-        setIsLoading(true);
-        //check if total auctions is less than 7
-        if (totalAuctions - displayCount <= 7) {
-            setDisplayCount(totalAuctions);
-            console.log("display count:", displayCount);
-        } else {
-            setDisplayCount(7);
-        }
-    }, [filters]);
-
-    useEffect(() => {
-        fetchData(filters);
-    }, [displayCount]);
-
-    // check if data is fetched
-    useEffect(() => {
-        console.log("auctionData:", auctionsData);
-        console.log("selectedData:", selectedData);
-        console.log("tournamentOBJ:", tournamentObject);
-    }, [auctionsData, selectedData, tournamentObject]);
 
     //creates tournament
     const handleCreateTournament = async () => {
@@ -521,6 +522,10 @@ const CreateTournamentsPage = () => {
 
         changetournamentEndTime();
         changeMaxDateTimeOption();
+
+        // sets tournamentEndTime to null if no selectedData
+        if (selectedData != null && selectedData.length == 0)
+            setTournamentEndTime(null);
     }, [selectedData]);
 
     // close all dropdowns
@@ -714,7 +719,14 @@ const CreateTournamentsPage = () => {
                             <label htmlFor="tournamentEndTime">
                                 Tournament End Time
                             </label>
-                            <input
+                            <div className="tw-pl-2 tw-opacity-50">
+                                {tournamentEndTime != null
+                                    ? tournamentEndTime
+                                          ?.toISOString()
+                                          .split(".")[0]
+                                    : "--"}
+                            </div>
+                            {/* FIXME:<input
                                 id="tournamentEndTime"
                                 name="tournamentEndTime"
                                 placeholder="tournament end time"
@@ -725,7 +737,7 @@ const CreateTournamentsPage = () => {
                                         .split(".")[0]
                                 }
                                 disabled
-                            />
+                            /> */}
                         </div>
                     </div>
                     <div className="tw-w-full tw-bg-white/5 tw-rounded tw-p-4 md:tw-p-8 tw-flex tw-flex-col tw-gap-4">
