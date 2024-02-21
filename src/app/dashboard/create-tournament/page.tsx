@@ -318,10 +318,6 @@ const CreateTournamentsPage = () => {
             });
 
             if (data && "cars" in data) {
-                if (data.total < displayCount) {
-                    setDisplayCount(data.total);
-                    console.log("display count:", displayCount);
-                }
                 setAuctionsData(data.cars as CarData[]);
                 setTotalAuctions(data.total);
                 setLoadmoreLoading(false);
@@ -345,13 +341,14 @@ const CreateTournamentsPage = () => {
             setDisplayCount(7);
         }
     }, [filters]);
+
     useEffect(() => {
         fetchData(filters);
     }, [displayCount]);
 
     // check if data is fetched
     useEffect(() => {
-        // console.log("auctionData:", auctionsData);
+        console.log("auctionData:", auctionsData);
         console.log("selectedData:", selectedData);
         console.log("tournamentOBJ:", tournamentObject);
     }, [auctionsData, selectedData, tournamentObject]);

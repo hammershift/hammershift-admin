@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         const db = client.db();
         await connectToDB();
         const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
-        const limit = Number(req.nextUrl.searchParams.get("limit"));
+        const limit = Number(req.nextUrl.searchParams.get("limit")) || 7;
         const searchedKeyword = req.nextUrl.searchParams.get("search");
         const tournamentID = req.nextUrl.searchParams.get("tournament_id");
         let completed = req.nextUrl.searchParams.get("completed") || [1];
