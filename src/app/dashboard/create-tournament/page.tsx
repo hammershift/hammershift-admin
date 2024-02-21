@@ -14,6 +14,7 @@ import {
 import TournamentModal from "@/app/ui/dashboard/modals/TournamentModal";
 import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
 import { DateTime } from "luxon";
+import { useRouter } from "next/navigation";
 
 interface CarData {
     _id: string;
@@ -227,6 +228,7 @@ export type TournamentObjType = {
 };
 
 const CreateTournamentsPage = () => {
+    const router = useRouter();
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
@@ -261,10 +263,6 @@ const CreateTournamentsPage = () => {
         null
     );
 
-    // useEffect(() => {
-    //     console.log("display count:", displayCount);
-    // }, [displayCount]);
-
     // adds 7 to displayCount
     const handleLoadMore = () => {
         setLoadmoreLoading(true);
@@ -282,16 +280,20 @@ const CreateTournamentsPage = () => {
         }
     }, [filters]);
 
+    // FIXME:
     useEffect(() => {
-        fetchData(filters);
-    }, [displayCount]);
+        fetchData();
+        console.log("CALLED FETCH DATA");
+    }, [displayCount, filters]);
 
     // check if data is fetched
     useEffect(() => {
         console.log("auctionData:", auctionsData);
         console.log("selectedData:", selectedData);
         console.log("tournamentOBJ:", tournamentObject);
-    }, [auctionsData, selectedData, tournamentObject]);
+        console.log("filters:", filters);
+        console.log("display count:", displayCount);
+    }, [auctionsData, selectedData, tournamentObject, filters]);
 
     // change selected auction Id
     const selectAuctionID = (id: string) => {
@@ -334,11 +336,11 @@ const CreateTournamentsPage = () => {
     };
 
     //function to fetch data
-    const fetchData = async (filterData: FiltersType) => {
+    const fetchData = async () => {
         try {
             const data = await getCarsWithFilter({
                 limit: displayCount,
-                ...filterData,
+                ...filters,
             });
 
             if (data && "cars" in data) {
@@ -374,6 +376,7 @@ const CreateTournamentsPage = () => {
             setTournamentObject({});
             setSelectedData([]);
             setIsTournamentModalOpen(false);
+            router.push("/dashboard/create-tournament");
         }, 5000);
     };
 
@@ -385,7 +388,7 @@ const CreateTournamentsPage = () => {
             value = Number(value);
         }
         if (e.target.name == "startTime" || e.target.name == "endTime") {
-            value = new Date(value);
+            value = new Date(value).toISOString();
         }
         setTournamentObject((prev) => ({
             ...prev,
@@ -515,7 +518,7 @@ const CreateTournamentsPage = () => {
                 setTournamentEndTime(latestDate);
                 setTournamentObject((prev) => ({
                     ...prev,
-                    tournamentEndTime: latestDate,
+                    tournamentEndTime: latestDate.toISOString(),
                 }));
             }
         };
@@ -726,18 +729,6 @@ const CreateTournamentsPage = () => {
                                           .split(".")[0]
                                     : "--"}
                             </div>
-                            {/* FIXME:<input
-                                id="tournamentEndTime"
-                                name="tournamentEndTime"
-                                placeholder="tournament end time"
-                                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
-                                value={
-                                    tournamentEndTime
-                                        ?.toISOString()
-                                        .split(".")[0]
-                                }
-                                disabled
-                            /> */}
                         </div>
                     </div>
                     <div className="tw-w-full tw-bg-white/5 tw-rounded tw-p-4 md:tw-p-8 tw-flex tw-flex-col tw-gap-4">
@@ -909,7 +900,7 @@ const CreateTournamentsPage = () => {
                                     onClick={() => handleToggleDropdown("sort")}
                                     className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
                                 >
-                                    Sort
+                                    sort
                                 </div>
                             </div>
                             {/* mobile view */}

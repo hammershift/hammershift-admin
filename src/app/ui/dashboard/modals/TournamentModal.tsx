@@ -36,14 +36,14 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
         return null;
     }
 
-    const startTimeString = DateTime.fromISO(
-        data.startTime.toString()
-    ).toFormat("MM/dd/yy hh:mm a");
-    const endTimeString = DateTime.fromISO(data.endTime.toString()).toFormat(
+    const startTimeString = DateTime.fromISO(data.startTime as string).toFormat(
+        "MM/dd/yy hh:mm a"
+    );
+    const endTimeString = DateTime.fromISO(data.endTime as string).toFormat(
         "MM/dd/yy hh:mm a"
     );
     const tournamentEndTimeString = DateTime.fromISO(
-        data.tournamentEndTime.toString()
+        data.tournamentEndTime as string
     ).toFormat("MM/dd/yy hh:mm a");
 
     return (
