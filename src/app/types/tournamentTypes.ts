@@ -7,8 +7,16 @@ export interface TournamentType {
     endTime: string;
     tournamentEndTime: string;
     status: number;
-    auctionIdentifierId: string;
-    auctionID: string;
+    auctionID: string[];
     isActive: boolean;
     createdAt: string;
+}
+
+export interface TournamentObject {
+    title: string;
+    buyInFee: number;
+    startTime: string | Date;
+    endTime: string | Date;
+    tournamentEndTime: string | Date;
+    auctionID: string[];
 }

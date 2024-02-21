@@ -350,10 +350,11 @@ const CreateTournamentsPage = () => {
     }, [displayCount]);
 
     // check if data is fetched
-    // useEffect(() => {
-    //     console.log("auctionData:", auctionsData);
-    //     console.log("selectedData:", selectedData);
-    // }, [auctionsData, selectedData]);
+    useEffect(() => {
+        // console.log("auctionData:", auctionsData);
+        console.log("selectedData:", selectedData);
+        console.log("tournamentOBJ:", tournamentObject);
+    }, [auctionsData, selectedData, tournamentObject]);
 
     //creates tournament
     const handleCreateTournament = async () => {
@@ -380,10 +381,13 @@ const CreateTournamentsPage = () => {
 
     // onChange of input, saves data to tournamentObject
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let value: string | number = e.target.value;
+        let value: string | Date | number = e.target.value;
         //turn to number type if buyInFee
         if (e.target.name == "buyInFee") {
             value = Number(value);
+        }
+        if (e.target.name == "startTime" || e.target.name == "endTime") {
+            value = new Date(value);
         }
         setTournamentObject((prev) => ({
             ...prev,
@@ -484,8 +488,7 @@ const CreateTournamentsPage = () => {
         return;
     };
 
-    // sets max date for endTime
-    // FIXME:sets tournamentEndTime to the latest deadline plus one day
+    // sets max date for endTime and tournamentEndTime
     useEffect(() => {
         const changeMaxDateTimeOption = () => {
             if (selectedData != null && selectedData.length > 0) {

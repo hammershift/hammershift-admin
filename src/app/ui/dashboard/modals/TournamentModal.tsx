@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { SelectedDataType } from "../createTournament/CreateTournament";
 
 //types / interfaces
-import { TournamentObjType } from "@/app/dashboard/create-tournament/page";
+import { TournamentObject } from "@/app/types/tournamentTypes";
 import { BeatLoader } from "react-spinners";
 import { DateTime } from "luxon";
 
@@ -17,7 +17,7 @@ interface TournamentModalProps {
     isOpen: boolean;
     onClose: () => void;
     selectedData: SelectedDataType[];
-    data: TournamentObjType;
+    data: TournamentObject;
     successfullyPosted: boolean;
     handleCreateTournament: () => Promise<{ message: string }>;
     createTournamentLoading: boolean;
@@ -37,13 +37,13 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
     }
 
     const startTimeString = DateTime.fromISO(
-        data.startTime.toISOString()
+        data.startTime.toString()
     ).toFormat("MM/dd/yy hh:mm a");
-    const endTimeString = DateTime.fromISO(data.endTime.toISOString()).toFormat(
+    const endTimeString = DateTime.fromISO(data.endTime.toString()).toFormat(
         "MM/dd/yy hh:mm a"
     );
     const tournamentEndTimeString = DateTime.fromISO(
-        data.tournamentEndTime.toISOString()
+        data.tournamentEndTime.toString()
     ).toFormat("MM/dd/yy hh:mm a");
 
     return (
