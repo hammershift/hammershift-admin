@@ -270,7 +270,7 @@ const CreateTournamentsPage = () => {
         setDisplayCount((prev) => prev + 7);
     };
 
-    // FIXME: fetch auctions data when filters change
+    // fetch auctions data when filters change
     useEffect(() => {
         setIsLoading(true);
         if (totalAuctions != null && totalAuctions - displayCount <= 7) {
@@ -281,7 +281,7 @@ const CreateTournamentsPage = () => {
         }
     }, [filters]);
 
-    // FIXME:
+    // fetch data when displayCount changes
     useEffect(() => {
         fetchData();
     }, [displayCount, filters]);
