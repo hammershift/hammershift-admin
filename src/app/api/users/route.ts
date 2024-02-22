@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/options";
 import bcrypt from "bcrypt";
+import { ObjectId } from "mongodb";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,6 @@ export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
         const db = client.db();
-        // await connectToDB();
         const user_id = req.nextUrl.searchParams.get("user_id");
         const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
         const limit = Number(req.nextUrl.searchParams.get("limit"));
@@ -71,7 +71,6 @@ export async function POST(req: NextRequest) {
         );
     }
     try {
-        // await connectToDB();
         const client = await clientPromise;
         const db = client.db();
         const requestBody = await req.json();
@@ -107,6 +106,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (session?.user.role !== "owner" && session?.user.role !== "admin") {
+        console.log("User is Authorized!");
         return NextResponse.json(
             {
                 message:
@@ -116,10 +116,9 @@ export async function PUT(req: NextRequest) {
         );
     }
 
-    console.log("User is Authorized!");
-
     try {
-        await connectToDB();
+        const client = await clientPromise;
+        const db = client.db();
         const user_id = req.nextUrl.searchParams.get("user_id");
 
         const requestBody = await req.json();
@@ -131,11 +130,14 @@ export async function PUT(req: NextRequest) {
         }
 
         if (user_id) {
-            const user = await Users.findOneAndUpdate(
-                { _id: user_id, isActive: true },
-                editData,
-                { new: true }
-            ).select("-password");
+            const user = await db.collection("users").findOneAndUpdate(
+                { _id: new ObjectId(user_id) },
+                { $set: editData },
+                {
+                    returnDocument: "after",
+                    projection: { password: 0 },
+                }
+            );
 
             if (user) {
                 return NextResponse.json(user, { status: 200 });

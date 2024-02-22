@@ -10,7 +10,7 @@ import {
     getLimitedWagers,
     getWagers,
     getWagersWithSearch,
-} from "@/app/lib/getWagers";
+} from "@/app/lib/data";
 import Link from "next/link";
 import Image from "next/image";
 import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
