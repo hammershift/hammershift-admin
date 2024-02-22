@@ -90,6 +90,7 @@ export const getAdmins = async () => {
     return data;
 };
 
+///////////////////////// Users //////////////////////////
 // get all users
 export const getUsers = async () => {
     const res = await fetch("/api/users");
@@ -118,9 +119,9 @@ export const getUsersWithSearch = async (searchString: string) => {
     return data;
 };
 
-// edit user
+// edit user and delete user
 export const editUserWithId = async (id: string, body: any) => {
-    const res = await fetch(`/api/users/edit?user_id=${id}`, {
+    const res = await fetch(`/api/users?user_id=${id}`, {
         method: "PUT",
         body: JSON.stringify(body),
     });
@@ -130,6 +131,8 @@ export const editUserWithId = async (id: string, body: any) => {
         console.error("Edit Unsuccessful");
     }
 };
+
+///////////////////////// Tournaments //////////////////////////
 
 // create tournament
 /*{
