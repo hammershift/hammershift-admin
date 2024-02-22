@@ -14,6 +14,8 @@ import {
 import TournamentModal from "@/app/ui/dashboard/modals/TournamentModal";
 import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
 import { DateTime } from "luxon";
+import { useRouter } from "next/navigation";
+import { TournamentObject } from "@/app/types/tournamentTypes";
 
 interface CarData {
     _id: string;
@@ -227,13 +229,14 @@ export type TournamentObjType = {
 };
 
 const CreateTournamentsPage = () => {
+    const router = useRouter();
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
     const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
     const [successfullyPosted, setSuccessfullyPosted] = useState(false); // if tournament is successfully posted
     const [tournamentObject, setTournamentObject] = useState({});
-    const [totalAuctions, setTotalAuctions] = useState<number>(0);
+    const [totalAuctions, setTotalAuctions] = useState<number | null>(null);
     const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
     const [isAuctionModalOpen, setIsAuctionModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -257,17 +260,40 @@ const CreateTournamentsPage = () => {
         end.setDate(start.getDate() + 14);
         return { start, end };
     });
-    const [tournamentEndTime, setTournamentEndTime] = useState<Date | null>();
-
-    // useEffect(() => {
-    //     console.log("display count:", displayCount);
-    // }, [displayCount]);
+    const [tournamentEndTime, setTournamentEndTime] = useState<Date | null>(
+        null
+    );
 
     // adds 7 to displayCount
     const handleLoadMore = () => {
         setLoadmoreLoading(true);
         setDisplayCount((prev) => prev + 7);
     };
+
+    // fetch auctions data when filters change
+    useEffect(() => {
+        setIsLoading(true);
+        if (totalAuctions != null && totalAuctions - displayCount <= 7) {
+            setDisplayCount(totalAuctions);
+            console.log("display count:", displayCount);
+        } else {
+            setDisplayCount(7);
+        }
+    }, [filters]);
+
+    // fetch data when displayCount changes
+    useEffect(() => {
+        fetchData();
+    }, [displayCount, filters]);
+
+    // check if data is fetched
+    useEffect(() => {
+        console.log("auctionData:", auctionsData);
+        console.log("selectedData:", selectedData);
+        console.log("tournamentOBJ:", tournamentObject);
+        console.log("filters:", filters);
+        console.log("display count:", displayCount);
+    }, [auctionsData, selectedData, tournamentObject, filters]);
 
     // change selected auction Id
     const selectAuctionID = (id: string) => {
@@ -310,18 +336,14 @@ const CreateTournamentsPage = () => {
     };
 
     //function to fetch data
-    const fetchData = async (filterData: FiltersType) => {
+    const fetchData = async () => {
         try {
             const data = await getCarsWithFilter({
                 limit: displayCount,
-                ...filterData,
+                ...filters,
             });
 
             if (data && "cars" in data) {
-                if (data.total < displayCount) {
-                    setDisplayCount(data.total);
-                    console.log("display count:", displayCount);
-                }
                 setAuctionsData(data.cars as CarData[]);
                 setTotalAuctions(data.total);
                 setLoadmoreLoading(false);
@@ -333,27 +355,6 @@ const CreateTournamentsPage = () => {
         }
         setIsLoading(false);
     };
-
-    // fetch auctions data when filters change
-    useEffect(() => {
-        setIsLoading(true);
-        //check if total auctions is less than 7
-        if (totalAuctions - displayCount <= 7) {
-            setDisplayCount(totalAuctions);
-            console.log("display count:", displayCount);
-        } else {
-            setDisplayCount(7);
-        }
-    }, [filters]);
-    useEffect(() => {
-        fetchData(filters);
-    }, [displayCount]);
-
-    // check if data is fetched
-    // useEffect(() => {
-    //     console.log("auctionData:", auctionsData);
-    //     console.log("selectedData:", selectedData);
-    // }, [auctionsData, selectedData]);
 
     //creates tournament
     const handleCreateTournament = async () => {
@@ -375,15 +376,19 @@ const CreateTournamentsPage = () => {
             setTournamentObject({});
             setSelectedData([]);
             setIsTournamentModalOpen(false);
+            router.push("/dashboard/create-tournament");
         }, 5000);
     };
 
     // onChange of input, saves data to tournamentObject
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let value: string | number = e.target.value;
+        let value: string | Date | number = e.target.value;
         //turn to number type if buyInFee
         if (e.target.name == "buyInFee") {
             value = Number(value);
+        }
+        if (e.target.name == "startTime" || e.target.name == "endTime") {
+            value = new Date(value).toISOString();
         }
         setTournamentObject((prev) => ({
             ...prev,
@@ -484,8 +489,7 @@ const CreateTournamentsPage = () => {
         return;
     };
 
-    // sets max date for endTime
-    // FIXME:sets tournamentEndTime to the latest deadline plus one day
+    // sets max date for endTime and tournamentEndTime
     useEffect(() => {
         const changeMaxDateTimeOption = () => {
             if (selectedData != null && selectedData.length > 0) {
@@ -514,13 +518,17 @@ const CreateTournamentsPage = () => {
                 setTournamentEndTime(latestDate);
                 setTournamentObject((prev) => ({
                     ...prev,
-                    tournamentEndTime: latestDate,
+                    tournamentEndTime: latestDate.toISOString(),
                 }));
             }
         };
 
         changetournamentEndTime();
         changeMaxDateTimeOption();
+
+        // sets tournamentEndTime to null if no selectedData
+        if (selectedData != null && selectedData.length == 0)
+            setTournamentEndTime(null);
     }, [selectedData]);
 
     // close all dropdowns
@@ -714,18 +722,13 @@ const CreateTournamentsPage = () => {
                             <label htmlFor="tournamentEndTime">
                                 Tournament End Time
                             </label>
-                            <input
-                                id="tournamentEndTime"
-                                name="tournamentEndTime"
-                                placeholder="tournament end time"
-                                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
-                                value={
-                                    tournamentEndTime
-                                        ?.toISOString()
-                                        .split(".")[0]
-                                }
-                                disabled
-                            />
+                            <div className="tw-pl-2 tw-opacity-50">
+                                {tournamentEndTime != null
+                                    ? tournamentEndTime
+                                          ?.toISOString()
+                                          .split(".")[0]
+                                    : "--"}
+                            </div>
                         </div>
                     </div>
                     <div className="tw-w-full tw-bg-white/5 tw-rounded tw-p-4 md:tw-p-8 tw-flex tw-flex-col tw-gap-4">
@@ -897,7 +900,7 @@ const CreateTournamentsPage = () => {
                                     onClick={() => handleToggleDropdown("sort")}
                                     className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
                                 >
-                                    Sort
+                                    sort
                                 </div>
                             </div>
                             {/* mobile view */}
@@ -991,7 +994,7 @@ const CreateTournamentsPage = () => {
                     isOpen={isTournamentModalOpen}
                     onClose={() => setIsTournamentModalOpen(false)}
                     selectedData={selectedData as SelectedDataType[]}
-                    data={tournamentObject as TournamentObjType}
+                    data={tournamentObject as TournamentObject}
                     successfullyPosted={successfullyPosted}
                     handleCreateTournament={handleCreateTournament}
                     createTournamentLoading={createTournamentLoading}

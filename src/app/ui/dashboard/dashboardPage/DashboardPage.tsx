@@ -23,7 +23,7 @@ import {
     getLimitedWagers,
     getWagersCount,
     getWagersOnDate,
-} from "@/app/lib/getWagers";
+} from "@/app/lib/data";
 import Link from "next/link";
 
 const DashboardPage = () => {

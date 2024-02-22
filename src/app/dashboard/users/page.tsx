@@ -202,7 +202,7 @@ const Table: React.FC<UsersPageProps> = ({ userData, banUser }) => {
                                     {item.country}
                                 </td>
                                 <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
-                                    {item.isBanned.toString() == "true" ? (
+                                    {item.isBanned?.toString() == "true" ? (
                                         <p className="tw-text-red-700">
                                             Banned
                                         </p>

@@ -1,28 +1,21 @@
 import connectToDB from "@/app/lib/mongoose";
 import Tournaments from "@/app/models/tournament.model";
-import Auctions from "@/app/models/auction.model";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
-import { CarData } from "@/app/dashboard/auctions/page";
+import { AuctionType } from "@/app/types/auctionTypes";
 import { ObjectId } from "mongodb";
+import clientPromise from "@/app/lib/mongoDB";
 
 export const dynamic = "force-dynamic";
-
-type TournamentData = {
-    title: string;
-    buyInFee: number;
-    isActive: boolean;
-    startTime: string;
-    endTime: string;
-};
 
 // to GET tournament data
 // URL = /api/tournaments?id=<insert id>    fetch one tournaments
 // URL = /api/tournaments                   fetch all tournaments
 export async function GET(req: NextRequest) {
     try {
-        await connectToDB();
+        const client = await clientPromise;
+        const db = client.db();
         const id = req.nextUrl.searchParams.get("id");
         const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
         const limit = Number(req.nextUrl.searchParams.get("limit"));
@@ -40,15 +33,17 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        // To get all auctions with isActive = true
-        const tournaments = await Tournaments.find()
+        // To get all auctions
+        const tournaments = await db
+            .collection("tournaments")
+            .find()
             .sort({ createdAt: -1 }) //newest first
             .limit(limit)
-            .skip(offset);
+            .skip(offset)
+            .toArray();
+
         // count all tournaments with isActive = true
-        const tournamentsCount = await Tournaments.countDocuments({
-            isActive: true,
-        });
+        const tournamentsCount = await Tournaments.countDocuments();
 
         //response {total, tournaments}
         if (tournaments) {
@@ -102,7 +97,8 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        await connectToDB();
+        const client = await clientPromise;
+        const db = client.db();
         const tournamentData = await req.json();
 
         // check if there is a request body
@@ -131,16 +127,30 @@ export async function POST(req: NextRequest) {
 
         //Create tournament
         // added pot and isActive
-        const tournament = await Tournaments.create(newTournamentData);
-        let auctionsData: CarData[] = [];
+        const tournamentObject = new Tournaments({
+            ...newTournamentData,
+            createdAt: new Date(),
+        });
+        console.log("tournamentObject", tournamentObject);
+        const tournament = await db
+            .collection("tournaments")
+            .insertOne(tournamentObject);
+
+        let auctionsData: AuctionType[] = [];
         if (tournament && auctionID.length > 0) {
             await Promise.all(
                 auctionID.map(async (id: string) => {
-                    const updatedAuction = await Auctions.findOneAndUpdate(
-                        { _id: new ObjectId(id) },
-                        { $push: { tournamentID: tournament._id } },
-                        { new: true }
-                    );
+                    const updatedAuction: any = await db
+                        .collection("auctions")
+                        .findOneAndUpdate(
+                            { _id: new ObjectId(id) },
+                            {
+                                $push: {
+                                    tournamentID: tournament.insertedId,
+                                } as any,
+                            },
+                            { returnDocument: "after" }
+                        );
                     if (updatedAuction !== null) {
                         auctionsData.push(updatedAuction);
                     }
@@ -192,7 +202,8 @@ export async function PUT(req: NextRequest) {
     // console.log("User is Authorized!");
 
     try {
-        await connectToDB();
+        const client = await clientPromise;
+        const db = client.db();
         const tournament_id = req.nextUrl.searchParams.get("id");
 
         const requestBody = await req.json();
@@ -205,11 +216,15 @@ export async function PUT(req: NextRequest) {
 
         // api/tournaments?id=657ab7edd422075ea7871f65
         if (tournament_id) {
-            const tournament = await Tournaments.findOneAndUpdate(
-                { _id: tournament_id },
-                editData,
-                { new: true }
-            );
+            const tournament = await db
+                .collection("tournaments")
+                .findOneAndUpdate(
+                    { _id: new ObjectId(tournament_id) },
+                    { $set: editData },
+                    {
+                        returnDocument: "after",
+                    }
+                );
 
             if (tournament) {
                 console.log("message: Tournament edited successfully");
