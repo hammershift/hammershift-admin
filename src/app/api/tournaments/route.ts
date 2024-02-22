@@ -1,6 +1,5 @@
 import connectToDB from "@/app/lib/mongoose";
 import Tournaments from "@/app/models/tournament.model";
-import Auctions from "@/app/models/auction.model";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
@@ -203,7 +202,8 @@ export async function PUT(req: NextRequest) {
     // console.log("User is Authorized!");
 
     try {
-        await connectToDB();
+        const client = await clientPromise;
+        const db = client.db();
         const tournament_id = req.nextUrl.searchParams.get("id");
 
         const requestBody = await req.json();
@@ -216,11 +216,15 @@ export async function PUT(req: NextRequest) {
 
         // api/tournaments?id=657ab7edd422075ea7871f65
         if (tournament_id) {
-            const tournament = await Tournaments.findOneAndUpdate(
-                { _id: tournament_id },
-                editData,
-                { new: true }
-            );
+            const tournament = await db
+                .collection("tournaments")
+                .findOneAndUpdate(
+                    { _id: new ObjectId(tournament_id) },
+                    { $set: editData },
+                    {
+                        returnDocument: "after",
+                    }
+                );
 
             if (tournament) {
                 console.log("message: Tournament edited successfully");
