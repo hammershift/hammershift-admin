@@ -7,7 +7,7 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import AuctionModal from "../modals/auction_modal";
 import { useSession } from "next-auth/react";
-import { BounceLoader, BeatLoader } from "react-spinners";
+import { BeatLoader } from "react-spinners";
 
 interface CarData {
     auction_id: string;
