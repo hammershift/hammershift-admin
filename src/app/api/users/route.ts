@@ -1,6 +1,4 @@
 import clientPromise from "@/app/lib/mongoDB";
-import connectToDB from "@/app/lib/mongoose";
-import Users from "@/app/models/user.model";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/options";
@@ -20,9 +18,12 @@ export async function GET(req: NextRequest) {
 
         // api/users?user_id=<insert id> to get a specific user
         if (user_id) {
-            const user = await Users.findOne({
-                $and: [{ _id: user_id }, { isActive: true }],
-            }).select("-password");
+            const user = await db
+                .collection("users")
+                .findOne(
+                    { _id: new ObjectId(user_id) },
+                    { projection: { password: 0 } }
+                );
             if (user) {
                 return NextResponse.json(user, { status: 200 });
             } else {
