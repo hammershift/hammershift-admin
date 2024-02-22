@@ -1,3 +1,5 @@
+import { ObjectId } from "mongoose";
+
 export interface AuctionType {
     _id: string;
     attributes: { key: string; value: string | number; _id: string }[];
@@ -15,6 +17,6 @@ export interface AuctionType {
     sort: { price: number; bids: number; deadline: string };
     createdAt: Date;
     updatedAt: Date;
-    tournament_id?: string[];
+    tournamentID?: string[] | ObjectId[];
     pot?: number;
 }
