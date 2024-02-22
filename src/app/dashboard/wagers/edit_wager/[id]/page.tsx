@@ -115,7 +115,7 @@ const EditWager = ({ params }: { params: { id: string } }) => {
                         <div className="tw-flex tw-justify-between tw-w-2/5">
                             <label className="tw-px-6">Price Guessed:</label>
                             <input
-                                name="email"
+                                name="priceGuessed"
                                 type="number"
                                 defaultValue={data?.priceGuessed || ""}
                                 className="tw-bg-[#fff]/20 tw-border-yellow-500 tw-border-2 tw-px-1"
