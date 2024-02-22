@@ -319,7 +319,7 @@ const CreateTournamentsPage = () => {
             filterKey: "category",
             dropdown: categoryDropdown,
             content: CategoryDropdownContent,
-            columns: 3,
+            columns: 2,
         },
         era: {
             filterKey: "era",

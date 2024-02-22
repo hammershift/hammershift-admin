@@ -22,7 +22,9 @@ export async function GET(req: NextRequest) {
 
         // check if there is a request body
         if (id) {
-            const tournament = await Tournaments.findOne({ _id: id });
+            const tournament = await db
+                .collection("tournaments")
+                .findOne({ _id: new ObjectId(id) });
             if (tournament) {
                 return NextResponse.json(tournament, { status: 200 });
             } else {
@@ -33,7 +35,7 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        // To get all auctions
+        // To get all tournaments
         const tournaments = await db
             .collection("tournaments")
             .find()
@@ -43,7 +45,9 @@ export async function GET(req: NextRequest) {
             .toArray();
 
         // count all tournaments with isActive = true
-        const tournamentsCount = await Tournaments.countDocuments();
+        const tournamentsCount = await db
+            .collection("tournaments")
+            .countDocuments();
 
         //response {total, tournaments}
         if (tournaments) {

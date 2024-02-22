@@ -5,9 +5,7 @@ import { AuctionType } from "@/app/types/auctionTypes";
 import { TournamentType } from "@/app/types/tournamentTypes";
 import { BeatLoader, BounceLoader } from "react-spinners";
 import { DateTime } from "luxon";
-
 import { SelectedDataType } from "@/app/ui/dashboard/createTournament/CreateTournament";
-import { date } from "zod";
 
 const TournamentsPage = () => {
     return <div>TournamentsPage</div>;
@@ -40,7 +38,7 @@ export const AuctionIDDropdown = ({
     }, []);
 
     return (
-        <div className="tw-absolute tw-bg-[#1A2C3D] tw-h-[500px] tw-overflow-scroll">
+        <div className="tw-absolute tw-p-4 tw-bg-[#1A2C3D] tw-h-[500px] tw-overflow-scroll">
             {auctions ? (
                 auctions.map((item, index) => {
                     const yearAttribute = item.attributes.find(
@@ -58,7 +56,7 @@ export const AuctionIDDropdown = ({
                     const model = modelAttribute ? modelAttribute.value : "";
                     const title = `${year} ${make} ${model}`;
                     return (
-                        <div key={item + "Auctions"}>
+                        <div key={item._id + "Auctions"}>
                             <TournamentAuctionsCard
                                 _id={item._id}
                                 title={title}
@@ -80,26 +78,23 @@ export const AuctionIDDropdown = ({
 
 export const ShowTournamentDetails = ({
     tournamentID,
-    key,
+    labelString,
 }: {
     tournamentID: string;
-    key: string;
+    labelString: string;
 }) => {
     const [auctions, setAuctions] = useState<AuctionType[]>([]);
     const [tournamentData, setTournamentData] = useState<TournamentType | null>(
         null
     );
-    const [isDataLoading, setIsDataLoading] = useState(false);
 
     // fetch Tournament Data
     useEffect(() => {
         const fetchTournamentData = async () => {
-            setIsDataLoading(true);
             const res = await getTournamentData(tournamentID);
             if (res) {
                 setTournamentData(res);
             }
-            setIsDataLoading(false);
         };
 
         fetchTournamentData();
@@ -131,7 +126,7 @@ export const ShowTournamentDetails = ({
     }
 
     return (
-        <div className="tw-w-2/3 tw-grid tw-grid-cols-2 tw-gap-8 tw-p-4">
+        <div className="tw-w-full 2xl:tw-w-2/3 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-8 tw-p-4">
             <div>
                 <div className="tw-grid tw-grid-cols-2 tw-h-auto tw-gap-4">
                     <div className="tw-font-bold">Tournament Id:</div>
@@ -168,9 +163,9 @@ export const ShowTournamentDetails = ({
                     <p className="tw-px-3">{tournamentData.status}</p>
                 </div>
             </div>
-            <div className="tw-flex">
+            <div className="tw-flex tw-flex-col lg:tw-flex-row">
                 <div className="tw-font-bold">Auctions:</div>
-                <div className="tw-px-3">
+                <div className="tw-px-0 lg:tw-px-3">
                     <div className="">
                         {auctions ? (
                             auctions.map((item, index) => {
@@ -195,7 +190,7 @@ export const ShowTournamentDetails = ({
                                     : "";
                                 const title = `${year} ${make} ${model}`;
                                 return (
-                                    <div key={item + "Auctions" + key}>
+                                    <div key={item._id + labelString}>
                                         <TournamentAuctionsCard
                                             _id={item._id}
                                             title={title}
@@ -227,7 +222,7 @@ export const TournamentAuctionsCard: React.FC<SelectedDataType> = ({
 }) => {
     return (
         <div className="tw-flex tw-flex-col tw-rounded">
-            <div className="tw-flex tw-gap-4 tw-py-3 tw-px-2">
+            <div className="tw-flex tw-gap-4 tw-py-5">
                 <img
                     src={image}
                     alt={title}

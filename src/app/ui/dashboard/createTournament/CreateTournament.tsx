@@ -212,20 +212,25 @@ export const DropdownComponent: React.FC<DropdownComponentProps> = ({
     filters,
 }) => {
     return (
-        <div className="tw-absolute tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg">
-            <ul className={`tw-grid tw-grid-cols-${columns} tw-gap-3 `}>
+        <div className="tw-absolute tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg tw-max-h-[500px] tw-overflow-scroll">
+            <ul className={`tw-grid tw-grid-cols-${columns} tw-gap-3`}>
                 {content.map((item: string, index: number) => (
-                    <li key={String(index + item)}>
-                        <Checkbox
-                            checked={
-                                filters
-                                    ? filters[filterKey]?.includes(item)
-                                    : false
-                            }
-                            onClick={() =>
-                                handleCheckboxFilters(filterKey, item)
-                            }
-                        />
+                    <li
+                        key={String(index + item)}
+                        className="tw-flex tw-items-center"
+                    >
+                        <div>
+                            <Checkbox
+                                checked={
+                                    filters
+                                        ? filters[filterKey]?.includes(item)
+                                        : false
+                                }
+                                onClick={() =>
+                                    handleCheckboxFilters(filterKey, item)
+                                }
+                            />
+                        </div>
                         <span>{item}</span>
                     </li>
                 ))}
