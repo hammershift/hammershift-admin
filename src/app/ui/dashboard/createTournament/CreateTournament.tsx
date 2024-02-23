@@ -213,7 +213,7 @@ export const DropdownComponent: React.FC<DropdownComponentProps> = ({
 }) => {
     // FIXME: width of the dropdown is not responsive
     return (
-        <div className=" tw-absolute -tw-left-1/3 tw-transform -translate-x-1/2 md:tw-left-0 md:translate-x-0 tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg tw-max-h-[500px] tw-overflow-scroll tw-z-20">
+        <div className=" tw-absolute  tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg tw-max-h-[500px] tw-overflow-scroll tw-z-20">
             <ul className={`tw-grid tw-grid-cols-${columns} tw-gap-3`}>
                 {content.map((item: string, index: number) => (
                     <li

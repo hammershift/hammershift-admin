@@ -812,7 +812,7 @@ const CreateTournamentsPage = () => {
                         <div>Filters:</div>
                         {/* Dropdowns for make, category, era and filter */}
                         {/* desktop view */}
-                        <div className="tw-relative tw-hidden lg:tw-flex tw-gap-3">
+                        <div className="tw-hidden lg:tw-flex tw-gap-3">
                             {ListOfFilters.map(
                                 (item: string, index: number) => {
                                     const data = FiltersDataContent[item];
@@ -845,7 +845,7 @@ const CreateTournamentsPage = () => {
                             )}
                         </div>
                         {/*FIXME: mobile view */}
-                        <div className="tw-block lg:tw-hidden">
+                        <div className=" tw-block lg:tw-hidden">
                             {
                                 <div>
                                     <Image
@@ -861,60 +861,68 @@ const CreateTournamentsPage = () => {
                                         }
                                     />
                                     {isMobileDropdownOpen && (
-                                        <div className="tw-relative">
+                                        <div
+                                            ref={filterDropdownRef}
+                                            className="tw-absolute tw-w-full tw-h-full tw-bg-[#DCE0D9] tw-rounded-xl tw-left-0 "
+                                        >
                                             <div
-                                                ref={filterDropdownRef}
-                                                className="tw-absolute tw-w-auto tw-bg-[#DCE0D9] tw-rounded-xl"
+                                                onClick={() =>
+                                                    setIsMobileDropdownOpen(
+                                                        false
+                                                    )
+                                                }
+                                                className="tw-text-black tw-bg-white tw-w-[100px]"
                                             >
-                                                {ListOfFilters.map(
-                                                    (
-                                                        item: string,
-                                                        index: number
-                                                    ) => {
-                                                        const data =
-                                                            FiltersDataContent[
-                                                                item
-                                                            ];
-                                                        return (
-                                                            <div
-                                                                key={String(
-                                                                    index + item
-                                                                )}
-                                                            >
-                                                                <div
-                                                                    onClick={() =>
-                                                                        handleToggleDropdown(
-                                                                            data.filterKey
-                                                                        )
-                                                                    }
-                                                                    className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
-                                                                >
-                                                                    {item}
-                                                                </div>
-                                                                {data.dropdown && (
-                                                                    <DropdownComponent
-                                                                        filterKey={
-                                                                            data.filterKey
-                                                                        }
-                                                                        content={
-                                                                            data.content
-                                                                        }
-                                                                        columns={
-                                                                            data.columns
-                                                                        }
-                                                                        handleCheckboxFilters={
-                                                                            handleCheckboxFilters
-                                                                        }
-                                                                        filters={
-                                                                            filters
-                                                                        }
-                                                                    />
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    }
-                                                )}
+                                                X
                                             </div>
+                                            {ListOfFilters.map(
+                                                (
+                                                    item: string,
+                                                    index: number
+                                                ) => {
+                                                    const data =
+                                                        FiltersDataContent[
+                                                            item
+                                                        ];
+                                                    return (
+                                                        <div
+                                                            key={String(
+                                                                index + item
+                                                            )}
+                                                        >
+                                                            <div
+                                                                onClick={() =>
+                                                                    handleToggleDropdown(
+                                                                        data.filterKey
+                                                                    )
+                                                                }
+                                                                className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                                                            >
+                                                                {item}
+                                                            </div>
+                                                            {data.dropdown && (
+                                                                <DropdownComponent
+                                                                    filterKey={
+                                                                        data.filterKey
+                                                                    }
+                                                                    content={
+                                                                        data.content
+                                                                    }
+                                                                    columns={
+                                                                        data.columns
+                                                                    }
+                                                                    handleCheckboxFilters={
+                                                                        handleCheckboxFilters
+                                                                    }
+                                                                    filters={
+                                                                        filters
+                                                                    }
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    );
+                                                }
+                                            )}
                                         </div>
                                     )}
                                 </div>
