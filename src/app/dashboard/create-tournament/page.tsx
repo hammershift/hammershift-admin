@@ -309,6 +309,7 @@ const CreateTournamentsPage = () => {
             dropdown: any;
             content: string[];
             columns: number;
+            columnsSM: number;
         };
     } = {
         make: {
@@ -316,24 +317,28 @@ const CreateTournamentsPage = () => {
             dropdown: makeDropdown,
             content: MakeDropdownContent,
             columns: 3,
+            columnsSM: 1,
         },
         category: {
             filterKey: "category",
             dropdown: categoryDropdown,
             content: CategoryDropdownContent,
             columns: 2,
+            columnsSM: 1,
         },
         era: {
             filterKey: "era",
             dropdown: eraDropdown,
             content: EraDropdownContent,
             columns: 2,
+            columnsSM: 1,
         },
         location: {
             filterKey: "location",
             dropdown: locationDropdown,
             content: LocationDropdownContent,
             columns: 3,
+            columnsSM: 1,
         },
     };
 
@@ -807,7 +812,7 @@ const CreateTournamentsPage = () => {
                         <div>Filters:</div>
                         {/* Dropdowns for make, category, era and filter */}
                         {/* desktop view */}
-                        <div className="tw-hidden lg:tw-flex tw-gap-3">
+                        <div className="tw-relative tw-hidden lg:tw-flex tw-gap-3">
                             {ListOfFilters.map(
                                 (item: string, index: number) => {
                                     const data = FiltersDataContent[item];
@@ -859,7 +864,7 @@ const CreateTournamentsPage = () => {
                                         <div className="tw-relative">
                                             <div
                                                 ref={filterDropdownRef}
-                                                className="tw-absolute tw-w-[300px] tw-bg-[#DCE0D9] tw-rounded-xl"
+                                                className="tw-absolute tw-w-auto tw-bg-[#DCE0D9] tw-rounded-xl"
                                             >
                                                 {ListOfFilters.map(
                                                     (
