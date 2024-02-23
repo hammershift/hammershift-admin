@@ -230,6 +230,8 @@ export type TournamentObjType = {
 
 const CreateTournamentsPage = () => {
     const router = useRouter();
+    const filterDropdownRef = useRef<HTMLDivElement | null>(null);
+    const filterRef = useRef<HTMLElement | null>(null);
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
@@ -253,7 +255,7 @@ const CreateTournamentsPage = () => {
     );
     const [selectedAuctionId, setSelectedAuctionId] = useState("");
     const [filters, setFilters] = useState(FilterInitialState);
-    const filterRef = useRef<HTMLElement | null>(null);
+
     const [dateLimit, setDateLimit] = useState(() => {
         const start = new Date();
         const end = new Date();
@@ -644,6 +646,23 @@ const CreateTournamentsPage = () => {
         closeAllDropdowns();
     };
 
+    // handle clicking outside of mobile dropdown of filters
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                filterDropdownRef.current &&
+                !filterDropdownRef.current.contains(event.target as Node)
+            ) {
+                setIsMobileDropdownOpen(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-flex-col sm:tw-flex-row tw-justify-between tw-gap-4">
@@ -837,7 +856,12 @@ const CreateTournamentsPage = () => {
                                         }
                                     />
                                     {isMobileDropdownOpen && (
-                                        <div className="tw-absolute tw-bg-[#DCE0D9] tw-rounded-xl">
+                                        <div
+                                            ref={
+                                                filterDropdownRef as RefObject<HTMLDivElement>
+                                            }
+                                            className="tw-absolute tw-bg-[#DCE0D9] tw-rounded-xl"
+                                        >
                                             {ListOfFilters.map(
                                                 (
                                                     item: string,

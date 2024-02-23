@@ -47,7 +47,7 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
     ).toFormat("MM/dd/yy hh:mm a");
 
     return (
-        <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
+        <div className="tw-fixed tw-max-h-screen tw-overflow-scroll tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
             <div className="tw-w-[800px] tw-flex tw-flex-col">
                 <button
                     className="tw-text-white tw-text-xl tw-place-self-end tw-rounded-full tw-border-2 tw-w-8 hover:tw-bg-yellow-400"
@@ -70,7 +70,7 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
                             Tournament End Time : {tournamentEndTimeString}
                         </div>
                         <div>Auctions : </div>
-                        <div className="tw-grid tw-grid-cols-2 tw-mt-2">
+                        <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-mt-2">
                             {selectedData.map((item) => {
                                 const deadlineString =
                                     convertDateStringToDateTime(item.deadline);

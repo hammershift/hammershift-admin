@@ -79,7 +79,7 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     return (
         <div>
             <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-6 tw-mt-6 md:tw-pl-4">
-                <div className="tw-w-1/3 tw-flex tw-items-center tw-gap-2 md:tw-gap-4">
+                <div className="tw-w-full md:tw-w-1/3 tw-flex tw-items-center tw-gap-2 md:tw-gap-4">
                     <Checkbox
                         checked={selected}
                         value={auctionID}
