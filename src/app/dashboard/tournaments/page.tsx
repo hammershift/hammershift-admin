@@ -255,7 +255,7 @@ const Table: React.FC<TableProps> = ({
                                 <td className="tw-p-2.5 tw-w-1/8">
                                     {data?.user.role !== "guest" &&
                                     data?.user.role !== "moderator" ? (
-                                        <div className="tw-flex tw-gap-4 tw-justify-center">
+                                        <div className="tw-flex tw-gap-2 md:tw-gap-4 tw-justify-center">
                                             <Link
                                                 href={`/dashboard/tournaments/edit_tournament/${item._id}`}
                                             >
