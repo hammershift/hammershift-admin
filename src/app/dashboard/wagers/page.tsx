@@ -182,7 +182,7 @@ const Table: React.FC<WagersPageProps> = ({ wagerData }) => {
                                 <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                                     ${item.wagerAmount}.00
                                 </td>
-                                <td className="tw-p-2.5 tw-w-1/8">
+                                <td className="tw-p-2.5 tw-w-1/8 tw-truncate">
                                     {item.user.username}
                                 </td>
                                 <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
@@ -195,7 +195,7 @@ const Table: React.FC<WagersPageProps> = ({ wagerData }) => {
                                             : item.auctionID}
                                     </p>
                                     <button
-                                        className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs"
+                                        className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs max-md:tw-hidden"
                                         onClick={() => {
                                             setOpenModal(true);
                                             setSelectedAuctionId(
@@ -209,7 +209,7 @@ const Table: React.FC<WagersPageProps> = ({ wagerData }) => {
                                 <td className="tw-p-2.5 tw-w-1/8">
                                     {data?.user.role !== "guest" &&
                                     data?.user.role !== "moderator" ? (
-                                        <div className="tw-flex tw-gap-4 tw-justify-center">
+                                        <div className="tw-flex tw-gap-2 md:tw-gap-4 tw-justify-center">
                                             <Link
                                                 href={`/dashboard/wagers/edit_wager/${item._id}`}
                                             >
