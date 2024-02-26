@@ -39,9 +39,12 @@ export async function GET(req: NextRequest) {
             req.nextUrl.searchParams.get("sort") || "Newly Listed";
 
         if (tournamentID) {
-            const tournamentAuctions = await Auctions.find({
-                tournamentID: tournamentID,
-            });
+            const tournamentAuctions = await db
+                .collection("auctions")
+                .find({
+                    tournamentID: new ObjectId(tournamentID),
+                })
+                .toArray();
             if (tournamentAuctions) {
                 return NextResponse.json({
                     total: tournamentAuctions.length,

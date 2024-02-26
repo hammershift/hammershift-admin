@@ -15,7 +15,8 @@ import TournamentModal from "@/app/ui/dashboard/modals/TournamentModal";
 import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
-import { TournamentObject } from "@/app/types/tournamentTypes";
+import { TournamentObjectType } from "@/app/types/tournamentTypes";
+import { set } from "mongoose";
 
 interface CarData {
     _id: string;
@@ -219,24 +220,19 @@ type FiltersType = {
     sort: string;
 };
 
-export type TournamentObjType = {
-    title: string;
-    auctionID: string[];
-    buyInFee: number;
-    startTime: Date;
-    endTime: Date;
-    tournamentEndTime: Date;
-};
-
 const CreateTournamentsPage = () => {
     const router = useRouter();
+    const filterDropdownRef = useRef<HTMLDivElement | null>(null);
+    const filterRef = useRef<HTMLElement | null>(null);
     const [auctionsData, setAuctionsData] = useState<CarData[] | null>([]); // data for list of auctions
     const [displayCount, setDisplayCount] = useState(7);
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
-    const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
+    // const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
     const [successfullyPosted, setSuccessfullyPosted] = useState(false); // if tournament is successfully posted
-    const [tournamentObject, setTournamentObject] = useState({});
+    const [tournamentObject, setTournamentObject] =
+        useState<TournamentObjectType>({});
     const [totalAuctions, setTotalAuctions] = useState<number | null>(null);
+    const [loadMoreButton, setLoadMoreButton] = useState(false);
     const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
     const [isAuctionModalOpen, setIsAuctionModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -253,7 +249,7 @@ const CreateTournamentsPage = () => {
     );
     const [selectedAuctionId, setSelectedAuctionId] = useState("");
     const [filters, setFilters] = useState(FilterInitialState);
-    const filterRef = useRef<HTMLElement | null>(null);
+
     const [dateLimit, setDateLimit] = useState(() => {
         const start = new Date();
         const end = new Date();
@@ -263,21 +259,55 @@ const CreateTournamentsPage = () => {
     const [tournamentEndTime, setTournamentEndTime] = useState<Date | null>(
         null
     );
+    const [inputError, setInputError] = useState<
+        | "buyInPrice"
+        | "title"
+        | "incomplete"
+        | "startTime"
+        | "endTime"
+        | "auctionID"
+        | null
+    >(null);
+
+    const inputErrorMessages = {
+        buyInPrice: "Please enter a valid buy-in price",
+        title: "Please enter a title for the tournament",
+        incomplete: "Please fill in all fields",
+        startTime: "Please enter a valid start time",
+        endTime: "Please enter a valid end time",
+        auctionID: "Please select 5 auctions",
+    };
 
     // adds 7 to displayCount
     const handleLoadMore = () => {
+        if (totalAuctions == null) return;
         setLoadmoreLoading(true);
-        setDisplayCount((prev) => prev + 7);
+        if (totalAuctions - displayCount < 7) {
+            setDisplayCount(totalAuctions);
+        } else {
+            setDisplayCount((prev) => prev + 7);
+        }
     };
+
+    // check if loadMoreButton should be displayed
+    useEffect(() => {
+        if (totalAuctions != null && displayCount >= totalAuctions) {
+            setLoadMoreButton(false);
+        } else {
+            setLoadMoreButton(true);
+        }
+    }, [totalAuctions, displayCount]);
 
     // fetch auctions data when filters change
     useEffect(() => {
-        setIsLoading(true);
-        if (totalAuctions != null && totalAuctions - displayCount <= 7) {
-            setDisplayCount(totalAuctions);
-            console.log("display count:", displayCount);
-        } else {
-            setDisplayCount(7);
+        if (totalAuctions != null) {
+            setIsLoading(true);
+            if (displayCount >= totalAuctions) {
+                console.log("heya");
+                setDisplayCount(totalAuctions);
+            } else {
+                setDisplayCount(7);
+            }
         }
     }, [filters]);
 
@@ -287,13 +317,13 @@ const CreateTournamentsPage = () => {
     }, [displayCount, filters]);
 
     // check if data is fetched
-    useEffect(() => {
-        console.log("auctionData:", auctionsData);
-        console.log("selectedData:", selectedData);
-        console.log("tournamentOBJ:", tournamentObject);
-        console.log("filters:", filters);
-        console.log("display count:", displayCount);
-    }, [auctionsData, selectedData, tournamentObject, filters]);
+    // useEffect(() => {
+    //     console.log("auctionData:", auctionsData);
+    //     console.log("selectedData:", selectedData);
+    //     console.log("tournamentOBJ:", tournamentObject);
+    //     console.log("filters:", filters);
+    //     console.log("display count:", displayCount);
+    // }, [auctionsData, selectedData, tournamentObject, filters]);
 
     // change selected auction Id
     const selectAuctionID = (id: string) => {
@@ -307,6 +337,7 @@ const CreateTournamentsPage = () => {
             dropdown: any;
             content: string[];
             columns: number;
+            columnsSM: number;
         };
     } = {
         make: {
@@ -314,24 +345,28 @@ const CreateTournamentsPage = () => {
             dropdown: makeDropdown,
             content: MakeDropdownContent,
             columns: 3,
+            columnsSM: 1,
         },
         category: {
             filterKey: "category",
             dropdown: categoryDropdown,
             content: CategoryDropdownContent,
             columns: 2,
+            columnsSM: 1,
         },
         era: {
             filterKey: "era",
             dropdown: eraDropdown,
             content: EraDropdownContent,
             columns: 2,
+            columnsSM: 1,
         },
         location: {
             filterKey: "location",
             dropdown: locationDropdown,
             content: LocationDropdownContent,
             columns: 3,
+            columnsSM: 1,
         },
     };
 
@@ -397,22 +432,67 @@ const CreateTournamentsPage = () => {
     };
 
     // check if tournamentObject is complete
+    // useEffect(() => {
+    //     const checkValidity = (objectData: TournamentObjectType) => {
+    //         if (
+    //             objectData["title"] &&
+    //             objectData["buyInFee"] &&
+    //             objectData["startTime"] &&
+    //             objectData["endTime"] &&
+    //             objectData["auctionID"]?.length === 5
+    //         ) {
+    //             setTounamentObjIsValid(true);
+    //         } else {
+    //             setTounamentObjIsValid(false);
+    //         }
+    //     };
+    //     checkValidity(tournamentObject);
+    // }, [tournamentObject, selectedData]);
+
+    //FIXME:
+    const checkInputs = () => {
+        if (Object.keys(tournamentObject).length === 0) {
+            setInputError("incomplete");
+        } else if (
+            tournamentObject.title == undefined ||
+            tournamentObject.title == ""
+        ) {
+            setInputError("title");
+        } else if (
+            tournamentObject.startTime == undefined ||
+            tournamentObject.startTime > dateLimit.end.toISOString()
+        ) {
+            setInputError("startTime");
+        } else if (
+            tournamentObject.endTime == undefined ||
+            tournamentObject.endTime > dateLimit.end.toISOString()
+        ) {
+            setInputError("endTime");
+        } else if (
+            tournamentObject.buyInFee == undefined ||
+            isNaN(tournamentObject.buyInFee)
+        ) {
+            setInputError("buyInPrice");
+        } else if (
+            tournamentObject.auctionID == undefined ||
+            selectedData == null ||
+            selectedData?.length < 5
+        ) {
+            setInputError("auctionID");
+        } else {
+            setInputError(null);
+        }
+    };
+
+    const handleCheckTournamentObj = () => {
+        checkInputs();
+    };
+
     useEffect(() => {
-        const checkValidity = (objectData: TournamentObjType) => {
-            if (
-                objectData["title"] &&
-                objectData["buyInFee"] &&
-                objectData["startTime"] &&
-                objectData["endTime"] &&
-                objectData["auctionID"]?.length === 5
-            ) {
-                setTounamentObjIsValid(true);
-            } else {
-                setTounamentObjIsValid(false);
-            }
-        };
-        checkValidity(tournamentObject as TournamentObjType);
-    }, [tournamentObject, selectedData]);
+        if (inputError == null && Object.keys(tournamentObject).length != 0) {
+            setIsTournamentModalOpen(true);
+        }
+    }, [inputError]);
 
     // removes all auctions from selectedData
     const handleRemoveAuctions = () => {
@@ -471,7 +551,7 @@ const CreateTournamentsPage = () => {
         });
 
         // update tournamentObject
-        setTournamentObject((prevTournamentObj: TournamentObjType) => {
+        setTournamentObject((prevTournamentObj: TournamentObjectType) => {
             //if there is no auctionID field, add and include current auctionID
             if (!prevTournamentObj.auctionID) {
                 return { ...prevTournamentObj, auctionID: [_id] };
@@ -516,7 +596,7 @@ const CreateTournamentsPage = () => {
                 // Add one day to latestDate
                 latestDate.setDate(latestDate.getDate() + 1);
                 setTournamentEndTime(latestDate);
-                setTournamentObject((prev) => ({
+                setTournamentObject((prev: TournamentObjectType | null) => ({
                     ...prev,
                     tournamentEndTime: latestDate.toISOString(),
                 }));
@@ -644,6 +724,23 @@ const CreateTournamentsPage = () => {
         closeAllDropdowns();
     };
 
+    // handle clicking outside of mobile dropdown of filters
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                filterDropdownRef.current &&
+                !filterDropdownRef.current.contains(event.target as Node)
+            ) {
+                setIsMobileDropdownOpen(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     return (
         <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-flex-col sm:tw-flex-row tw-justify-between tw-gap-4">
@@ -651,12 +748,21 @@ const CreateTournamentsPage = () => {
                     Create Tournament
                 </div>
                 <button
-                    className={tounamentObjIsValid ? "btn-yellow" : "btn-gray"}
-                    onClick={() => setIsTournamentModalOpen(true)}
+                    className="btn-yellow"
+                    onClick={handleCheckTournamentObj}
                 >
                     CREATE TOURNAMENT
                 </button>
             </div>
+            {inputError != null && (
+                <div className="tw-text-black tw-font-bold tw-bg-red-600 tw-rounded tw-text-center tw-py-2">
+                    {
+                        inputErrorMessages[
+                            inputError as keyof typeof inputErrorMessages
+                        ]
+                    }
+                </div>
+            )}
             <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-4">
                 {/* left column */}
                 <div className="tw-flex tw-flex-col tw-w-full md:tw-w-2/5 tw-gap-4">
@@ -820,8 +926,8 @@ const CreateTournamentsPage = () => {
                                 }
                             )}
                         </div>
-                        {/* mobile view */}
-                        <div className="tw-block lg:tw-hidden">
+                        {/*FIXME: mobile view */}
+                        <div className=" tw-block lg:tw-hidden">
                             {
                                 <div>
                                     <Image
@@ -837,7 +943,20 @@ const CreateTournamentsPage = () => {
                                         }
                                     />
                                     {isMobileDropdownOpen && (
-                                        <div className="tw-absolute tw-bg-[#DCE0D9] tw-rounded-xl">
+                                        <div
+                                            ref={filterDropdownRef}
+                                            className="tw-absolute tw-w-full tw-h-full tw-bg-[#DCE0D9] tw-rounded-xl tw-left-0 "
+                                        >
+                                            <div
+                                                onClick={() =>
+                                                    setIsMobileDropdownOpen(
+                                                        false
+                                                    )
+                                                }
+                                                className="tw-text-black tw-bg-white tw-w-[100px]"
+                                            >
+                                                X
+                                            </div>
                                             {ListOfFilters.map(
                                                 (
                                                     item: string,
@@ -970,7 +1089,7 @@ const CreateTournamentsPage = () => {
                         {!isLoading && !loadmoreLoading ? (
                             <div className="tw-h-[100px] tw-flex tw-flex-col tw-justify-center tw-items-center">
                                 <div className="tw-pb-2">{`Showing ${displayCount} out of ${totalAuctions}`}</div>
-                                {displayCount !== totalAuctions && (
+                                {loadMoreButton && (
                                     <button
                                         className="btn-white"
                                         onClick={handleLoadMore}
@@ -994,7 +1113,7 @@ const CreateTournamentsPage = () => {
                     isOpen={isTournamentModalOpen}
                     onClose={() => setIsTournamentModalOpen(false)}
                     selectedData={selectedData as SelectedDataType[]}
-                    data={tournamentObject as TournamentObject}
+                    data={tournamentObject as TournamentObjectType}
                     successfullyPosted={successfullyPosted}
                     handleCreateTournament={handleCreateTournament}
                     createTournamentLoading={createTournamentLoading}

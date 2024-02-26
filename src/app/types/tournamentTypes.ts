@@ -12,11 +12,11 @@ export interface TournamentType {
     createdAt: string;
 }
 
-export interface TournamentObject {
-    title: string;
-    buyInFee: number;
-    startTime: string;
-    endTime: string;
-    tournamentEndTime: string;
-    auctionID: string[];
+export interface TournamentObjectType {
+    title?: string;
+    buyInFee?: number;
+    startTime?: string;
+    endTime?: string;
+    tournamentEndTime?: string;
+    auctionID?: string[];
 }

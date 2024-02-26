@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { SelectedDataType } from "../createTournament/CreateTournament";
 
 //types / interfaces
-import { TournamentObject } from "@/app/types/tournamentTypes";
+import { TournamentObjectType } from "@/app/types/tournamentTypes";
 import { BeatLoader } from "react-spinners";
 import { DateTime } from "luxon";
 
@@ -17,7 +17,7 @@ interface TournamentModalProps {
     isOpen: boolean;
     onClose: () => void;
     selectedData: SelectedDataType[];
-    data: TournamentObject;
+    data: TournamentObjectType;
     successfullyPosted: boolean;
     handleCreateTournament: () => Promise<{ message: string }>;
     createTournamentLoading: boolean;
@@ -47,7 +47,7 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
     ).toFormat("MM/dd/yy hh:mm a");
 
     return (
-        <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
+        <div className="tw-fixed tw-max-h-screen tw-overflow-scroll tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
             <div className="tw-w-[800px] tw-flex tw-flex-col">
                 <button
                     className="tw-text-white tw-text-xl tw-place-self-end tw-rounded-full tw-border-2 tw-w-8 hover:tw-bg-yellow-400"
@@ -70,22 +70,25 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
                             Tournament End Time : {tournamentEndTimeString}
                         </div>
                         <div>Auctions : </div>
-                        <div className="tw-grid tw-grid-cols-2 tw-mt-2">
-                            {selectedData.map((item) => {
-                                const deadlineString =
-                                    convertDateStringToDateTime(item.deadline);
-                                return (
-                                    <div key={item._id + "SD"}>
-                                        <AuctionsCard
-                                            _id={item._id}
-                                            title={item.title}
-                                            deadline={deadlineString}
-                                            auction_id={item.auction_id}
-                                            image={item.image}
-                                        />
-                                    </div>
-                                );
-                            })}
+                        <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-mt-2">
+                            {selectedData != null &&
+                                selectedData.map((item) => {
+                                    const deadlineString =
+                                        convertDateStringToDateTime(
+                                            item.deadline
+                                        );
+                                    return (
+                                        <div key={item._id + "SD"}>
+                                            <AuctionsCard
+                                                _id={item._id}
+                                                title={item.title}
+                                                deadline={deadlineString}
+                                                auction_id={item.auction_id}
+                                                image={item.image}
+                                            />
+                                        </div>
+                                    );
+                                })}
                         </div>
                     </div>
                     <div className="tw-bg-white/10 tw-h-[2px] tw-my-2"></div>

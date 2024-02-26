@@ -5,7 +5,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import DvrIcon from "@mui/icons-material/Dvr";
 import DeleteIcon from "@mui/icons-material/Delete";
 import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
-import { TournamentObjType } from "../../dashboard/create-tournament/page";
 import { BeatLoader } from "react-spinners";
 import { useSession } from "next-auth/react";
 import {

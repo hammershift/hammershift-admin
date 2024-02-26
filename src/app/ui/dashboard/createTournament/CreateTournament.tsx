@@ -79,7 +79,7 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
     return (
         <div>
             <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-6 tw-mt-6 md:tw-pl-4">
-                <div className="tw-w-1/3 tw-flex tw-items-center tw-gap-2 md:tw-gap-4">
+                <div className="tw-w-full md:tw-w-1/3 tw-flex tw-items-center tw-gap-2 md:tw-gap-4">
                     <Checkbox
                         checked={selected}
                         value={auctionID}
@@ -211,8 +211,9 @@ export const DropdownComponent: React.FC<DropdownComponentProps> = ({
     handleCheckboxFilters,
     filters,
 }) => {
+    // FIXME: width of the dropdown is not responsive
     return (
-        <div className="tw-absolute tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg tw-max-h-[500px] tw-overflow-scroll">
+        <div className=" tw-absolute  tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg tw-max-h-[500px] tw-overflow-scroll tw-z-20">
             <ul className={`tw-grid tw-grid-cols-${columns} tw-gap-3`}>
                 {content.map((item: string, index: number) => (
                     <li
