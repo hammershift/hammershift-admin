@@ -484,13 +484,8 @@ const CreateTournamentsPage = () => {
         }
     };
 
-    // useEffect(() => {
-    //     console.log("input Error:", inputError);
-    // }, [inputError]);
-
     const handleCheckTournamentObj = () => {
         checkInputs();
-        console.log("input Error:", inputError);
     };
 
     useEffect(() => {
