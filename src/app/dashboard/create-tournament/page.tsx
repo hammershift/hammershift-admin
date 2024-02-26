@@ -249,6 +249,7 @@ const CreateTournamentsPage = () => {
     );
     const [selectedAuctionId, setSelectedAuctionId] = useState("");
     const [filters, setFilters] = useState(FilterInitialState);
+    const [emptyAuctions, setEmptyAuctions] = useState(false);
 
     const [dateLimit, setDateLimit] = useState(() => {
         const start = new Date();
@@ -302,15 +303,13 @@ const CreateTournamentsPage = () => {
     // fetch auctions data when filters change
     useEffect(() => {
         if (totalAuctions != null) {
-            setIsLoading(true);
             if (displayCount >= totalAuctions) {
-                console.log("heya");
                 setDisplayCount(totalAuctions);
             } else {
                 setDisplayCount(7);
             }
         }
-    }, [filters]);
+    }, [totalAuctions]);
 
     // fetch data when displayCount changes
     useEffect(() => {
@@ -382,6 +381,11 @@ const CreateTournamentsPage = () => {
             if (data && "cars" in data) {
                 setAuctionsData(data.cars as CarData[]);
                 setTotalAuctions(data.total);
+                if (data.cars.length === 0) {
+                    setEmptyAuctions(true);
+                } else {
+                    setEmptyAuctions(false);
+                }
                 setLoadmoreLoading(false);
             } else {
                 console.error("Unexpected data structure:", data);
@@ -432,25 +436,7 @@ const CreateTournamentsPage = () => {
         }));
     };
 
-    // check if tournamentObject is complete
-    // useEffect(() => {
-    //     const checkValidity = (objectData: TournamentObjectType) => {
-    //         if (
-    //             objectData["title"] &&
-    //             objectData["buyInFee"] &&
-    //             objectData["startTime"] &&
-    //             objectData["endTime"] &&
-    //             objectData["auctionID"]?.length === 5
-    //         ) {
-    //             setTounamentObjIsValid(true);
-    //         } else {
-    //             setTounamentObjIsValid(false);
-    //         }
-    //     };
-    //     checkValidity(tournamentObject);
-    // }, [tournamentObject, selectedData]);
-
-    //FIXME:
+    //check input fields / validation
     const checkInputs = () => {
         if (Object.keys(tournamentObject).length === 0) {
             setInputError("incomplete");
@@ -485,19 +471,16 @@ const CreateTournamentsPage = () => {
         }
     };
 
+    // checks if tournamentObject is empty
     const handleCheckTournamentObj = () => {
         checkInputs();
         setCreateTournamentCount((prev) => prev + 1);
-        console.log("error inputs:", inputError);
-        console.log("modal:", isTournamentModalOpen);
     };
 
+    // opens modal if there is no input error and tournamentObject is not empty
     useEffect(() => {
         if (inputError == null && Object.keys(tournamentObject).length != 0) {
             setIsTournamentModalOpen(true);
-            console.log("yey is open");
-        } else {
-            console.log("why you no open?");
         }
     }, [inputError, createTournamentCount]);
 
@@ -820,14 +803,14 @@ const CreateTournamentsPage = () => {
                                 onChange={handleInputChange}
                             />
                         </div>
-
                         <div className="tw-flex tw-flex-col tw-gap-1.5">
                             <label htmlFor="buyInFee">Buy-in Price</label>
                             <input
                                 id="buyInFee"
                                 name="buyInFee"
+                                type="number"
                                 placeholder="buy-in price"
-                                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                className="tw-text-black tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded"
                                 onChange={handleInputChange}
                             />
                         </div>
@@ -1057,6 +1040,9 @@ const CreateTournamentsPage = () => {
                     <div className=" md:tw-h-[1000px] tw-rounded-xl tw-bg-white/20 md:tw-overflow-scroll tw-px-4">
                         {!isLoading ? (
                             <>
+                                {emptyAuctions && (
+                                    <div>No results found...</div>
+                                )}
                                 {auctionsData &&
                                     auctionsData.map((item, index) => {
                                         return (
