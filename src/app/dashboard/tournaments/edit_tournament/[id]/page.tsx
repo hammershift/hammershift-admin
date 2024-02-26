@@ -176,11 +176,11 @@ const EditTournamentDetails = ({
     }
 
     return (
-        <div className="tw-w-full tw-flex tw-gap-8 tw-p-4">
+        <div className="tw-w-full tw-flex tw-flex-col md:tw-flex-row tw-gap-8 tw-p-4">
             <div>
                 <div className="tw-grid tw-grid-cols-2 tw-h-auto tw-gap-4">
                     <div className="tw-font-bold">Tournament Id:</div>
-                    <div>{tournamentData._id}</div>
+                    <div className="tw-truncate">{tournamentData._id}</div>
 
                     <div className="tw-font-bold">Title:</div>
                     <input
@@ -244,9 +244,9 @@ const EditTournamentDetails = ({
                     <p className="tw-px-3">{tournamentData.status}</p>
                 </div>
             </div>
-            <div className="tw-flex">
+            <div className="tw-flex tw-flex-col md:tw-flex-row">
                 <div className="tw-font-bold">Auctions:</div>
-                <div className="tw-px-3">
+                <div className="md:tw-px-3">
                     <div className="">
                         {auctions ? (
                             auctions.map((item, index) => {
