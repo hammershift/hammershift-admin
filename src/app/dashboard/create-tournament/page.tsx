@@ -299,12 +299,12 @@ const CreateTournamentsPage = () => {
         }
     }, [totalAuctions, displayCount]);
 
+    // FIXME:
     // fetch auctions data when filters change
     useEffect(() => {
         if (totalAuctions != null) {
             setIsLoading(true);
             if (displayCount >= totalAuctions) {
-                console.log("heya");
                 setDisplayCount(totalAuctions);
             } else {
                 setDisplayCount(7);
@@ -432,25 +432,6 @@ const CreateTournamentsPage = () => {
         }));
     };
 
-    // check if tournamentObject is complete
-    // useEffect(() => {
-    //     const checkValidity = (objectData: TournamentObjectType) => {
-    //         if (
-    //             objectData["title"] &&
-    //             objectData["buyInFee"] &&
-    //             objectData["startTime"] &&
-    //             objectData["endTime"] &&
-    //             objectData["auctionID"]?.length === 5
-    //         ) {
-    //             setTounamentObjIsValid(true);
-    //         } else {
-    //             setTounamentObjIsValid(false);
-    //         }
-    //     };
-    //     checkValidity(tournamentObject);
-    // }, [tournamentObject, selectedData]);
-
-    //FIXME:
     const checkInputs = () => {
         if (Object.keys(tournamentObject).length === 0) {
             setInputError("incomplete");
@@ -488,16 +469,11 @@ const CreateTournamentsPage = () => {
     const handleCheckTournamentObj = () => {
         checkInputs();
         setCreateTournamentCount((prev) => prev + 1);
-        console.log("error inputs:", inputError);
-        console.log("modal:", isTournamentModalOpen);
     };
 
     useEffect(() => {
         if (inputError == null && Object.keys(tournamentObject).length != 0) {
             setIsTournamentModalOpen(true);
-            console.log("yey is open");
-        } else {
-            console.log("why you no open?");
         }
     }, [inputError, createTournamentCount]);
 
