@@ -165,15 +165,27 @@ const Table: React.FC<TableProps> = ({
                     <tr>
                         <th className="tw-p-2.5 tw-font-bold">Date Created</th>
                         <th className="tw-p-2.5 tw-font-bold">Title</th>
-                        <th className="tw-p-2.5 tw-font-bold">Pot</th>
-                        <th className="tw-p-2.5 tw-font-bold">Buy-In Fee</th>
-                        <th className="tw-p-2.5 tw-font-bold">Start Time</th>
-                        <th className="tw-p-2.5 tw-font-bold">End Time</th>
-                        <th className="tw-p-2.5 tw-font-bold">
+                        <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+                            Pot
+                        </th>
+                        <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+                            Buy-In Fee
+                        </th>
+                        <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+                            Start Time
+                        </th>
+                        <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+                            End Time
+                        </th>
+                        <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
                             Tournament End Time
                         </th>
-                        <th className="tw-p-2.5 tw-font-bold">Auction ID</th>
-                        <th className="tw-p-2.5 tw-font-bold">isActive</th>
+                        <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+                            Auction ID
+                        </th>
+                        <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+                            isActive
+                        </th>
                         <th className="tw-p-2.5 tw-font-bold">Actions</th>
                     </tr>
                 </thead>
@@ -192,35 +204,35 @@ const Table: React.FC<TableProps> = ({
                                 <td className="tw-p-2.5 tw-w-1/8">
                                     {item.title}
                                 </td>
-                                <td className="tw-p-2.5 tw-w-1/8">
+                                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                                     {new Intl.NumberFormat("en-US", {
                                         style: "currency",
                                         currency: "USD",
                                     }).format(item.pot as unknown as number)}
                                 </td>
-                                <td className="tw-p-2.5 tw-w-1/8">
+                                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                                     ${item.buyInFee}.00
                                 </td>
-                                <td className="tw-p-2.5 tw-w-1/8">
+                                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                                     {DateTime.fromISO(item.startTime).toFormat(
                                         "MM/dd/yy hh:mm a"
                                     )}
                                 </td>
-                                <td className="tw-p-2.5 tw-w-1/8">
+                                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                                     <p>
                                         {DateTime.fromISO(
                                             item.endTime
                                         ).toFormat("MM/dd/yy hh:mm a")}
                                     </p>
                                 </td>
-                                <td className="tw-p-2.5 tw-w-1/8">
+                                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                                     <p>
                                         {DateTime.fromISO(
                                             item.tournamentEndTime
                                         ).toFormat("MM/dd/yy hh:mm a")}
                                     </p>
                                 </td>
-                                <td className="tw-p-2.5 tw-w-1/8">
+                                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                                     <button
                                         className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs"
                                         onClick={() =>
@@ -237,7 +249,7 @@ const Table: React.FC<TableProps> = ({
                                         />
                                     )}
                                 </td>
-                                <td className="tw-p-2.5 tw-w-1/8">
+                                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
                                     <p>{item.isActive ? "true" : "false"}</p>
                                 </td>
                                 <td className="tw-p-2.5 tw-w-1/8">

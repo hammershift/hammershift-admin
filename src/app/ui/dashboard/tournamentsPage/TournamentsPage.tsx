@@ -140,7 +140,7 @@ export const ShowTournamentDetails = ({
             <div>
                 <div className="tw-grid tw-grid-cols-2 tw-h-auto tw-gap-4">
                     <div className="tw-font-bold">Tournament Id:</div>
-                    <p className="tw-px-3">{tournamentData._id}</p>
+                    <p className="tw-px-3 tw-truncate">{tournamentData._id}</p>
                     <div className="tw-font-bold">Title:</div>
                     <p className="tw-px-3">{tournamentData.title}</p>
                     <div className="tw-font-bold">Buy-In Fee:</div>
