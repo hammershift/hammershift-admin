@@ -37,6 +37,10 @@ export const AuctionIDDropdown = ({
         fetchAuctionsOfTournament(tournamentID);
     }, []);
 
+    useEffect(() => {
+        console.log("tournament auctions:", auctions);
+    }, [auctions]);
+
     return (
         <div className="tw-absolute tw-p-4 tw-bg-[#1A2C3D] tw-h-[500px] tw-overflow-scroll">
             {auctions ? (

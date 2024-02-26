@@ -4,11 +4,14 @@ import { SelectedDataType } from "../createTournament/CreateTournament";
 import { DateTime } from "luxon";
 
 //types / interfaces
-import { TournamentObjType } from "@/app/dashboard/create-tournament/page";
+import { TournamentObjectType } from "@/app/types/tournamentTypes";
 import { BeatLoader } from "react-spinners";
 
 // convert date string to date time
-function convertDateStringToDateTime(dateString: string | Date) {
+function convertDateStringToDateTime(dateString: string | undefined) {
+    if (!dateString) {
+        return "";
+    }
     const date = new Date(dateString);
     return date.toLocaleString();
 }
@@ -16,7 +19,7 @@ function convertDateStringToDateTime(dateString: string | Date) {
 interface TournamentModalProps {
     isOpen: boolean;
     onClose: () => void;
-    data: TournamentObjType;
+    data: TournamentObjectType;
 }
 
 const TournamentShowModal: React.FC<TournamentModalProps> = ({
