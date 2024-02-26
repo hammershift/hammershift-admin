@@ -803,14 +803,14 @@ const CreateTournamentsPage = () => {
                                 onChange={handleInputChange}
                             />
                         </div>
-
                         <div className="tw-flex tw-flex-col tw-gap-1.5">
                             <label htmlFor="buyInFee">Buy-in Price</label>
                             <input
                                 id="buyInFee"
                                 name="buyInFee"
+                                type="number"
                                 placeholder="buy-in price"
-                                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                                className="tw-text-black tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded"
                                 onChange={handleInputChange}
                             />
                         </div>
