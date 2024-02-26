@@ -129,7 +129,7 @@ export const ShowTournamentDetails = ({
 
     if (tournamentData == null) {
         return (
-            <div className="tw-w-[500px] tw-h-[350px] tw-flex tw-justify-center tw-items-center">
+            <div className="tw-w-full md:tw-w-[500px] tw-h-[350px] tw-flex tw-justify-center tw-items-center">
                 <BounceLoader color="#F2CA16" />
             </div>
         );
