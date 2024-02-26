@@ -19,16 +19,18 @@ export const AuctionIDDropdown = ({
     tournamentID: string;
 }) => {
     const [auctions, setAuctions] = useState<AuctionType[]>([]);
+    const [auctionsLoading, setAuctionsLoading] = useState<boolean>(false);
 
     // fetch Auctions for Tournament
     useEffect(() => {
         const fetchAuctionsOfTournament = async (id: string) => {
+            setAuctionsLoading(true);
             try {
                 const res = await getAuctionsForTournaments(id);
                 if (res) {
                     const data = await res.json();
-                    console.log("data:", data.auctions);
                     setAuctions(data.auctions);
+                    setAuctionsLoading(false);
                 }
             } catch (error) {
                 console.error(error);
@@ -42,8 +44,12 @@ export const AuctionIDDropdown = ({
     }, [auctions]);
 
     return (
-        <div className="tw-absolute tw-p-4 tw-bg-[#1A2C3D] tw-h-[500px] tw-overflow-scroll">
-            {auctions ? (
+        <div className="tw-absolute tw-transform -tw-translate-x-1/2 tw-p-4 tw-bg-[#1A2C3D] tw-h-[500px] tw-w-[400px] tw-overflow-scroll">
+            {auctionsLoading ? (
+                <div className=" tw-flex tw-h-[200px] tw-justify-center tw-items-center">
+                    <BounceLoader color="#F2CA16" />
+                </div>
+            ) : auctions ? (
                 auctions.map((item, index) => {
                     const yearAttribute = item.attributes.find(
                         (attr) => attr.key === "year"

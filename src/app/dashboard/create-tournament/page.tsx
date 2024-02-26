@@ -268,6 +268,7 @@ const CreateTournamentsPage = () => {
         | "auctionID"
         | null
     >(null);
+    const [createTournamentCount, setCreateTournamentCount] = useState(0);
 
     const inputErrorMessages = {
         buyInPrice: "Please enter a valid buy-in price",
@@ -486,13 +487,19 @@ const CreateTournamentsPage = () => {
 
     const handleCheckTournamentObj = () => {
         checkInputs();
+        setCreateTournamentCount((prev) => prev + 1);
+        console.log("error inputs:", inputError);
+        console.log("modal:", isTournamentModalOpen);
     };
 
     useEffect(() => {
         if (inputError == null && Object.keys(tournamentObject).length != 0) {
             setIsTournamentModalOpen(true);
+            console.log("yey is open");
+        } else {
+            console.log("why you no open?");
         }
-    }, [inputError]);
+    }, [inputError, createTournamentCount]);
 
     // removes all auctions from selectedData
     const handleRemoveAuctions = () => {
