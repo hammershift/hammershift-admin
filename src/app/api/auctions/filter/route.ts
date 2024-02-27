@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
         const db = client.db();
-        // await connectToDB();
+
         const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
         const limit = Number(req.nextUrl.searchParams.get("limit")) || 7;
         const searchedKeyword = req.nextUrl.searchParams.get("search");
@@ -276,7 +276,6 @@ export async function GET(req: NextRequest) {
 
         const arrayCars = await filteredCars.toArray();
 
-        console.log(filteredCars);
         return NextResponse.json({ total: totalCars, cars: arrayCars });
     } catch (error) {
         console.error(error);
