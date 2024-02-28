@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
         const db = client.db();
-        // await connectToDB();
+
         const date: string | null = req.nextUrl.searchParams.get("date");
 
         // date string for start of day

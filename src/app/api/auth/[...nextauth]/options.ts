@@ -7,7 +7,6 @@ import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 
 export const authOptions: NextAuthOptions = {
-    debug: true,
     adapter: MongoDBAdapter(clientPromise),
     session: {
         strategy: "jwt",

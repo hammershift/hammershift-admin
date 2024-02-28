@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { DateTime } from "luxon";
 import Image from "next/image";
 import GroupIcon from "@mui/icons-material/Group";
 import PaidIcon from "@mui/icons-material/Paid";
@@ -22,7 +23,7 @@ import {
     getLimitedWagers,
     getWagersCount,
     getWagersOnDate,
-} from "@/app/lib/getWagers";
+} from "@/app/lib/data";
 import Link from "next/link";
 
 const DashboardPage = () => {
@@ -253,7 +254,10 @@ const Table = ({ wagersData }: { wagersData: any }) => {
         <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
             <thead>
                 <tr>
-                    <th className="tw-p-2.5 tw-font-bold ">Wager</th>
+                    <th className="tw-p-2.5 tw-font-bold tw-hidden sm:tw-block">
+                        Date
+                    </th>
+                    <th className="tw-p-2.5 tw-font-bold">Wager</th>
                     <th className="tw-p-2.5 tw-font-bold tw-hidden sm:tw-block">
                         Price
                     </th>
@@ -268,13 +272,18 @@ const Table = ({ wagersData }: { wagersData: any }) => {
                             key={item._id}
                             className=" tw-rounded-lg tw-bg-[#fff]/5"
                         >
-                            <td className="tw-p-2.5 tw-w-1/4">
+                            <td className="tw-p-2.5 tw-w-1/5 tw-hidden sm:tw-table-cell">
+                                {DateTime.fromISO(item.createdAt).toFormat(
+                                    "MM/dd/yy"
+                                )}
+                            </td>
+                            <td className="tw-p-2.5 tw-w-1/5">
                                 ${item.wagerAmount}.00
                             </td>
-                            <td className="tw-p-2.5 tw-w-1/4 tw-hidden sm:tw-inline-block">
+                            <td className="tw-p-2.5 tw-w-1/5 tw-hidden sm:tw-table-cell">
                                 ${item.priceGuessed}
                             </td>
-                            <td className="tw-p-2.5 tw-w-1/4">
+                            <td className="tw-p-2.5 tw-w-1/5">
                                 <span className={`tw-p-2 tw-rounded`}>
                                     {item.auctionIdentifierId}
                                 </span>
@@ -290,7 +299,7 @@ const Table = ({ wagersData }: { wagersData: any }) => {
                                     Show Auction Details
                                 </button>
                             </td>
-                            <td className="tw-p-2.5 tw-w-1/4">
+                            <td className="tw-p-2.5 tw-w-1/5">
                                 {item.user.username}
                             </td>
                         </tr>
