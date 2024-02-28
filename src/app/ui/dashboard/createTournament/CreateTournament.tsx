@@ -211,9 +211,12 @@ export const DropdownComponent: React.FC<DropdownComponentProps> = ({
     handleCheckboxFilters,
     filters,
 }) => {
-    // FIXME: width of the dropdown is not responsive
     return (
-        <div className=" tw-absolute  tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg tw-max-h-[500px] tw-overflow-scroll tw-z-20">
+        <div
+            className={`dropdown_menu-6 tw-absolute tw-w-[200px] md:tw-w-fit tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg tw-h-[400px] md:tw-h-auto tw-max-h-[500px] tw-overflow-scroll tw-z-20 ${
+                filterKey == "sort" ? "tw-right-0" : ""
+            }`}
+        >
             <ul className={`tw-grid tw-grid-cols-${columns} tw-gap-3`}>
                 {content.map((item: string, index: number) => (
                     <li
