@@ -877,7 +877,7 @@ const CreateTournamentsPage = () => {
                         </span>
                     </div>
                     <div
-                        className="tw-flex tw-gap-4"
+                        className="tw-relative tw-w-fit tw-flex tw-gap-4"
                         ref={
                             filterRef as unknown as
                                 | RefObject<HTMLDivElement>
@@ -920,6 +920,7 @@ const CreateTournamentsPage = () => {
                             )}
                         </div>
                         <div className=" tw-block lg:tw-hidden">
+                            {/* FIXME: */}
                             {
                                 <div>
                                     <Image
@@ -934,21 +935,12 @@ const CreateTournamentsPage = () => {
                                             )
                                         }
                                     />
+                                    {/* FIXME: */}
                                     {isMobileDropdownOpen && (
                                         <div
                                             ref={filterDropdownRef}
-                                            className="tw-absolute tw-w-full tw-h-full tw-bg-[#DCE0D9] tw-rounded-xl tw-left-0 "
+                                            className=" dropdown_menu-6 tw-absolute tw-w-[100px] tw-h-auto tw-bg-[#DCE0D9] tw-rounded-xl tw-left-0 tw-z-10"
                                         >
-                                            <div
-                                                onClick={() =>
-                                                    setIsMobileDropdownOpen(
-                                                        false
-                                                    )
-                                                }
-                                                className="tw-text-black tw-bg-white tw-w-[100px]"
-                                            >
-                                                X
-                                            </div>
                                             {ListOfFilters.map(
                                                 (
                                                     item: string,
@@ -963,6 +955,7 @@ const CreateTournamentsPage = () => {
                                                             key={String(
                                                                 index + item
                                                             )}
+                                                            className="tw-relative"
                                                         >
                                                             <div
                                                                 onClick={() =>
@@ -975,23 +968,25 @@ const CreateTournamentsPage = () => {
                                                                 {item}
                                                             </div>
                                                             {data.dropdown && (
-                                                                <DropdownComponent
-                                                                    filterKey={
-                                                                        data.filterKey
-                                                                    }
-                                                                    content={
-                                                                        data.content
-                                                                    }
-                                                                    columns={
-                                                                        data.columns
-                                                                    }
-                                                                    handleCheckboxFilters={
-                                                                        handleCheckboxFilters
-                                                                    }
-                                                                    filters={
-                                                                        filters
-                                                                    }
-                                                                />
+                                                                <div className="tw-absolute tw-left-24 tw-top-0">
+                                                                    <DropdownComponent
+                                                                        filterKey={
+                                                                            data.filterKey
+                                                                        }
+                                                                        content={
+                                                                            data.content
+                                                                        }
+                                                                        columns={
+                                                                            data.columnsSM
+                                                                        }
+                                                                        handleCheckboxFilters={
+                                                                            handleCheckboxFilters
+                                                                        }
+                                                                        filters={
+                                                                            filters
+                                                                        }
+                                                                    />
+                                                                </div>
                                                             )}
                                                         </div>
                                                     );
@@ -1006,7 +1001,7 @@ const CreateTournamentsPage = () => {
                         <div>Sort:</div>
                         <div>
                             {/* desktop view */}
-                            <div className="tw-hidden lg:tw-flex">
+                            <div className=" tw-hidden lg:tw-flex">
                                 <div
                                     onClick={() => handleToggleDropdown("sort")}
                                     className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
@@ -1015,7 +1010,7 @@ const CreateTournamentsPage = () => {
                                 </div>
                             </div>
                             {/* mobile view */}
-                            <div className="tw-block lg:tw-hidden">
+                            <div className=" tw-block lg:tw-hidden">
                                 <Image
                                     src={ArrowDown}
                                     alt="arrow down"
