@@ -50,7 +50,7 @@ const TournamentModal: React.FC<TournamentModalProps> = ({
 
     return (
         <div className="tw-fixed tw-max-h-screen tw-overflow-scroll tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
-            <div className="tw-w-[800px] tw-flex tw-flex-col">
+            <div className="tw-w-[800px] tw-pt-64 md:tw-pt-0 tw-flex tw-flex-col">
                 <button
                     className="tw-text-white tw-text-xl tw-place-self-end tw-rounded-full tw-border-2 tw-w-8 hover:tw-bg-yellow-400"
                     onClick={() => onClose()}
