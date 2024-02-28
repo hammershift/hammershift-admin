@@ -88,3 +88,19 @@ a {
     border-radius: 0.25rem;
     font-weight: 700;
 }
+
+/* ANIMATIONS */
+
+.dropdown_menu-6 {
+    animation: growDown 500ms ease-in-out forwards;
+    transform-origin: top center;
+}
+
+@keyframes growDown {
+    from {
+        transform: scaleY(0);
+    }
+    to {
+        transform: scaleY(1);
+    }
+}
