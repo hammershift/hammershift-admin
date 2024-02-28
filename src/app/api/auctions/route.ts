@@ -1,4 +1,3 @@
-import connectToDB from "@/app/lib/mongoose";
 import Auctions from "@/app/models/auction.model";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
