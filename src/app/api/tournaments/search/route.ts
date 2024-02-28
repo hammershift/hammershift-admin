@@ -1,5 +1,4 @@
 import clientPromise from "@/app/lib/mongoDB";
-import connectToDB from "@/app/lib/mongoose";
 import Tournaments from "@/app/models/tournament.model";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -13,7 +12,6 @@ export async function GET(req: NextRequest) {
         const db = client.db();
         const searchKeyword = req.nextUrl.searchParams.get("search");
 
-        //TODO: search sensitivity
         if (searchKeyword) {
             const searchedTournaments = await db
                 .collection("tournaments")
