@@ -920,7 +920,6 @@ const CreateTournamentsPage = () => {
                             )}
                         </div>
                         <div className=" tw-block lg:tw-hidden">
-                            {/* FIXME: */}
                             {
                                 <div>
                                     <Image
@@ -935,7 +934,7 @@ const CreateTournamentsPage = () => {
                                             )
                                         }
                                     />
-                                    {/* FIXME: */}
+
                                     {isMobileDropdownOpen && (
                                         <div
                                             ref={filterDropdownRef}
