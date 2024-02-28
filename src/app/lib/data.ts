@@ -153,9 +153,11 @@ export const createTournament = async (body: any) => {
         body: JSON.stringify(body),
     });
     if (res.status === 200) {
-        return { message: "Created Tournament" };
+        console.log("Create Tournament Successful");
+        return { isSuccessful: true };
     } else {
-        console.error("Create Tournament Unsuccessful");
+        console.log("Create Tournament Unsuccessful");
+        return { isSuccessful: false };
     }
 };
 
