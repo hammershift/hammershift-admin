@@ -9,7 +9,6 @@ export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
         const db = client.db();
-        // await connectToDB();
 
         // api/wagers/count count all wagers
         const wagers = await db

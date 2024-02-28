@@ -229,6 +229,7 @@ const CreateTournamentsPage = () => {
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
     // const [tounamentObjIsValid, setTounamentObjIsValid] = useState(false); // checks completeness of tournamentObject
     const [successfullyPosted, setSuccessfullyPosted] = useState(false); // if tournament is successfully posted
+    const [unsuccessfulPosting, setUnsuccessfulPosting] = useState(false);
     const [tournamentObject, setTournamentObject] =
         useState<TournamentObjectType>({});
     const [totalAuctions, setTotalAuctions] = useState<number | null>(null);
@@ -400,12 +401,14 @@ const CreateTournamentsPage = () => {
     const handleCreateTournament = async () => {
         setCreateTournamentLoading(true);
         const res = await createTournament(tournamentObject);
-        if (res) {
+        if (res.isSuccessful == true) {
             console.log("Tournament created successfully");
             setSuccessfullyPosted(true);
-            setCreateTournamentLoading(false);
             handleSuccessfulPost();
+        } else {
+            setUnsuccessfulPosting(true);
         }
+        setCreateTournamentLoading(false);
         return { message: "Tournament created successfully" };
     };
 
@@ -916,7 +919,6 @@ const CreateTournamentsPage = () => {
                                 }
                             )}
                         </div>
-                        {/*FIXME: mobile view */}
                         <div className=" tw-block lg:tw-hidden">
                             {
                                 <div>
@@ -1110,6 +1112,7 @@ const CreateTournamentsPage = () => {
                     successfullyPosted={successfullyPosted}
                     handleCreateTournament={handleCreateTournament}
                     createTournamentLoading={createTournamentLoading}
+                    unsuccessfulPosting={unsuccessfulPosting}
                 />
             )}
             {isAuctionModalOpen && (
