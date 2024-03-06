@@ -133,6 +133,7 @@ export async function POST(req: NextRequest) {
         // added pot and isActive
         const tournamentObject = new Tournaments({
             ...newTournamentData,
+            status: 1,
             createdAt: new Date(),
         });
         console.log("tournamentObject", tournamentObject);
