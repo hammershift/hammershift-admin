@@ -21,13 +21,13 @@ import { set } from "mongoose";
 const TournamentsPage = () => {
   const [tournamentData, setTournamentData] = useState<TournamentType[]>([]);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [displayCount, setDisplayCount] = useState(7);
+  const [displayCount, setDisplayCount] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
   const [totalTournaments, setTotalTournaments] = useState<number>(0);
 
   // adds 7 to the display count
   const handleNextClick = () => {
-    if (totalTournaments - displayCount >= 7) {
+    if (totalTournaments - displayCount >= 10) {
       setDisplayCount((prevCount) => prevCount + 7);
     } else {
       setDisplayCount(totalTournaments);

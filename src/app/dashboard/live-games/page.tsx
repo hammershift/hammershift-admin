@@ -1,25 +1,25 @@
 "use client";
 
+import { getCarsWithFilter } from "@/app/lib/data";
+import LiveGamesPage from "@/app/ui/dashboard/liveGamesPage/LiveGamesPage";
 import React, { useEffect, useState } from "react";
-import AuctionsPage from "@/app/ui/dashboard/auctionsPage/AuctionsPage";
-import { getCarsWithFilter } from "../../lib/data";
-// import sampleData from "../../sample_data.json";
 
-export interface CarData {
+export interface LiveAuctions {
+  [key: string]: any;
+  image: string;
   auction_id: string;
   price: number;
   year: string;
   make: string;
   model: string;
-  category: string;
-  location: string;
   bids: number;
   isActive: boolean;
   deadline: Date;
+  display: boolean;
 }
 
-const Auctions = () => {
-  const [carData, setCarData] = useState<CarData[]>([]);
+const LiveGames = () => {
+  const [liveAuctionsData, setLiveAuctionsData] = useState<LiveAuctions[]>([]);
   const [displayCount, setDisplayCount] = useState(12);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,7 +30,7 @@ const Auctions = () => {
 
         if (data && "cars" in data) {
           console.log(data);
-          setCarData(data.cars as CarData[]);
+          setLiveAuctionsData(data.cars as LiveAuctions[]);
           setIsLoading(false);
         } else {
           console.error("Unexpected data structure:", data);
@@ -47,12 +47,12 @@ const Auctions = () => {
   };
 
   return (
-    <AuctionsPage
-      auctionData={carData}
+    <LiveGamesPage
+      liveAuctionsData={liveAuctionsData}
       handleLoadMore={handleLoadMore}
       isLoading={isLoading}
     />
   );
 };
 
-export default Auctions;
+export default LiveGames;
