@@ -22,6 +22,7 @@ const LiveGames = () => {
   const [liveAuctionsData, setLiveAuctionsData] = useState<LiveAuctions[]>([]);
   const [displayCount, setDisplayCount] = useState(12);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalAuctions, setTotalAuctions] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,6 +31,7 @@ const LiveGames = () => {
 
         if (data && "cars" in data) {
           console.log(data);
+          setTotalAuctions(data.total);
           setLiveAuctionsData(data.cars as LiveAuctions[]);
           setIsLoading(false);
         } else {
@@ -42,6 +44,8 @@ const LiveGames = () => {
     fetchData();
   }, [displayCount]);
 
+  console.log("live auctions: ", liveAuctionsData)
+
   const handleLoadMore = () => {
     setDisplayCount((prevCount) => prevCount + 7);
   };
@@ -51,6 +55,8 @@ const LiveGames = () => {
       liveAuctionsData={liveAuctionsData}
       handleLoadMore={handleLoadMore}
       isLoading={isLoading}
+      displayCount={displayCount}
+      totalAuctions={totalAuctions}
     />
   );
 };

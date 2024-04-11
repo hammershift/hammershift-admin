@@ -17,12 +17,16 @@ interface AuctionsPageProps {
   auctionData: CarData[];
   handleLoadMore: () => void;
   isLoading: boolean;
+  displayCount: number;
+  totalCars: number;
 }
 
 const AuctionsPage: React.FC<AuctionsPageProps> = ({
   auctionData: auctionData,
   handleLoadMore,
   isLoading,
+  displayCount,
+  totalCars,
 }) => {
   const [activeAuctions, setActiveAuctions] = useState<{
     [key: string]: boolean;
@@ -232,7 +236,16 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
         </table>
       )}
 
-      <div className="tw-flex tw-items-center tw-justify-center tw-gap-4 tw-py-4">
+      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-py-4">
+        {displayCount >= totalCars ? (
+          <p>
+            Showing {totalCars} out of {totalCars}
+          </p>
+        ) : (
+          <p>
+            Showing {displayCount} out of {totalCars}
+          </p>
+        )}
         <button className="btn-transparent-white" onClick={handleLoadMore}>
           Load More
         </button>
