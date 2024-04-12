@@ -44,7 +44,7 @@ const LiveGames = () => {
     fetchData();
   }, [displayCount]);
 
-  console.log("live auctions: ", liveAuctionsData)
+  console.log("live auctions: ", liveAuctionsData);
 
   const handleLoadMore = () => {
     setDisplayCount((prevCount) => prevCount + 7);

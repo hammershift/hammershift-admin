@@ -20,7 +20,7 @@ export interface CarData {
 
 const Auctions = () => {
   const [carData, setCarData] = useState<CarData[]>([]);
-  const [totalCars, setTotalCars] = useState(0)
+  const [totalCars, setTotalCars] = useState(0);
   const [displayCount, setDisplayCount] = useState(12);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -31,7 +31,7 @@ const Auctions = () => {
 
         if (data && "cars" in data) {
           console.log(data.total);
-          setTotalCars(data.total)
+          setTotalCars(data.total);
           setCarData(data.cars as CarData[]);
           setIsLoading(false);
         } else {
