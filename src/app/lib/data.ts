@@ -358,3 +358,23 @@ export const toggleAuctionDisplay = async (
     throw new Error("Failed to toggle display of auction");
   }
 };
+
+//get all comments
+export const getAllComments = async (limit: number) => {
+    const response = await fetch(`/api/comments?limit=${limit}`);
+    const data = response.json();
+
+    return data;
+}
+
+export const getSortedComments = async (limit: number, sort: string) => {
+    const response = await fetch(`/api/comments?limit=${limit}&sort=${sort}`);
+    const data = response.json();
+    return data;
+}
+
+export const deleteComment = async (commentID: string) => {
+    await fetch(`/api/comments?id=${commentID}`, {
+        method: "DELETE"
+    });
+}
