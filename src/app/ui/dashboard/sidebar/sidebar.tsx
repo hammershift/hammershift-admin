@@ -15,6 +15,7 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import AddBoxIcon from "@mui/icons-material/AddBox";
+import CommentIcon from "@mui/icons-material/Comment";
 //images
 import userImg from "../../../../../public/images/user.svg";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
@@ -67,6 +68,11 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
                     title: "Create Tournament",
                     path: "/dashboard/create-tournament",
                     icon: <AddBoxIcon />,
+                },
+                {
+                    title: "Comments",
+                    path: "/dashboard/comments",
+                    icon: <CommentIcon />,
                 },
             ],
         },
