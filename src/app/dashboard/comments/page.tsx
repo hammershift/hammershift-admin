@@ -2,6 +2,7 @@
 
 import {
     deleteComment,
+    deleteMultipleComments,
     getAllComments,
     getSortedComments,
 } from "@/app/lib/data";
@@ -22,6 +23,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import DeleteCommentModal from "@/app/ui/dashboard/modals/delete_comment_modal";
+import Checkbox from "@mui/material/Checkbox";
 
 export default function Comments() {
     const [comments, setComments] = useState([]);
@@ -29,6 +31,7 @@ export default function Comments() {
     const [oldestComments, setOldestComments] = useState([]);
     const [likedComments, setLikedComments] = useState([]);
     const [dislikedComments, setDislikedComments] = useState([]);
+    const [selectedIDs, setSelectedIDs] = useState<string[]>([]);
     const [dateArrowUp, setDateArrowUp] = useState(false);
     const [likesAndDislikesArrowUp, setLikesAndDislikesArrowUp] =
         useState(false);
@@ -109,10 +112,37 @@ export default function Comments() {
         setDisplayCount((prev) => prev + 7);
     };
 
+    const addOrRemoveID = (id: string) => {
+        setSelectedIDs((prev) => {
+            if (prev.includes(id)) {
+                return prev.filter((commentID) => commentID !== id);
+            } else {
+                return [...prev, id];
+            }
+        });
+    };
+
     return (
         <div>
             <div className="section-container tw-mt-4">
-                <div className="tw-font-bold">Comments Moderation</div>
+                <div className="tw-flex tw-justify-between">
+                    <div className="tw-font-bold">Comments Moderation</div>
+                    {selectedIDs.length !== 0 && (
+                        <button
+                            onClick={async () =>
+                                await deleteMultipleComments(selectedIDs)
+                            }
+                            className="tw-text-sm tw-font-bold tw-text-[#C2451E] tw-flex tw-items-center tw-border tw-border-[#C2451E] tw-px-2 tw-gap-2 tw-rounded hover:tw-text-[#1a2c3d] hover:tw-bg-[#C2451E]"
+                        >
+                            <div>Delete Selected({selectedIDs.length})</div>
+                            <DeleteIcon
+                                sx={{
+                                    fontSize: "20px",
+                                }}
+                            />
+                        </button>
+                    )}
+                </div>
                 <div className="tw-my-4">
                     {isLoading ? (
                         <div className="tw-flex tw-justify-center tw-items-center tw-h-[592px]">
@@ -122,6 +152,7 @@ export default function Comments() {
                         <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
                             <thead className="tw-w-full">
                                 <tr className="">
+                                    <th className="tw-font-bold tw-p-2.5"></th>
                                     <th className="tw-font-bold tw-p-2.5">
                                         User
                                     </th>
@@ -164,6 +195,14 @@ export default function Comments() {
                                                     : "tw-bg-[#fff]/5"
                                             }`}
                                         >
+                                            <td className="tw-p-2.5 tw-w-1/8">
+                                                <Checkbox
+                                                    sx={{ color: "white" }}
+                                                    onClick={() =>
+                                                        addOrRemoveID(item._id)
+                                                    }
+                                                />
+                                            </td>
                                             <td className="tw-p-2.5 tw-w-1/5">
                                                 <div>{item.user.username}</div>
                                                 <div className="tw-text-sm">

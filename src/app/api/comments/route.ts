@@ -94,37 +94,40 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  const id = req.nextUrl.searchParams.get("id");
+    const session = await getServerSession(authOptions);
+    const { ids } = await req.json();
 
-  if (!session) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 400 });
-  }
+    if (!session) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 400 });
+    }
 
-  if (!id) {
-      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
-  }
+    if (!ids) {
+        return NextResponse.json({ message: 'Error parsing JSON from request body' }, { status: 400 });
+    }
 
-  try {
-      const client = await clientPromise;
-      const db = client.db();
+    try {
+        const client = await clientPromise;
+        const db = client.db();
 
-      await db.collection('comments').deleteOne(
-          { _id: new ObjectId(id) }
-      );
+        const objectIDs = ids.map((id: string) => new ObjectId(id));
 
-      await db.collection('comments').deleteMany(
-          { parentID: new ObjectId(id) }
-      );
+        await db.collection('comments').deleteMany(
+            { _id: { $in: objectIDs } }
+        );
 
-      return NextResponse.json(
-          {
-              message: "comment deleted"
-          },
-          { status: 200 }
-      );
-  } catch (error) {
-      console.error('Error in deleting comment', error);
-      return NextResponse.json({ message: 'Server error in deleting comment' }, { status: 500 });
-  }
+        await db.collection('comments').deleteMany(
+            { parentID: { $in: objectIDs } }
+        );
+
+        return NextResponse.json(
+            {
+                message: "comments deleted"
+            },
+            { status: 200 }
+        );
+
+    } catch (error) {
+        console.error('Error in deleting comment', error);
+        return NextResponse.json({ message: 'Server error in deleting comment' }, { status: 500 });
+    }
 }
