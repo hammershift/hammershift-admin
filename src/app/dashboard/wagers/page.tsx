@@ -38,7 +38,7 @@ interface WagersPageProps {
 const WagersPage = () => {
     const [wagerData, setWagerData] = useState<WagerData[]>([]);
     const [searchValue, setSearchValue] = useState<null | string>(null);
-    const [displayCount, setDisplayCount] = useState(7);
+    const [displayCount, setDisplayCount] = useState(8);
     const [isLoading, setIsLoading] = useState(true);
 
     const { data: session } = useSession(); // to get session
