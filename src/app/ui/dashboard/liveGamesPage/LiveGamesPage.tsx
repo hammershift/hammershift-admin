@@ -15,6 +15,10 @@ interface LiveGamesPageProps {
   isLoading: boolean;
   displayCount: number;
   totalAuctions: number;
+  handleSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  searchedData: LiveAuctions[];
+  searchedKeyword: string;
+  handleSortChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
@@ -23,11 +27,16 @@ const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
   isLoading,
   displayCount,
   totalAuctions,
+  handleSearch,
+  searchedData,
+  searchedKeyword,
+  handleSortChange,
 }) => {
   const [auctionsInDisplay, setAuctionsInDisplay] = useState<{
     [key: string]: boolean;
   }>({});
 
+  // Show correct display status of auctions
   useEffect(() => {
     const initialAuctionsInDisplay = liveAuctionsData.reduce(
       (acc, item) => ({
@@ -40,10 +49,23 @@ const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
   }, [liveAuctionsData]);
 
   async function handleDisplayToggle(id: string) {
+    // Calculate the current count of auctions in display
+    const auctionsInDisplayCount =
+      Object.values(auctionsInDisplay).filter(Boolean).length;
+
+    // Check if the count is 5 or more and the toggle is trying to set to true
+    if (auctionsInDisplayCount >= 5 && !auctionsInDisplay[id]) {
+      // Optionally display an alert
+      alert("Maximum of 5 auctions to display");
+      // Prevent the toggle action
+      return;
+    }
+
     setAuctionsInDisplay((prevStates) => ({
       ...prevStates,
       [id]: !prevStates[id],
     }));
+
     console.log("auctions in display: ", auctionsInDisplay);
     try {
       await toggleAuctionDisplay(id, !auctionsInDisplay[id]);
@@ -79,9 +101,22 @@ const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
           />
           <input
             type="text"
-            placeholder="Search for Auctions"
-            className="tw-bg-transparent focus:tw-outline-none"
+            placeholder="Search by Year, Make, Model..."
+            className="tw-bg-transparent focus:tw-outline-none tw-w-full"
+            onChange={handleSearch}
           />
+        </div>
+        <div className="tw-flex tw-mt-5 tw-justify-start tw-items-center">
+          <p>Sort by:</p>
+          <select
+            className="tw-mx-2 tw-rounded-sm tw-text-black"
+            onChange={handleSortChange}
+          >
+            <option value="On Display">On Display</option>
+            <option value="Newly Listed">Most Recent</option>
+            <option value="Most Bids">Most Popular</option>
+            <option value="Ending Soon">Ending Soon</option>
+          </select>
         </div>
       </div>
       {isLoading ? (
@@ -101,59 +136,113 @@ const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
               </tr>
             </thead>
             <tbody>
-              {liveAuctionsData &&
-                liveAuctionsData.map((liveAuction) => (
-                  <tr
-                    key={liveAuction.auction_id}
-                    className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
-                  >
-                    {headers.map((header, index) => (
-                      <td key={index} className="tw-p-2.5 tw-content-center">
-                        {header.KEY === "image" ? (
-                          <Image
-                            src={liveAuction[header.KEY]}
-                            alt="Auction Image"
-                            width={175}
-                            height={175}
-                          />
-                        ) : header.KEY === "price" ? (
-                          <span>
-                            $
-                            {Intl.NumberFormat("en-US").format(
-                              liveAuction.price
-                            )}
-                          </span>
-                        ) : header.KEY === "toggle_display" ? (
-                          <button
-                            onClick={() =>
-                              handleDisplayToggle(liveAuction.auction_id)
-                            }
-                          >
-                            {auctionsInDisplay[liveAuction.auction_id] ? (
-                              <ToggleOnIcon />
-                            ) : (
-                              <ToggleOffIcon />
-                            )}
-                          </button>
-                        ) : header.KEY === "display" ? (
-                          <span
-                            style={{
-                              color: auctionsInDisplay[liveAuction.auction_id]
-                                ? "green"
-                                : "red",
-                            }}
-                          >
-                            {auctionsInDisplay[liveAuction.auction_id]
-                              ? "Displayed"
-                              : "Not Displayed"}
-                          </span>
-                        ) : (
-                          liveAuction[header.KEY]
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+              {searchedKeyword
+                ? searchedData &&
+                  searchedData.map((liveAuction) => (
+                    <tr
+                      key={liveAuction.auction_id}
+                      className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
+                    >
+                      {headers.map((header, index) => (
+                        <td key={index} className="tw-p-2.5 tw-content-center">
+                          {header.KEY === "image" ? (
+                            <Image
+                              src={liveAuction[header.KEY]}
+                              alt="Auction Image"
+                              width={175}
+                              height={175}
+                            />
+                          ) : header.KEY === "price" ? (
+                            <span>
+                              $
+                              {Intl.NumberFormat("en-US").format(
+                                liveAuction.price
+                              )}
+                            </span>
+                          ) : header.KEY === "toggle_display" ? (
+                            <button
+                              onClick={() =>
+                                handleDisplayToggle(liveAuction.auction_id)
+                              }
+                            >
+                              {auctionsInDisplay[liveAuction.auction_id] ? (
+                                <ToggleOnIcon />
+                              ) : (
+                                <ToggleOffIcon />
+                              )}
+                            </button>
+                          ) : header.KEY === "display" ? (
+                            <span
+                              style={{
+                                color: auctionsInDisplay[liveAuction.auction_id]
+                                  ? "green"
+                                  : "red",
+                              }}
+                            >
+                              {auctionsInDisplay[liveAuction.auction_id]
+                                ? "Displayed"
+                                : "Not Displayed"}
+                            </span>
+                          ) : (
+                            liveAuction[header.KEY]
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                : liveAuctionsData &&
+                  liveAuctionsData.map((liveAuction) => (
+                    <tr
+                      key={liveAuction.auction_id}
+                      className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
+                    >
+                      {headers.map((header, index) => (
+                        <td key={index} className="tw-p-2.5 tw-content-center">
+                          {header.KEY === "image" ? (
+                            <Image
+                              src={liveAuction[header.KEY]}
+                              alt="Auction Image"
+                              width={175}
+                              height={175}
+                            />
+                          ) : header.KEY === "price" ? (
+                            <span>
+                              $
+                              {Intl.NumberFormat("en-US").format(
+                                liveAuction.price
+                              )}
+                            </span>
+                          ) : header.KEY === "toggle_display" ? (
+                            <button
+                              onClick={() =>
+                                handleDisplayToggle(liveAuction.auction_id)
+                              }
+                            >
+                              {auctionsInDisplay[liveAuction.auction_id] ? (
+                                <ToggleOnIcon />
+                              ) : (
+                                <ToggleOffIcon />
+                              )}
+                            </button>
+                          ) : header.KEY === "display" ? (
+                            <span
+                              style={{
+                                color: auctionsInDisplay[liveAuction.auction_id]
+                                  ? "green"
+                                  : "red",
+                              }}
+                            >
+                              {auctionsInDisplay[liveAuction.auction_id]
+                                ? "Displayed"
+                                : "Not Displayed"}
+                            </span>
+                          ) : (
+                            liveAuction[header.KEY]
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
             </tbody>
           </table>
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-py-4">

@@ -23,6 +23,8 @@ const Auctions = () => {
   const [totalCars, setTotalCars] = useState(0);
   const [displayCount, setDisplayCount] = useState(12);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchedKeyword, setSearchedKeyword] = useState<string>("");
+  const [searchedData, setSearchedData] = useState<CarData[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,8 +46,29 @@ const Auctions = () => {
     fetchData();
   }, [displayCount]);
 
+  useEffect(() => {
+    const fetchSearchedAuctions = async () => {
+      console.log(`Fetching searched auctions for keyword: ${searchedKeyword}`);
+      const response = await fetch(
+        `/api/auctions/filter?search=${searchedKeyword}`
+      );
+      console.log("Response:", response);
+      const data = await response.json();
+      console.log("Data:", data);
+      setSearchedData(data.cars as CarData[]);
+    };
+
+    if (searchedKeyword.length) {
+      fetchSearchedAuctions();
+    }
+  }, [searchedKeyword]);
+
   const handleLoadMore = () => {
     setDisplayCount((prevCount) => prevCount + 7);
+  };
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchedKeyword(e.target.value);
   };
 
   return (
@@ -55,6 +78,9 @@ const Auctions = () => {
       isLoading={isLoading}
       displayCount={displayCount}
       totalCars={totalCars}
+      searchedData={searchedData}
+      searchedKeyword={searchedKeyword}
+      handleSearch={handleSearch}
     />
   );
 };

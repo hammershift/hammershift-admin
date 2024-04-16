@@ -6,6 +6,7 @@ export interface getCarsWithFilterProps {
   era?: string[];
   location?: string[];
   limit?: number;
+  sort?: string;
 }
 
 export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {

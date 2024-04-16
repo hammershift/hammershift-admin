@@ -19,6 +19,9 @@ interface AuctionsPageProps {
   isLoading: boolean;
   displayCount: number;
   totalCars: number;
+  searchedData: CarData[];
+  searchedKeyword: String;
+  handleSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const AuctionsPage: React.FC<AuctionsPageProps> = ({
@@ -27,6 +30,9 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   isLoading,
   displayCount,
   totalCars,
+  searchedData,
+  searchedKeyword,
+  handleSearch,
 }) => {
   const [activeAuctions, setActiveAuctions] = useState<{
     [key: string]: boolean;
@@ -35,7 +41,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     keyToSort: "auction_id",
     direction: "asc",
   });
-  const [searchTerm, setSearchTerm] = useState("");
+
   const [viewportWidth, setViewportWidth] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [selectedAuctionId, setSelectedAuctionId] = useState("");
@@ -58,15 +64,24 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   }, []);
 
   useEffect(() => {
-    const initialActiveAuctions = auctionData.reduce(
-      (acc, item) => ({
-        ...acc,
-        [item.auction_id]: item.isActive,
-      }),
-      {}
-    );
+    const initialActiveAuctions = searchedKeyword
+      ? searchedData.reduce(
+          (acc, item) => ({
+            ...acc,
+            [item.auction_id]: item.isActive,
+          }),
+          {}
+        )
+      : auctionData.reduce(
+          (acc, item) => ({
+            ...acc,
+            [item.auction_id]: item.isActive,
+          }),
+          {}
+        );
+
     setActiveAuctions(initialActiveAuctions);
-  }, [auctionData]);
+  }, [auctionData, searchedData, searchedKeyword]);
 
   async function handleStatusToggle(id: string) {
     setActiveAuctions((prevStates) => ({
@@ -130,18 +145,6 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     );
   }
 
-  const filteredData = auctionData.filter((item) =>
-    Object.values(item).some((value) =>
-      String(value).toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  function handleSearch(e: {
-    target: { value: React.SetStateAction<string> };
-  }) {
-    setSearchTerm(e.target.value);
-  }
-
   return (
     <div className="section-container tw-mt-4">
       <div className="tw-flex tw-flex-col tw-justify-between">
@@ -189,49 +192,99 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
             </tr>
           </thead>
           <tbody>
-            {sortData(filteredData).map((item, index) => (
-              <tr key={index} className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5">
-                {headers.map((header, index) => (
-                  <td key={index} className="tw-p-2.5">
-                    {header.KEY === "auction_id" ? (
-                      <span
-                        onClick={() => {
-                          setShowModal(true);
-                          setSelectedAuctionId(item.auction_id);
-                        }}
-                        className="hover: tw-cursor-pointer"
-                      >
-                        {item[header.KEY]}
-                      </span>
-                    ) : header.KEY === "toggle_status" ? (
-                      <button
-                        onClick={() => handleStatusToggle(item.auction_id)}
-                      >
-                        {activeAuctions[item.auction_id] ? (
-                          <ToggleOnIcon />
+            {searchedKeyword
+              ? sortData(searchedData).map((item, index) => (
+                  <tr
+                    key={index}
+                    className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
+                  >
+                    {headers.map((header, index) => (
+                      <td key={index} className="tw-p-2.5">
+                        {header.KEY === "auction_id" ? (
+                          <span
+                            onClick={() => {
+                              setShowModal(true);
+                              setSelectedAuctionId(item.auction_id);
+                            }}
+                            className="hover: tw-cursor-pointer"
+                          >
+                            {item[header.KEY]}
+                          </span>
+                        ) : header.KEY === "toggle_status" ? (
+                          <button
+                            onClick={() => handleStatusToggle(item.auction_id)}
+                          >
+                            {activeAuctions[item.auction_id] ? (
+                              <ToggleOnIcon />
+                            ) : (
+                              <ToggleOffIcon />
+                            )}
+                          </button>
+                        ) : header.KEY === "isActive" ? (
+                          <span
+                            style={{
+                              color: activeAuctions[item.auction_id]
+                                ? "green"
+                                : "red",
+                            }}
+                          >
+                            {activeAuctions[item.auction_id]
+                              ? "Active"
+                              : "Inactive"}
+                          </span>
                         ) : (
-                          <ToggleOffIcon />
+                          item[header.KEY]
                         )}
-                      </button>
-                    ) : header.KEY === "isActive" ? (
-                      <span
-                        style={{
-                          color: activeAuctions[item.auction_id]
-                            ? "green"
-                            : "red",
-                        }}
-                      >
-                        {activeAuctions[item.auction_id]
-                          ? "Active"
-                          : "Inactive"}
-                      </span>
-                    ) : (
-                      item[header.KEY]
-                    )}
-                  </td>
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              : sortData(auctionData).map((item, index) => (
+                  <tr
+                    key={index}
+                    className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
+                  >
+                    {headers.map((header, index) => (
+                      <td key={index} className="tw-p-2.5">
+                        {header.KEY === "auction_id" ? (
+                          <span
+                            onClick={() => {
+                              setShowModal(true);
+                              setSelectedAuctionId(item.auction_id);
+                            }}
+                            className="hover: tw-cursor-pointer"
+                          >
+                            {item[header.KEY]}
+                          </span>
+                        ) : header.KEY === "toggle_status" ? (
+                          <button
+                            onClick={() => handleStatusToggle(item.auction_id)}
+                          >
+                            {activeAuctions[item.auction_id] ? (
+                              <ToggleOnIcon />
+                            ) : (
+                              <ToggleOffIcon />
+                            )}
+                          </button>
+                        ) : header.KEY === "isActive" ? (
+                          <span
+                            style={{
+                              color: activeAuctions[item.auction_id]
+                                ? "green"
+                                : "red",
+                            }}
+                          >
+                            {activeAuctions[item.auction_id]
+                              ? "Active"
+                              : "Inactive"}
+                          </span>
+                        ) : (
+                          item[header.KEY]
+                        )}
+                      </td>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
           </tbody>
         </table>
       )}

@@ -75,11 +75,11 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           path: "/dashboard/create-tournament",
           icon: <AddBoxIcon />,
         },
-                {
-                    title: "Comments",
-                    path: "/dashboard/comments",
-                    icon: <CommentIcon />,
-                },
+        {
+          title: "Comments",
+          path: "/dashboard/comments",
+          icon: <CommentIcon />,
+        },
       ],
     },
     {
