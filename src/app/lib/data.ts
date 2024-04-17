@@ -375,7 +375,27 @@ export const getSortedComments = async (limit: number, sort: string) => {
 }
 
 export const deleteComment = async (commentID: string) => {
-    await fetch(`/api/comments?id=${commentID}`, {
-        method: "DELETE"
+    await fetch("/api/comments", {
+        method: "DELETE",
+        body: JSON.stringify({ids: [commentID]})
     });
+}
+
+export const deleteMultipleComments = async (ids: string[]) => {
+    await fetch("/api/comments", {
+        method: "DELETE",
+        body: JSON.stringify({ids: [...ids]})
+    });
+}
+
+export const getCommentReplies = async (id: string) => {
+    const response = await fetch(`/api/comments?parent_id=${id}`);
+    const data = response.json();
+    return data;
+}
+
+export const getParentComment = async (id: string) => {
+    const response = await fetch(`/api/comments?id=${id}`);
+    const data = response.json();
+    return data;
 }
