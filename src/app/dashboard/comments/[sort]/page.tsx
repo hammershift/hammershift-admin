@@ -17,7 +17,6 @@ import {
 } from "obscenity";
 import { useRouter } from "next/navigation";
 
-import { BeatLoader } from "react-spinners";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PreviewIcon from "@mui/icons-material/Preview";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -25,13 +24,17 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import DeleteCommentModal from "@/app/ui/dashboard/modals/delete_comment_modal";
 import Checkbox from "@mui/material/Checkbox";
-import CommmentInfo, {
-    CommentInfoI,
-} from "@/app/ui/dashboard/modals/comment_info_modal";
+import CommmentInfo from "@/app/ui/dashboard/modals/comment_info_modal";
 
-export default function Comments() {
+interface SortedCommentsI {
+    params: {
+        sort: string;
+    };
+}
+
+export default function SortedComments(props: SortedCommentsI) {
     const router = useRouter();
-    const [comments, setComments] = useState([]);
+    const [sortedComments, setSortedComments] = useState([]);
     const [selectedIDs, setSelectedIDs] = useState<string[]>([]);
     const [commentData, setCommentData] = useState<any>();
     const [showDeleteSelectedModal, setShowDeleteSelectedModal] =
@@ -49,16 +52,23 @@ export default function Comments() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await getAllComments(displayCount);
-                setComments(data);
-
+                const comments = await getSortedComments(
+                    displayCount,
+                    props.params.sort
+                );
+                setSortedComments(comments);
                 setIsLoading(false);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         };
         fetchData();
-    }, [displayCount, showDeleteCommentModal, showDeleteSelectedModal]);
+    }, [
+        displayCount,
+        showDeleteCommentModal,
+        props.params.sort,
+        showDeleteSelectedModal,
+    ]);
 
     const removeComment = async (commentID: string) => {
         await deleteComment(commentID);
@@ -121,51 +131,111 @@ export default function Comments() {
                     )}
                 </div>
                 <div className="tw-my-4">
-                    {isLoading ? (
-                        <div className="tw-flex tw-justify-center tw-items-center tw-h-[592px]">
-                            <BeatLoader color="#F2CA16" />
-                        </div>
-                    ) : (
-                        <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
-                            <thead className="tw-w-full">
-                                <tr className="">
-                                    <th className="tw-font-bold tw-p-2.5"></th>
-                                    <th className="tw-font-bold tw-p-2.5">
-                                        User
-                                    </th>
-                                    <th className="tw-font-bold tw-p-2.5">
-                                        Comment
-                                    </th>
-                                    <th className="tw-font-bold tw-p-2.5">
-                                        <button
-                                            onClick={() =>
+                    <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
+                        <thead className="tw-w-full">
+                            <tr className="">
+                                <th className="tw-font-bold tw-p-2.5"></th>
+                                <th className="tw-font-bold tw-p-2.5">User</th>
+                                <th className="tw-font-bold tw-p-2.5">
+                                    Comment
+                                </th>
+                                <th className="tw-font-bold tw-p-2.5">
+                                    <button
+                                        onClick={() => {
+                                            if (props.params.sort === "likes") {
                                                 router.push(
-                                                    "/dashboard/comments/likes"
-                                                )
+                                                    "/dashboard/comments/dislikes"
+                                                );
+                                                return;
                                             }
-                                        >
-                                            Likes/Dislikes <ArrowDropDownIcon />
-                                        </button>
-                                    </th>
-                                    <th className="tw-font-bold tw-p-2.5">
-                                        <button
-                                            onClick={() =>
+
+                                            router.push(
+                                                "/dashboard/comments/likes"
+                                            );
+                                        }}
+                                    >
+                                        Likes/Dislikes{" "}
+                                        {props.params.sort === "likes" ? (
+                                            <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon />
+                                        )}
+                                    </button>
+                                </th>
+                                <th className="tw-font-bold tw-p-2.5">
+                                    <button
+                                        onClick={() => {
+                                            if (
+                                                props.params.sort === "newest"
+                                            ) {
                                                 router.push(
-                                                    "/dashboard/comments/newest"
-                                                )
+                                                    "/dashboard/comments/oldest"
+                                                );
+                                                return;
                                             }
-                                        >
-                                            Date Posted <ArrowDropDownIcon />
+
+                                            router.push(
+                                                "/dashboard/comments/newest"
+                                            );
+                                        }}
+                                    >
+                                        Date Posted{" "}
+                                        {props.params.sort === "newest" ? (
+                                            <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon />
+                                        )}
+                                    </button>
+                                </th>
+                                <th className="tw-font-bold tw-p-2.5">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        {isLoading ? (
+                            <tbody className="tw-w-full tw-h-[496px]">
+                                <tr className="tw-opacity-0">
+                                    <td className="tw-p-2.5 tw-w-1/8">
+                                        <Checkbox />
+                                    </td>
+                                    <td className="tw-p-2.5 tw-w-1/5">
+                                        <div>username</div>
+                                        <div className="tw-text-sm">
+                                            6571434721dafaf1855e236b
+                                        </div>
+                                    </td>
+                                    <td className="tw-p-2.5 tw-w-1/3">
+                                        compass
+                                    </td>
+                                    <td className="tw-p-2.5 tw-w-1/8">0 / 1</td>
+                                    <td className="tw-p-2.5 tw-w-1/8">
+                                        04/15/24 12:49 PM
+                                    </td>
+                                    <td className="tw-p-2.5 tw-w-1/8">
+                                        <button>
+                                            <PreviewIcon />
                                         </button>
-                                    </th>
-                                    <th className="tw-font-bold tw-p-2.5">
-                                        Actions
-                                    </th>
+                                        <Link
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            href={"/"}
+                                        >
+                                            <OpenInNewIcon />
+                                        </Link>
+                                        <button>
+                                            <DeleteIcon
+                                                sx={{
+                                                    color: "#C2451E",
+                                                }}
+                                            />
+                                        </button>
+                                    </td>
                                 </tr>
-                            </thead>
+                            </tbody>
+                        ) : (
                             <tbody className="tw-w-full">
-                                {comments &&
-                                    comments.map((item: any, index) => (
+                                {sortedComments &&
+                                    sortedComments.map((item: any, index) => (
                                         <tr
                                             key={item._id}
                                             className={`${
@@ -257,6 +327,7 @@ export default function Comments() {
                                                         removeComment={
                                                             removeComment
                                                         }
+                                                        item={item}
                                                         closeModal={closeModal}
                                                         commentID={commentID}
                                                     />
@@ -265,8 +336,8 @@ export default function Comments() {
                                         </tr>
                                     ))}
                             </tbody>
-                        </table>
-                    )}
+                        )}
+                    </table>
                 </div>
                 <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-py-4">
                     <button
