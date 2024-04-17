@@ -42,6 +42,7 @@ const auctionSchema = new mongoose.Schema(
         },
         page_url: { type: "string" },
         isActive: "boolean",
+        display: "boolean",
         website: { type: "string" },
         sort: {
             type: "object",

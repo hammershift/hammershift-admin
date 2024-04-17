@@ -1,40 +1,45 @@
 "use client";
 
+import { getCarsWithFilter } from "@/app/lib/data";
+import LiveGamesPage from "@/app/ui/dashboard/liveGamesPage/LiveGamesPage";
 import React, { useEffect, useState } from "react";
-import AuctionsPage from "@/app/ui/dashboard/auctionsPage/AuctionsPage";
-import { getCarsWithFilter } from "../../lib/data";
-// import sampleData from "../../sample_data.json";
 
-export interface CarData {
+export interface LiveAuctions {
+  [key: string]: any;
+  image: string;
   auction_id: string;
   price: number;
   year: string;
   make: string;
   model: string;
-  category: string;
-  location: string;
   bids: number;
   isActive: boolean;
   deadline: Date;
+  display: boolean;
 }
 
-const Auctions = () => {
-  const [carData, setCarData] = useState<CarData[]>([]);
-  const [totalCars, setTotalCars] = useState(0);
+const LiveGames = () => {
+  const [liveAuctionsData, setLiveAuctionsData] = useState<LiveAuctions[]>([]);
   const [displayCount, setDisplayCount] = useState(12);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalAuctions, setTotalAuctions] = useState(0);
+  const [sortType, setSortType] = useState<string>("On Display");
   const [searchedKeyword, setSearchedKeyword] = useState<string>("");
-  const [searchedData, setSearchedData] = useState<CarData[]>([]);
+  const [searchedData, setSearchedData] = useState<LiveAuctions[]>([]);
 
+  //Fetch Auction data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getCarsWithFilter({ limit: displayCount });
+        const data = await getCarsWithFilter({
+          limit: displayCount,
+          sort: sortType,
+        });
 
         if (data && "cars" in data) {
-          console.log(data.total);
-          setTotalCars(data.total);
-          setCarData(data.cars as CarData[]);
+          console.log(data);
+          setTotalAuctions(data.total);
+          setLiveAuctionsData(data.cars as LiveAuctions[]);
           setIsLoading(false);
         } else {
           console.error("Unexpected data structure:", data);
@@ -44,8 +49,10 @@ const Auctions = () => {
       }
     };
     fetchData();
-  }, [displayCount]);
+  }, [displayCount, sortType]);
+  console.log("live auctions: ", liveAuctionsData);
 
+  //Fetch Auction data based on searched keyword
   useEffect(() => {
     const fetchSearchedAuctions = async () => {
       console.log(`Fetching searched auctions for keyword: ${searchedKeyword}`);
@@ -55,7 +62,7 @@ const Auctions = () => {
       console.log("Response:", response);
       const data = await response.json();
       console.log("Data:", data);
-      setSearchedData(data.cars as CarData[]);
+      setSearchedData(data.cars as LiveAuctions[]);
     };
 
     if (searchedKeyword.length) {
@@ -63,26 +70,31 @@ const Auctions = () => {
     }
   }, [searchedKeyword]);
 
-  const handleLoadMore = () => {
-    setDisplayCount((prevCount) => prevCount + 7);
-  };
-
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchedKeyword(e.target.value);
   };
 
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortType(e.target.value);
+  };
+
+  const handleLoadMore = () => {
+    setDisplayCount((prevCount) => prevCount + 7);
+  };
+
   return (
-    <AuctionsPage
-      auctionData={carData}
+    <LiveGamesPage
+      liveAuctionsData={liveAuctionsData}
       handleLoadMore={handleLoadMore}
       isLoading={isLoading}
       displayCount={displayCount}
-      totalCars={totalCars}
+      totalAuctions={totalAuctions}
+      handleSearch={handleSearch}
       searchedData={searchedData}
       searchedKeyword={searchedKeyword}
-      handleSearch={handleSearch}
+      handleSortChange={handleSortChange}
     />
   );
 };
 
-export default Auctions;
+export default LiveGames;
