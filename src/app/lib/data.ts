@@ -349,3 +349,15 @@ export const deleteMultipleComments = async (ids: string[]) => {
         body: JSON.stringify({ids: [...ids]})
     });
 }
+
+export const getCommentReplies = async (id: string) => {
+    const response = await fetch(`/api/comments?parent_id=${id}`);
+    const data = response.json();
+    return data;
+}
+
+export const getParentComment = async (id: string) => {
+    const response = await fetch(`/api/comments?id=${id}`);
+    const data = response.json();
+    return data;
+}

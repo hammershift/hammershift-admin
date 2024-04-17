@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
         const db = client.db();
+        const id = req.nextUrl.searchParams.get("id");
         const parent_id = req.nextUrl.searchParams.get("parent_id");
         const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
         const limit = Number(req.nextUrl.searchParams.get("limit")) || 0;
@@ -70,6 +71,14 @@ export async function GET(req: NextRequest) {
         
             default:
                 break;
+        }
+
+        if (id) {
+            const comment = await db
+                .collection("comments")
+                .findOne({ _id: new ObjectId(id) });
+
+            return NextResponse.json(comment);
         }
 
         if (parent_id) {
