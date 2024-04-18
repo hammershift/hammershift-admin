@@ -21,6 +21,10 @@ const LoginPage = () => {
   const [isUsernameValid, setIsUsernameValid] = useState<boolean>(false);
   const [isEmptyInput, setIsEmptyinput] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [error, setError] = useState("");
+  const [modalOnDisplay, setModalOnDisplay] = useState<
+    "enter email" | "enter otp" | "reset password"
+  >("enter email");
 
   const router = useRouter();
 
@@ -73,11 +77,6 @@ const LoginPage = () => {
     checkAndSetUsername();
   }, [username]);
 
-  // For checking only
-  // useEffect(() => {
-  //     console.log("username:", username);
-  // }, [username]);
-
   // login function
   const handleSignIn = async (e: any) => {
     e.preventDefault();
@@ -121,6 +120,43 @@ const LoginPage = () => {
     setTimeout(() => {
       setAlert(false);
     }, 2000);
+  };
+
+  // Forgot/Reset Password
+  const [resetEmail, setResetEmail] = useState("");
+
+  const handleResetPassword = async () => {
+    // Check if resetEmail is empty
+    if (!resetEmail) {
+      setError("Please enter your email.");
+      console.log(error);
+      setModalOnDisplay("enter email");
+      return; // Exit the function early to prevent further execution
+    }
+
+    try {
+      const response = await fetch("/api/forgotPassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("passwordResetEmail", resetEmail); // store the email in local storage
+        localStorage.setItem("isNewPasswordResetProcess", "true"); // set the flag for password reset flow process
+        setModalOnDisplay("enter otp");
+      } else {
+        setError(data.message);
+        console.log(data.message);
+      }
+    } catch (error) {
+      console.error("Error during password reset request:", error);
+      setError(
+        "An error occurred while processing the password reset request."
+      );
+    }
   };
 
   return (
@@ -236,7 +272,15 @@ const LoginPage = () => {
       {showModal && (
         <ForgotPasswordModal
           isOpen={showModal}
-          onClose={() => setShowModal(false)}
+          onClose={() => {
+            setShowModal(false);
+            setModalOnDisplay("enter email");
+          }}
+          handleResetPassword={handleResetPassword}
+          resetEmail={resetEmail}
+          setResetEmail={setResetEmail}
+          modalOnDisplay={modalOnDisplay}
+          error={error}
         />
       )}
     </main>
