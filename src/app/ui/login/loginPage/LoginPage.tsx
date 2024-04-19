@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -23,10 +23,8 @@ const LoginPage = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState("");
   const [modalOnDisplay, setModalOnDisplay] = useState<
-    "enter email" | "enter otp" | "reset password"
+    "enter email" | "enter otp" | "reset password" | "success"
   >("enter email");
-
-  const router = useRouter();
 
   const message = {
     username: {
@@ -83,7 +81,7 @@ const LoginPage = () => {
     setLoading(true);
     if (username == "" && password == "") {
       setIsEmptyinput(true);
-      console.log("username and paswword cannot be empty");
+      console.log("username and password cannot be empty");
       return;
     }
     try {
@@ -147,6 +145,7 @@ const LoginPage = () => {
         localStorage.setItem("passwordResetEmail", resetEmail); // store the email in local storage
         localStorage.setItem("isNewPasswordResetProcess", "true"); // set the flag for password reset flow process
         setModalOnDisplay("enter otp");
+        setError("");
       } else {
         setError(data.message);
         console.log(data.message);
@@ -156,6 +155,198 @@ const LoginPage = () => {
       setError(
         "An error occurred while processing the password reset request."
       );
+    }
+  };
+
+  // OTP verification
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [timer, setTimer] = useState<number | null>(60);
+  const [timerStartTime, setTimerStartTime] = useState<number | null>(null);
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+
+  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const router = useRouter();
+
+  // handle password matching
+  const passwordMatch = newPassword === confirmPassword && newPassword !== "";
+
+  // handle timer expiration
+  const timerExpired = timer === 0;
+
+  // handle OTP expiration
+  const otpExpired = timerExpired && modalOnDisplay === "enter otp";
+
+  // handle OTP entry completion
+  const otpEntryCompleted = modalOnDisplay === "reset password" || otpExpired;
+
+  // handle otp/code input validation
+  const isOtpLengthValid = otp.length === 6;
+
+  // format time remaining for display
+  const formatTime = () => {
+    const minutes = Math.floor((timer || 0) / 60);
+    const seconds = (timer || 0) % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  // common error handling function
+  const handleCommonError = (error: string) => {
+    console.error("Error:", error);
+    setError("An error occurred.");
+  };
+
+  useEffect(() => {
+    const startCountdown = (startTime: number) => {
+      intervalRef.current = setInterval(() => {
+        const currentTime = Date.now();
+        const elapsedTime = Math.floor((currentTime - startTime) / 1000);
+        const remainingTime = 60 - elapsedTime;
+
+        if (remainingTime <= 0) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = undefined;
+          setTimer(0);
+        } else {
+          setTimer(remainingTime);
+        }
+      }, 1000);
+    };
+
+    const handleNewProcess = () => {
+      const newStartTime = Date.now();
+      const newSessionId = newStartTime.toString();
+      localStorage.setItem("timerStartTime", newSessionId);
+      localStorage.setItem("passwordResetSessionId", newSessionId);
+      setTimerStartTime(newStartTime);
+      startCountdown(newStartTime);
+    };
+
+    const handleExistingProcess = (startTime: number) => {
+      const currentTime = Date.now();
+      const timeElapsed = currentTime - startTime;
+
+      if (timeElapsed < 60000) {
+        setTimerStartTime(startTime);
+        startCountdown(startTime);
+      } else {
+        localStorage.removeItem("timerStartTime");
+      }
+    };
+
+    // retrieve the email from localStorage
+    const storedEmail = localStorage.getItem("passwordResetEmail");
+    if (!storedEmail) {
+      router.push("/login_page");
+      return;
+    }
+    setEmail(storedEmail);
+
+    // retrieve the session state (or flag) from localStorage
+    const isNewProcess =
+      localStorage.getItem("isNewPasswordResetProcess") === "true";
+    localStorage.removeItem("isNewPasswordResetProcess"); // clear the flag for a new process
+
+    const storedStartTime = localStorage.getItem("timerStartTime");
+    if (isNewProcess || !storedStartTime) {
+      handleNewProcess();
+    } else {
+      handleExistingProcess(parseInt(storedStartTime, 10));
+    }
+
+    // Cleanup function to clear the interval
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
+      }
+    };
+  }, [modalOnDisplay, otpExpired, otpEntryCompleted]);
+
+  const handleOtpVerification = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/verifyOtpCode", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ otp }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setModalOnDisplay("reset password");
+        setError("");
+      } else {
+        setError("Invalid OTP. Please try again");
+      }
+    } catch (error: any) {
+      handleCommonError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!passwordMatch) {
+      setPasswordError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/resetPassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, otp, newPassword }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setModalOnDisplay("success");
+        setNewPassword("");
+        setConfirmPassword("");
+        setTimeout(() => {
+          setShowModal(false);
+        }, 3000);
+      } else {
+        setError(data.message);
+      }
+    } catch (error: any) {
+      handleCommonError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const response = await fetch("/api/resendOtp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setTimer(60);
+        // Store the current time as the timer start time
+        setTimerStartTime(Date.now());
+      } else {
+        setError(data.message);
+      }
+    } catch (error: any) {
+      handleCommonError(error);
     }
   };
 
@@ -275,12 +466,24 @@ const LoginPage = () => {
           onClose={() => {
             setShowModal(false);
             setModalOnDisplay("enter email");
+            setError("");
           }}
           handleResetPassword={handleResetPassword}
           resetEmail={resetEmail}
           setResetEmail={setResetEmail}
           modalOnDisplay={modalOnDisplay}
           error={error}
+          handleOtpVerification={handleOtpVerification}
+          otp={otp}
+          setOtp={setOtp}
+          handlePasswordReset={handlePasswordReset}
+          newPassword={newPassword}
+          setNewPassword={setNewPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          otpExpired={otpExpired}
+          formatTime={formatTime}
+          handleResendOtp={handleResendOtp}
         />
       )}
     </main>
