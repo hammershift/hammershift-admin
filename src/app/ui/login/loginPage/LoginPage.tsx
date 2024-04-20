@@ -240,7 +240,7 @@ const LoginPage = () => {
     // retrieve the email from localStorage
     const storedEmail = localStorage.getItem("passwordResetEmail");
     if (!storedEmail) {
-      router.push("/login_page");
+      router.push("/");
       return;
     }
     setEmail(storedEmail);
@@ -248,6 +248,7 @@ const LoginPage = () => {
     // retrieve the session state (or flag) from localStorage
     const isNewProcess =
       localStorage.getItem("isNewPasswordResetProcess") === "true";
+
     localStorage.removeItem("isNewPasswordResetProcess"); // clear the flag for a new process
 
     const storedStartTime = localStorage.getItem("timerStartTime");
