@@ -210,11 +210,11 @@ const Table: React.FC<WagersPageProps> = ({ wagerData }) => {
                                     {data?.user.role !== "guest" &&
                                     data?.user.role !== "moderator" ? (
                                         <div className="tw-flex tw-gap-2 md:tw-gap-4 tw-justify-center">
-                                            <Link
+                                            {/* <Link
                                                 href={`/dashboard/wagers/edit_wager/${item._id}`}
                                             >
                                                 <EditIcon />
-                                            </Link>
+                                            </Link> */}
                                             <Link
                                                 href={`/dashboard/wagers/show_wager/${item._id}`}
                                             >
