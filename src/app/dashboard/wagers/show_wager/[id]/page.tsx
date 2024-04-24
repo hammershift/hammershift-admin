@@ -79,11 +79,11 @@ const ShowWager = ({ params }: { params: { id: string } }) => {
             {data?.user?.role !== "guest" &&
             data?.user?.role !== "moderator" ? (
                 <div className="tw-flex tw-gap-1 tw-justify-evenly tw-w-1/2 tw-m-4 max-lg:tw-w-full">
-                    <Link href={`/dashboard/wagers/edit_wager/${ID}`}>
+                    {/* <Link href={`/dashboard/wagers/edit_wager/${ID}`}>
                         <button className="btn-transparent-white ">
                             EDIT WAGER
                         </button>
-                    </Link>
+                    </Link> */}
                     <Link href={`/dashboard/wagers/delete_wager/${ID}`}>
                         <button className="btn-transparent-red">
                             DELETE WAGER
