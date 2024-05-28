@@ -1,5 +1,5 @@
 "use client";
-import { getOneWager, editWagerWithId } from "@/app/lib/data";
+import { getOneWager, editWagerWithId, refundWager } from "@/app/lib/data";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const DeleteWager = ({ params }: { params: { id: string } }) => {
-    const [wagerData, setData] = useState<any>({});
+    const [wagerData, setWagerData] = useState<any>({});
+    const [refundInitiated, setRefundInitiated] = useState(false);
     const ID = params.id;
     const router = useRouter();
 
@@ -17,12 +18,13 @@ const DeleteWager = ({ params }: { params: { id: string } }) => {
                 const data = await getOneWager(ID);
                 console.log(data);
                 if (data) {
-                    setData(data);
+                    setWagerData(data);
                 }
             } catch (error) {
                 console.error("Error:", error);
             }
         };
+        console.log(ID);
         fetchData();
     }, []);
 
@@ -34,6 +36,20 @@ const DeleteWager = ({ params }: { params: { id: string } }) => {
             router.push("/dashboard/wagers");
         } else {
             alert("Unauthorized Wager Delete");
+        }
+    };
+
+    const handleRefund = async () => {
+        try {
+            if (!refundInitiated) {
+                setRefundInitiated(true);
+                await editWagerWithId(ID, { isActive: false });
+                await refundWager(ID);
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error(error);
+            setRefundInitiated(false);
         }
     };
 
@@ -69,9 +85,22 @@ const DeleteWager = ({ params }: { params: { id: string } }) => {
                 <h4>AUCTION ID:</h4>
                 <p>{wagerData.auctionID}</p>
             </div>
-            <button className="btn-transparent-red" onClick={handleSubmit}>
-                DELETE WAGER
-            </button>
+            <div className="tw-flex tw-justify-between tw-w-1/3 tw-mx-4 tw-my-2">
+                <button className="btn-transparent-red" onClick={handleSubmit}>
+                    DELETE WAGER
+                </button>
+                <button
+                    disabled={wagerData.refunded || refundInitiated}
+                    onClick={handleRefund}
+                    className={`tw-border tw-rounded tw-px-3.5 tw-py-1.5 ${
+                        wagerData.refunded
+                            ? "tw-bg-white tw-text-black tw-font-bold"
+                            : "hover:tw-bg-white hover:tw-text-black tw-font-medium"
+                    }`}
+                >
+                    {wagerData.refunded ? "REFUNDED" : "REFUND"}
+                </button>
+            </div>
         </div>
     );
 };

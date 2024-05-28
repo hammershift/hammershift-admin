@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
         // api/wagers?wager_id=657bd345cf53f5078c72bbc8 to get a specific wager
         if (wager_id) {
             const wager = await db.collection("wagers").findOne({
-                $and: [{ _id: new ObjectId(wager_id) }, { isActive: true }],
+                $and: [{ _id: new ObjectId(wager_id) }],
             });
             if (wager) {
                 return NextResponse.json(wager, { status: 200 });
