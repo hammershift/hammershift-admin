@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import TransactionsPage from '@/app/ui/dashboard/transactionsPage/TransactionsPage';
+import React, { useEffect, useState } from "react";
+import TransactionsPage from "@/app/ui/dashboard/transactionsPage/TransactionsPage";
 
 export interface Transaction {
   _id: string;
@@ -21,14 +21,16 @@ export interface Transaction {
 }
 
 const Transactions = () => {
-  const [withdrawTransactions, setWithdrawTransactions] = useState<Transaction[]>([]);
+  const [withdrawTransactions, setWithdrawTransactions] = useState<
+    Transaction[]
+  >([]);
 
   const fetchWithdrawalTransactions = async (limit: number) => {
     const res = await fetch(`/api/transactions?limit=${limit}`, {
-      method: 'GET',
+      method: "GET",
     });
     if (!res.ok) {
-      throw new Error('Unable to fetch withdrawal transactions');
+      throw new Error("Unable to fetch withdrawal transactions");
     }
     const data = await res.json();
     setWithdrawTransactions(data);
@@ -42,7 +44,12 @@ const Transactions = () => {
     fetchWithdrawalTransactions(30);
   };
 
-  return <TransactionsPage withdrawTransactions={withdrawTransactions} refreshTransactions={refreshTransactions} />;
+  return (
+    <TransactionsPage
+      withdrawTransactions={withdrawTransactions}
+      refreshTransactions={refreshTransactions}
+    />
+  );
 };
 
 export default Transactions;
