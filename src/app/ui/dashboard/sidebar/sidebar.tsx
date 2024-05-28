@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-
 import SidebarLink from "./sidebarLinks/sidebarLink";
 
 //icons
@@ -23,31 +22,27 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 //images
 import userImg from "../../../../../public/images/user.svg";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
-import { toggle } from "@nextui-org/react";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { blue } from "@mui/material/colors";
 
 const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
-  const [username, setUsername] = useState("");
-
   const { data } = useSession();
+  const [username, setUsername] = useState("");
+  const [role, setRole] = useState("");
 
   useEffect(() => {
     if (data?.user?.username) {
       setUsername(data.user.username);
     }
-    // console.log("data:", data)
+    if (data?.user?.role) {
+      setRole(data.user.role);
+    }
   }, [data]);
 
   const sidebarItems = [
     {
       title: "Pages",
       list: [
-        {
-          title: "Dashboard",
-          path: "/dashboard",
-          icon: <DashboardIcon />,
-        },
+        { title: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
         {
           title: "Transactions",
           path: "/dashboard/transactions",
@@ -63,11 +58,7 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           path: "/dashboard/auctions",
           icon: <DirectionsCarIcon />,
         },
-        {
-          title: "Users",
-          path: "/dashboard/users",
-          icon: <PersonIcon />,
-        },
+        { title: "Users", path: "/dashboard/users", icon: <PersonIcon /> },
         {
           title: "Wagers",
           path: "/dashboard/wagers",
@@ -98,7 +89,7 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           path: "/dashboard/admins",
           icon: <SupervisorAccountIcon />,
         },
-        ...(data?.user?.role === "owner"
+        ...(role === "owner"
           ? [
               {
                 title: "Create New Admin",
@@ -117,25 +108,18 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           path: "/dashboard/settings",
           icon: <SettingsIcon />,
         },
-        {
-          title: "Log-out",
-          path: "/logout",
-          icon: <LogoutIcon />,
-        },
+        { title: "Log-out", path: "/logout", icon: <LogoutIcon /> },
       ],
     },
   ];
 
   return (
-    <div
-      className="tw-sticky tw-top-0 tw-bg-slate-800 tw-h-full
-         tw-p-5 max-md:tw-bg-opacity-75 max-md:tw-backdrop-blur"
-    >
+    <div className="tw-sticky tw-top-0 tw-bg-slate-800 tw-h-full tw-p-5 max-md:tw-bg-opacity-75 max-md:tw-backdrop-blur">
       <div className="tw-pb-3 tw-pt-1 md:tw-hidden">
         <ArrowBackIosIcon onClick={closeSidebar} />
       </div>
 
-      <div className={"tw-top-auto"}>
+      <div className="tw-top-auto">
         <Image
           alt="hammershift-logo"
           src={hammershiftLogo}
@@ -151,7 +135,7 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           />
           <div className="tw-flex tw-flex-col tw-gap-2">
             <p className="tw-text-xs tw-font-semibold">{username}</p>
-            <p className="tw-text-xs">{data?.user.role}</p>
+            <p className="tw-text-xs">{role}</p>
           </div>
         </div>
         <ul>

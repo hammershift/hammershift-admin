@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     // Fetch all withdraw transactions with status 'processing'
     const transactions = await db
       .collection("transactions")
-      .find({ transactionType: "withdraw", status: "processing" })
+      .find({ transactionType: "withdraw"})
       .skip(offset)
       .limit(limit)
       .toArray();
