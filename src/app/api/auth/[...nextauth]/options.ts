@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ session, token }) {
-      console.log("Session callback - Token:", token);
+      // console.log("Session callback - Token:", token);
       if (token) {
         session.user.first_name = token.first_name;
         session.user.last_name = token.last_name;
@@ -64,13 +64,13 @@ export const authOptions: NextAuthOptions = {
         session.user.username = token.username;
         session.user.role = token.role;
       }
-      console.log("Session callback - Final Session object:", session);
+      // console.log("Session callback - Final Session object:", session);
       return session;
     },
 
     async jwt({ token, user }: { token: any; user: any }) {
-      console.log("JWT callback - Initial token:", token);
-      console.log("JWT callback - User:", user);
+      // console.log("JWT callback - Initial token:", token);
+      // console.log("JWT callback - User:", user);
       if (user) {
         token.first_name = user.first_name;
         token.last_name = user.last_name;
@@ -86,7 +86,7 @@ export const authOptions: NextAuthOptions = {
         .collection("admins")
         .findOne({ _id: new ObjectId(token.id) });
 
-      console.log("JWT callback - Fetched User from DB:", dbAdmin);
+      // console.log("JWT callback - Fetched User from DB:", dbAdmin);
 
       if (dbAdmin) {
         // token.fullName = dbUser.fullName;
@@ -94,7 +94,7 @@ export const authOptions: NextAuthOptions = {
         token.role = dbAdmin.role;
       }
 
-      console.log("JWT callback - Final token:", token);
+      // console.log("JWT callback - Final token:", token);
       return token;
     },
   },
