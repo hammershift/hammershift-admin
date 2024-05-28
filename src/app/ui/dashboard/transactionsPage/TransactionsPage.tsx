@@ -69,11 +69,11 @@ const TransactionsPage = (props: any) => {
                     {header.KEY === "actions" ? (
                       <div>
                         <button
-                          className={`tw-p-1 tw-text-red-700 tw-font-bold ${
+                          className={`tw-p-1 tw-font-bold ${
                             withdrawTransaction.status === "successful" ||
                             withdrawTransaction.status === "failed"
                               ? "tw-text-gray-600"
-                              : null
+                              : "tw-text-red-700"
                           }`}
                           onClick={() =>
                             handleDeclineClick(withdrawTransaction._id)
@@ -87,11 +87,11 @@ const TransactionsPage = (props: any) => {
                         </button>
                         <span className="tw-text-white/30">|</span>
                         <button
-                          className={`tw-p-1 tw-text-green-700 tw-font-bold ${
+                          className={`tw-p-1  tw-font-bold ${
                             withdrawTransaction.status === "successful" ||
                             withdrawTransaction.status === "failed"
                               ? "tw-text-gray-600"
-                              : null
+                              : "tw-text-green-700"
                           }`}
                           onClick={() =>
                             handleApproveClick(withdrawTransaction._id)
