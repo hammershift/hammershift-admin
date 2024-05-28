@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { getOneAuction } from "@/app/lib/data";
 import { FadeLoader } from "react-spinners";
 
