@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 
 import SidebarLink from "./sidebarLinks/sidebarLink";
+
 //icons
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
@@ -17,6 +18,8 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import CommentIcon from "@mui/icons-material/Comment";
 import LiveTvIcon from "@mui/icons-material/LiveTv";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+
 //images
 import userImg from "../../../../../public/images/user.svg";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
@@ -44,6 +47,11 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           title: "Dashboard",
           path: "/dashboard",
           icon: <DashboardIcon />,
+        },
+        {
+          title: "Transactions",
+          path: "/dashboard/transactions",
+          icon: <ReceiptLongIcon />,
         },
         {
           title: "Live Games",
