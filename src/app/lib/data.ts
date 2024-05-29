@@ -324,6 +324,19 @@ export const getWagersOnDate = async (date: string) => {
   console.error("Failed to fetch wagers!");
 };
 
+export const refundWager = async (wager_id: string) => {
+  const res = await fetch("/api/refundAuctionWagers", {
+    method: "POST",
+    body: JSON.stringify({wager_id}),
+  });
+
+  if (res.status === 200) {
+    return res;
+  } else {
+    console.log("Refund Unsuccessful");
+  }
+}
+
 // toggle auction isActive status
 export const updateAuctionStatus = async (
   auction_id: string,
