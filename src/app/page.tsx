@@ -6,17 +6,17 @@ import { redirect } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Home() {
-    // check if logged in and has session
-    const { data: session } = useSession();
-    useEffect(() => {
-        if (session) {
-            redirect("/dashboard");
-        }
-    }, [session]);
+  // check if logged in and has session
+  const { data: session } = useSession();
+  useEffect(() => {
+    if (session) {
+      redirect("/dashboard");
+    }
+  }, [session]);
 
-    return (
-        <div className="tw-flex tw-justify-center tw-items-center tw-pt-64">
-            <LoginPage />
-        </div>
-    );
+  return (
+    <div className="tw-flex tw-justify-center tw-items-center tw-pt-64">
+      <LoginPage />
+    </div>
+  );
 }
