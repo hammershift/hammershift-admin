@@ -274,7 +274,7 @@ export async function GET(req: NextRequest) {
     const filteredCars = await db
       .collection("auctions")
       .find({
-        $and: [query, { isActive: true }],
+        $and: [query],
       })
       .limit(limit)
       .skip(offset)
