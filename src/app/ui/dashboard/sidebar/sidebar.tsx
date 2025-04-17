@@ -5,16 +5,13 @@ import { useEffect, useState } from "react";
 import SidebarLink from "./sidebarLinks/sidebarLink";
 
 //icons
-import AddBoxIcon from "@mui/icons-material/AddBox";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import CommentIcon from "@mui/icons-material/Comment";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 
@@ -43,11 +40,6 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
       list: [
         { title: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
         {
-          title: "Transactions",
-          path: "/dashboard/transactions",
-          icon: <ReceiptLongIcon />,
-        },
-        {
           title: "Auctions",
           path: "/dashboard/auctions",
           icon: <DirectionsCarIcon />,
@@ -57,16 +49,6 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           title: "Wagers",
           path: "/dashboard/wagers",
           icon: <AttachMoneyIcon />,
-        },
-        {
-          title: "Tournaments",
-          path: "/dashboard/tournaments",
-          icon: <EmojiEventsIcon />,
-        },
-        {
-          title: "Create Tournament",
-          path: "/dashboard/create-tournament",
-          icon: <AddBoxIcon />,
         },
         {
           title: "Comments",
