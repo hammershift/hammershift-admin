@@ -5,8 +5,6 @@ import { useEffect, useState } from "react";
 import SidebarLink from "./sidebarLinks/sidebarLink";
 
 //icons
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import CommentIcon from "@mui/icons-material/Comment";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -45,16 +43,6 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           icon: <DirectionsCarIcon />,
         },
         { title: "Users", path: "/dashboard/users", icon: <PersonIcon /> },
-        {
-          title: "Wagers",
-          path: "/dashboard/wagers",
-          icon: <AttachMoneyIcon />,
-        },
-        {
-          title: "Comments",
-          path: "/dashboard/comments",
-          icon: <CommentIcon />,
-        },
       ],
     },
     {
