@@ -1,28 +1,27 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import SidebarLink from "./sidebarLinks/sidebarLink";
 
 //icons
+import AddBoxIcon from "@mui/icons-material/AddBox";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import CommentIcon from "@mui/icons-material/Comment";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import PersonIcon from "@mui/icons-material/Person";
-import SettingsIcon from "@mui/icons-material/Settings";
-import LogoutIcon from "@mui/icons-material/Logout";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import AddBoxIcon from "@mui/icons-material/AddBox";
-import CommentIcon from "@mui/icons-material/Comment";
-import LiveTvIcon from "@mui/icons-material/LiveTv";
+import LogoutIcon from "@mui/icons-material/Logout";
+import PersonIcon from "@mui/icons-material/Person";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import SettingsIcon from "@mui/icons-material/Settings";
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 
 //images
-import userImg from "../../../../../public/images/user.svg";
-import hammershiftLogo from "../../../../../public/images/hammershift.svg";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import hammershiftLogo from "../../../../../public/images/hammershift.svg";
+import userImg from "../../../../../public/images/user.svg";
 
 const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
   const { data } = useSession();
@@ -47,11 +46,6 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           title: "Transactions",
           path: "/dashboard/transactions",
           icon: <ReceiptLongIcon />,
-        },
-        {
-          title: "Live Games",
-          path: "/dashboard/live-games",
-          icon: <LiveTvIcon />,
         },
         {
           title: "Auctions",
