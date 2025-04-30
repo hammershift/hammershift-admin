@@ -17,6 +17,7 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
 import userImg from "../../../../../public/images/user.svg";
+import { Face5, Group, GroupAdd, PersonAddAlt1 } from "@mui/icons-material";
 
 const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
   const { data } = useSession();
@@ -62,6 +63,20 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
               },
             ]
           : []),
+        {
+          title: "Agents",
+          path: "/dashboard/agents",
+          icon: <Group />,
+        },
+        ...(role === "owner" || role === "guest"
+          ? [
+              {
+                title: "Create AI Agent",
+                path: "/dashboard/create-new-agent",
+                icon: <GroupAdd />,
+              },
+            ]
+          : []),
       ],
     },
     {
@@ -78,34 +93,34 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
   ];
 
   return (
-    <div className="tw-sticky tw-top-0 tw-bg-slate-800 tw-h-full tw-p-5 max-md:tw-bg-opacity-75 max-md:tw-backdrop-blur">
-      <div className="tw-pb-3 tw-pt-1 md:tw-hidden">
+    <div className="sticky top-0 bg-slate-800 h-full p-5 max-md:bg-opacity-75 max-md:backdrop-blur">
+      <div className="pb-3 pt-1 md:hidden">
         <ArrowBackIosIcon onClick={closeSidebar} />
       </div>
 
-      <div className="tw-top-auto">
+      <div className="top-auto">
         <Image
           alt="hammershift-logo"
           src={hammershiftLogo}
-          className="tw-m-1 tw-mb-5"
+          className="m-1 mb-5"
         />
-        <div className="tw-flex tw-flex-row tw-items-center tw-gap-5 tw-mb-5">
+        <div className="flex flex-row items-center gap-5 mb-5">
           <Image
             src={userImg}
             alt="user"
             width={50}
             height={50}
-            className="rounded-full tw-object-cover"
+            className="rounded-full object-cover"
           />
-          <div className="tw-flex tw-flex-col tw-gap-2">
-            <p className="tw-text-xs tw-font-semibold">{username}</p>
-            <p className="tw-text-xs">{role}</p>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-semibold">{username}</p>
+            <p className="text-xs">{role}</p>
           </div>
         </div>
         <ul>
           {sidebarItems.map((category) => (
             <li key={category.title}>
-              <p className="tw-text-xs tw-m-2">{category.title}</p>
+              <p className="text-xs m-2">{category.title}</p>
               {category.list.map((item) => (
                 <div key={item.title} onClick={closeSidebar}>
                   <SidebarLink item={item} />

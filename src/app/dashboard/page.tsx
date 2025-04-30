@@ -5,11 +5,11 @@ import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const Dashboard = () => {
-    return (
-        <div className="tw-mt-4">
-            <DashboardPage />
-        </div>
-    );
+  return (
+    <div className="mt-4">
+      <DashboardPage />
+    </div>
+  );
 };
 
 export default Dashboard;

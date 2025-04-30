@@ -1,22 +1,24 @@
-import mongoose from "mongoose";
+import { Schema, model, models } from "mongoose";
+import { User } from "../lib/interfaces";
 
-const usersSchema = new mongoose.Schema(
+const userSchema = new Schema(
   {
-    email: { type: String, required: true },
-    password: { type: String, required: true },
-    image: { type: String },
-    emailVerified: { type: Boolean, default: null },
-    aboutMe: { type: String },
-    country: { type: String, required: true },
-    fullName: { type: String, required: true },
-    state: { type: String, required: true },
+    _id: { type: Schema.Types.ObjectId, required: true },
     username: { type: String, required: true },
+    fullName: { type: String, required: true },
+    email: { type: String, required: true },
+    balance: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     isBanned: { type: Boolean, default: false },
+    provider: { type: String, default: "email" },
+    about: { type: String, default: "" },
+    isAI: { type: Boolean, default: false },
+    createdAt: Date,
+    updatedAt: Date,
   },
-  { timestamps: true }
+  { collection: "users", timestamps: true }
 );
 
-const Users = mongoose.models.users || mongoose.model("users", usersSchema);
+const Users = models.users || model<User>("users", userSchema);
 
 export default Users;

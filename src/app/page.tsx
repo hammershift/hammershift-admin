@@ -15,7 +15,7 @@ export default function Home() {
   }, [session]);
 
   return (
-    <div className="tw-flex tw-justify-center tw-items-center tw-pt-64">
+    <div className="flex justify-center items-center pt-64">
       <LoginPage />
     </div>
   );

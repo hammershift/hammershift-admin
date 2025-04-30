@@ -57,58 +57,56 @@ const EditUser = ({ params }: { params: { id: string } }) => {
   // };
 
   return (
-    <div className="section-container tw-mt-4">
+    <div className="section-container mt-4">
       <Link href={`/dashboard/users`}>
         <ArrowBackIcon />
       </Link>
-      <h2 className="tw-font-bold tw-m-4 tw-text-yellow-500">
-        EDIT USER ACCOUNT
-      </h2>{" "}
+      <h2 className="font-bold m-4 text-yellow-500">EDIT USER ACCOUNT</h2>{" "}
       {data && (
         <form>
-          <div className="tw-flex tw-flex-col tw-justify-between tw-gap-4 tw-m-6">
-            <div className="tw-flex tw-justify-between tw-w-2/5">
-              <label className="tw-px-6">User ID:</label>
+          <div className="flex flex-col justify-between gap-4 m-6">
+            <div className="flex justify-between w-2/5">
+              <label className="px-6">User ID:</label>
               <input
                 type="text"
                 name="_id"
                 value={data?._id || ""}
-                className="tw-bg-[#fff]/20 tw-text-white/50 tw-border-yellow-500 tw-border-2 tw-px-1"
+                className="bg-[#fff]/20 text-white/50 border-yellow-500 border-2 px-1"
                 disabled
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
-              <label className="tw-px-6">Full Name:</label>
+            <div className="flex justify-between w-2/5">
+              <label className="px-6">Full Name:</label>
               <input
                 name="fullName"
                 type="text"
                 defaultValue={data?.fullName || ""}
-                className="tw-bg-[#fff]/20 tw-border-yellow-500 tw-border-2 tw-px-1"
+                className="bg-[#fff]/20 border-yellow-500 border-2 px-1"
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
-              <label className="tw-px-6">Username:</label>
+            <div className="flex justify-between w-2/5">
+              <label className="px-6">Username:</label>
               <input
                 name="username"
                 type="text"
                 defaultValue={data?.username || ""}
-                className="tw-bg-[#fff]/20 tw-border-yellow-500 tw-border-2 tw-px-1"
+                className="bg-[#fff]/20 border-yellow-500 border-2 px-1"
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
-              <label className="tw-px-6">Email:</label>
+            <div className="flex justify-between w-2/5">
+              <label className="px-6">Email:</label>
               <input
                 name="email"
                 type="email"
                 defaultValue={data?.email || ""}
-                className="tw-bg-[#fff]/20 tw-border-yellow-500 tw-border-2 tw-px-1"
+                className="bg-[#fff]/20 border-yellow-500 border-2 px-1"
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-gap-2 tw-w-2/5">
-              <div className="tw-px-6">Email Verification:</div>
+            <div className="flex gap-2 w-2/5">
+              <div className="px-6">Email Verification:</div>
               <label>Verified</label>
               <input
                 name="emailVerified"
@@ -135,37 +133,37 @@ const EditUser = ({ params }: { params: { id: string } }) => {
                 onChange={(e) => handleEmailVerificationChange(e)}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
-              <label className="tw-px-6">About Me:</label>
+            <div className="flex justify-between w-2/5">
+              <label className="px-6">About Me:</label>
               <input
                 name="aboutMe"
                 type="text"
                 defaultValue={data?.aboutMe || ""}
-                className="tw-bg-[#fff]/20 tw-border-yellow-500 tw-border-2 tw-px-1"
+                className="bg-[#fff]/20 border-yellow-500 border-2 px-1"
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
-              <label className="tw-px-6">State:</label>
+            <div className="flex justify-between w-2/5">
+              <label className="px-6">State:</label>
               <input
                 name="state"
                 type="text"
                 defaultValue={data?.state || ""}
-                className="tw-bg-[#fff]/20 tw-border-yellow-500 tw-border-2 tw-px-1"
+                className="bg-[#fff]/20 border-yellow-500 border-2 px-1"
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-justify-between tw-w-2/5">
-              <label className="tw-px-6">Country:</label>
+            <div className="flex justify-between w-2/5">
+              <label className="px-6">Country:</label>
               <input
                 name="country"
                 type="text"
                 defaultValue={data?.country || ""}
-                className="tw-bg-[#fff]/20 tw-border-yellow-500 tw-border-2 tw-px-1"
+                className="bg-[#fff]/20 border-yellow-500 border-2 px-1"
                 onChange={handleChange}
               />
             </div>
-            <div className="tw-flex tw-gap-1 tw-justify-evenly tw-w-2/5 tw-m-4">
+            <div className="flex gap-1 justify-evenly w-2/5 m-4">
               <Link href={`/dashboard/users/delete_user/${ID}`}>
                 <button className="btn-transparent-red">DELETE USER</button>
               </Link>

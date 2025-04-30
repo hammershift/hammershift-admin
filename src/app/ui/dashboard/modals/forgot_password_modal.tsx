@@ -48,10 +48,10 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   }
 
   return (
-    <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
-      <div className="tw-w-[600px] tw-flex tw-flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center z-30">
+      <div className="w-[600px] flex flex-col">
         <button
-          className="tw-text-white tw-text-xl tw-place-self-end tw-rounded-full tw-border-2 tw-w-8 hover:tw-bg-yellow-400"
+          className="text-white text-xl place-self-end rounded-full border-2 w-8 hover:bg-yellow-400"
           onClick={() => {
             onClose();
             setResetEmail("");
@@ -60,17 +60,17 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           x
         </button>
         {modalOnDisplay === "enter email" && (
-          <div className="section-container tw-border-2 tw-mt-2">
-            <div className="tw-m-4 tw-flex tw-flex-col tw-justify-between">
-              <h2 className="tw-text-lg tw-font-bold tw-text-yellow-400">
+          <div className="section-container border-2 mt-2">
+            <div className="m-4 flex flex-col justify-between">
+              <h2 className="text-lg font-bold text-yellow-400">
                 RESET PASSWORD
               </h2>
-              <p className="tw-text-sm">
+              <p className="text-sm">
                 Enter your email to receive instructions on how to reset your
                 password
               </p>
               <form
-                className="tw-flex tw-flex-col tw-mt-6 tw-gap-2"
+                className="flex flex-col mt-6 gap-2"
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleResetPassword();
@@ -79,15 +79,13 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 <label>Email:</label>
                 <input
                   placeholder="Enter email here"
-                  className="tw-text-black tw-p-2 tw-rounded-sm"
+                  className="text-black p-2 rounded-sm"
                   type="email"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                 ></input>
-                {error ? (
-                  <p className="tw-text-red-500 tw-text-sm">{error}</p>
-                ) : null}
-                <button className="tw-bg-yellow-400 tw-text-black tw-font-bold tw-rounded-sm tw-p-1 tw-w-1/6 tw-self-end">
+                {error ? <p className="text-red-500 text-sm">{error}</p> : null}
+                <button className="bg-yellow-400 text-black font-bold rounded-sm p-1 w-1/6 self-end">
                   RESET
                 </button>
               </form>
@@ -95,17 +93,17 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           </div>
         )}
         {modalOnDisplay === "enter otp" && (
-          <div className="section-container tw-border-2 tw-mt-2">
-            <div className="tw-m-4 tw-flex tw-flex-col tw-justify-between">
-              <h2 className="tw-text-lg tw-font-bold tw-text-yellow-400">
+          <div className="section-container border-2 mt-2">
+            <div className="m-4 flex flex-col justify-between">
+              <h2 className="text-lg font-bold text-yellow-400">
                 PLEASE VERIFY YOUR EMAIL
               </h2>
-              <p className="tw-text-sm">
+              <p className="text-sm">
                 Please check your email account for the verification code we
                 just sent you and enter that code in the box below
               </p>
               <form
-                className="tw-flex tw-flex-col tw-mt-6 tw-gap-2"
+                className="flex flex-col mt-6 gap-2"
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleOtpVerification();
@@ -114,27 +112,25 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 <label>Enter OTP:</label>
                 <input
                   placeholder="Enter OTP here"
-                  className="tw-text-black tw-p-2 tw-rounded-sm"
+                  className="text-black p-2 rounded-sm"
                   type="text"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                 ></input>
-                {error ? (
-                  <p className="tw-text-red-500 tw-text-sm">{error}</p>
-                ) : null}
+                {error ? <p className="text-red-500 text-sm">{error}</p> : null}
                 {!otpExpired ? (
-                  <div className="tw-text-sm tw-mb-2 tw-ml-2">
+                  <div className="text-sm mb-2 ml-2">
                     Time Remaining: {formatTime()}
                   </div>
                 ) : (
                   <p
-                    className="tw-underline hover:tw-cursor-pointer"
+                    className="underline hover:cursor-pointer"
                     onClick={handleResendOtp}
                   >
                     Resend Code
                   </p>
                 )}
-                <button className="tw-bg-yellow-400 tw-text-black tw-font-bold tw-rounded-sm tw-p-1 tw-w-1/4 tw-self-end">
+                <button className="bg-yellow-400 text-black font-bold rounded-sm p-1 w-1/4 self-end">
                   VERIFY OTP
                 </button>
               </form>
@@ -142,20 +138,20 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           </div>
         )}
         {modalOnDisplay === "reset password" && (
-          <div className="section-container tw-border-2 tw-mt-2">
-            <div className="tw-m-4 tw-flex tw-flex-col tw-justify-between">
-              <h2 className="tw-text-lg tw-font-bold tw-text-yellow-400">
+          <div className="section-container border-2 mt-2">
+            <div className="m-4 flex flex-col justify-between">
+              <h2 className="text-lg font-bold text-yellow-400">
                 RESET ACCOUNT PASSWORD
               </h2>
-              <p className="tw-text-sm">Enter a new password</p>
+              <p className="text-sm">Enter a new password</p>
               <form
-                className="tw-flex tw-flex-col tw-mt-6 tw-gap-2"
+                className="flex flex-col mt-6 gap-2"
                 onSubmit={handlePasswordReset}
               >
                 <label>New Password:</label>
                 <input
                   placeholder="Enter email here"
-                  className="tw-text-black tw-p-2 tw-rounded-sm"
+                  className="text-black p-2 rounded-sm"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -163,12 +159,12 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 <label>Confirm Password:</label>
                 <input
                   placeholder="Enter email here"
-                  className="tw-text-black tw-p-2 tw-rounded-sm"
+                  className="text-black p-2 rounded-sm"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 ></input>
-                <button className="tw-bg-yellow-400 tw-text-black tw-font-bold tw-rounded-sm tw-p-1 tw-w-1/4 tw-self-end">
+                <button className="bg-yellow-400 text-black font-bold rounded-sm p-1 w-1/4 self-end">
                   RESET PASSWORD
                 </button>
               </form>
@@ -176,9 +172,9 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           </div>
         )}
         {modalOnDisplay === "success" && (
-          <div className="section-container tw-border-2 tw-mt-2">
-            <div className="tw-m-4 tw-flex tw-flex-col tw-justify-between">
-              <h2 className="tw-text-lg tw-font-bold tw-text-yellow-400">
+          <div className="section-container border-2 mt-2">
+            <div className="m-4 flex flex-col justify-between">
+              <h2 className="text-lg font-bold text-yellow-400">
                 PASSWORD UPDATED!
               </h2>
               <p>Your password has been changed successfully</p>

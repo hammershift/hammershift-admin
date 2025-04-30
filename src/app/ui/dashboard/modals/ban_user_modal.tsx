@@ -19,32 +19,29 @@ const BanUserModal: React.FC<BanUserModalProps> = ({
     return null;
   }
   return (
-    <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center">
-      <div className="tw-w-[600px] tw-flex tw-flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center">
+      <div className="w-[600px] flex flex-col">
         <button
-          className="tw-text-white tw-text-xl tw-place-self-end tw-rounded-full tw-border-2 tw-w-8 hover:tw-bg-yellow-400"
+          className="text-white text-xl place-self-end rounded-full border-2 w-8 hover:bg-yellow-400"
           onClick={() => onClose()}
         >
           x
         </button>
-        <div className="tw-flex tw-flex-col tw-justify-evenly tw-p-5 tw-bg-sky-950">
+        <div className="flex flex-col justify-evenly p-5 bg-sky-950">
           <p>
             Are you sure you want to ban{" "}
-            <span className="tw-font-semibold tw-text-yellow-400">
-              {username}
-            </span>
-            ?
+            <span className="font-semibold text-yellow-400">{username}</span>?
           </p>
-          <div className="tw-bg-slate-300 tw-p-2 tw-m-2 tw-text-sm">
-            <p className="tw-text-lg tw-font-bold tw-text-red-700">Warning</p>
-            <p className="tw-text-red-700">
+          <div className="bg-slate-300 p-2 m-2 text-sm">
+            <p className="text-lg font-bold text-red-700">Warning</p>
+            <p className="text-red-700">
               By banning this account, this user will no longer have access to
               the Hammershift App
             </p>
           </div>
-          <div className="tw-flex tw-justify-evenly">
+          <div className="flex justify-evenly">
             <button
-              className="tw-bg-yellow-500 tw-text-red-700 tw-font-bold tw-w-1/5 tw-h-8 tw-rounded-md"
+              className="bg-yellow-500 text-red-700 font-bold w-1/5 h-8 rounded-md"
               onClick={() => username && onConfirm(id)}
             >
               Confirm

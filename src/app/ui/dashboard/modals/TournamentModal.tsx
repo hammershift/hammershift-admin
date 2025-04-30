@@ -9,159 +9,150 @@ import { DateTime } from "luxon";
 
 // convert date string to date time
 function convertDateStringToDateTime(dateString: string | Date) {
-    const date = new Date(dateString);
-    return date.toLocaleString();
+  const date = new Date(dateString);
+  return date.toLocaleString();
 }
 
 interface TournamentModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    selectedData: SelectedDataType[];
-    data: TournamentObjectType;
-    successfullyPosted: boolean;
-    handleCreateTournament: () => Promise<{ message: string }>;
-    createTournamentLoading: boolean;
-    unsuccessfulPosting: boolean;
+  isOpen: boolean;
+  onClose: () => void;
+  selectedData: SelectedDataType[];
+  data: TournamentObjectType;
+  successfullyPosted: boolean;
+  handleCreateTournament: () => Promise<{ message: string }>;
+  createTournamentLoading: boolean;
+  unsuccessfulPosting: boolean;
 }
 
 const TournamentModal: React.FC<TournamentModalProps> = ({
-    isOpen,
-    onClose,
-    selectedData,
-    data,
-    successfullyPosted,
-    handleCreateTournament,
-    createTournamentLoading,
-    unsuccessfulPosting,
+  isOpen,
+  onClose,
+  selectedData,
+  data,
+  successfullyPosted,
+  handleCreateTournament,
+  createTournamentLoading,
+  unsuccessfulPosting,
 }) => {
-    if (!isOpen) {
-        return null;
-    }
+  if (!isOpen) {
+    return null;
+  }
 
-    const startTimeString = DateTime.fromISO(data.startTime as string).toFormat(
-        "MM/dd/yy hh:mm a"
-    );
-    const endTimeString = DateTime.fromISO(data.endTime as string).toFormat(
-        "MM/dd/yy hh:mm a"
-    );
-    const tournamentEndTimeString = DateTime.fromISO(
-        data.tournamentEndTime as string
-    ).toFormat("MM/dd/yy hh:mm a");
+  const startTimeString = DateTime.fromISO(data.startTime as string).toFormat(
+    "MM/dd/yy hh:mm a"
+  );
+  const endTimeString = DateTime.fromISO(data.endTime as string).toFormat(
+    "MM/dd/yy hh:mm a"
+  );
+  const tournamentEndTimeString = DateTime.fromISO(
+    data.tournamentEndTime as string
+  ).toFormat("MM/dd/yy hh:mm a");
 
-    return (
-        <div className="tw-fixed tw-max-h-screen tw-overflow-scroll tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
-            <div className="tw-w-[800px] tw-pt-64 md:tw-pt-0 tw-flex tw-flex-col">
-                <button
-                    className="tw-text-white tw-text-xl tw-place-self-end tw-rounded-full tw-border-2 tw-w-8 hover:tw-bg-yellow-400"
-                    onClick={() => onClose()}
-                >
-                    x
-                </button>
-                <div className="tw-flex tw-flex-col tw-gap-2 tw-p-4 tw-bg-[#1A2C3D] tw-rounded-lg tw-border-2 tw-mt-4">
-                    <h2 className="tw-font-bold tw-text-yellow-500">
-                        TOURNAMENT DETAILS
-                    </h2>
-                    <div>
-                        <div className="tw-font-bold tw-text-lg">
-                            Title : {data.title}
-                        </div>
-                        <div>Start Time : {startTimeString}</div>
-                        <div>End Time : {endTimeString}</div>
-                        <div>Buy-In Fee : {data.buyInFee}</div>
-                        <div>
-                            Tournament End Time : {tournamentEndTimeString}
-                        </div>
-                        <div>Auctions : </div>
-                        <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-mt-2">
-                            {selectedData != null &&
-                                selectedData.map((item) => {
-                                    const deadlineString =
-                                        convertDateStringToDateTime(
-                                            item.deadline
-                                        );
-                                    return (
-                                        <div key={item._id + "SD"}>
-                                            <AuctionsCard
-                                                _id={item._id}
-                                                title={item.title}
-                                                deadline={deadlineString}
-                                                auction_id={item.auction_id}
-                                                image={item.image}
-                                            />
-                                        </div>
-                                    );
-                                })}
-                        </div>
+  return (
+    <div className="fixed max-h-screen overflow-scroll inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center z-30">
+      <div className="w-[800px] pt-64 md:pt-0 flex flex-col">
+        <button
+          className="text-white text-xl place-self-end rounded-full border-2 w-8 hover:bg-yellow-400"
+          onClick={() => onClose()}
+        >
+          x
+        </button>
+        <div className="flex flex-col gap-2 p-4 bg-[#1A2C3D] rounded-lg border-2 mt-4">
+          <h2 className="font-bold text-yellow-500">TOURNAMENT DETAILS</h2>
+          <div>
+            <div className="font-bold text-lg">Title : {data.title}</div>
+            <div>Start Time : {startTimeString}</div>
+            <div>End Time : {endTimeString}</div>
+            <div>Buy-In Fee : {data.buyInFee}</div>
+            <div>Tournament End Time : {tournamentEndTimeString}</div>
+            <div>Auctions : </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 mt-2">
+              {selectedData != null &&
+                selectedData.map((item) => {
+                  const deadlineString = convertDateStringToDateTime(
+                    item.deadline
+                  );
+                  return (
+                    <div key={item._id + "SD"}>
+                      <AuctionsCard
+                        _id={item._id}
+                        title={item.title}
+                        deadline={deadlineString}
+                        auction_id={item.auction_id}
+                        image={item.image}
+                      />
                     </div>
-                    <div className="tw-bg-white/10 tw-h-[2px] tw-my-2"></div>
-                    {createTournamentLoading ? (
-                        <div className="tw-w-full tw-h-[60px] tw-flex tw-justify-center tw-items-center">
-                            <BeatLoader color="#F2CA16" />
-                        </div>
-                    ) : successfullyPosted ? (
-                        <div className="tw-bg-[#F2CA16] tw-p-2 tw-text-black tw-text-xl tw-font-bold tw-text-center ">
-                            Tournament Successfully Posted! 🎉
-                        </div>
-                    ) : (
-                        <>
-                            {unsuccessfulPosting && (
-                                <div className="tw-text-red-600">
-                                    Unsucessful Posting. Please try again...
-                                </div>
-                            )}
-                            <div className="tw-flex tw-flex-col tw-gap-3">
-                                <div>Post Tournament?</div>
-                                <div className="tw-flex tw-gap-4">
-                                    <button onClick={() => onClose()}>
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={() => handleCreateTournament()}
-                                        className="btn-yellow"
-                                    >
-                                        Confirm
-                                    </button>
-                                </div>
-                            </div>
-                        </>
-                    )}
-                </div>
+                  );
+                })}
             </div>
+          </div>
+          <div className="bg-white/10 h-[2px] my-2"></div>
+          {createTournamentLoading ? (
+            <div className="w-full h-[60px] flex justify-center items-center">
+              <BeatLoader color="#F2CA16" />
+            </div>
+          ) : successfullyPosted ? (
+            <div className="bg-[#F2CA16] p-2 text-black text-xl font-bold text-center ">
+              Tournament Successfully Posted! 🎉
+            </div>
+          ) : (
+            <>
+              {unsuccessfulPosting && (
+                <div className="text-red-600">
+                  Unsucessful Posting. Please try again...
+                </div>
+              )}
+              <div className="flex flex-col gap-3">
+                <div>Post Tournament?</div>
+                <div className="flex gap-4">
+                  <button onClick={() => onClose()}>Cancel</button>
+                  <button
+                    onClick={() => handleCreateTournament()}
+                    className="btn-yellow"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default TournamentModal;
 
 const AuctionsCard: React.FC<SelectedDataType> = ({
-    _id,
-    title,
-    deadline,
-    auction_id,
-    image,
+  _id,
+  title,
+  deadline,
+  auction_id,
+  image,
 }) => {
-    const dateTime = convertDateStringToDateTime(deadline);
+  const dateTime = convertDateStringToDateTime(deadline);
 
-    return (
-        <div className="tw-w-full tw-h-full tw-flex tw-gap-4 tw-border-solid tw-border-2 tw-border-white tw-border tw-p-2 tw-rounded">
-            <img
-                src={image}
-                alt={title}
-                width={50}
-                height={50}
-                className="tw-w-[100px] tw-h-[100px] tw-object-cover"
-            />
-            <div className="tw-grid">
-                <div>
-                    Auction ID: <span>{auction_id}</span>
-                </div>
-                <div className="tw-truncate">
-                    Title: <span>{title}</span>
-                </div>
-                <div className="tw-truncate">
-                    Deadline: <span>{dateTime}</span>
-                </div>
-            </div>
+  return (
+    <div className="w-full h-full flex gap-4 border-solid border-2 border-white border p-2 rounded">
+      <img
+        src={image}
+        alt={title}
+        width={50}
+        height={50}
+        className="w-[100px] h-[100px] object-cover"
+      />
+      <div className="grid">
+        <div>
+          Auction ID: <span>{auction_id}</span>
         </div>
-    );
+        <div className="truncate">
+          Title: <span>{title}</span>
+        </div>
+        <div className="truncate">
+          Deadline: <span>{dateTime}</span>
+        </div>
+      </div>
+    </div>
+  );
 };

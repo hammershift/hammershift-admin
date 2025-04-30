@@ -49,17 +49,17 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div>
       {" "}
-      <div className="tw-flex tw-h-auto tw-w-auto">
+      <div className="flex h-auto w-auto">
         {menuOpen ? (
-          <div className="tw-flex-4 tw-z-10 tw-w-auto max-md:tw-absolute max-md:tw-w-full">
+          <div className="flex-4 z-10 w-auto max-md:absolute max-md:w-full">
             <Sidebar closeSidebar={closeSidebar} />
           </div>
         ) : null}
-        <div className="tw-flex-1 tw-bg-slate-900 tw-m-1 tw-p-1 tw-pt-1 tw-flex tw-flex-col tw-w-auto tw-h-full">
-          <div className="tw-w-auto">
+        <div className="flex-1 bg-slate-900 m-1 p-1 pt-1 flex flex-col w-auto h-full">
+          <div className="w-auto">
             <Navbar openSidebar={openSidebar} />
           </div>
-          <div className="tw-w-auto">{children}</div>
+          <div className="w-auto">{children}</div>
         </div>
       </div>
     </div>

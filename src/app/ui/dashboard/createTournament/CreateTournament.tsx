@@ -44,7 +44,7 @@ export const LoadingComponent = ({
   loaderType: "bounceLoader" | "beatLoader";
 }) => {
   return (
-    <div className={`tw-h-[100px] tw-flex tw-justify-center tw-items-center`}>
+    <div className={`h-[100px] flex justify-center items-center`}>
       {loaderType == "bounceLoader" ? (
         <BounceLoader color="#F2CA16" />
       ) : (
@@ -76,8 +76,8 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
 
   return (
     <div>
-      <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-6 tw-mt-6 md:tw-pl-4">
-        <div className="tw-w-full md:tw-w-1/3 tw-flex tw-items-center tw-gap-2 md:tw-gap-4">
+      <div className="flex flex-col md:flex-row gap-6 mt-6 md:pl-4">
+        <div className="w-full md:w-1/3 flex items-center gap-2 md:gap-4">
           <Checkbox
             checked={selected}
             value={auctionID}
@@ -94,38 +94,34 @@ export const TournamentsListCard: React.FC<tournamentsListCardData> = ({
             width={416}
             height={240}
             alt={title}
-            className="tw-w-4/5 tw-h-[100px] md:tw-h-[200px] tw-object-cover tw-aspect-auto tw-cursor-pointer"
+            className="w-4/5 h-[100px] md:h-[200px] object-cover aspect-auto cursor-pointer"
             onClick={handleClick}
           />
         </div>
-        <div className="tw-w-full lg:tw-w-2/3 tw-flex tw-flex-col">
-          <div className="tw-opacity-30 tw-text-md md:tw-text-lg tw-font-bold">
+        <div className="w-full lg:w-2/3 flex flex-col">
+          <div className="opacity-30 text-md md:text-lg font-bold">
             Auction ID: {auctionID}
           </div>
-          <div className="tw-text-lg md:tw-text-2xl tw-font-bold tw-mt-3">
-            {title}
-          </div>
-          <div className="tw-text-sm md:tw-text-md tw-h-[4rem] tw-ellipsis tw-overflow-hidden">
+          <div className="text-lg md:text-2xl font-bold mt-3">{title}</div>
+          <div className="text-sm md:text-md h-[4rem] ellipsis overflow-hidden">
             {description.map((item, index) => (
               <p key={index}>{item}</p>
             ))}
           </div>
-          <div className="tw-text-sm md:tw-text-md tw-flex tw-mt-4">
+          <div className="text-sm md:text-md flex mt-4">
             <Image
               src={HourGlass}
               width={20}
               height={20}
               alt="car"
-              className="tw-w-5 tw-h-5"
+              className="w-5 h-5"
             />
-            <span className="tw-text-[#F2CA16] tw-font-bold tw-ml-2">
-              {dateTime}
-            </span>
+            <span className="text-[#F2CA16] font-bold ml-2">{dateTime}</span>
           </div>
         </div>
       </div>
 
-      <div className="tw-bg-white/5 tw-h-[1.5px] tw-mt-6"></div>
+      <div className="bg-white/5 h-[1.5px] mt-6"></div>
     </div>
   );
 };
@@ -153,16 +149,16 @@ export const SelectedCard: React.FC<SelectedCardProps> = ({
   };
 
   return (
-    <div className="tw-flex tw-gap-4 tw-border-solid tw-border-2 tw-border-white tw-border tw-py-3 tw-px-2 tw-rounded">
+    <div className="flex gap-4 border-solid border-2 border-white border py-3 px-2 rounded">
       <img
         src={image}
         alt={title}
         width={100}
         height={100}
-        className="tw-w-[100px] tw-h-[100px] tw-object-cover tw-cursor-pointer"
+        className="w-[100px] h-[100px] object-cover cursor-pointer"
         onClick={handleClick}
       />
-      <div className="tw-grid tw-gap-2">
+      <div className="grid gap-2">
         <div>
           Auction ID: <span>{auction_id}</span>
         </div>
@@ -201,13 +197,13 @@ export const DropdownComponent: React.FC<DropdownComponentProps> = ({
 }) => {
   return (
     <div
-      className={`dropdown_menu-6 tw-absolute tw-w-[200px] md:tw-w-fit tw-bg-[#DCE0D9] tw-text-black tw-py-3 tw-px-4 tw-rounded-lg tw-shadow-lg tw-h-[400px] md:tw-h-auto tw-max-h-[500px] tw-overflow-scroll tw-z-20 ${
-        filterKey == "sort" ? "tw-right-0" : ""
+      className={`dropdown_menu-6 absolute w-[200px] md:w-fit bg-[#DCE0D9] text-black py-3 px-4 rounded-lg shadow-lg h-[400px] md:h-auto max-h-[500px] overflow-scroll z-20 ${
+        filterKey == "sort" ? "right-0" : ""
       }`}
     >
-      <ul className={`tw-grid tw-grid-cols-${columns} tw-gap-3`}>
+      <ul className={`grid grid-cols-${columns} gap-3`}>
         {content.map((item: string, index: number) => (
-          <li key={String(index + item)} className="tw-flex tw-items-center">
+          <li key={String(index + item)} className="flex items-center">
             <div>
               <Checkbox
                 checked={filters ? filters[filterKey]?.includes(item) : false}

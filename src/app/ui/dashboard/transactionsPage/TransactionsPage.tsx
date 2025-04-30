@@ -43,16 +43,16 @@ const TransactionsPage = (props: any) => {
   ];
 
   return (
-    <div className="section-container tw-mt-4">
+    <div className="section-container mt-4">
       <h1>Withdraw Transactions</h1>
       {withdrawTransactions.length === 0 ? (
         <p>No withdraw transactions found.</p>
       ) : (
-        <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center tw-table-auto">
+        <table className="w-full border-separate border-spacing-y-2 text-center table-auto">
           <thead>
-            <tr className="tw-text-center">
+            <tr className="text-center">
               {headers.map((header, index) => (
-                <td className="tw-p-2.5 tw-font-bold" key={index}>
+                <td className="p-2.5 font-bold" key={index}>
                   {header.LABEL}
                 </td>
               ))}
@@ -62,18 +62,18 @@ const TransactionsPage = (props: any) => {
             {withdrawTransactions.map((withdrawTransaction: any) => (
               <tr
                 key={withdrawTransaction._id}
-                className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
+                className="rounded-lg m-2 bg-[#fff]/5"
               >
                 {headers.map((header, index) => (
-                  <td className="tw-p-2.5 tw-content-center" key={index}>
+                  <td className="p-2.5 content-center" key={index}>
                     {header.KEY === "actions" ? (
                       <div>
                         <button
-                          className={`tw-p-1 tw-font-bold ${
+                          className={`p-1 font-bold ${
                             withdrawTransaction.status === "successful" ||
                             withdrawTransaction.status === "failed"
-                              ? "tw-text-gray-600"
-                              : "tw-text-red-700"
+                              ? "text-gray-600"
+                              : "text-red-700"
                           }`}
                           onClick={() =>
                             handleDeclineClick(withdrawTransaction._id)
@@ -85,13 +85,13 @@ const TransactionsPage = (props: any) => {
                         >
                           Decline
                         </button>
-                        <span className="tw-text-white/30">|</span>
+                        <span className="text-white/30">|</span>
                         <button
-                          className={`tw-p-1  tw-font-bold ${
+                          className={`p-1  font-bold ${
                             withdrawTransaction.status === "successful" ||
                             withdrawTransaction.status === "failed"
-                              ? "tw-text-gray-600"
-                              : "tw-text-green-700"
+                              ? "text-gray-600"
+                              : "text-green-700"
                           }`}
                           onClick={() =>
                             handleApproveClick(withdrawTransaction._id)

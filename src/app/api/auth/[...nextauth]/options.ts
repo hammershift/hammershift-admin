@@ -5,6 +5,8 @@ import clientPromise from "@/app/lib/mongoDB";
 import { Admin, Credentials } from "@/app/types/adminTypes";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
+import connectToDB from "@/app/lib/mongoose";
+import Admins from "@/app/models/admin.model";
 
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
@@ -23,12 +25,8 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const client = await clientPromise;
-        const db = client.db();
-        const admin = await db
-          .collection<Admin>("admins")
-          .findOne({ username: credentials.username });
-
+        await connectToDB();
+        const admin = await Admins.findOne({ username: credentials.username });
         if (
           !admin ||
           !admin.password ||

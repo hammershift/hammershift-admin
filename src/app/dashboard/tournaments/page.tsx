@@ -91,10 +91,10 @@ const TournamentsPage = () => {
 
   return (
     <Fragment>
-      <div className="section-container tw-mt-4">
-        <div className="tw-font-bold">Tournaments</div>
-        <div className="tw-w-auto tw-my-4 tw-self-center tw-relative">
-          <div className="tw-bg-[#fff]/20 tw-h-auto tw-flex tw-px-2 tw-py-1.5 tw-rounded tw-gap-1">
+      <div className="section-container mt-4">
+        <div className="font-bold">Tournaments</div>
+        <div className="w-auto my-4 self-center relative">
+          <div className="bg-[#fff]/20 h-auto flex px-2 py-1.5 rounded gap-1">
             <Image
               src={magnifyingGlass}
               alt="magnifying glass"
@@ -103,14 +103,14 @@ const TournamentsPage = () => {
             />
             <input
               placeholder={`Search tournaments`}
-              className="tw-bg-transparent focus:tw-outline-none"
+              className="bg-transparent focus:outline-none"
               onChange={(e) => setSearchValue(e.target.value)}
             />
           </div>
         </div>
-        <div className="tw-my-4">
+        <div className="my-4">
           {isLoading ? (
-            <div className="tw-flex tw-justify-center tw-items-center tw-h-[592px]">
+            <div className="flex justify-center items-center h-[592px]">
               <BeatLoader color="#F2CA16" />
             </div>
           ) : (
@@ -120,7 +120,7 @@ const TournamentsPage = () => {
             />
           )}
         </div>
-        <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-py-4">
+        <div className="flex flex-col items-center gap-4 py-4">
           <div>{`Showing ${
             totalTournaments <= 7 ? totalTournaments : displayCount
           } out of ${totalTournaments}`}</div>
@@ -157,72 +157,66 @@ const Table: React.FC<TableProps> = ({
   return (
     <div>
       {" "}
-      <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center">
+      <table className="w-full border-separate border-spacing-y-2 text-center">
         <thead>
           <tr>
-            <th className="tw-p-2.5 tw-font-bold">Date Created</th>
-            <th className="tw-p-2.5 tw-font-bold">Title</th>
-            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Pot</th>
-            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
-              Buy-In Fee
-            </th>
-            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
-              Start Time
-            </th>
-            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">End Time</th>
-            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
+            <th className="p-2.5 font-bold">Date Created</th>
+            <th className="p-2.5 font-bold">Title</th>
+            <th className="p-2.5 font-bold max-md:hidden">Pot</th>
+            <th className="p-2.5 font-bold max-md:hidden">Buy-In Fee</th>
+            <th className="p-2.5 font-bold max-md:hidden">Start Time</th>
+            <th className="p-2.5 font-bold max-md:hidden">End Time</th>
+            <th className="p-2.5 font-bold max-md:hidden">
               Tournament End Time
             </th>
-            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">
-              Auction ID
-            </th>
-            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">isActive</th>
-            <th className="tw-p-2.5 tw-font-bold max-md:tw-hidden">Status</th>
-            <th className="tw-p-2.5 tw-font-bold">Actions</th>
+            <th className="p-2.5 font-bold max-md:hidden">Auction ID</th>
+            <th className="p-2.5 font-bold max-md:hidden">isActive</th>
+            <th className="p-2.5 font-bold max-md:hidden">Status</th>
+            <th className="p-2.5 font-bold">Actions</th>
           </tr>
         </thead>
-        <tbody className="tw-w-full">
+        <tbody className="w-full">
           {tournamentData &&
             tournamentData.map((item, index) => (
               <tr
                 key={index + "TournamentList"}
-                className=" tw-rounded-lg tw-bg-[#fff]/5"
+                className=" rounded-lg bg-[#fff]/5"
               >
-                <td className="tw-p-2.5 tw-w-1/8">
+                <td className="p-2.5 w-1/8">
                   {DateTime.fromISO(item.createdAt).toFormat("MM/dd/yy")}
                 </td>
-                <td className="tw-p-2.5 tw-w-1/8">{item.title}</td>
-                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                <td className="p-2.5 w-1/8">{item.title}</td>
+                <td className="p-2.5 w-1/8 max-md:hidden">
                   {new Intl.NumberFormat("en-US", {
                     style: "currency",
                     currency: "USD",
                   }).format(item.pot as unknown as number)}
                 </td>
-                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                <td className="p-2.5 w-1/8 max-md:hidden">
                   ${item.buyInFee}.00
                 </td>
-                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                <td className="p-2.5 w-1/8 max-md:hidden">
                   {DateTime.fromISO(item.startTime).toFormat(
                     "MM/dd/yy hh:mm a"
                   )}
                 </td>
-                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                <td className="p-2.5 w-1/8 max-md:hidden">
                   <p>
                     {DateTime.fromISO(item.endTime).toFormat(
                       "MM/dd/yy hh:mm a"
                     )}
                   </p>
                 </td>
-                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                <td className="p-2.5 w-1/8 max-md:hidden">
                   <p>
                     {DateTime.fromISO(item.tournamentEndTime).toFormat(
                       "MM/dd/yy hh:mm a"
                     )}
                   </p>
                 </td>
-                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                <td className="p-2.5 w-1/8 max-md:hidden">
                   <button
-                    className="tw-rounded-md tw-bg-slate-500 tw-px-2 tw-text-xs"
+                    className="rounded-md bg-slate-500 px-2 text-xs"
                     onClick={() =>
                       setOpenModal((prev) => (prev == null ? item._id : null))
                     }
@@ -233,16 +227,16 @@ const Table: React.FC<TableProps> = ({
                     <AuctionIDDropdown tournamentID={item._id} />
                   )}
                 </td>
-                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                <td className="p-2.5 w-1/8 max-md:hidden">
                   <p>{item.isActive ? "true" : "false"}</p>
                 </td>
-                <td className="tw-p-2.5 tw-w-1/8 max-md:tw-hidden">
+                <td className="p-2.5 w-1/8 max-md:hidden">
                   <p>{item.status}</p>
                 </td>
-                <td className="tw-p-2.5 tw-w-1/8">
+                <td className="p-2.5 w-1/8">
                   {data?.user.role !== "guest" &&
                   data?.user.role !== "moderator" ? (
-                    <div className="tw-flex tw-gap-2 md:tw-gap-4 tw-justify-center">
+                    <div className="flex gap-2 md:gap-4 justify-center">
                       <Link
                         href={`/dashboard/tournaments/edit_tournament/${item._id}`}
                       >
@@ -260,7 +254,7 @@ const Table: React.FC<TableProps> = ({
                       </Link>
                     </div>
                   ) : (
-                    <div className="tw-flex tw-gap-4 tw-justify-center">
+                    <div className="flex gap-4 justify-center">
                       <Link href={`/dashboard/wagers/show_wager/${item._id}`}>
                         <DvrIcon />
                       </Link>

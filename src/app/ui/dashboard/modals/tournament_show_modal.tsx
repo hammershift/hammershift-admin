@@ -9,67 +9,63 @@ import { BeatLoader } from "react-spinners";
 
 // convert date string to date time
 function convertDateStringToDateTime(dateString: string | undefined) {
-    if (!dateString) {
-        return "";
-    }
-    const date = new Date(dateString);
-    return date.toLocaleString();
+  if (!dateString) {
+    return "";
+  }
+  const date = new Date(dateString);
+  return date.toLocaleString();
 }
 
 interface TournamentModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    data: TournamentObjectType;
+  isOpen: boolean;
+  onClose: () => void;
+  data: TournamentObjectType;
 }
 
 const TournamentShowModal: React.FC<TournamentModalProps> = ({
-    isOpen,
-    onClose,
-    data,
+  isOpen,
+  onClose,
+  data,
 }) => {
-    if (!isOpen) {
-        return null;
-    }
+  if (!isOpen) {
+    return null;
+  }
 
-    const startTimeString = convertDateStringToDateTime(data.startTime);
-    const endTimeString = convertDateStringToDateTime(data.endTime);
+  const startTimeString = convertDateStringToDateTime(data.startTime);
+  const endTimeString = convertDateStringToDateTime(data.endTime);
 
-    return (
-        <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
-            <div className="tw-w-[800px] tw-flex tw-flex-col">
-                <button
-                    className="tw-text-white tw-text-xl tw-place-self-end tw-rounded-full tw-border-2 tw-w-8 hover:tw-bg-yellow-400"
-                    onClick={() => onClose()}
-                >
-                    x
-                </button>
-                <div className="tw-flex tw-flex-col tw-gap-2 tw-p-4 tw-bg-[#1A2C3D] tw-rounded-lg tw-border-2 tw-mt-4">
-                    <h2 className="tw-font-bold tw-text-yellow-500">
-                        TOURNAMENT DETAILS
-                    </h2>
-                    <div>
-                        <div className="tw-font-bold tw-text-lg">
-                            Title : {data.title}
-                        </div>
-                        <div>Start Time : {startTimeString}</div>
-                        <div>End Time : {endTimeString}</div>
-                        <div>Buy-In Fee : {data.buyInFee}</div>
-                        <div>Auctions : </div>
-                        {}
-                    </div>
-                    <div className="tw-bg-white/10 tw-h-[2px] tw-my-2"></div>
-                    {/* {createTournamentLoading ? (
-                        <div className="tw-w-full tw-h-[60px] tw-flex tw-justify-center tw-items-center">
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center z-30">
+      <div className="w-[800px] flex flex-col">
+        <button
+          className="text-white text-xl place-self-end rounded-full border-2 w-8 hover:bg-yellow-400"
+          onClick={() => onClose()}
+        >
+          x
+        </button>
+        <div className="flex flex-col gap-2 p-4 bg-[#1A2C3D] rounded-lg border-2 mt-4">
+          <h2 className="font-bold text-yellow-500">TOURNAMENT DETAILS</h2>
+          <div>
+            <div className="font-bold text-lg">Title : {data.title}</div>
+            <div>Start Time : {startTimeString}</div>
+            <div>End Time : {endTimeString}</div>
+            <div>Buy-In Fee : {data.buyInFee}</div>
+            <div>Auctions : </div>
+            {}
+          </div>
+          <div className="bg-white/10 h-[2px] my-2"></div>
+          {/* {createTournamentLoading ? (
+                        <div className="w-full h-[60px] flex justify-center items-center">
                             <BeatLoader color="#F2CA16" />
                         </div>
                     ) : successfullyPosted ? (
-                        <div className="tw-bg-[#F2CA16] tw-p-2 tw-text-black tw-text-xl tw-font-bold tw-text-center ">
+                        <div className="bg-[#F2CA16] p-2 text-black text-xl font-bold text-center ">
                             Tournament Successfully Posted! 🎉
                         </div>
                     ) : (
-                        <div className="tw-flex tw-flex-col tw-gap-3">
+                        <div className="flex flex-col gap-3">
                             <div>Post Tournament?</div>
-                            <div className="tw-flex tw-gap-4">
+                            <div className="flex gap-4">
                                 <button onClick={() => onClose()}>
                                     Cancel
                                 </button>
@@ -82,43 +78,43 @@ const TournamentShowModal: React.FC<TournamentModalProps> = ({
                             </div>
                         </div>
                     )} */}
-                </div>
-            </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default TournamentShowModal;
 
 const AuctionsCard: React.FC<SelectedDataType> = ({
-    _id,
-    title,
-    deadline,
-    auction_id,
-    image,
+  _id,
+  title,
+  deadline,
+  auction_id,
+  image,
 }) => {
-    const dateTime = convertDateStringToDateTime(deadline);
+  const dateTime = convertDateStringToDateTime(deadline);
 
-    return (
-        <div className="tw-w-full tw-h-full tw-flex tw-gap-4 tw-border-solid tw-border-2 tw-border-white tw-border tw-p-2 tw-rounded">
-            <img
-                src={image}
-                alt={title}
-                width={50}
-                height={50}
-                className="tw-w-[100px] tw-h-[100px] tw-object-cover"
-            />
-            <div className="tw-grid">
-                <div>
-                    Auction ID: <span>{auction_id}</span>
-                </div>
-                <div className="tw-truncate">
-                    Title: <span>{title}</span>
-                </div>
-                <div className="tw-truncate">
-                    Deadline: <span>{dateTime}</span>
-                </div>
-            </div>
+  return (
+    <div className="w-full h-full flex gap-4 border-solid border-2 border-white border p-2 rounded">
+      <img
+        src={image}
+        alt={title}
+        width={50}
+        height={50}
+        className="w-[100px] h-[100px] object-cover"
+      />
+      <div className="grid">
+        <div>
+          Auction ID: <span>{auction_id}</span>
         </div>
-    );
+        <div className="truncate">
+          Title: <span>{title}</span>
+        </div>
+        <div className="truncate">
+          Deadline: <span>{dateTime}</span>
+        </div>
+      </div>
+    </div>
+  );
 };

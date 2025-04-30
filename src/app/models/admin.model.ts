@@ -1,7 +1,9 @@
-import mongoose from "mongoose";
+import { model, models, Schema, Types } from "mongoose";
+import { Admin } from "../lib/interfaces";
 
-const adminsSchema = new mongoose.Schema(
+const adminsSchema = new Schema(
   {
+    _id: { type: Types.ObjectId, required: true },
     first_name: { type: String, required: true },
     last_name: { type: String, required: true },
     email: { type: String, required: true },
@@ -9,9 +11,9 @@ const adminsSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: { type: String, required: true },
   },
-  { timestamps: true }
+  { collection: "admins", timestamps: true }
 );
 
-const Admins = mongoose.models.admins || mongoose.model("admins", adminsSchema);
+const Admins = models.admins || model<Admin>("admins", adminsSchema);
 
 export default Admins;

@@ -327,7 +327,7 @@ export const getWagersOnDate = async (date: string) => {
 export const refundWager = async (wager_id: string) => {
   const res = await fetch("/api/refundAuctionWagers", {
     method: "POST",
-    body: JSON.stringify({wager_id}),
+    body: JSON.stringify({ wager_id }),
   });
 
   if (res.status === 200) {
@@ -335,7 +335,7 @@ export const refundWager = async (wager_id: string) => {
   } else {
     console.log("Refund Unsuccessful");
   }
-}
+};
 
 // toggle auction isActive status
 export const updateAuctionStatus = async (
@@ -375,40 +375,46 @@ export const toggleAuctionDisplay = async (
 
 //get all comments
 export const getAllComments = async (limit: number) => {
-    const response = await fetch(`/api/comments?limit=${limit}`);
-    const data = response.json();
+  const response = await fetch(`/api/comments?limit=${limit}`);
+  const data = response.json();
 
-    return data;
-}
+  return data;
+};
 
 export const getSortedComments = async (limit: number, sort: string) => {
-    const response = await fetch(`/api/comments?limit=${limit}&sort=${sort}`);
-    const data = response.json();
-    return data;
-}
+  const response = await fetch(`/api/comments?limit=${limit}&sort=${sort}`);
+  const data = response.json();
+  return data;
+};
 
 export const deleteComment = async (commentID: string) => {
-    await fetch("/api/comments", {
-        method: "DELETE",
-        body: JSON.stringify({ids: [commentID]})
-    });
-}
+  await fetch("/api/comments", {
+    method: "DELETE",
+    body: JSON.stringify({ ids: [commentID] }),
+  });
+};
 
 export const deleteMultipleComments = async (ids: string[]) => {
-    await fetch("/api/comments", {
-        method: "DELETE",
-        body: JSON.stringify({ids: [...ids]})
-    });
-}
+  await fetch("/api/comments", {
+    method: "DELETE",
+    body: JSON.stringify({ ids: [...ids] }),
+  });
+};
 
 export const getCommentReplies = async (id: string) => {
-    const response = await fetch(`/api/comments?parent_id=${id}`);
-    const data = response.json();
-    return data;
-}
+  const response = await fetch(`/api/comments?parent_id=${id}`);
+  const data = response.json();
+  return data;
+};
 
 export const getParentComment = async (id: string) => {
-    const response = await fetch(`/api/comments?id=${id}`);
-    const data = response.json();
-    return data;
-}
+  const response = await fetch(`/api/comments?id=${id}`);
+  const data = response.json();
+  return data;
+};
+
+export const getAgents = async () => {
+  const res = await fetch("/api/agents");
+  const data = await res.json();
+  return data;
+};

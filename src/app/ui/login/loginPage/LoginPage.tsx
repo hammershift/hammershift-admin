@@ -352,106 +352,102 @@ const LoginPage = () => {
   };
 
   return (
-    <main className="tw-relative section-container tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-[360px] sm:tw-w-full  md:tw-w-2/3 lg:tw-w-1/3 lg:tw-h-2/3 xl:tw-w-1/3 xl:tw-h-2/3">
+    <main className="relative section-container flex flex-col items-center justify-center w-full h-[360px] sm:w-full  md:w-2/3 lg:w-1/3 lg:h-2/3 xl:w-1/3 xl:h-2/3">
       {loading ? (
-        <div className="tw-h-[360px] tw-w-full tw-flex tw-justify-center tw-items-center">
+        <div className="h-[360px] w-full flex justify-center items-center">
           <BounceLoader color="#F2CA16" />
         </div>
       ) : (
         <>
-          <div className="tw-mt-4 tw-flex tw-flex-col tw-items-center tw-justify-center tw-m-6">
+          <div className="mt-4 flex flex-col items-center justify-center m-6">
             <Image alt="hammershift-logo" src={hammershiftLogo} width={360} />
-            <h1 className="tw-p-2 tw-text-2xl tw-font-bold tw-text-yellow-400">
-              WELCOME
-            </h1>
-            <p className="tw-p-1">Please login to Admin Panel</p>
+            <h1 className="p-2 text-2xl font-bold text-yellow-400">WELCOME</h1>
+            <p className="p-1">Please login to Admin Panel</p>
           </div>
           {alert && (
-            <div className="tw-w-full tw-absolute tw-left-0 tw-top-0 tw-transform tw--translate-y-full">
+            <div className="w-full absolute left-0 top-0 transform -translate-y-full">
               <AlertMessage message="Login Unsuccesful. Invalid username or password" />
             </div>
           )}
-          <form className="tw-flex tw-flex-col">
-            <div className="tw-m-1">
+          <form className="flex flex-col">
+            <div className="m-1">
               <label>
-                <PersonIcon className="tw-mx-1" />
+                <PersonIcon className="mx-1" />
               </label>
               <input
                 type="text"
                 name="username"
                 placeholder=" Username"
-                className="tw-rounded-full tw-p-1 tw-pl-2"
+                className="rounded-full p-1 pl-2"
                 style={{ color: "black" }}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
               {username.length > 3 &&
                 (isUsernameValid ? (
-                  <div className="tw-pl-1">
+                  <div className="pl-1">
                     <Image
                       src={GreenCheck}
                       alt="check"
                       width={24}
                       height={24}
-                      className="tw-w-[24px], tw-h-[24px]"
+                      className="w-[24px], h-[24px]"
                     />
                   </div>
                 ) : (
-                  <div className="tw-flex tw-gap-1.5 tw-pt-2 tw-items-center tw-pl-2">
+                  <div className="flex gap-1.5 pt-2 items-center pl-2">
                     <Image
                       src={RedCancel}
                       alt="check"
                       width={16}
                       height={16}
-                      className="tw-w-[16px], tw-h-[16px]"
+                      className="w-[16px], h-[16px]"
                     />
-                    <p className="tw-text-xs tw-text-red-500">
+                    <p className="text-xs text-red-500">
                       {message.username.invalid}
                     </p>
                   </div>
                 ))}
             </div>
-            <div className="tw-m-1">
+            <div className="m-1">
               <label>
-                <KeyIcon className="tw-mx-1" />
+                <KeyIcon className="mx-1" />
               </label>
               <input
                 type="password"
                 name="password"
                 placeholder=" Password"
-                className="tw-rounded-full tw-p-1 tw-pl-2"
+                className="rounded-full p-1 pl-2"
                 style={{ color: "black" }}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               {isEmptyInput == true && (
-                <div className="tw-flex tw-gap-1.5 tw-pt-2 tw-items-center tw-pl-2">
+                <div className="flex gap-1.5 pt-2 items-center pl-2">
                   <Image
                     src={RedCancel}
                     alt="check"
                     width={16}
                     height={16}
-                    className="tw-w-[16px], tw-h-[16px]"
+                    className="w-[16px], h-[16px]"
                   />
-                  <p className="tw-text-xs tw-text-red-500">
-                    {message.both.invalid}
-                  </p>
+                  <p className="text-xs text-red-500">{message.both.invalid}</p>
                 </div>
               )}
             </div>
-            <div className="tw-flex tw-justify-between tw-my-2">
-              <p className="tw-text-xs tw-my-3">
+            <div className="flex justify-between my-2">
+              <p className="text-xs my-3">
                 Forgot password? Click{" "}
                 <u
-                  className="hover: tw-cursor-pointer"
+                  className="hover: cursor-pointer"
                   onClick={(e) => setShowModal(true)}
                 >
                   Here
                 </u>
               </p>
               <button
-                className={`tw-my-1 tw-px-3 tw-py-2 tw-font-bold tw-text-black tw-rounded ${
-                  !isUsernameValid ? "tw-bg-white/20" : "tw-bg-[#F2CA16]"
+                className={`my-1 px-3 py-2 font-bold text-black rounded ${
+                  !isUsernameValid ? "bg-white/20" : "bg-[#F2CA16]"
                 }`}
                 onClick={handleSignIn}
               >
@@ -495,14 +491,14 @@ export default LoginPage;
 
 const AlertMessage = ({ message }: { message: string }) => {
   return (
-    <div className="tw-flex tw-justify-center tw-items-center tw-text-sm tw-text-black tw-bg-[#F2CA16] tw-py-2 tw-px-4 tw-rounded">
-      <div className="tw-flex tw-gap-1.5 tw-items-center tw-pl-2">
+    <div className="flex justify-center items-center text-sm text-black bg-[#F2CA16] py-2 px-4 rounded">
+      <div className="flex gap-1.5 items-center pl-2">
         <Image
           src={RedCancel}
           alt="check"
           width={16}
           height={16}
-          className="tw-w-[16px], tw-h-[16px]"
+          className="w-[16px], h-[16px]"
         />
         <p>{message}</p>
       </div>

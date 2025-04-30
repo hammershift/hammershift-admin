@@ -16,10 +16,10 @@ const AuctionModal: React.FC<AuctionModalProps> = ({ isOpen, onClose, id }) => {
     return null;
   }
   return (
-    <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-25 tw-backdrop-blur-sm tw-flex tw-justify-center tw-items-center tw-z-30">
-      <div className="tw-w-[600px] tw-flex tw-flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center z-30">
+      <div className="w-[600px] flex flex-col">
         <button
-          className="tw-text-white tw-text-xl tw-place-self-end tw-rounded-full tw-border-2 tw-w-8 hover:tw-bg-yellow-400"
+          className="text-white text-xl place-self-end rounded-full border-2 w-8 hover:bg-yellow-400"
           onClick={() => onClose()}
         >
           x
@@ -56,17 +56,15 @@ const ShowModal = ({ params }: { params: { id: string } }) => {
   }, []);
 
   return (
-    <div className="section-container tw-border-2 tw-mt-4">
-      <h2 className="tw-font-bold tw-m-4 tw-text-yellow-500">
-        AUCTION DETAILS
-      </h2>
+    <div className="section-container border-2 mt-4">
+      <h2 className="font-bold m-4 text-yellow-500">AUCTION DETAILS</h2>
       {isLoading ? (
-        <div className="tw-flex tw-justify-center tw-items-center">
+        <div className="flex justify-center items-center">
           <FadeLoader color="rgba(92, 92, 95, 1)" />
         </div>
       ) : (
-        <div className="tw-flex tw-flex-col tw-justify-between">
-          <div className="tw-flex tw-justify-between tw-w-auto tw-mx-4 tw-my-2">
+        <div className="flex flex-col justify-between">
+          <div className="flex justify-between w-auto mx-4 my-2">
             <h4 onClick={() => console.log(data)}>AUCTION ID:</h4>
             <p>
               {data &&
@@ -75,7 +73,7 @@ const ShowModal = ({ params }: { params: { id: string } }) => {
                 data.auction_id}
             </p>
           </div>
-          <div className="tw-flex tw-justify-between tw-w-auto tw-mx-4 tw-my-2">
+          <div className="flex justify-between w-auto mx-4 my-2">
             <h4>PRICE:</h4>
             <p>
               {data &&
@@ -84,7 +82,7 @@ const ShowModal = ({ params }: { params: { id: string } }) => {
                 data.attributes[0].value}
             </p>
           </div>
-          <div className="tw-flex tw-justify-between tw-w-auto tw-mx-4 tw-my-2">
+          <div className="flex justify-between w-auto mx-4 my-2">
             <h4>YEAR:</h4>
             <p>
               {data &&
@@ -93,7 +91,7 @@ const ShowModal = ({ params }: { params: { id: string } }) => {
                 data.attributes[1].value}
             </p>
           </div>
-          <div className="tw-flex tw-justify-between tw-w-auto tw-mx-4 tw-my-2">
+          <div className="flex justify-between w-auto mx-4 my-2">
             <h4>MAKE:</h4>
             <p>
               {data &&
@@ -102,7 +100,7 @@ const ShowModal = ({ params }: { params: { id: string } }) => {
                 data.attributes[2].value}
             </p>
           </div>
-          <div className="tw-flex tw-justify-between tw-w-auto tw-mx-4 tw-my-2">
+          <div className="flex justify-between w-auto mx-4 my-2">
             <h4>MODEL:</h4>
             <p>
               {data &&
@@ -111,7 +109,7 @@ const ShowModal = ({ params }: { params: { id: string } }) => {
                 data.attributes[3].value}
             </p>
           </div>
-          <div className="tw-flex tw-justify-between tw-w-auto tw-mx-4 tw-my-2">
+          <div className="flex justify-between w-auto mx-4 my-2">
             <h4>CATEGORY:</h4>
             <p>
               {data &&
@@ -120,7 +118,7 @@ const ShowModal = ({ params }: { params: { id: string } }) => {
                 data.attributes[4].value}
             </p>
           </div>
-          <div className="tw-flex tw-justify-between tw-w-auto tw-mx-4 tw-my-2">
+          <div className="flex justify-between w-auto mx-4 my-2">
             <h4>LOCATION:</h4>
             <p>
               {data &&
@@ -129,7 +127,7 @@ const ShowModal = ({ params }: { params: { id: string } }) => {
                 data.attributes[8].value}
             </p>
           </div>
-          <div className="tw-flex tw-justify-between tw-w-auto tw-mx-4 tw-my-2">
+          <div className="flex justify-between w-auto mx-4 my-2">
             <h4>DEADLINE:</h4>
             <p>
               {data &&
@@ -138,7 +136,7 @@ const ShowModal = ({ params }: { params: { id: string } }) => {
                 data.attributes[12].value}
             </p>
           </div>
-          <div className="tw-flex tw-justify-between tw-w-auto tw-mx-4 tw-my-2">
+          <div className="flex justify-between w-auto mx-4 my-2">
             <h4>CURRENT BIDS:</h4>
             <p>
               {data &&
@@ -147,13 +145,13 @@ const ShowModal = ({ params }: { params: { id: string } }) => {
                 data.attributes[13].value}
             </p>
           </div>
-          <div className="tw-flex tw-justify-between tw-w-auto tw-mx-4 tw-my-2">
+          <div className="flex justify-between w-auto mx-4 my-2">
             <h4>STATUS:</h4>
             <p>
               {data && data.isActive ? (
-                <p className="tw-text-green-400">Active</p>
+                <p className="text-green-400">Active</p>
               ) : (
-                <p className="tw-text-red-600">Inactive</p>
+                <p className="text-red-600">Inactive</p>
               )}
             </p>
           </div>

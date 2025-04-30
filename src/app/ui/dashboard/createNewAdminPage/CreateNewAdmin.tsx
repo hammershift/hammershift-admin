@@ -117,24 +117,22 @@ const CreateNewAdminPage = () => {
   };
 
   return (
-    <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-justify-center tw-items-center max-md:tw-items-start">
-      <div className="tw-m-3">
-        <h2 className="tw-text-yellow-500 tw-font-bold tw-text-lg">
-          Create New Admin
-        </h2>
+    <div className="section-container mt-4 flex flex-col justify-center items-center max-md:items-start">
+      <div className="m-3">
+        <h2 className="text-yellow-500 font-bold text-lg">Create New Admin</h2>
       </div>
-      <div className="tw-m-7 tw-mt-4">
-        <form className="tw-flex tw-flex-col tw-justify-center tw-items-center max-md:tw-items-start">
-          <label className="tw-mx-1">Name</label>
-          <div className="tw-flex tw-justify-center tw-items-center max-sm:tw-flex-col">
+      <div className="m-7 mt-4">
+        <form className="flex flex-col justify-center items-center max-md:items-start">
+          <label className="mx-1">Name</label>
+          <div className="flex justify-center items-center max-sm:flex-col">
             <input
               type="text"
               placeholder="First Name *"
               id="first_name"
               value={newAdmin.first_name}
               onChange={handleChange}
-              className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
-                emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+              className={`bg-[#fff]/20 text-white/50 border-2 px-1 m-2 ${
+                emptyInputError ? "border-red-500" : "border-yellow-500"
               }`}
             ></input>
             <input
@@ -143,56 +141,56 @@ const CreateNewAdminPage = () => {
               id="last_name"
               value={newAdmin.last_name}
               onChange={handleChange}
-              className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
-                emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+              className={`bg-[#fff]/20 text-white/50 border-2 px-1 m-2 ${
+                emptyInputError ? "border-red-500" : "border-yellow-500"
               }`}
             ></input>
           </div>
-          <label className="tw-mx-1">Email</label>
+          <label className="mx-1">Email</label>
           <input
             type="email"
             placeholder=" Email *"
             id="email"
             value={newAdmin.email}
             onChange={handleChange}
-            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
-              emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+            className={`bg-[#fff]/20 text-white/50 border-2 px-1 m-2 ${
+              emptyInputError ? "border-red-500" : "border-yellow-500"
             }`}
           ></input>
-          <label className="tw-mx-1">Username</label>
+          <label className="mx-1">Username</label>
           <input
             type="text"
             placeholder=" Username *"
             id="username"
             value={newAdmin.username}
             onChange={handleChange}
-            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
-              emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+            className={`bg-[#fff]/20 text-white/50 border-2 px-1 m-2 ${
+              emptyInputError ? "border-red-500" : "border-yellow-500"
             }`}
           ></input>
-          <label className="tw-mx-1">Password</label>
+          <label className="mx-1">Password</label>
           <input
             type="password"
             placeholder="Password *"
             id="password"
             value={newAdmin.password}
             onChange={handleChange}
-            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
-              emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+            className={`bg-[#fff]/20 text-white/50 border-2 px-1 m-2 ${
+              emptyInputError ? "border-red-500" : "border-yellow-500"
             }`}
           ></input>
-          <label className="tw-mx-1">Confirm Password</label>
+          <label className="mx-1">Confirm Password</label>
           <input
             type="password"
             placeholder="Confirm Password *"
             onChange={handleConfirmPasswordChange}
-            className={`tw-bg-[#fff]/20 tw-text-white/50 tw-border-2 tw-px-1 tw-m-2 ${
-              emptyInputError ? "tw-border-red-500" : "tw-border-yellow-500"
+            className={`bg-[#fff]/20 text-white/50 border-2 px-1 m-2 ${
+              emptyInputError ? "border-red-500" : "border-yellow-500"
             }`}
           ></input>
-          <label className="tw-mx-1">Admin Role:</label>
+          <label className="mx-1">Admin Role:</label>
           <div>
-            <div className="tw-flex">
+            <div className="flex">
               <input
                 type="radio"
                 name="role"
@@ -200,7 +198,7 @@ const CreateNewAdminPage = () => {
                 checked={newAdmin.role === "owner"}
                 onChange={handleRoleChange}
               ></input>
-              <label className="tw-px-2">Owner</label>
+              <label className="px-2">Owner</label>
             </div>
             <div>
               <input
@@ -210,7 +208,7 @@ const CreateNewAdminPage = () => {
                 checked={newAdmin.role === "admin"}
                 onChange={handleRoleChange}
               ></input>
-              <label className="tw-px-2">Admin</label>
+              <label className="px-2">Admin</label>
             </div>
             <div>
               <input
@@ -220,7 +218,7 @@ const CreateNewAdminPage = () => {
                 checked={newAdmin.role === "moderator"}
                 onChange={handleRoleChange}
               ></input>
-              <label className="tw-px-2">Moderator</label>
+              <label className="px-2">Moderator</label>
             </div>
             <div>
               <input
@@ -230,14 +228,14 @@ const CreateNewAdminPage = () => {
                 checked={newAdmin.role === "guest"}
                 onChange={handleRoleChange}
               ></input>
-              <label className="tw-px-2">Guest</label>
+              <label className="px-2">Guest</label>
             </div>
           </div>
           {requiredFieldsError ? (
-            <p className="tw-text-red-500">Please fill-out required fields</p>
+            <p className="text-red-500">Please fill-out required fields</p>
           ) : null}
           <button
-            className="tw-w-1/3 tw-h-12 tw-p-1 tw-rounded-full tw-m-1 tw-mt-4 tw-bg-yellow-400 tw-text-black tw-font-bold max-md:tw-w-2/3"
+            className="w-1/3 h-12 p-1 rounded-full m-1 mt-4 bg-yellow-400 text-black font-bold max-md:w-2/3"
             onClick={handleCreateAccountButtonClick}
           >
             Create Account

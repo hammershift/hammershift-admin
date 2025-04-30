@@ -728,98 +728,92 @@ const CreateTournamentsPage = () => {
   }, []);
 
   return (
-    <div className="section-container tw-mt-4 tw-flex tw-flex-col tw-gap-4">
-      <div className="tw-flex tw-flex-col sm:tw-flex-row tw-justify-between tw-gap-4">
-        <div className="tw-text-xl md:tw-text-2xl tw-font-bold">
-          Create Tournament
-        </div>
+    <div className="section-container mt-4 flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <div className="text-xl md:text-2xl font-bold">Create Tournament</div>
         <button className="btn-yellow" onClick={handleCheckTournamentObj}>
           CREATE TOURNAMENT
         </button>
       </div>
       {inputError != null && (
-        <div className="tw-text-black tw-font-bold tw-bg-red-600 tw-rounded tw-text-center tw-py-2">
+        <div className="text-black font-bold bg-red-600 rounded text-center py-2">
           {inputErrorMessages[inputError as keyof typeof inputErrorMessages]}
         </div>
       )}
-      <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         {/* left column */}
-        <div className="tw-flex tw-flex-col tw-w-full md:tw-w-2/5 tw-gap-4">
+        <div className="flex flex-col w-full md:w-2/5 gap-4">
           {/* tournament information */}
-          <div className="tw-w-full tw-min-h-[200px] tw-bg-white/5 tw-rounded tw-p-4 md:tw-p-8 tw-flex tw-flex-col tw-gap-4 ">
-            <div className="tw-text-xl tw-font-bold">
-              Tournament Information
-            </div>
-            <div className="tw-flex tw-flex-col tw-gap-1.5">
+          <div className="w-full min-h-[200px] bg-white/5 rounded p-4 md:p-8 flex flex-col gap-4 ">
+            <div className="text-xl font-bold">Tournament Information</div>
+            <div className="flex flex-col gap-1.5">
               <label htmlFor="title">Title</label>
               <input
                 id="title"
                 name="title"
                 placeholder="title"
-                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                className="px-2 py-1.5 flex-grow rounded text-black"
                 onChange={handleInputChange}
               />
             </div>
-            <div className="tw-flex tw-flex-col tw-gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <label htmlFor="title">Description</label>
               <input
                 id="description"
                 name="description"
                 placeholder="description"
-                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                className="px-2 py-1.5 flex-grow rounded text-black"
                 onChange={handleInputChange}
               />
             </div>
-            <div className="tw-flex tw-flex-col tw-gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <label htmlFor="startTime">Start Date and Time</label>
               <input
                 id="startTime"
                 name="startTime"
                 type="datetime-local"
                 placeholder="Start Time"
-                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                className="px-2 py-1.5 flex-grow rounded text-black"
                 min={dateLimit.start.toISOString().split(".")[0]}
                 max={dateLimit.end.toISOString().split(".")[0]}
                 onChange={handleInputChange}
               />
             </div>
-            <div className="tw-flex tw-flex-col tw-gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <label htmlFor="endTime">End Date and Time</label>
               <input
                 id="endTime"
                 name="endTime"
                 type="datetime-local"
                 placeholder="end Time"
-                className="tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded tw-text-black"
+                className="px-2 py-1.5 flex-grow rounded text-black"
                 min={dateLimit.start.toISOString().split(".")[0]}
                 max={dateLimit.end.toISOString().split(".")[0]}
                 onChange={handleInputChange}
               />
             </div>
-            <div className="tw-flex tw-flex-col tw-gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <label htmlFor="buyInFee">Buy-in Price</label>
               <input
                 id="buyInFee"
                 name="buyInFee"
                 type="number"
                 placeholder="buy-in price"
-                className="tw-text-black tw-px-2 tw-py-1.5 tw-flex-grow tw-rounded"
+                className="text-black px-2 py-1.5 flex-grow rounded"
                 onChange={handleInputChange}
               />
             </div>
-            <div className="tw-flex tw-flex-col tw-gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <label htmlFor="tournamentEndTime">Tournament End Time</label>
-              <div className="tw-pl-2 tw-opacity-50">
+              <div className="pl-2 opacity-50">
                 {tournamentEndTime != null
                   ? tournamentEndTime?.toISOString().split(".")[0]
                   : "--"}
               </div>
             </div>
           </div>
-          <div className="tw-w-full tw-bg-white/5 tw-rounded tw-p-4 md:tw-p-8 tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-text-xl tw-font-bold">
-              List of Selected Auctions
-            </div>
+          <div className="w-full bg-white/5 rounded p-4 md:p-8 flex flex-col gap-4">
+            <div className="text-xl font-bold">List of Selected Auctions</div>
             <button
               className="btn-transparent-red"
               onClick={handleRemoveAuctions}
@@ -844,33 +838,33 @@ const CreateTournamentsPage = () => {
                 </div>
               ))
             ) : (
-              <div className="tw-h-[50px] tw-flex tw-items-center tw-justify-center">
+              <div className="h-[50px] flex items-center justify-center">
                 No Auctions Selected
               </div>
             )}
           </div>
         </div>
         {/* auctions and filter section */}
-        <div className="tw-flex tw-flex-col tw-w-full md:tw-w-3/5 tw-gap-4 tw-bg-white/5 tw-p-4 md:tw-p-8">
-          <div className="tw-text-lg tw-font-bold">
+        <div className="flex flex-col w-full md:w-3/5 gap-4 bg-white/5 p-4 md:p-8">
+          <div className="text-lg font-bold">
             Auctions
-            <span className="tw-opacity-20 tw-ml-2">{totalAuctions}</span>
+            <span className="opacity-20 ml-2">{totalAuctions}</span>
           </div>
           <div
-            className="tw-relative tw-w-fit tw-flex tw-gap-4"
+            className="relative w-fit flex gap-4"
             ref={filterRef as unknown as RefObject<HTMLDivElement> | undefined}
           >
             <div>Filters:</div>
             {/* Dropdowns for make, category, era and filter */}
             {/* desktop view */}
-            <div className="tw-hidden lg:tw-flex tw-gap-3">
+            <div className="hidden lg:flex gap-3">
               {ListOfFilters.map((item: string, index: number) => {
                 const data = FiltersDataContent[item];
                 return (
                   <div key={String(index + item)}>
                     <div
                       onClick={() => handleToggleDropdown(data.filterKey)}
-                      className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                      className="w-[100px] py-2 px-4 rounded-lg bg-[#DCE0D9] text-black cursor-pointer"
                     >
                       {item}
                     </div>
@@ -887,7 +881,7 @@ const CreateTournamentsPage = () => {
                 );
               })}
             </div>
-            <div className=" tw-block lg:tw-hidden">
+            <div className=" block lg:hidden">
               {
                 <div>
                   <Image
@@ -895,32 +889,29 @@ const CreateTournamentsPage = () => {
                     alt="funnel filter"
                     width={24}
                     height={24}
-                    className="tw-w-6 tw-h-6"
+                    className="w-6 h-6"
                     onClick={() => setIsMobileDropdownOpen((prev) => !prev)}
                   />
 
                   {isMobileDropdownOpen && (
                     <div
                       ref={filterDropdownRef}
-                      className=" dropdown_menu-6 tw-absolute tw-w-[100px] tw-h-auto tw-bg-[#DCE0D9] tw-rounded-xl tw-left-0 tw-z-10"
+                      className=" dropdown_menu-6 absolute w-[100px] h-auto bg-[#DCE0D9] rounded-xl left-0 z-10"
                     >
                       {ListOfFilters.map((item: string, index: number) => {
                         const data = FiltersDataContent[item];
                         return (
-                          <div
-                            key={String(index + item)}
-                            className="tw-relative"
-                          >
+                          <div key={String(index + item)} className="relative">
                             <div
                               onClick={() =>
                                 handleToggleDropdown(data.filterKey)
                               }
-                              className="tw-w-[100px] tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                              className="w-[100px] py-2 px-4 rounded-lg bg-[#DCE0D9] text-black cursor-pointer"
                             >
                               {item}
                             </div>
                             {data.dropdown && (
-                              <div className="tw-absolute tw-left-24 tw-top-0">
+                              <div className="absolute left-24 top-0">
                                 <DropdownComponent
                                   filterKey={data.filterKey}
                                   content={data.content}
@@ -942,22 +933,22 @@ const CreateTournamentsPage = () => {
             <div>Sort:</div>
             <div>
               {/* desktop view */}
-              <div className=" tw-hidden lg:tw-flex">
+              <div className=" hidden lg:flex">
                 <div
                   onClick={() => handleToggleDropdown("sort")}
-                  className="tw-py-2 tw-px-4 tw-rounded-lg tw-bg-[#DCE0D9] tw-text-black tw-cursor-pointer"
+                  className="py-2 px-4 rounded-lg bg-[#DCE0D9] text-black cursor-pointer"
                 >
                   sort
                 </div>
               </div>
               {/* mobile view */}
-              <div className=" tw-block lg:tw-hidden">
+              <div className=" block lg:hidden">
                 <Image
                   src={ArrowDown}
                   alt="arrow down"
                   width={24}
                   height={24}
-                  className="tw-w-6 tw-h-6"
+                  className="w-6 h-6"
                   onClick={() => handleToggleDropdown("sort")}
                 />
               </div>
@@ -973,7 +964,7 @@ const CreateTournamentsPage = () => {
             </div>
           </div>
           {/* Auctions List */}
-          <div className=" md:tw-h-[1000px] tw-rounded-xl tw-bg-white/20 md:tw-overflow-scroll tw-px-4">
+          <div className=" md:h-[1000px] rounded-xl bg-white/20 md:overflow-scroll px-4">
             {!isLoading ? (
               <>
                 {emptyAuctions && <div>No results found...</div>}
@@ -1001,13 +992,13 @@ const CreateTournamentsPage = () => {
                   })}
               </>
             ) : (
-              <div className="tw-py-[200px]">
+              <div className="py-[200px]">
                 <LoadingComponent loaderType="bounceLoader" />
               </div>
             )}
             {!isLoading && !loadmoreLoading ? (
-              <div className="tw-h-[100px] tw-flex tw-flex-col tw-justify-center tw-items-center">
-                <div className="tw-pb-2">{`Showing ${displayCount} out of ${totalAuctions}`}</div>
+              <div className="h-[100px] flex flex-col justify-center items-center">
+                <div className="pb-2">{`Showing ${displayCount} out of ${totalAuctions}`}</div>
                 {loadMoreButton && (
                   <button className="btn-white" onClick={handleLoadMore}>
                     Load More

@@ -146,12 +146,10 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   }
 
   return (
-    <div className="section-container tw-mt-4">
-      <div className="tw-flex tw-flex-col tw-justify-between">
-        <h2 className="tw-font-bold tw-text-yellow-500 tw-text-xl tw-m-2">
-          Auction List
-        </h2>
-        <div className="tw-bg-[#fff]/20 tw-h-auto tw-flex tw-px-2 tw-py-1.5 tw-rounded tw-gap-1">
+    <div className="section-container mt-4">
+      <div className="flex flex-col justify-between">
+        <h2 className="font-bold text-yellow-500 text-xl m-2">Auction List</h2>
+        <div className="bg-[#fff]/20 h-auto flex px-2 py-1.5 rounded gap-1">
           <Image
             src={magnifyingGlass}
             alt="magnifying glass"
@@ -161,23 +159,23 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
           <input
             type="text"
             placeholder="Search for Auctions"
-            className="tw-bg-transparent focus:tw-outline-none"
+            className="bg-transparent focus:outline-none"
             onChange={handleSearch}
           />
         </div>
       </div>
       {isLoading ? (
-        <div className="tw-flex tw-justify-center tw-items-center tw-h-[618px]">
+        <div className="flex justify-center items-center h-[618px]">
           <BeatLoader color="#F2CA16" />
         </div>
       ) : (
-        <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center tw-table-auto">
+        <table className="w-full border-separate border-spacing-y-2 text-center table-auto">
           <thead>
             <tr>
               {headers.map((header, index) => (
                 <td
                   key={index}
-                  className="tw-p-2.5 tw-font-bold"
+                  className="p-2.5 font-bold"
                   onClick={() => handleTableHeaderClick(header)}
                 >
                   <span>{header.LABEL}</span>
@@ -194,19 +192,16 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
           <tbody>
             {searchedKeyword
               ? sortData(searchedData).map((item, index) => (
-                  <tr
-                    key={index}
-                    className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
-                  >
+                  <tr key={index} className="rounded-lg m-2 bg-[#fff]/5">
                     {headers.map((header, index) => (
-                      <td key={index} className="tw-p-2.5">
+                      <td key={index} className="p-2.5">
                         {header.KEY === "auction_id" ? (
                           <span
                             onClick={() => {
                               setShowModal(true);
                               setSelectedAuctionId(item.auction_id);
                             }}
-                            className="hover: tw-cursor-pointer"
+                            className="hover: cursor-pointer"
                           >
                             {item[header.KEY]}
                           </span>
@@ -240,19 +235,16 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                   </tr>
                 ))
               : sortData(auctionData).map((item, index) => (
-                  <tr
-                    key={index}
-                    className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
-                  >
+                  <tr key={index} className="rounded-lg m-2 bg-[#fff]/5">
                     {headers.map((header, index) => (
-                      <td key={index} className="tw-p-2.5">
+                      <td key={index} className="p-2.5">
                         {header.KEY === "auction_id" ? (
                           <span
                             onClick={() => {
                               setShowModal(true);
                               setSelectedAuctionId(item.auction_id);
                             }}
-                            className="hover: tw-cursor-pointer"
+                            className="hover: cursor-pointer"
                           >
                             {item[header.KEY]}
                           </span>
@@ -289,7 +281,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
         </table>
       )}
 
-      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-py-4">
+      <div className="flex flex-col items-center justify-center gap-4 py-4">
         {displayCount >= totalCars ? (
           <p>
             Showing {totalCars} out of {totalCars}

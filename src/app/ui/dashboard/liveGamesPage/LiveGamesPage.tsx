@@ -87,12 +87,12 @@ const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
     { KEY: "toggle_display", LABEL: "Toggle Display" },
   ];
   return (
-    <div className="section-container tw-mt-4">
-      <div className="tw-flex tw-flex-col tw-justify-between">
-        <h2 className="tw-font-bold tw-text-yellow-500 tw-text-xl tw-m-2">
+    <div className="section-container mt-4">
+      <div className="flex flex-col justify-between">
+        <h2 className="font-bold text-yellow-500 text-xl m-2">
           Live Games List
         </h2>
-        <div className="tw-bg-[#fff]/20 tw-h-auto tw-flex tw-px-2 tw-py-1.5 tw-rounded tw-gap-1">
+        <div className="bg-[#fff]/20 h-auto flex px-2 py-1.5 rounded gap-1">
           <Image
             src={magnifyingGlass}
             alt="magnifying glass"
@@ -102,14 +102,14 @@ const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
           <input
             type="text"
             placeholder="Search by Year, Make, Model..."
-            className="tw-bg-transparent focus:tw-outline-none tw-w-full"
+            className="bg-transparent focus:outline-none w-full"
             onChange={handleSearch}
           />
         </div>
-        <div className="tw-flex tw-mt-5 tw-justify-start tw-items-center">
+        <div className="flex mt-5 justify-start items-center">
           <p>Sort by:</p>
           <select
-            className="tw-mx-2 tw-rounded-sm tw-text-black"
+            className="mx-2 rounded-sm text-black"
             onChange={handleSortChange}
           >
             <option value="On Display">On Display</option>
@@ -120,16 +120,16 @@ const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
         </div>
       </div>
       {isLoading ? (
-        <div className="tw-flex tw-justify-center tw-items-center tw-h-[618px]">
+        <div className="flex justify-center items-center h-[618px]">
           <BeatLoader color="#F2CA16" />
         </div>
       ) : (
         <div>
-          <table className="tw-w-full tw-border-separate tw-border-spacing-y-2 tw-text-center tw-table-auto">
+          <table className="w-full border-separate border-spacing-y-2 text-center table-auto">
             <thead>
               <tr>
                 {headers.map((header, index) => (
-                  <td key={index} className="tw-p-2.5 tw-font-bold">
+                  <td key={index} className="p-2.5 font-bold">
                     {header.LABEL}
                   </td>
                 ))}
@@ -141,10 +141,10 @@ const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
                   searchedData.map((liveAuction) => (
                     <tr
                       key={liveAuction.auction_id}
-                      className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
+                      className="rounded-lg m-2 bg-[#fff]/5"
                     >
                       {headers.map((header, index) => (
-                        <td key={index} className="tw-p-2.5 tw-content-center">
+                        <td key={index} className="p-2.5 content-center">
                           {header.KEY === "image" ? (
                             <Image
                               src={liveAuction[header.KEY]}
@@ -194,10 +194,10 @@ const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
                   liveAuctionsData.map((liveAuction) => (
                     <tr
                       key={liveAuction.auction_id}
-                      className="tw-rounded-lg tw-m-2 tw-bg-[#fff]/5"
+                      className="rounded-lg m-2 bg-[#fff]/5"
                     >
                       {headers.map((header, index) => (
-                        <td key={index} className="tw-p-2.5 tw-content-center">
+                        <td key={index} className="p-2.5 content-center">
                           {header.KEY === "image" ? (
                             <Image
                               src={liveAuction[header.KEY]}
@@ -245,7 +245,7 @@ const LiveGamesPage: React.FC<LiveGamesPageProps> = ({
                   ))}
             </tbody>
           </table>
-          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-py-4">
+          <div className="flex flex-col items-center justify-center gap-4 py-4">
             {displayCount >= totalAuctions ? (
               <p>
                 Showing {totalAuctions} out of {totalAuctions}
