@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     }
 
     // api/users to get all users that are active and are not AI
-    const users = await Users.find({ isActive: true, isAI: false })
+    const users = await Users.find({ isActive: true, isAgent: false })
       .limit(limit)
       .skip(offset);
 

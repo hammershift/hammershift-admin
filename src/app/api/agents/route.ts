@@ -21,7 +21,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(admin);
     }
     // api/agents to get all AI agents
-    const agents = await Users.find({ isAI: true }).limit(limit).skip(offset);
+    const agents = await Users.find({ isAgent: true })
+      .limit(limit)
+      .skip(offset);
 
     return NextResponse.json({ total: agents.length, agents: agents });
   } catch (error) {
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest) {
         provider: "email",
         createdAt: newDate,
         updatedAt: newDate,
-        isAI: true,
+        isAgent: true,
       };
 
       const newAgent = new Users(newAgentData);

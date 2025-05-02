@@ -12,7 +12,7 @@ const userSchema = new Schema(
     isBanned: { type: Boolean, default: false },
     provider: { type: String, default: "email" },
     about: { type: String, default: "" },
-    isAI: { type: Boolean, default: false },
+    isAgent: { type: Boolean, default: false },
     createdAt: Date,
     updatedAt: Date,
   },
