@@ -11,13 +11,14 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SettingsIcon from "@mui/icons-material/Settings";
+import GroupIcon from "@mui/icons-material/Group";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 
 //images
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import hammershiftLogo from "../../../../../public/images/hammershift.svg";
 import userImg from "../../../../../public/images/user.svg";
-import { Face5, Group, GroupAdd, PersonAddAlt1 } from "@mui/icons-material";
 
 const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
   const { data } = useSession();
@@ -66,14 +67,14 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
         {
           title: "Agents",
           path: "/dashboard/agents",
-          icon: <Group />,
+          icon: <GroupIcon />,
         },
         ...(role === "owner" || role === "guest"
           ? [
               {
                 title: "Create AI Agent",
                 path: "/dashboard/create-new-agent",
-                icon: <GroupAdd />,
+                icon: <GroupAddIcon />,
               },
             ]
           : []),
