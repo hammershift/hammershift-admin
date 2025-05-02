@@ -19,7 +19,7 @@ export interface User {
   about: string;
   createdAt: Date;
   updatedAt: Date;
-  isAgent: boolean;
+  isAgent?: boolean;
 }
 
 export interface Admin {

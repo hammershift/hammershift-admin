@@ -21,7 +21,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(admin);
     }
     // api/agents to get all AI agents
-    const agents = await Users.find({ isAgent: true })
+    const agents = await Users.find({
+      $and: [{ isAgent: { $exists: true } }, { isAgent: true }],
+    })
       .limit(limit)
       .skip(offset);
 
