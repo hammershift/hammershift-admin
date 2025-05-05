@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import connectToDB from "@/app/lib/mongoose";
 import Users from "@/app/models/user.model";
 import { Types } from "mongoose";
+import { Role } from "@/app/lib/interfaces";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export async function GET(req: NextRequest) {
     }
     // api/agents to get all AI agents
     const agents = await Users.find({
-      $and: [{ isAgent: { $exists: true } }, { isAgent: true }],
+      role: Role.AGENT,
     })
       .limit(limit)
       .skip(offset);
@@ -51,14 +52,12 @@ export async function POST(req: NextRequest) {
 
   try {
     await connectToDB();
-    const { username, fullName, email } = await req.json();
-    console.log("here");
-    console.log(username, fullName, email);
+    const { username, fullName, email, systemInstruction } = await req.json();
     const existingAgent = await Users.findOne({ username: username });
 
     if (existingAgent) {
       return NextResponse.json({ message: "Agent already exists" });
-    } else if (!username || !fullName || !email) {
+    } else if (!username || !fullName || !email || !systemInstruction) {
       throw new Error("Please fill out required fields");
     } else {
       const newDate = new Date();
@@ -74,7 +73,10 @@ export async function POST(req: NextRequest) {
         provider: "email",
         createdAt: newDate,
         updatedAt: newDate,
-        isAgent: true,
+        role: Role.AGENT,
+        agentProperties: {
+          systemInstruction: systemInstruction,
+        },
       };
 
       const newAgent = new Users(newAgentData);

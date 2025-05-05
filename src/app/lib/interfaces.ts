@@ -7,6 +7,14 @@ export interface AgentData {
   email: string;
 }
 
+export enum Role {
+  USER = "USER",
+  AGENT = "AGENT",
+}
+export interface AgentProperties {
+  systemInstruction: string;
+}
+
 export interface User {
   _id: Types.ObjectId;
   username: string;
@@ -19,7 +27,8 @@ export interface User {
   about: string;
   createdAt: Date;
   updatedAt: Date;
-  isAgent?: boolean;
+  role: Role;
+  agentProperties?: AgentProperties;
 }
 
 export interface Admin {

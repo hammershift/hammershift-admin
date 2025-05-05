@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import { ObjectId } from "mongodb";
 import connectToDB from "@/app/lib/mongoose";
 import Users from "@/app/models/user.model";
+import { Role } from "@/app/lib/interfaces";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
     // api/users to get all users that are active and are not AI
     const users = await Users.find({
       isActive: true,
-      $or: [{ isAgent: { $exists: false } }, { isAgent: false }],
+      role: Role.USER,
     })
       .limit(limit)
       .skip(offset);
