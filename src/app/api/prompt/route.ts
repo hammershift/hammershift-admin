@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/options";
 import connectToDB from "@/app/lib/mongoose";
 import { app } from "@/app/lib/firebase";
 import { getVertexAI, getGenerativeModel, Schema } from "firebase/vertexai";
 import Auctions from "@/app/models/auction.model";
 import Users from "@/app/models/user.model";
-import { initializeApp } from "firebase/app";
+import Predictions from "@/app/models/prediction.model";
 export async function POST(req: NextRequest) {
   try {
     await connectToDB();
@@ -35,18 +33,21 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    //TODO: add a loop through all the ai users
-    const agents = await Users.find({ isAI: true });
+    const agents = await Users.find({ role: "AGENT" });
 
     if (agents.length === 0) {
       console.error("No AI agents found");
       return NextResponse.json({ message: "No AI agents found" });
     }
+    const newPredictions: any[] = [];
     for (const agent of agents) {
       const result = await model.generateContent({
         //TODO: replace this with the agent's system instruction
+        // systemInstruction: {
+        //   text: "You are a veteran predictor of car auction pricing. You are given a description of a vehicle and you must predict its final selling price. You must also provide a reason for your prediction. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'",
+        // },
         systemInstruction: {
-          text: "You are a veteran predictor of car auction pricing. You are given a description of a vehicle and you must predict its final selling price. You must also provide a reason for your prediction. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'",
+          text: agent.agentProperties.systemInstruction,
         },
         contents: [
           {
@@ -65,16 +66,45 @@ export async function POST(req: NextRequest) {
           result.response.candidates[0].content.parts[0].text ===
           "I am sorry, but I cannot predict the price of this vehicle."
         ) {
-          return NextResponse.json({
-            message:
-              "I am sorry, but I cannot predict the price of this vehicle.",
-          });
+          //TODO: skip the agent that can't predict or retry?
+          console.error("AI agent could not predict the price");
+          continue;
         }
 
-        //TODO: submit a prediction for the auction, using the result of the prompt
+        //get the structured response object
+        const response = JSON.parse(
+          result.response.candidates[0].content.parts[0].text!
+        );
+
+        const prediction = await Predictions.create({
+          carId: auction_id,
+          carObjectId: auction._id,
+          predictedPrice: response.predictedPrice,
+          wagerAmount: 0,
+          user: {
+            userId: agent._id,
+            fullName: agent.fullName,
+            username: agent.username,
+            role: agent.role,
+          },
+          reasoning: response.reasoning,
+        });
+
+        newPredictions.push(prediction);
       } else {
-        console.error("Failed to get response from Gemini");
+        console.error("Failed to get a response from Vertex AI");
       }
+    }
+
+    if (newPredictions.length > 0) {
+      return NextResponse.json({
+        predictions: newPredictions,
+        message: "Successfully added predictions for AI agents",
+      });
+    } else {
+      return NextResponse.json({
+        message: "Failed to add predictions for AI agents",
+      });
     }
   } catch (e) {
     console.error(e);
