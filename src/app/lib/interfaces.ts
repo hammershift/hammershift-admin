@@ -5,6 +5,9 @@ export interface AgentData {
   username: string;
   fullName: string;
   email: string;
+  agentProperties: {
+    systemInstruction: string;
+  };
 }
 
 export enum Role {

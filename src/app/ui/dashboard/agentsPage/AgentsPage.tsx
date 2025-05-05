@@ -47,13 +47,13 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ data }) => {
                     <Link href={`/dashboard/agents/show_agent/${item._id}`}>
                       <DvrIcon />
                     </Link>
-                    <Link href={`/dashboard/agents/delete_agent/${item._id}`}>
+                    {/* <Link href={`/dashboard/agents/delete_agent/${item._id}`}>
                       <DeleteIcon
                         sx={{
                           color: "#C2451E",
                         }}
                       />
-                    </Link>
+                    </Link> */}
                     {/* <button
                           onClick={() => {
                             setShowModal(true);

@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     await connectToDB();
-    const agent_id = req.nextUrl.searchParams.get("_id");
+    const agent_id = req.nextUrl.searchParams.get("agent_id");
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
     const limit = Number(req.nextUrl.searchParams.get("limit"));
 
@@ -89,5 +89,75 @@ export async function POST(req: NextRequest) {
       message: "Internal server error",
       error: error,
     });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (session?.user.role !== "owner" && session?.user.role !== "admin") {
+    console.log("User is Authorized!");
+    return NextResponse.json(
+      {
+        message:
+          "Unauthorized! Your role does not have access to this function",
+      },
+      { status: 400 }
+    );
+  }
+
+  try {
+    await connectToDB();
+    const agent_id = req.nextUrl.searchParams.get("agent_id");
+
+    const requestBody = await req.json();
+    const editData: { [key: string]: string | boolean | number } = {};
+
+    if (requestBody) {
+      Object.keys(requestBody).forEach((key) => {
+        editData[key] = requestBody[key] as string | boolean | number;
+      });
+    }
+
+    if (agent_id) {
+      const existingDifferentAgent = await Users.findOne({
+        _id: { $ne: agent_id },
+        username: editData["username"],
+      });
+
+      if (existingDifferentAgent) {
+        return NextResponse.json(
+          {
+            message:
+              "Agent already exists with that Full Name (original or variant of it)",
+          },
+          { status: 409 }
+        );
+      }
+
+      const agent = await Users.findOneAndUpdate(
+        { _id: new ObjectId(agent_id) },
+        { $set: editData },
+        {
+          returnDocument: "after",
+        }
+      );
+
+      if (agent) {
+        return NextResponse.json(agent, { status: 200 });
+      } else {
+        return NextResponse.json(
+          { message: "Cannot find agent" },
+          { status: 404 }
+        );
+      }
+    } else {
+      return NextResponse.json(
+        { message: "No ID has been provided" },
+        { status: 400 }
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "Internal server error" });
   }
 }
