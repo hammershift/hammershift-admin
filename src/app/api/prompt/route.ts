@@ -41,6 +41,20 @@ export async function POST(req: NextRequest) {
     }
     const newPredictions: any[] = [];
     for (const agent of agents) {
+      //check if agent has already submitted a prediction
+      const existingPrediction = await Predictions.findOne({
+        auction_id: auction_id,
+        user: {
+          userId: agent._id,
+        },
+      });
+
+      if (existingPrediction) {
+        console.log(
+          `Agent ${agent._id} has already submitted a prediction for this auction`
+        );
+        continue;
+      }
       const result = await model.generateContent({
         //TODO: replace this with the agent's system instruction
         // systemInstruction: {
