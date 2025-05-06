@@ -5,6 +5,17 @@ export interface AgentData {
   username: string;
   fullName: string;
   email: string;
+  agentProperties: {
+    systemInstruction: string;
+  };
+}
+
+export enum Role {
+  USER = "USER",
+  AGENT = "AGENT",
+}
+export interface AgentProperties {
+  systemInstruction: string;
 }
 
 export interface User {
@@ -19,7 +30,8 @@ export interface User {
   about: string;
   createdAt: Date;
   updatedAt: Date;
-  isAI: boolean;
+  role: Role;
+  agentProperties?: AgentProperties;
 }
 
 export interface Admin {

@@ -20,7 +20,7 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ data }) => {
       <div className="flex justify-between">
         <h2 className="font-bold text-yellow-500 text-xl m-2">Admin List</h2>
       </div>
-      <table className="w-full border-separate border-spacing-y-2 text-left">
+      <table className="w-full border-separate border-spacing-y-2 text-center">
         <thead>
           <tr>
             <td className="p-2.5 font-bold max-md:hidden">Admin ID</td>

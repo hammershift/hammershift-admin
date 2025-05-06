@@ -1,5 +1,6 @@
+import { AgentProperties } from "./../lib/interfaces";
 import { Schema, model, models } from "mongoose";
-import { User } from "../lib/interfaces";
+import { Role, User } from "../lib/interfaces";
 
 const userSchema = new Schema(
   {

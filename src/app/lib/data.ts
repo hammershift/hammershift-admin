@@ -431,3 +431,18 @@ export const getAgents = async () => {
   const data = await res.json();
   return data;
 };
+export const editAgentWithId = async (id: string, body: any) => {
+  const res = await fetch(`/api/agents?agent_id=${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+  console.log(res);
+  if (res.status === 200) {
+    return { message: "Edit Successful" };
+  } else {
+    const data = await res.json();
+    console.error("Edit Unsuccessful");
+    console.log(data);
+    return { message: data.message };
+  }
+};
