@@ -11,7 +11,7 @@ import AuctionModal from "../modals/auction_modal";
 import { useSession } from "next-auth/react";
 import { BeatLoader } from "react-spinners";
 import { CarData } from "@/app/dashboard/auctions/page";
-import { updateAuctionStatus } from "@/app/lib/data";
+import { updateAuctionStatus, promptAgentPredictions } from "@/app/lib/data";
 
 interface AuctionsPageProps {
   auctionData: CarData[];
@@ -91,6 +91,9 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     console.log(activeAuctions);
     try {
       await updateAuctionStatus(id, !activeAuctions[id]);
+      if (!activeAuctions[id]) {
+        await promptAgentPredictions(id);
+      }
     } catch (error) {
       console.error(error);
     }
