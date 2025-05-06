@@ -139,6 +139,7 @@ export async function POST(req: NextRequest) {
         message: "Successfully added predictions for AI agents",
       });
     } else {
+      console.log("Failed to add predictions for AI agents");
       return NextResponse.json({
         message: "Failed to add predictions for AI agents",
       });
