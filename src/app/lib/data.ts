@@ -355,6 +355,19 @@ export const updateAuctionStatus = async (
   }
 };
 
+export const promptAgentPredictions = async (auction_id: string) => {
+  const res = await fetch(`/api/prompt?auction_id=${auction_id}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to prompt Vertex AI");
+  }
+};
+
 //toggle auction display
 export const toggleAuctionDisplay = async (
   auction_id: string,
