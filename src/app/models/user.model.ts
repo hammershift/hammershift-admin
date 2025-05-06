@@ -12,7 +12,13 @@ const userSchema = new Schema(
     isBanned: { type: Boolean, default: false },
     provider: { type: String, default: "email" },
     about: { type: String, default: "" },
-    isAI: { type: Boolean, default: false },
+    role: { type: String, enum: ["USER", "AGENT"], required: true},
+    agentProperties: {
+      systemInstruction: {
+        type: String,
+        required: false,
+      }
+    },
     createdAt: Date,
     updatedAt: Date,
   },
