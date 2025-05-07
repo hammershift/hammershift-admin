@@ -40,8 +40,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "No AI agents found" });
     }
     const newPredictions: any[] = [];
+    const predictionValues: number[] = [];
     for (const agent of agents) {
-      
       try {
         //check if agent has already submitted a prediction
         const existingPrediction = await Predictions.findOne({
@@ -50,12 +50,20 @@ export async function POST(req: NextRequest) {
             userId: agent._id,
           },
         });
-  
+
         if (existingPrediction) {
           console.log(
             `Agent ${agent._id} has already submitted a prediction for this auction`
           );
           continue;
+        }
+
+        let systemInstruction = agent.agentProperties.systemInstruction;
+        //add already submitted prediction values to the system instruction so the agent cannot use them
+        if (predictionValues.length > 0) {
+          systemInstruction +=
+            " For the final selling price, these values are taken so you cannot use them as your prediction: " +
+            predictionValues.join(", ");
         }
         const result = await model.generateContent({
           //TODO: replace this with the agent's system instruction
@@ -63,7 +71,7 @@ export async function POST(req: NextRequest) {
           //   text: "You are a veteran predictor of car auction pricing. You are given a description of a vehicle and you must predict its final selling price. You must also provide a reason for your prediction. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'",
           // },
           systemInstruction: {
-            text: agent.agentProperties.systemInstruction,
+            text: systemInstruction,
           },
           contents: [
             {
@@ -86,12 +94,12 @@ export async function POST(req: NextRequest) {
             console.error("AI agent could not predict the price");
             continue;
           }
-  
+
           //get the structured response object
           const response = JSON.parse(
             result.response.candidates[0].content.parts[0].text!
           );
-  
+
           const prediction = await Predictions.create({
             carId: auction_id,
             carObjectId: auction._id,
@@ -107,10 +115,10 @@ export async function POST(req: NextRequest) {
             },
             refunded: false,
             isActive: true,
-            prize: 0
-            
+            prize: 0,
           });
-  
+
+          predictionValues.push(response.predictedPrice);
           newPredictions.push(prediction);
         } else {
           console.error("Failed to get a response from Vertex AI");
@@ -119,11 +127,12 @@ export async function POST(req: NextRequest) {
         console.error("An error has occured: ", e);
         continue;
       }
-      
     }
 
     if (newPredictions.length > 0) {
-      console.log(`Successfully added predictions for ${newPredictions.length} AI agents`);
+      console.log(
+        `Successfully added predictions for ${newPredictions.length} AI agents`
+      );
       return NextResponse.json({
         predictions: newPredictions,
         message: "Successfully added predictions for AI agents",
