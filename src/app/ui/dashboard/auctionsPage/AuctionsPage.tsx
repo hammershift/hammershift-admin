@@ -84,6 +84,22 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   }, [auctionData, searchedData, searchedKeyword]);
 
   async function handleStatusToggle(id: string) {
+    const auction = searchedKeyword
+      ? searchedData.find((x) => x.auction_id === id)
+      : auctionData.find((x) => x.auction_id === id);
+
+    if (!auction) {
+      alert("Auction not found");
+      console.error("Auction not found");
+      return;
+    }
+    if (
+      !auction.isActive &&
+      Date.parse(auction.deadline.toString()) < Date.now()
+    ) {
+      alert("Deadline has passed for this auction");
+      return;
+    }
     setActiveAuctions((prevStates) => ({
       ...prevStates,
       [id]: !prevStates[id],
