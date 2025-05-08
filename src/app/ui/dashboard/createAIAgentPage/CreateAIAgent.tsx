@@ -43,9 +43,11 @@ const CreateAIAgentPage = () => {
         if (!systemInstruction) {
           setEmptyInputError(true);
         }
+        const defaultInstruction =
+          "You are given a description of a vehicle and you must predict its final selling price. You must also provide a reason for your prediction. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'";
         setNewAgent({
           ...newAgent,
-          systemInstruction: systemInstruction,
+          systemInstruction: systemInstruction + ` ${defaultInstruction}`,
         });
         break;
       default:
