@@ -6,6 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DvrIcon from "@mui/icons-material/Dvr";
 import BlockIcon from "@mui/icons-material/Block";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
 import {
   editUserWithId,
@@ -31,7 +32,7 @@ interface UserData {
 }
 interface UsersPageProps {
   userData: UserData[];
-  banUser: (_id: string) => void;
+  banUser: (_id: string, newBannedStatus: boolean) => Promise<void>;
 }
 
 const UsersPage = () => {
@@ -80,9 +81,9 @@ const UsersPage = () => {
     getDataWithSearchValue();
   }, [searchValue]);
 
-  const banUser = async (_id: string) => {
+  const banUser = async (_id: string, newBannedStatus: boolean) => {
     try {
-      const updatedUser = { isBanned: true };
+      const updatedUser = { isBanned: newBannedStatus };
       const res = await editUserWithId(_id, updatedUser);
 
       if (res && res.message === "Edit Successful") {
@@ -92,10 +93,11 @@ const UsersPage = () => {
             user._id === _id ? { ...user, ...updatedUser } : user
           )
         );
-        alert("User Banned Successfully");
+        if (newBannedStatus) alert("User Banned Successfully");
+        else alert("User Unbanned Successfully");
       }
     } catch (error) {
-      alert("Error banning user");
+      alert("Error banning/unbanning user");
     }
   };
 
@@ -148,6 +150,7 @@ const Table: React.FC<UsersPageProps> = ({ userData, banUser }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUsername, setSelectedUsername] = useState<string>("");
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [bannedStatus, setBannedStatus] = useState<boolean>(false);
 
   const { data } = useSession();
 
@@ -208,9 +211,10 @@ const Table: React.FC<UsersPageProps> = ({ userData, banUser }) => {
                             setShowModal(true);
                             setSelectedUsername(item.username);
                             setSelectedUserId(item._id);
+                            setBannedStatus(item.isBanned);
                           }}
                         >
-                          <BlockIcon />
+                          {item.isBanned ? <LockOpenIcon /> : <BlockIcon />}
                         </button>
                       </div>
                     )}
@@ -224,8 +228,13 @@ const Table: React.FC<UsersPageProps> = ({ userData, banUser }) => {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         username={selectedUsername || ""}
+        bannedStatus={bannedStatus}
         id={selectedUserId}
-        onConfirm={() => banUser(selectedUserId)}
+        onConfirm={() => {
+          banUser(selectedUserId, !bannedStatus).then(() =>
+            setShowModal(false)
+          );
+        }}
       />
     </div>
   );

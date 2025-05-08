@@ -15,8 +15,12 @@ const EditUser = ({ params }: { params: { id: string } }) => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await fetch("/api/users?user_id=" + ID);
-      const json = await res.json();
-      setData(json);
+      if (res.status === 200) {
+        const json = await res.json();
+        setData(json);
+      } else {
+        console.log("error");
+      }
     };
     fetchData();
   }, []);
@@ -24,16 +28,6 @@ const EditUser = ({ params }: { params: { id: string } }) => {
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setNewData({ ...newData, [name]: value });
-  };
-
-  const handleEmailVerificationChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (e.target.value === "true") {
-      setNewData({ ...newData, emailVerified: true });
-    } else {
-      setNewData({ ...newData, emailVerified: false });
-    }
   };
 
   useEffect(() => {
@@ -105,60 +99,12 @@ const EditUser = ({ params }: { params: { id: string } }) => {
                 onChange={handleChange}
               />
             </div>
-            <div className="flex gap-2 w-2/5">
-              <div className="px-6">Email Verification:</div>
-              <label>Verified</label>
-              <input
-                name="emailVerified"
-                type="radio"
-                value="true"
-                checked={
-                  newData?.emailVerified
-                    ? newData?.emailVerified === true
-                    : data?.emailVerified
-                }
-                onChange={(e) => handleEmailVerificationChange(e)}
-              />
-
-              <label>Not Verified</label>
-              <input
-                name="emailVerified"
-                type="radio"
-                value="false"
-                checked={
-                  newData?.emailVerified
-                    ? newData?.emailVerified === false
-                    : !data?.emailVerified
-                }
-                onChange={(e) => handleEmailVerificationChange(e)}
-              />
-            </div>
             <div className="flex justify-between w-2/5">
-              <label className="px-6">About Me:</label>
+              <label className="px-6">About:</label>
               <input
-                name="aboutMe"
+                name="about"
                 type="text"
-                defaultValue={data?.aboutMe || ""}
-                className="bg-[#fff]/20 border-yellow-500 border-2 px-1"
-                onChange={handleChange}
-              />
-            </div>
-            <div className="flex justify-between w-2/5">
-              <label className="px-6">State:</label>
-              <input
-                name="state"
-                type="text"
-                defaultValue={data?.state || ""}
-                className="bg-[#fff]/20 border-yellow-500 border-2 px-1"
-                onChange={handleChange}
-              />
-            </div>
-            <div className="flex justify-between w-2/5">
-              <label className="px-6">Country:</label>
-              <input
-                name="country"
-                type="text"
-                defaultValue={data?.country || ""}
+                defaultValue={data?.about || ""}
                 className="bg-[#fff]/20 border-yellow-500 border-2 px-1"
                 onChange={handleChange}
               />

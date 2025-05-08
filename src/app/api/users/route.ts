@@ -20,10 +20,11 @@ export async function GET(req: NextRequest) {
 
     // api/users?user_id=<insert id> to get a specific user
     if (user_id) {
-      const user = Users.findOne(
+      const user = await Users.findOne(
         { _id: new ObjectId(user_id) },
         { projection: { password: 0 } }
       );
+      console.log(user);
       if (user) {
         return NextResponse.json(user, { status: 200 });
       } else {

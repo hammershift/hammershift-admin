@@ -46,24 +46,8 @@ const ShowUser = ({ params }: { params: { id: string } }) => {
           <p className="px-3">{userData.email}</p>
         </div>
         <div className="flex justify-between w-1/2 mx-4 my-2 max-lg:w-full">
-          <h4>Email Verified:</h4>
-          {userData.emailVerified ? (
-            <p className="px-3">Verified</p>
-          ) : (
-            <p className="px-3">Not Verified</p>
-          )}
-        </div>
-        <div className="flex justify-between w-1/2 mx-4 my-2 max-lg:w-full">
           <h4>About:</h4>
-          <p className="px-3">{userData.aboutMe}</p>
-        </div>
-        <div className="flex justify-between w-1/2 mx-4 my-2 max-lg:w-full">
-          <h4>State:</h4>
-          <p className="px-3">{userData.state}</p>
-        </div>
-        <div className="flex justify-between w-1/2 mx-4 my-2 max-lg:w-full">
-          <h4>Country:</h4>
-          <p className="px-3">{userData.country}</p>
+          <p className="px-3">{userData.about}</p>
         </div>
       </div>
       {data?.user.role !== "guest" && data?.user.role !== "moderator" ? (

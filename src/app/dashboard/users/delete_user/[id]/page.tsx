@@ -56,20 +56,8 @@ const DeleteUser = ({ params }: { params: { id: string } }) => {
         <p>{data.email}</p>
       </div>
       <div className="flex justify-between w-1/3 mx-4 my-2">
-        <h4>Email Verified:</h4>
-        {data.emailVerified ? <p>Verified</p> : <p>Not Verified</p>}
-      </div>
-      <div className="flex justify-between w-1/3 mx-4 my-2">
         <h4>About:</h4>
-        <p>{data.aboutMe}</p>
-      </div>
-      <div className="flex justify-between w-1/3 mx-4 my-2">
-        <h4>State:</h4>
-        <p>{data.state}</p>
-      </div>
-      <div className="flex justify-between w-1/3 mx-4 my-2">
-        <h4>Country:</h4>
-        <p>{data.country}</p>
+        <p>{data.about}</p>
       </div>
       <div className="flex mt-4 gap-4">
         <button className="btn-transparent-red" onClick={handleDelete}>
