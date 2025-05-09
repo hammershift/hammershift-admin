@@ -13,8 +13,9 @@ export interface Prediction {
 
 const predictionsSchema = new Schema(
   {
-    carId: { type: String, required: true },
-    carObjectId: { type: Types.ObjectId, required: true },
+    // carId: { type: String, required: true },
+    // carObjectId: { type: Types.ObjectId, required: true },
+    auction_id: { type: String, required: true },
     predictedPrice: { type: Number, required: true },
     reasoning: { type: String, required: false },
     predictionType: { type: String, required: true },
