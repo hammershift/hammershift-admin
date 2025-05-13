@@ -43,6 +43,7 @@ const CreateAIAgentPage = () => {
         if (!systemInstruction) {
           setEmptyInputError(true);
         }
+
         setNewAgent({
           ...newAgent,
           systemInstruction: systemInstruction,

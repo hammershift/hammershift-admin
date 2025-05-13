@@ -75,7 +75,7 @@ const auctionSchema = new Schema(
     views: { type: Number, default: 0 },
     watchers: { type: Number, default: 0 },
     comments: { type: Number, default: 0 },
-    description: { type: [String] },
+    description: { type: Schema.Types.Mixed },
     images_list: [imageSchema],
     listing_details: { type: [String] },
     sort: sortSchema,

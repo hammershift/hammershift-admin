@@ -4,7 +4,6 @@ import Auctions from "@/app/models/auction.model";
 import { SortOrder } from "mongoose";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
-
 export const dynamic = "force-dynamic";
 
 interface SortQuery {
@@ -19,8 +18,7 @@ interface SortQuery {
 
 export async function GET(req: NextRequest) {
   try {
-    const client = await clientPromise;
-    const db = client.db();
+    await connectToDB();
 
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
     const limit = Number(req.nextUrl.searchParams.get("limit")) || 7;
@@ -37,12 +35,10 @@ export async function GET(req: NextRequest) {
       req.nextUrl.searchParams.get("sort") || "Newly Listed";
 
     if (tournamentID) {
-      const tournamentAuctions = await db
-        .collection("auctions")
-        .find({
-          tournamentID: new ObjectId(tournamentID),
-        })
-        .toArray();
+      const tournamentAuctions = await Auctions.find({
+        tournamentID: new ObjectId(tournamentID),
+      });
+
       if (tournamentAuctions) {
         return NextResponse.json({
           total: tournamentAuctions.length,
@@ -71,110 +67,107 @@ export async function GET(req: NextRequest) {
     //(search queries are case insensitive) api/auctions/filter?search=land%20cruiser&completed=true
 
     if (searchedKeyword) {
-      const searchedCars = await db
-        .collection("auctions")
-        .aggregate([
-          {
-            $search: {
-              index: "auctionSearchAutocomplete",
-              text: {
-                query: searchedKeyword,
-                path: "attributes.value",
-                fuzzy: {
-                  prefixLength: 3,
+      const searchedCars = await Auctions.aggregate([
+        {
+          $search: {
+            index: "auctionSearchAutocomplete",
+            text: {
+              query: searchedKeyword,
+              path: "attributes.value",
+              fuzzy: {
+                prefixLength: 3,
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            auction_id: 1,
+            make: {
+              $arrayElemAt: [
+                {
+                  $filter: {
+                    input: "$attributes",
+                    cond: { $eq: ["$$this.key", "make"] },
+                  },
                 },
-              },
+                0,
+              ],
             },
-          },
-          {
-            $project: {
-              _id: 0,
-              auction_id: 1,
-              make: {
-                $arrayElemAt: [
-                  {
-                    $filter: {
-                      input: "$attributes",
-                      cond: { $eq: ["$$this.key", "make"] },
-                    },
+            model: {
+              $arrayElemAt: [
+                {
+                  $filter: {
+                    input: "$attributes",
+                    cond: { $eq: ["$$this.key", "model"] },
                   },
-                  0,
-                ],
-              },
-              model: {
-                $arrayElemAt: [
-                  {
-                    $filter: {
-                      input: "$attributes",
-                      cond: { $eq: ["$$this.key", "model"] },
-                    },
-                  },
-                  0,
-                ],
-              },
-              year: {
-                $arrayElemAt: [
-                  {
-                    $filter: {
-                      input: "$attributes",
-                      cond: { $eq: ["$$this.key", "year"] },
-                    },
-                  },
-                  0,
-                ],
-              },
-              price: {
-                $arrayElemAt: [
-                  {
-                    $filter: {
-                      input: "$attributes",
-                      cond: { $eq: ["$$this.key", "price"] },
-                    },
-                  },
-                  0,
-                ],
-              },
-              bids: {
-                $arrayElemAt: [
-                  {
-                    $filter: {
-                      input: "$attributes",
-                      cond: { $eq: ["$$this.key", "bids"] },
-                    },
-                  },
-                  0,
-                ],
-              },
-              deadline: {
-                $arrayElemAt: [
-                  {
-                    $filter: {
-                      input: "$attributes",
-                      cond: { $eq: ["$$this.key", "deadline"] },
-                    },
-                  },
-                  0,
-                ],
-              },
-              image: 1,
-              isActive: 1,
+                },
+                0,
+              ],
             },
-          },
-          {
-            $project: {
-              auction_id: 1,
-              make: "$make.value",
-              model: "$model.value",
-              year: "$year.value",
-              price: "$price.value",
-              bids: "$bids.value",
-              deadline: "$deadline.value",
-              image: "$image",
-              isActive: "$isActive",
+            year: {
+              $arrayElemAt: [
+                {
+                  $filter: {
+                    input: "$attributes",
+                    cond: { $eq: ["$$this.key", "year"] },
+                  },
+                },
+                0,
+              ],
             },
+            price: {
+              $arrayElemAt: [
+                {
+                  $filter: {
+                    input: "$attributes",
+                    cond: { $eq: ["$$this.key", "price"] },
+                  },
+                },
+                0,
+              ],
+            },
+            bids: {
+              $arrayElemAt: [
+                {
+                  $filter: {
+                    input: "$attributes",
+                    cond: { $eq: ["$$this.key", "bids"] },
+                  },
+                },
+                0,
+              ],
+            },
+            deadline: {
+              $arrayElemAt: [
+                {
+                  $filter: {
+                    input: "$attributes",
+                    cond: { $eq: ["$$this.key", "deadline"] },
+                  },
+                },
+                0,
+              ],
+            },
+            image: 1,
+            isActive: 1,
           },
-        ])
-        .toArray();
+        },
+        {
+          $project: {
+            auction_id: 1,
+            make: "$make.value",
+            model: "$model.value",
+            year: "$year.value",
+            price: "$price.value",
+            bids: "$bids.value",
+            deadline: "$deadline.value",
+            image: "$image",
+            isActive: "$isActive",
+          },
+        },
+      ]);
 
       return NextResponse.json({
         total: searchedCars.length,
@@ -269,20 +262,16 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const totalCars = await db.collection("auctions").countDocuments(query);
+    const totalCars = await Auctions.countDocuments(query);
 
-    const filteredCars = await db
-      .collection("auctions")
-      .find({
-        $and: [query],
-      })
+    const filteredCars = await Auctions.find({
+      $and: [query],
+    })
       .limit(limit)
       .skip(offset)
       .sort(sort as { [key: string]: SortOrder | { $meta: any } });
 
-    const arrayCars = await filteredCars.toArray();
-
-    return NextResponse.json({ total: totalCars, cars: arrayCars });
+    return NextResponse.json({ total: totalCars, cars: filteredCars });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: "Internal server error" });

@@ -101,8 +101,7 @@ export async function POST(req: NextRequest) {
           );
 
           const prediction = await Predictions.create({
-            carId: auction_id,
-            carObjectId: auction._id,
+            auction_id: auction.auction_id,
             predictedPrice: response.predictedPrice,
             reasoning: response.reasoning,
             predictionType: "free_play",
