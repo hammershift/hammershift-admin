@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import AuctionsPage from "@/app/ui/dashboard/auctionsPage/AuctionsPage";
+import React, { useEffect, useState } from "react";
 import { getCarsWithFilter } from "../../lib/data";
 // import sampleData from "../../sample_data.json";
 
@@ -64,7 +64,7 @@ const Auctions = () => {
   }, [searchedKeyword]);
 
   const handleLoadMore = () => {
-    setDisplayCount((prevCount) => prevCount + 7);
+    setDisplayCount((prevCount) => prevCount + 50);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
