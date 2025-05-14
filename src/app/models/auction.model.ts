@@ -1,5 +1,13 @@
-import mongoose, { Document, Schema, model, models } from "mongoose";
-
+import mongoose, {
+  Document,
+  Schema,
+  model,
+  models,
+  PaginateModel,
+  AggregatePaginateModel,
+} from "mongoose";
+import aggregatePaginate from "mongoose-aggregate-paginate-v2";
+import paginate from "mongoose-paginate-v2";
 const attributeSchema = new Schema({
   key: { type: String, required: true },
   value: { type: Schema.Types.Mixed, required: true },
@@ -102,7 +110,18 @@ const auctionSchema = new Schema(
   { collection: "auctions", timestamps: true }
 );
 
+auctionSchema.plugin(aggregatePaginate);
+auctionSchema.plugin(paginate);
+
+type AuctionModelType =
+  | AggregatePaginateModel<Auction>
+  | PaginateModel<Auction>;
 const Auctions =
-  mongoose.models.auctions || mongoose.model("auctions", auctionSchema);
+  (mongoose.models.auctions as AuctionModelType) ||
+  mongoose.model<Auction, AuctionModelType>(
+    "auctions",
+    auctionSchema,
+    "auctions"
+  );
 
 export default Auctions;
