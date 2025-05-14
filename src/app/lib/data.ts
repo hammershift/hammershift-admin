@@ -5,8 +5,10 @@ export interface getCarsWithFilterProps {
   category?: string[];
   era?: string[];
   location?: string[];
+  offset?: number;
   limit?: number;
   sort?: string;
+  search?: string;
 }
 
 export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
@@ -33,10 +35,11 @@ export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
       const list = await response.json();
       let auctions = {
         total: list.total,
+        totalPages: list.totalPages,
         cars: list.cars.map((data: any) => ({
           _id: data._id,
           auction_id: data.auction_id,
-          description: [...data.description],
+          // description: [...data.description],
           images_list: [...data.images_list],
           listing_details: [...data.listing_details],
           image: data.image,

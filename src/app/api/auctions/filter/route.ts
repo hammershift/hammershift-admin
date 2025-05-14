@@ -1,6 +1,7 @@
 import clientPromise from "@/app/lib/mongoDB";
 import connectToDB from "@/app/lib/mongoose";
-import Auctions from "@/app/models/auction.model";
+import Auctions, { Auction } from "@/app/models/auction.model";
+import { AggregatePaginateModel, PaginateModel } from "mongoose";
 import { SortOrder } from "mongoose";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
@@ -49,6 +50,10 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    const options = {
+      offset: offset,
+      limit: limit,
+    };
     if (completed) {
       if (completed === "true") {
         completed = [2];
@@ -67,7 +72,7 @@ export async function GET(req: NextRequest) {
     //(search queries are case insensitive) api/auctions/filter?search=land%20cruiser&completed=true
 
     if (searchedKeyword) {
-      const searchedCars = await Auctions.aggregate([
+      const aggregate = Auctions.aggregate([
         {
           $search: {
             index: "auctionSearchAutocomplete",
@@ -84,6 +89,14 @@ export async function GET(req: NextRequest) {
           $project: {
             _id: 0,
             auction_id: 1,
+            attributes: 1,
+            images_list: 1,
+            listing_details: 1,
+            page_url: 1,
+            image: 1,
+            isActive: 1,
+            website: 1,
+            display: 1,
             make: {
               $arrayElemAt: [
                 {
@@ -117,61 +130,64 @@ export async function GET(req: NextRequest) {
                 0,
               ],
             },
-            price: {
-              $arrayElemAt: [
-                {
-                  $filter: {
-                    input: "$attributes",
-                    cond: { $eq: ["$$this.key", "price"] },
-                  },
-                },
-                0,
-              ],
-            },
-            bids: {
-              $arrayElemAt: [
-                {
-                  $filter: {
-                    input: "$attributes",
-                    cond: { $eq: ["$$this.key", "bids"] },
-                  },
-                },
-                0,
-              ],
-            },
-            deadline: {
-              $arrayElemAt: [
-                {
-                  $filter: {
-                    input: "$attributes",
-                    cond: { $eq: ["$$this.key", "deadline"] },
-                  },
-                },
-                0,
-              ],
-            },
-            image: 1,
-            isActive: 1,
+            // price: {
+            //   $arrayElemAt: [
+            //     {
+            //       $filter: {
+            //         input: "$attributes",
+            //         cond: { $eq: ["$$this.key", "price"] },
+            //       },
+            //     },
+            //     0,
+            //   ],
+            // },
+            // bids: {
+            //   $arrayElemAt: [
+            //     {
+            //       $filter: {
+            //         input: "$attributes",
+            //         cond: { $eq: ["$$this.key", "bids"] },
+            //       },
+            //     },
+            //     0,
+            //   ],
+            // },
+            // deadline: {
+            //   $arrayElemAt: [
+            //     {
+            //       $filter: {
+            //         input: "$attributes",
+            //         cond: { $eq: ["$$this.key", "deadline"] },
+            //       },
+            //     },
+            //     0,
+            //   ],
+            // },
           },
         },
-        {
-          $project: {
-            auction_id: 1,
-            make: "$make.value",
-            model: "$model.value",
-            year: "$year.value",
-            price: "$price.value",
-            bids: "$bids.value",
-            deadline: "$deadline.value",
-            image: "$image",
-            isActive: "$isActive",
-          },
-        },
+        // {
+        //   $project: {
+        //     auction_id: 1,
+        //     make: "$make.value",
+        //     model: "$model.value",
+        //     year: "$year.value",
+        //     price: "$price.value",
+        //     bids: "$bids.value",
+        //     deadline: "$deadline.value",
+        //     image: "$image",
+        //     isActive: "$isActive",
+        //   },
+        // },
       ]);
 
+      const searchedCars = await (
+        Auctions as AggregatePaginateModel<Auction>
+      ).aggregatePaginate(aggregate, { ...options, sort: { createdAt: -1 } });
+
       return NextResponse.json({
-        total: searchedCars.length,
-        cars: searchedCars,
+        total: searchedCars.totalDocs,
+        totalPages: searchedCars.totalPages,
+        cars: searchedCars.docs,
       });
     }
 
@@ -262,16 +278,28 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const totalCars = await Auctions.countDocuments(query);
+    //const totalCars = await Auctions.countDocuments(query);
 
-    const filteredCars = await Auctions.find({
-      $and: [query],
-    })
-      .limit(limit)
-      .skip(offset)
-      .sort(sort as { [key: string]: SortOrder | { $meta: any } });
+    // const filteredCars = await Auctions.find({
+    //   $and: [query],
+    // })
+    //   .limit(limit)
+    //   .skip(offset)
+    //   .sort(sort as { [key: string]: SortOrder | { $meta: any } });
 
-    return NextResponse.json({ total: totalCars, cars: filteredCars });
+    const filteredCars = await (Auctions as PaginateModel<Auction>).paginate(
+      query,
+      {
+        ...options,
+        sort: sort as { [key: string]: SortOrder | { $meta: any } },
+      }
+    );
+
+    return NextResponse.json({
+      total: filteredCars.totalDocs,
+      cars: filteredCars.docs,
+      totalPages: filteredCars.totalPages,
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: "Internal server error" });
