@@ -9,6 +9,7 @@ export interface getCarsWithFilterProps {
   limit?: number;
   sort?: string;
   search?: string;
+  isPlatformTab?: boolean;
 }
 
 export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
@@ -71,6 +72,20 @@ export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
     }
   } catch (err) {
     console.error(err);
+  }
+};
+
+export const getPredictions = async (auction_id: string) => {
+  try {
+    const response = await fetch(`/api/predictions?auction_id=${auction_id}`);
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      console.error(`Failed to fetch predictions for ${auction_id}`);
+    }
+  } catch (e) {
+    console.error(e);
   }
 };
 
@@ -355,6 +370,8 @@ export const updateAuctionStatus = async (
 
   if (!res.ok) {
     throw new Error("Failed to update auction status");
+  } else {
+    return res.json();
   }
 };
 
@@ -368,6 +385,19 @@ export const promptAgentPredictions = async (auction_id: string) => {
 
   if (!res.ok) {
     throw new Error("Failed to prompt Vertex AI");
+  }
+};
+
+export const deleteAgentPrediction = async (id: string) => {
+  const res = await fetch(`/api/predictions?prediction_id=${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to delete prediction");
   }
 };
 
