@@ -30,29 +30,18 @@ const Auctions = () => {
   const [searchedKeyword, setSearchedKeyword] = useState<string>("");
   const [oldKeyword, setOldKeyword] = useState<string>("");
   const [searchedData, setSearchedData] = useState<CarData[]>([]);
-  const [currentState, setCurrentState] = useState<string>("all");
+  const [currentTab, setCurrentTab] = useState<string>("external");
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // if (searchedKeyword.length) {
-        //   console.log(
-        //     `Fetching searched auctions for keyword: ${searchedKeyword}`
-        //   );
-        //   const response = await fetch(
-        //     `/api/auctions/filter?search=${searchedKeyword}`
-        //   );
-        //   const data = await response.json();
-
-        //   setTotalCars(data.total);
-        //   setTotalPages(data.totalPages);
-        //   setCarData(data.cars as CarData[]);
-        //   setIsLoading(false);
-        // } else {
         setIsLoading(true);
+
+        //load auction for external tab
         const data = await getCarsWithFilter({
           search: searchedKeyword,
           offset: searchedKeyword !== oldKeyword ? 0 : (currentPage - 1) * 9,
           limit: displayCount,
+          isPlatformTab: currentTab === "platform",
         });
         if (searchedKeyword !== oldKeyword) {
           setOldKeyword(searchedKeyword);
@@ -61,18 +50,18 @@ const Auctions = () => {
           setTotalCars(data.total);
           setTotalPages(data.totalPages);
           setCarData(data.cars as CarData[]);
-          setIsLoading(false);
         } else {
-          setIsLoading(false);
           console.error("Unexpected data structure:", data);
         }
         //}
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
-  }, [currentPage, searchedKeyword]);
+  }, [currentPage, searchedKeyword, currentTab]);
 
   // useEffect(() => {
   //   const fetchSearchedAuctions = async () => {};
@@ -93,13 +82,11 @@ const Auctions = () => {
   return (
     <AuctionsPage
       auctionData={carData}
-      handleLoadMore={handleLoadMore}
       currentPage={currentPage}
+      currentTab={currentTab}
+      setCurrentTab={setCurrentTab}
       totalPages={totalPages}
       isLoading={isLoading}
-      displayCount={displayCount}
-      totalCars={totalCars}
-      searchedData={searchedData}
       searchedKeyword={searchedKeyword}
       setCurrentPage={setCurrentPage}
       handleSearch={handleSearch}
