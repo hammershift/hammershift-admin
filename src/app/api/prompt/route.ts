@@ -46,9 +46,7 @@ export async function POST(req: NextRequest) {
         //check if agent has already submitted a prediction
         const existingPrediction = await Predictions.findOne({
           auction_id: auction_id,
-          user: {
-            userId: agent._id,
-          },
+          "user.userId": agent._id,
         });
 
         if (existingPrediction) {
