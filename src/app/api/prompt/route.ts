@@ -46,9 +46,7 @@ export async function POST(req: NextRequest) {
         //check if agent has already submitted a prediction
         const existingPrediction = await Predictions.findOne({
           auction_id: auction_id,
-          user: {
-            userId: agent._id,
-          },
+          "user.userId": agent._id,
         });
 
         if (existingPrediction) {
@@ -101,8 +99,7 @@ export async function POST(req: NextRequest) {
           );
 
           const prediction = await Predictions.create({
-            carId: auction_id,
-            carObjectId: auction._id,
+            auction_id: auction.auction_id,
             predictedPrice: response.predictedPrice,
             reasoning: response.reasoning,
             predictionType: "free_play",
