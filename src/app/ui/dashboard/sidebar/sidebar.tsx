@@ -80,17 +80,17 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           : []),
       ],
     },
-    {
-      title: "User",
-      list: [
-        {
-          title: "Settings",
-          path: "/dashboard/settings",
-          icon: <SettingsIcon />,
-        },
-        { title: "Log-out", path: "/logout", icon: <LogoutIcon /> },
-      ],
-    },
+    // {
+    //   title: "User",
+    //   list: [
+    //     {
+    //       title: "Settings",
+    //       path: "/dashboard/settings",
+    //       icon: <SettingsIcon />,
+    //     },
+    //     { title: "Log-out", path: "/logout", icon: <LogoutIcon /> },
+    //   ],
+    // },
   ];
 
   return (
