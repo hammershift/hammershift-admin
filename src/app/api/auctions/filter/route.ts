@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
     const limit = Number(req.nextUrl.searchParams.get("limit")) || 7;
     const searchedKeyword = req.nextUrl.searchParams.get("search");
+    const isPlatformTab = req.nextUrl.searchParams.get("isPlatformTab");
     const tournamentID = req.nextUrl.searchParams.get("tournament_id");
     let completed = req.nextUrl.searchParams.get("completed") || [1];
     let era: string | string[] = req.nextUrl.searchParams.get("era") || "All";
@@ -84,6 +85,12 @@ export async function GET(req: NextRequest) {
               },
             },
           },
+        },
+        {
+          $match:
+            isPlatformTab === "true"
+              ? { isActive: true }
+              : { isActive: { $exists: true } },
         },
         {
           $project: {
@@ -247,7 +254,10 @@ export async function GET(req: NextRequest) {
     //use "%20" or " " for 2-word queries
     //for ex. api/cars/filter?make=Porsche$Ferrari&location=New%20York$North%20Carolina&sort=Most%20Bids
     //if you don't add a sort query, it automatically defaults to sorting by Newly Listed for now
-    let query: any = { attributes: { $all: [] } };
+    let query: any = {
+      attributes: { $all: [] },
+      isActive: isPlatformTab === "true" ? true : { $exists: true },
+    };
 
     if (make !== "All") {
       query.attributes.$all.push({
