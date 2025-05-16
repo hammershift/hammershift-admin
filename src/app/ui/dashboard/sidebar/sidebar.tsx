@@ -9,6 +9,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
+import CommentIcon from "@mui/icons-material/Comment";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SettingsIcon from "@mui/icons-material/Settings";
 import GroupIcon from "@mui/icons-material/Group";
@@ -17,7 +18,7 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 
 //images
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import hammershiftLogo from "../../../../../public/images/hammershift.svg";
+import velocityMarketsLogo from "../../../../../public/images/velocity-markets-logo.png";
 import userImg from "../../../../../public/images/user.svg";
 
 const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
@@ -45,6 +46,11 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           icon: <DirectionsCarIcon />,
         },
         { title: "Users", path: "/dashboard/users", icon: <PersonIcon /> },
+        {
+          title: "Comments",
+          path: "/dashboard/comments",
+          icon: <CommentIcon />,
+        },
       ],
     },
     {
@@ -55,39 +61,21 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           path: "/dashboard/admins",
           icon: <SupervisorAccountIcon />,
         },
-        ...(role === "owner"
-          ? [
-              {
-                title: "Create New Admin",
-                path: "/dashboard/create-new-admin",
-                icon: <PersonAddIcon />,
-              },
-            ]
-          : []),
         {
           title: "Agents",
           path: "/dashboard/agents",
           icon: <GroupIcon />,
         },
-        ...(role === "owner" || role === "guest"
-          ? [
-              {
-                title: "Create AI Agent",
-                path: "/dashboard/create-new-agent",
-                icon: <GroupAddIcon />,
-              },
-            ]
-          : []),
       ],
     },
     {
       title: "User",
       list: [
-        {
-          title: "Settings",
-          path: "/dashboard/settings",
-          icon: <SettingsIcon />,
-        },
+        // {
+        //   title: "Settings",
+        //   path: "/dashboard/settings",
+        //   icon: <SettingsIcon />,
+        // },
         { title: "Log-out", path: "/logout", icon: <LogoutIcon /> },
       ],
     },
@@ -101,8 +89,9 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
 
       <div className="top-auto">
         <Image
-          alt="hammershift-logo"
-          src={hammershiftLogo}
+          alt="velocity-markets-logo"
+          src={velocityMarketsLogo}
+          width={250}
           className="m-1 mb-5"
         />
         <div className="flex flex-row items-center gap-5 mb-5">

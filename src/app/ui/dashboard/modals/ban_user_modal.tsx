@@ -4,6 +4,7 @@ interface BanUserModalProps {
   isOpen: boolean;
   onClose: Function;
   username: string;
+  bannedStatus: boolean;
   onConfirm: (_id: string) => void;
   id: string;
 }
@@ -12,6 +13,7 @@ const BanUserModal: React.FC<BanUserModalProps> = ({
   isOpen,
   onClose,
   username,
+  bannedStatus,
   onConfirm,
   id,
 }) => {
@@ -29,14 +31,15 @@ const BanUserModal: React.FC<BanUserModalProps> = ({
         </button>
         <div className="flex flex-col justify-evenly p-5 bg-sky-950">
           <p>
-            Are you sure you want to ban{" "}
+            Are you sure you want to {bannedStatus ? "unban " : "ban "}
             <span className="font-semibold text-yellow-400">{username}</span>?
           </p>
           <div className="bg-slate-300 p-2 m-2 text-sm">
             <p className="text-lg font-bold text-red-700">Warning</p>
             <p className="text-red-700">
-              By banning this account, this user will no longer have access to
-              the Hammershift App
+              {bannedStatus
+                ? "By unbanning this account, this user will have access again to the Hammershift App"
+                : "By banning this account, this user will no longer have access to the Hammershift App"}
             </p>
           </div>
           <div className="flex justify-evenly">

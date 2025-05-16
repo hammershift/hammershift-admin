@@ -166,16 +166,28 @@ export const getUsersWithSearch = async (searchString: string) => {
   return data;
 };
 
-// edit user and delete user
+// edit and ban user
 export const editUserWithId = async (id: string, body: any) => {
   const res = await fetch(`/api/users?user_id=${id}`, {
     method: "PUT",
     body: JSON.stringify(body),
   });
   if (res.status === 200) {
-    return { message: "Edit Successful" };
+    return { user: await res.json(), status: res.status };
   } else {
     console.error("Edit Unsuccessful");
+  }
+};
+
+export const deleteUserWithId = async (id: string) => {
+  const res = await fetch(`/api/users?user_id=${id}`, {
+    method: "DELETE",
+  });
+
+  if (res.status === 200) {
+    return { status: res.status };
+  } else {
+    console.error("Delete Unsuccessful");
   }
 };
 
@@ -447,14 +459,14 @@ export const toggleAuctionDisplay = async (
 //get all comments
 export const getAllComments = async (limit: number) => {
   const response = await fetch(`/api/comments?limit=${limit}`);
-  const data = response.json();
-
+  const data = await response.json();
+  console.log(data);
   return data;
 };
 
 export const getSortedComments = async (limit: number, sort: string) => {
   const response = await fetch(`/api/comments?limit=${limit}&sort=${sort}`);
-  const data = response.json();
+  const data = await response.json();
   return data;
 };
 
@@ -474,13 +486,13 @@ export const deleteMultipleComments = async (ids: string[]) => {
 
 export const getCommentReplies = async (id: string) => {
   const response = await fetch(`/api/comments?parent_id=${id}`);
-  const data = response.json();
+  const data = await response.json();
   return data;
 };
 
 export const getParentComment = async (id: string) => {
   const response = await fetch(`/api/comments?id=${id}`);
-  const data = response.json();
+  const data = await response.json();
   return data;
 };
 

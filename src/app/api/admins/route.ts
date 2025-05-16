@@ -51,44 +51,175 @@ export async function POST(req: NextRequest) {
     const { first_name, last_name, email, username, password, role } =
       await req.json();
 
-    const existingAdmin = await Admins.findOne({ username });
-
-    if (existingAdmin) {
-      return NextResponse.json({ message: "Admin already exists" });
-    } else if (
-      !first_name ||
-      !last_name ||
-      !email ||
-      !username ||
-      !password ||
-      !role
-    ) {
-      throw new Error("Please fill out required fields");
-    } else {
-      const hash = await bcrypt.hash(password, 10);
-      const newAdminData = {
-        _id: new Types.ObjectId(),
-        first_name,
-        last_name,
-        email,
-        username,
-        password: hash,
-        role,
-        createdAt: new Date(),
-      };
-
-      const newAdmin = new Admins(newAdminData);
-      await newAdmin.save();
-
-      console.log("Received email:", email);
-      console.log("Received role:", role);
-      console.log("Created Admin:", newAdmin);
-      return NextResponse.json({ message: "Admin account created" });
+    const existingEmail = await Admins.findOne({ email });
+    if (existingEmail) {
+      return NextResponse.json(
+        { message: "Email is already in use" },
+        { status: 400 }
+      );
     }
+
+    const existingUsername = await Admins.findOne({ username });
+    if (existingUsername) {
+      return NextResponse.json(
+        { message: "Username is already taken" },
+        { status: 400 }
+      );
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    const newAdminData = {
+      _id: new Types.ObjectId(),
+      first_name,
+      last_name,
+      email,
+      username,
+      password: hash,
+      role,
+      createdAt: new Date(),
+    };
+
+    const newAdmin = new Admins(newAdminData);
+    await newAdmin.save();
+
+    console.log("Received email:", email);
+    console.log("Received username:", username);
+    console.log("Received role:", role);
+    console.log("Created Admin:", newAdmin);
+    return NextResponse.json({ message: "Admin account created" });
   } catch (error) {
     return NextResponse.json({
       message: "Internal server error",
       error: error,
     });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (session?.user.role !== "owner") {
+    return NextResponse.json(
+      {
+        message:
+          "Unauthorized! Your role does not have access to this function",
+      },
+      { status: 400 }
+    );
+  }
+
+  console.log("User is Authorized to update admin!");
+
+  try {
+    await connectToDB();
+    const { _id, first_name, last_name, email, username, password, role } =
+      await req.json();
+
+    if (!_id) {
+      return NextResponse.json(
+        { message: "Admin ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const existingAdmin = await Admins.findById(_id);
+    if (!existingAdmin) {
+      return NextResponse.json({ message: "Admin not found" }, { status: 404 });
+    }
+
+    const emailConflict = await Admins.findOne({ email, _id: { $ne: _id } });
+    if (emailConflict) {
+      return NextResponse.json(
+        { message: "Email is already in use" },
+        { status: 400 }
+      );
+    }
+
+    const usernameConflict = await Admins.findOne({
+      username,
+      _id: { $ne: _id },
+    });
+    if (usernameConflict) {
+      return NextResponse.json(
+        { message: "Username is already taken" },
+        { status: 400 }
+      );
+    }
+
+    const updateData: any = {
+      first_name,
+      last_name,
+      email,
+      username,
+      role,
+    };
+
+    if (password || password != "") {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    await Admins.updateOne({ _id }, { $set: updateData });
+
+    console.log("Updated Admin ID:", _id);
+    return NextResponse.json({ message: "Admin account updated" });
+  } catch (error) {
+    console.error("Error updating admin:", error);
+    return NextResponse.json(
+      {
+        message: "Internal server error",
+        error,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (session?.user.role !== "owner") {
+    return NextResponse.json(
+      { message: "Unauthorized. Only owners can delete admins." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    await connectToDB();
+
+    const { _id } = await req.json();
+
+    if (!_id) {
+      return NextResponse.json(
+        { message: "Admin ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const existingAdmin = await Admins.findById(_id);
+
+    if (!existingAdmin) {
+      return NextResponse.json({ message: "Admin not found" }, { status: 404 });
+    }
+
+    if (session.user._id === _id) {
+      return NextResponse.json(
+        { message: "You cannot delete your own account." },
+        { status: 403 }
+      );
+    }
+
+    await Admins.deleteOne({ _id });
+
+    return NextResponse.json(
+      { message: "Admin account deleted" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting admin:", error);
+    return NextResponse.json(
+      { message: "Internal server error", error },
+      { status: 500 }
+    );
   }
 }

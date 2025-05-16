@@ -56,9 +56,9 @@ function Layout({ children }: { children: React.ReactNode }) {
           </div>
         ) : null}
         <div className="flex-1 bg-slate-900 m-1 p-1 pt-1 flex flex-col w-auto h-full">
-          <div className="w-auto">
+          {/* <div className="w-auto">
             <Navbar openSidebar={openSidebar} />
-          </div>
+          </div> */}
           <div className="w-auto">{children}</div>
         </div>
       </div>

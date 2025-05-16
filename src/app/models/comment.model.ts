@@ -1,52 +1,94 @@
-import mongoose from 'mongoose';
+import mongoose, { model, models, Schema, Types } from "mongoose";
+export interface Comment {
+  _id: Types.ObjectId;
+  comment: string;
+  pageID: string;
+  pageType: string;
+  parentID?: Types.ObjectId;
+  user: {
+    userId: string;
+    username: string;
+    profilePicture?: string;
+  };
+  likes: [];
+  dislikes: [];
+  createdAt: Date;
+  isDeleted?: boolean;
+  deletedAt?: Date;
+}
 
-const commentSchema = new mongoose.Schema({
+const commentSchema = new Schema(
+  {
+    _id: { type: Types.ObjectId, required: true },
     comment: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
-    auctionID: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false,
+    pageID: {
+      type: String,
+      required: true,
     },
-    tournamentID: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false,
+    pageType: {
+      type: String,
+      required: true,
     },
     parentID: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false,
+      type: Types.ObjectId,
+      required: false,
     },
     user: {
-        type: Object,
+      userId: {
+        type: String,
         required: true,
-        properties: {
-            UserId: {
-                type: String,
-                required: true,
-            },
-            username: {
-                type: String,
-                required: true,
-            },
-            profilePicture: {
-                type: String,
-            },
-        }
-
+      },
+      username: {
+        type: String,
+        required: true,
+      },
+      profilePicture: {
+        type: String,
+      },
     },
-    likes: {
-        type: Array
-    },
-    dislikes: {
-        type: Array
-    },
+    likes: [
+      {
+        userId: {
+          type: String,
+          required: true,
+        },
+        username: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+    dislikes: [
+      {
+        userId: {
+          type: String,
+          required: true,
+        },
+        username: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
     createdAt: {
-        type: Date,
-        default: Date.now,
+      type: Date,
+      default: Date.now,
     },
-});
+    isDeleted: {
+      type: Boolean,
+      required: false,
+    },
+    deletedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { collection: "comments", timestamps: true }
+);
 
-const Comments = mongoose.models.Comment || mongoose.model('Comments', commentSchema);
+const Comments = models.comments || model<Comment>("comments", commentSchema);
 
 export default Comments;
