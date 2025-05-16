@@ -51,6 +51,7 @@ export interface Auction extends Document {
   image: string;
   page_url: string;
   isActive: boolean;
+  ended: boolean;
   attributes: AuctionAttributes[];
   views: number;
   watchers: number;
@@ -79,6 +80,7 @@ const auctionSchema = new Schema(
     image: { type: String, required: true },
     page_url: { type: String, required: true },
     isActive: { type: Boolean, default: false },
+    ended: { type: Boolean, default: false },
     attributes: [attributeSchema],
     views: { type: Number, default: 0 },
     watchers: { type: Number, default: 0 },
