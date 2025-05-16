@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
         {
           $match:
             isPlatformTab === "true"
-              ? { isActive: true }
+              ? { $or: [{ isActive: true }, { ended: true }] }
               : { isActive: { $exists: true } },
         },
         {
@@ -256,7 +256,14 @@ export async function GET(req: NextRequest) {
     //if you don't add a sort query, it automatically defaults to sorting by Newly Listed for now
     let query: any = {
       attributes: { $all: [] },
-      isActive: isPlatformTab === "true" ? true : { $exists: true },
+      $or: [
+        {
+          isActive: isPlatformTab === "true" ? true : { $exists: true },
+        },
+        {
+          ended: true,
+        },
+      ],
     };
 
     if (make !== "All") {
