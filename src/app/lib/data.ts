@@ -40,7 +40,7 @@ export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
         cars: list.cars.map((data: any) => ({
           _id: data._id,
           auction_id: data.auction_id,
-          // description: [...data.description],
+          description: [...data.description],
           images_list: [...data.images_list],
           listing_details: [...data.listing_details],
           image: data.image,
@@ -72,6 +72,31 @@ export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
     }
   } catch (err) {
     console.error(err);
+  }
+};
+
+export const editAuctionWithId = async (auction_id: string, editData: any) => {
+  try {
+    const response = await fetch(
+      `/api/auctions/edit?auction_id=${auction_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editData),
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      console.error(`Failed to edit auction ${auction_id}`);
+      throw new Error("Failed to edit auction!");
+    }
+  } catch (e) {
+    console.error(e);
   }
 };
 
