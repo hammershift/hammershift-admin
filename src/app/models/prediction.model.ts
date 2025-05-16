@@ -1,11 +1,15 @@
 import { Document, Schema, model, models, Types } from "mongoose";
 
 export interface Prediction {
+  _id: Types.ObjectId;
   predictedPrice: number;
   predictionType: string;
+  isActive: boolean;
+  refunded: boolean;
   user: {
     fullName: string;
     username: string;
+    role: string;
   };
   createdAt?: Date;
   updatedAt?: Date;
