@@ -173,6 +173,7 @@ export async function PUT(req: NextRequest) {
     );
   }
 }
+
 export async function DELETE(req: NextRequest) {
   const session = await getServerSession(authOptions);
 

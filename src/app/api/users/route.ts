@@ -24,7 +24,6 @@ export async function GET(req: NextRequest) {
         { _id: new ObjectId(user_id) },
         { projection: { password: 0 } }
       );
-      console.log(user);
       if (user) {
         return NextResponse.json(user, { status: 200 });
       } else {

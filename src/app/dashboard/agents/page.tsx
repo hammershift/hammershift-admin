@@ -13,7 +13,6 @@ const Agents = () => {
       const data = await getAgents();
 
       if (data && "agents" in data) {
-        console.log(data);
         setAdminData(data.agents as AgentData[]);
       } else {
         console.error("Unexpected data structure:", data);
@@ -27,7 +26,7 @@ const Agents = () => {
     fetchData();
   }, []);
 
-  return <AgentsPage data={adminData} />;
+  return <AgentsPage agentData={adminData} fetchData={fetchData} />;
 };
 
 export default Agents;

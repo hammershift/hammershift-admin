@@ -66,15 +66,6 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           path: "/dashboard/agents",
           icon: <GroupIcon />,
         },
-        ...(role === "owner" || role === "admin"
-          ? [
-              {
-                title: "Create AI Agent",
-                path: "/dashboard/create-new-agent",
-                icon: <GroupAddIcon />,
-              },
-            ]
-          : []),
       ],
     },
     {

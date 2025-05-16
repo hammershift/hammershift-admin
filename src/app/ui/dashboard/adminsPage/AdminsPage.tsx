@@ -100,22 +100,28 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
     }
   };
 
-  const handleSelectedAdminChange = (e: any) => {
-    const { name, value } = e.target;
-    if (name) setSelectedAdmin({ ...selectedAdmin!, [name]: value });
-  };
-
-  const handleSelectedAdminRoleChange = (role: string) => {
-    setSelectedAdmin({ ...selectedAdmin!, role: role });
-  };
-
   const handleNewAdminChange = (e: any) => {
+    setEmptyInputError(false);
+    setPasswordMismatchError(false);
+    setAdminInputError(false);
     const { name, value } = e.target;
     if (name) setNewAdmin({ ...newAdmin!, [name]: value });
   };
 
   const handleNewAdminRoleChange = (role: string) => {
     setNewAdmin({ ...newAdmin!, role: role });
+  };
+
+  const handleSelectedAdminChange = (e: any) => {
+    setEmptyInputError(false);
+    setPasswordMismatchError(false);
+    setAdminInputError(false);
+    const { name, value } = e.target;
+    if (name) setSelectedAdmin({ ...selectedAdmin!, [name]: value });
+  };
+
+  const handleSelectedAdminRoleChange = (role: string) => {
+    setSelectedAdmin({ ...selectedAdmin!, role: role });
   };
 
   const handleConfirmPasswordChange = (
@@ -137,14 +143,8 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
       !confirmPassword
     ) {
       setEmptyInputError(true);
-      setTimeout(() => {
-        setEmptyInputError(false);
-      }, 1500);
     } else if (newAdmin.password !== confirmPassword.confirm_password) {
       setPasswordMismatchError(true);
-      setTimeout(() => {
-        setPasswordMismatchError(false);
-      }, 1500);
     } else {
       try {
         const response = await fetch("/api/admins", {
@@ -157,10 +157,6 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
         if (response.status === 400) {
           setAdminInputError(true);
           setAdminInputErrorMessage(data.message);
-          setTimeout(() => {
-            setAdminInputError(false);
-            setAdminInputErrorMessage("");
-          }, 1500);
         } else if (!response.ok) {
           console.error("Error creating admin account");
         } else {
@@ -690,7 +686,7 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                         }`}
                         aria-disabled={isSubmitting}
                       >
-                        Delete
+                        {isSubmitting ? "Deleting..." : "Delete"}
                       </Button>
                     </form>
                   </DialogFooter>

@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
 
     // api/agents?_id=213123 to get a single agent
     if (agent_id) {
-      const admin = await Users.findOne({ _id: new ObjectId(agent_id) });
-      return NextResponse.json(admin);
+      const agent = await Users.findOne({ _id: new ObjectId(agent_id) });
+      return NextResponse.json(agent, { status: 200 });
     }
     // api/agents to get all AI agents
     const agents = await Users.find({
@@ -38,7 +38,6 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (session?.user.role !== "owner" && session?.user.role !== "admin") {
-    console.log("error");
     return NextResponse.json(
       {
         message:
@@ -52,13 +51,16 @@ export async function POST(req: NextRequest) {
 
   try {
     await connectToDB();
-    const { username, fullName, email, systemInstruction } = await req.json();
+    const { username, fullName, email, agentProperties } = await req.json();
     const existingAgent = await Users.findOne({ username: username });
 
     if (existingAgent) {
-      return NextResponse.json({ message: "Agent already exists" });
-    } else if (!username || !fullName || !email || !systemInstruction) {
-      throw new Error("Please fill out required fields");
+      return NextResponse.json(
+        {
+          message: "Agent name already exists",
+        },
+        { status: 400 }
+      );
     } else {
       const newDate = new Date();
 
@@ -77,14 +79,18 @@ export async function POST(req: NextRequest) {
         updatedAt: newDate,
         role: Role.AGENT,
         agentProperties: {
-          systemInstruction: systemInstruction + ` ${defaultInstruction}`,
+          systemInstruction:
+            agentProperties.systemInstruction + ` ${defaultInstruction}`,
         },
       };
 
       const newAgent = new Users(newAgentData);
       await newAgent.save();
       console.log("Created newAgent:", newAgent);
-      return NextResponse.json({ message: "Agent account created" });
+      return NextResponse.json(
+        { message: "Agent account created" },
+        { status: 200 }
+      );
     }
   } catch (error) {
     return NextResponse.json({
@@ -109,36 +115,40 @@ export async function PUT(req: NextRequest) {
 
   try {
     await connectToDB();
-    const agent_id = req.nextUrl.searchParams.get("agent_id");
+    let { _id, username, fullName, email, agentProperties } = await req.json();
 
-    const requestBody = await req.json();
-    const editData: { [key: string]: string | boolean | number } = {};
-
-    if (requestBody) {
-      Object.keys(requestBody).forEach((key) => {
-        editData[key] = requestBody[key] as string | boolean | number;
-      });
-    }
-
-    if (agent_id) {
+    if (_id) {
       const existingDifferentAgent = await Users.findOne({
-        _id: { $ne: agent_id },
-        username: editData["username"],
+        _id: { $ne: _id },
+        username: username,
       });
 
       if (existingDifferentAgent) {
         return NextResponse.json(
-          {
-            message:
-              "Agent already exists with that Full Name (original or variant of it)",
-          },
-          { status: 409 }
+          { message: "Another agent already exists with that name" },
+          { status: 400 }
         );
       }
 
+      const defaultInstruction =
+        "You are given a description of a vehicle and you must predict its final selling price. You must also provide a reason for your prediction. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'";
+
+      if (agentProperties?.systemInstruction) {
+        agentProperties = {
+          ...agentProperties,
+          systemInstruction:
+            agentProperties.systemInstruction + ` ${defaultInstruction}`,
+        };
+      }
+      const updateData: any = {
+        username,
+        fullName,
+        email,
+        agentProperties,
+      };
       const agent = await Users.findOneAndUpdate(
-        { _id: new ObjectId(agent_id) },
-        { $set: editData },
+        { _id },
+        { $set: updateData },
         {
           returnDocument: "after",
         }
@@ -161,5 +171,45 @@ export async function PUT(req: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: "Internal server error" });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (session?.user.role !== "owner" && session?.user.role !== "admin") {
+    return NextResponse.json(
+      { message: "Unauthorized. Only owners or admins can delete agents." },
+      { status: 400 }
+    );
+  }
+  try {
+    await connectToDB();
+    const { _id } = await req.json();
+    if (!_id) {
+      return NextResponse.json(
+        { message: "Agent ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const existingAgent = await Users.findById(_id);
+
+    if (!existingAgent) {
+      return NextResponse.json({ message: "Agent not found" }, { status: 404 });
+    }
+
+    await Users.deleteOne({ _id });
+
+    return NextResponse.json(
+      { message: "Agent account deleted" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting agent:", error);
+    return NextResponse.json(
+      { message: "Internal server error", error },
+      { status: 500 }
+    );
   }
 }

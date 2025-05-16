@@ -82,7 +82,6 @@ export default function Comments() {
     const fetchData = async () => {
       try {
         const data = await getAllComments(displayCount);
-        console.log(data);
         setComments(data.comments as CommentData[]);
 
         setIsLoading(false);
