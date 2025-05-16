@@ -9,3 +9,12 @@ export const USDollar = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
 });
+
+export const formatDate = (dateString: Date) => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  } catch (error) {
+    return "Invalid date";
+  }
+};

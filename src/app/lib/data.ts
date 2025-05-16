@@ -401,14 +401,14 @@ export const toggleAuctionDisplay = async (
 //get all comments
 export const getAllComments = async (limit: number) => {
   const response = await fetch(`/api/comments?limit=${limit}`);
-  const data = response.json();
-
+  const data = await response.json();
+  console.log(data);
   return data;
 };
 
 export const getSortedComments = async (limit: number, sort: string) => {
   const response = await fetch(`/api/comments?limit=${limit}&sort=${sort}`);
-  const data = response.json();
+  const data = await response.json();
   return data;
 };
 
@@ -428,13 +428,13 @@ export const deleteMultipleComments = async (ids: string[]) => {
 
 export const getCommentReplies = async (id: string) => {
   const response = await fetch(`/api/comments?parent_id=${id}`);
-  const data = response.json();
+  const data = await response.json();
   return data;
 };
 
 export const getParentComment = async (id: string) => {
   const response = await fetch(`/api/comments?id=${id}`);
-  const data = response.json();
+  const data = await response.json();
   return data;
 };
 

@@ -6,7 +6,6 @@ import {
   deleteUserWithId,
   editUserWithId,
   getLimitedUsers,
-  getUsers,
   getUsersWithSearch,
 } from "@/app/lib/data";
 import Image from "next/image";
@@ -36,7 +35,7 @@ import {
   DialogTitle,
 } from "@/app/ui/components/dialog";
 import { Button } from "@/app/ui/components/button";
-import { Ban, Delete, Edit, LockOpen, Trash2 } from "lucide-react";
+import { Ban, Edit, LockOpen, Trash2 } from "lucide-react";
 import { Label } from "@/app/ui/components/label";
 import { Input } from "@/app/ui/components/input";
 
@@ -55,6 +54,7 @@ interface UsersPageProps {
   deleteUser: (_id: string) => Promise<void>;
   banUser: (_id: string, newBannedStatus: boolean) => Promise<void>;
   setUserData: (userData: UserData[]) => void;
+  setSearchValue: (searchValue: string) => void;
 }
 
 const UsersPage = () => {
@@ -144,36 +144,19 @@ const UsersPage = () => {
 
   return (
     <div className="section-container mt-4">
-      <div className="font-bold">Users</div>
-      <div className="w-auto my-4 self-center relative">
-        <div className="bg-[#fff]/20 h-auto flex px-2 py-1.5 rounded gap-1">
-          <Image
-            src={magnifyingGlass}
-            alt="magnifying glass"
-            width={20}
-            height={20}
-          />
-          <input
-            placeholder={`Search for users`}
-            className="bg-transparent focus:outline-none"
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
+      {isLoading ? (
+        <div className="flex justify-center items-center h-[436px]">
+          <BeatLoader color="#F2CA16" />
         </div>
-      </div>
-      <div className="my-4">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-[436px]">
-            <BeatLoader color="#F2CA16" />
-          </div>
-        ) : (
-          <UserTable
-            userData={userData}
-            deleteUser={deleteUser}
-            banUser={banUser}
-            setUserData={setUserData}
-          />
-        )}
-      </div>
+      ) : (
+        <UserTable
+          userData={userData}
+          deleteUser={deleteUser}
+          banUser={banUser}
+          setUserData={setUserData}
+          setSearchValue={setSearchValue}
+        />
+      )}
     </div>
   );
 };
@@ -185,6 +168,7 @@ const UserTable: React.FC<UsersPageProps> = ({
   deleteUser,
   banUser,
   setUserData,
+  setSearchValue,
 }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
@@ -222,21 +206,48 @@ const UserTable: React.FC<UsersPageProps> = ({
     <div>
       <Card className="bg-[#13202D] border-[#1E2A36] mb-8">
         <CardHeader>
-          <CardTitle>Users</CardTitle>
+          <CardTitle className="text-xl font-bold text-yellow-500">
+            Users
+          </CardTitle>
           <CardDescription>
             Manage user accounts, balances, and statuses
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
+            <div className="w-auto mb-4 self-center relative">
+              <div className="bg-[#fff]/20 h-auto flex px-2 py-1.5 rounded gap-1">
+                <Image
+                  src={magnifyingGlass}
+                  alt="magnifying glass"
+                  width={20}
+                  height={20}
+                />
+                <input
+                  placeholder={`Search for users`}
+                  className="bg-transparent focus:outline-none"
+                  onChange={(e) => setSearchValue(e.target.value)}
+                />
+              </div>
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Full Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="font-bold text-yellow-500/90">
+                    Username
+                  </TableHead>
+                  <TableHead className="font-bold text-yellow-500/90">
+                    Full Name
+                  </TableHead>
+                  <TableHead className="font-bold text-yellow-500/90">
+                    Email
+                  </TableHead>
+                  <TableHead className="font-bold text-yellow-500/90">
+                    Status
+                  </TableHead>
+                  <TableHead className="font-bold text-yellow-500/90">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -280,7 +291,7 @@ const UserTable: React.FC<UsersPageProps> = ({
                             variant="ghost"
                             size="icon"
                             className={"text-red-700"}
-                            title={`${user.isBanned ? "Unban" : "Ban"} User`}
+                            title={"Delete User"}
                             onClick={() => {
                               setShowDeleteModal(true);
                               setSelectedUser(user);
