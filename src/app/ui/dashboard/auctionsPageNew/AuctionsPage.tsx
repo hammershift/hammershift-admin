@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { formatDistanceToNow, isValid } from "date-fns";
 import { useSession } from "next-auth/react";
 import { BeatLoader, ClipLoader } from "react-spinners";
 import {
@@ -39,6 +40,7 @@ import {
   promptAgentPredictions,
   getPredictions,
   deleteAgentPrediction,
+  editAuctionWithId,
 } from "@/app/lib/data";
 import {
   Car,
@@ -52,7 +54,10 @@ import {
   Filter,
   Calendar,
   CircleCheck,
+  Clock,
 } from "lucide-react";
+import { Label } from "../../components/label";
+import { Textarea } from "../../components/textarea";
 import {
   Dialog,
   DialogContent,
@@ -69,10 +74,22 @@ interface AuctionsPageProps {
   currentTab: string;
   totalPages: number;
   isLoading: boolean;
+  refreshToggle: boolean;
   searchedKeyword: String;
   setCurrentPage: (page: number) => void;
+  setRefreshToggle: (toggle: boolean) => void;
   setCurrentTab: (tab: string) => void;
   handleSearch: (input: string) => void;
+}
+
+interface EditDetails {
+  image: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  description: string[];
+  status: string | null;
 }
 
 const AuctionsPage: React.FC<AuctionsPageProps> = ({
@@ -81,8 +98,10 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   currentPage,
   totalPages,
   isLoading,
+  refreshToggle,
   searchedKeyword,
   setCurrentPage,
+  setRefreshToggle,
   handleSearch,
   setCurrentTab,
 }) => {
@@ -92,8 +111,10 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   const [auctionLoadingStates, setAuctionLoadingStates] = useState<{
     [key: string]: string;
   }>({});
+  const [editAuction, setEditAuction] = useState<boolean>(false);
+  const [editLoading, setEditLoading] = useState<boolean>(false);
   const [viewingPredictions, setViewingPredictions] = useState<boolean>(false);
-  const [currentAuction, setCurrentAuction] = useState<CarData>();
+  const [currentAuction, setCurrentAuction] = useState<CarData | null>();
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [refreshPrediction, setRefreshPrediction] = useState<boolean>(false);
   const [viewportWidth, setViewportWidth] = useState(0);
@@ -103,8 +124,15 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   });
   const [predictionLoading, setPredictionLoading] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>("");
-
-  const { data } = useSession();
+  const [editAuctionDetails, setEditAuctionDetails] = useState<EditDetails>({
+    image: "",
+    make: "",
+    model: "",
+    year: 0,
+    price: 0,
+    description: [],
+    status: null,
+  });
 
   useEffect(() => {
     setViewportWidth(window.innerWidth);
@@ -163,11 +191,69 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     fetchPredictions();
   }, [currentAuction, refreshPrediction]);
 
+  const formatTimeLeft = (dateString: string) => {
+    if (!dateString) return "No end date";
+
+    try {
+      const endDate = new Date(dateString);
+
+      if (!isValid(endDate)) {
+        return "Invalid date";
+      }
+
+      const now = new Date();
+      if (endDate < now) {
+        return "Ended";
+      }
+
+      return formatDistanceToNow(endDate, { addSuffix: true });
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "Date error";
+    }
+  };
   async function handleViewPrediction(auction: CarData) {
     //get predictions from auction_id
     setCurrentAuction(auction);
     setPredictionLoading(true);
     setViewingPredictions(true);
+  }
+
+  async function handleEditAuction(auction: CarData) {
+    setCurrentAuction(auction);
+    setEditAuction(true);
+  }
+
+  async function handleSaveEdits() {
+    try {
+      console.log(editAuctionDetails);
+      if (currentAuction === null || currentAuction === undefined) {
+        alert("No auction selected");
+        return;
+      }
+      setEditLoading(true);
+      const response = await editAuctionWithId(
+        currentAuction.auction_id,
+        editAuctionDetails
+      );
+    } catch (e) {
+      console.log(e);
+      alert("An error occured while editing auction");
+    } finally {
+      setEditLoading(false);
+      setEditAuction(false);
+      setCurrentAuction(null);
+      setEditAuctionDetails({
+        image: "",
+        make: "",
+        model: "",
+        year: 0,
+        price: 0,
+        description: [],
+        status: null,
+      });
+      setRefreshToggle(!refreshToggle);
+    }
   }
 
   async function handleDeleteAgentPrediction(id: string) {
@@ -316,13 +402,23 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                           {auction.page_url}
                         </a>
 
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mb-2">
                           <div>
                             <div className="text-xs text-gray-400">
                               Current Bid
                             </div>
                             <div className="text-[#F2CA16] font-bold">
                               ${auction.price}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-400">
+                              Time Left
+                            </div>
+                            <div className="flex items-center">
+                              <Clock className="mr-1 h-4 w-4 text-gray-400" />
+
+                              {formatTimeLeft(auction.deadline.toString())}
                             </div>
                           </div>
                           <Badge
@@ -417,7 +513,6 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                         <TableHead>Car</TableHead>
                         <TableHead>Current Bid</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Visible</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -456,41 +551,31 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                           <TableCell className="font-mono">
                             ${auction.price.toLocaleString()}
                           </TableCell>
+
                           <TableCell>
                             {/* TODO: Change to using status from attributes */}
                             <Badge
                               className={
-                                Date.parse(auction.deadline.toString()) <
-                                Date.now()
+                                auction.isActive
                                   ? "bg-green-100 text-green-800"
                                   : "bg-red-100 text-red-800"
                               }
                             >
-                              {Date.parse(auction.deadline.toString()) <
-                              Date.now()
-                                ? "Active"
-                                : "Ended"}
+                              {auction.isActive ? "Active" : "Ended"}
                             </Badge>
                           </TableCell>
-                          <TableCell>
-                            {/* <Switch
-                              checked={car.visible}
-                              disabled={visibilityUpdating}
-                              onCheckedChange={() =>
-                                handleToggleVisibility(car.id, car.visible)
-                              }
-                            /> */}
-                          </TableCell>
+
                           <TableCell>
                             <div className="flex items-center gap-1">
-                              {/* <Button
+                              <Button
                                 variant="ghost"
                                 size="icon"
                                 title="Edit Car"
-                                onClick={() => handleEditCar(car)}
+                                className=""
+                                onClick={() => handleEditAuction(auction)}
                               >
                                 <Edit className="h-4 w-4" />
-                              </Button> */}
+                              </Button>
 
                               <Button
                                 variant="ghost"
@@ -632,6 +717,178 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
           <DialogFooter>
             <Button className="" onClick={() => setViewingPredictions(false)}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={editAuction} onOpenChange={setEditAuction}>
+        <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+          <DialogHeader>
+            <DialogTitle>Edit Auction</DialogTitle>
+            <DialogDescription>
+              Make changes to auction details
+            </DialogDescription>
+          </DialogHeader>
+          {currentAuction && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="mb-2 block">Car Image</Label>
+                  <div className="h-48 bg-gray-800 rounded-md mb-4 overflow-hidden">
+                    {currentAuction.image ? (
+                      <Image
+                        src={currentAuction.image}
+                        alt={`${currentAuction.year} ${currentAuction.make} ${currentAuction.model}`}
+                        title={`${currentAuction.year} ${currentAuction.make} ${currentAuction.model}`}
+                        className="w-full h-full object-cover"
+                        objectFit="cover"
+                        width={200}
+                        height={200}
+                      ></Image>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <ImageOff className="w-12 h-12 text-gray-500" />
+                      </div>
+                    )}
+                  </div>
+                  <Input
+                    placeholder="Image URL"
+                    defaultValue={currentAuction.image}
+                    className="bg-[#1E2A36] border-[#1E2A36]"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEditAuctionDetails({
+                        ...editAuctionDetails,
+                        image: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label>Make</Label>
+                    <Input
+                      defaultValue={currentAuction.make}
+                      className="bg-[#1E2A36] border-[#1E2A36]"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setEditAuctionDetails({
+                          ...editAuctionDetails,
+                          make: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Model</Label>
+                    <Input
+                      defaultValue={currentAuction.model}
+                      className="bg-[#1E2A36] border-[#1E2A36]"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setEditAuctionDetails({
+                          ...editAuctionDetails,
+                          model: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Year</Label>
+                    <Input
+                      type="number"
+                      defaultValue={currentAuction.year}
+                      className="bg-[#1E2A36] border-[#1E2A36]"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setEditAuctionDetails({
+                          ...editAuctionDetails,
+                          year: parseInt(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Current Bid</Label>
+                    <Input
+                      type="number"
+                      defaultValue={currentAuction.price}
+                      className="bg-[#1E2A36] border-[#1E2A36]"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setEditAuctionDetails({
+                          ...editAuctionDetails,
+                          price: parseInt(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  defaultValue={currentAuction.description}
+                  className="bg-[#1E2A36] border-[#1E2A36]"
+                  rows={3}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setEditAuctionDetails({
+                      ...editAuctionDetails,
+                      description: [e.target.value],
+                    })
+                  }
+                />
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Label>Status</Label>
+                <select
+                  defaultValue={
+                    currentAuction.isActive && !currentAuction.ended
+                      ? "active"
+                      : "ended"
+                  }
+                  className="bg-[#1E2A36] border border-[#1E2A36] rounded-md p-2"
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setEditAuctionDetails({
+                      ...editAuctionDetails,
+                      status: e.target.value,
+                    })
+                  }
+                >
+                  <option value="active">Active</option>
+                  <option value="ended">Ended</option>
+                </select>
+
+                {/* <div className="ml-auto flex items-center gap-2">
+                  <Label>Visible</Label>
+                  <Switch defaultChecked={selectedCar.visible} />
+                </div> */}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className=""
+              onClick={() => {
+                setCurrentAuction(null);
+                setEditAuction(false);
+              }}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+              onClick={handleSaveEdits}
+              disabled={editLoading}
+            >
+              {editLoading ? (
+                <BeatLoader color="#000" />
+              ) : (
+                <span>Save Changes</span>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

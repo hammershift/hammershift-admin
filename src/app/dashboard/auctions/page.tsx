@@ -7,6 +7,7 @@ import { getCarsWithFilter } from "../../lib/data";
 
 export interface CarData {
   auction_id: string;
+  description: string[];
   price: number;
   year: string;
   make: string;
@@ -17,6 +18,7 @@ export interface CarData {
   image: string;
   page_url: string;
   isActive: boolean;
+  ended: boolean;
   deadline: Date;
 }
 
@@ -31,6 +33,7 @@ const Auctions = () => {
   const [oldKeyword, setOldKeyword] = useState<string>("");
   const [searchedData, setSearchedData] = useState<CarData[]>([]);
   const [currentTab, setCurrentTab] = useState<string>("external");
+  const [refreshToggle, setRefreshToggle] = useState<boolean>(false);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -61,7 +64,7 @@ const Auctions = () => {
       }
     };
     fetchData();
-  }, [currentPage, searchedKeyword, currentTab]);
+  }, [currentPage, searchedKeyword, currentTab, refreshToggle]);
 
   // useEffect(() => {
   //   const fetchSearchedAuctions = async () => {};
@@ -70,10 +73,6 @@ const Auctions = () => {
   //     fetchSearchedAuctions();
   //   }
   // }, [searchedKeyword]);
-
-  const handleLoadMore = () => {
-    setDisplayCount((prevCount) => prevCount + 7);
-  };
 
   const handleSearch = (e: string) => {
     setSearchedKeyword(e);
@@ -87,8 +86,10 @@ const Auctions = () => {
       setCurrentTab={setCurrentTab}
       totalPages={totalPages}
       isLoading={isLoading}
+      refreshToggle={refreshToggle}
       searchedKeyword={searchedKeyword}
       setCurrentPage={setCurrentPage}
+      setRefreshToggle={setRefreshToggle}
       handleSearch={handleSearch}
     />
   );

@@ -37,8 +37,6 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    console.log(updateObject);
-
     const updateAuction = await Auctions.findOneAndUpdate(
       {
         auction_id: auction_id,
