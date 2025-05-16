@@ -14,6 +14,12 @@ export async function POST(req: NextRequest) {
     //get the description of the auction
     const auction = await Auctions.findOne({ auction_id: auction_id });
 
+    if (!auction) {
+      return NextResponse.json(
+        { message: "Auction not found" },
+        { status: 404 }
+      );
+    }
     const description = auction.description.join(" ");
 
     const vertexAI = getVertexAI(app);

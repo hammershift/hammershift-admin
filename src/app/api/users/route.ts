@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     // api/users?user_id=<insert id> to get a specific user
     if (user_id) {
-      const user = Users.findOne(
+      const user = await Users.findOne(
         { _id: new ObjectId(user_id) },
         { projection: { password: 0 } }
       );
@@ -135,7 +135,6 @@ export async function PUT(req: NextRequest) {
           projection: { password: 0 },
         }
       );
-
       if (user) {
         return NextResponse.json(user, { status: 200 });
       } else {
@@ -148,6 +147,49 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json(
         { message: "No ID has been provided" },
         { status: 400 }
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "Internal server error" });
+  }
+}
+
+// to delete user URL: /api/users?user_id=<user_id>
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (session?.user.role !== "owner" && session?.user.role !== "admin") {
+    return NextResponse.json(
+      {
+        message:
+          "Unauthorized! Your role does not have access to this function",
+      },
+      { status: 403 }
+    );
+  }
+
+  try {
+    await connectToDB();
+    const user_id = req.nextUrl.searchParams.get("user_id");
+
+    if (!user_id) {
+      return NextResponse.json(
+        { message: "No ID has been provided" },
+        { status: 400 }
+      );
+    }
+
+    const result = await Users.deleteOne({ _id: new ObjectId(user_id) });
+
+    if (result.deletedCount === 1) {
+      return NextResponse.json(
+        { message: "User deleted successfully" },
+        { status: 200 }
+      );
+    } else {
+      return NextResponse.json(
+        { message: "User not found or already deleted" },
+        { status: 404 }
       );
     }
   } catch (error) {

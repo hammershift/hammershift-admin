@@ -7,7 +7,7 @@ import { signIn } from "next-auth/react";
 
 import PersonIcon from "@mui/icons-material/Person";
 import KeyIcon from "@mui/icons-material/Key";
-import hammershiftLogo from "../../../../../public/images/hammershift.svg";
+import velocityMarketsLogo from "../../../../../public/images/velocity-markets-logo.png";
 import GreenCheck from "../../../../../public/images/check-green.svg";
 import RedCancel from "../../../../../public/images/cancel-red.svg";
 import { BounceLoader } from "react-spinners";
@@ -360,7 +360,11 @@ const LoginPage = () => {
       ) : (
         <>
           <div className="mt-4 flex flex-col items-center justify-center m-6">
-            <Image alt="hammershift-logo" src={hammershiftLogo} width={360} />
+            <Image
+              alt="hammershift-logo"
+              src={velocityMarketsLogo}
+              width={360}
+            />
             <h1 className="p-2 text-2xl font-bold text-yellow-400">WELCOME</h1>
             <p className="p-1">Please login to Admin Panel</p>
           </div>

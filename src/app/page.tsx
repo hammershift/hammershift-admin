@@ -4,6 +4,7 @@ import LoginPage from "./ui/login/loginPage/LoginPage";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useEffect } from "react";
+import Head from "next/head";
 
 export default function Home() {
   // check if logged in and has session
@@ -15,8 +16,13 @@ export default function Home() {
   }, [session]);
 
   return (
-    <div className="flex justify-center items-center pt-64">
-      <LoginPage />
-    </div>
+    <>
+      <Head>
+        <title>Velocity Markets Dashboard</title>
+      </Head>
+      <div className="flex justify-center items-center pt-64">
+        <LoginPage />
+      </div>
+    </>
   );
 }

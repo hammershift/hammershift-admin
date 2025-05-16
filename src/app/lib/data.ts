@@ -5,8 +5,11 @@ export interface getCarsWithFilterProps {
   category?: string[];
   era?: string[];
   location?: string[];
+  offset?: number;
   limit?: number;
   sort?: string;
+  search?: string;
+  isPlatformTab?: boolean;
 }
 
 export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
@@ -33,6 +36,7 @@ export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
       const list = await response.json();
       let auctions = {
         total: list.total,
+        totalPages: list.totalPages,
         cars: list.cars.map((data: any) => ({
           _id: data._id,
           auction_id: data.auction_id,
@@ -68,6 +72,45 @@ export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
     }
   } catch (err) {
     console.error(err);
+  }
+};
+
+export const editAuctionWithId = async (auction_id: string, editData: any) => {
+  try {
+    const response = await fetch(
+      `/api/auctions/edit?auction_id=${auction_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editData),
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      console.error(`Failed to edit auction ${auction_id}`);
+      throw new Error("Failed to edit auction!");
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const getPredictions = async (auction_id: string) => {
+  try {
+    const response = await fetch(`/api/predictions?auction_id=${auction_id}`);
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      console.error(`Failed to fetch predictions for ${auction_id}`);
+    }
+  } catch (e) {
+    console.error(e);
   }
 };
 
@@ -123,16 +166,28 @@ export const getUsersWithSearch = async (searchString: string) => {
   return data;
 };
 
-// edit user and delete user
+// edit and ban user
 export const editUserWithId = async (id: string, body: any) => {
   const res = await fetch(`/api/users?user_id=${id}`, {
     method: "PUT",
     body: JSON.stringify(body),
   });
   if (res.status === 200) {
-    return { message: "Edit Successful" };
+    return { user: await res.json(), status: res.status };
   } else {
     console.error("Edit Unsuccessful");
+  }
+};
+
+export const deleteUserWithId = async (id: string) => {
+  const res = await fetch(`/api/users?user_id=${id}`, {
+    method: "DELETE",
+  });
+
+  if (res.status === 200) {
+    return { status: res.status };
+  } else {
+    console.error("Delete Unsuccessful");
   }
 };
 
@@ -352,6 +407,8 @@ export const updateAuctionStatus = async (
 
   if (!res.ok) {
     throw new Error("Failed to update auction status");
+  } else {
+    return res.json();
   }
 };
 
@@ -365,6 +422,19 @@ export const promptAgentPredictions = async (auction_id: string) => {
 
   if (!res.ok) {
     throw new Error("Failed to prompt Vertex AI");
+  }
+};
+
+export const deleteAgentPrediction = async (id: string) => {
+  const res = await fetch(`/api/predictions?prediction_id=${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to delete prediction");
   }
 };
 
@@ -389,14 +459,14 @@ export const toggleAuctionDisplay = async (
 //get all comments
 export const getAllComments = async (limit: number) => {
   const response = await fetch(`/api/comments?limit=${limit}`);
-  const data = response.json();
-
+  const data = await response.json();
+  console.log(data);
   return data;
 };
 
 export const getSortedComments = async (limit: number, sort: string) => {
   const response = await fetch(`/api/comments?limit=${limit}&sort=${sort}`);
-  const data = response.json();
+  const data = await response.json();
   return data;
 };
 
@@ -416,13 +486,13 @@ export const deleteMultipleComments = async (ids: string[]) => {
 
 export const getCommentReplies = async (id: string) => {
   const response = await fetch(`/api/comments?parent_id=${id}`);
-  const data = response.json();
+  const data = await response.json();
   return data;
 };
 
 export const getParentComment = async (id: string) => {
   const response = await fetch(`/api/comments?id=${id}`);
-  const data = response.json();
+  const data = await response.json();
   return data;
 };
 
