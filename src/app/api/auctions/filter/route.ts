@@ -97,6 +97,7 @@ export async function GET(req: NextRequest) {
             _id: 0,
             auction_id: 1,
             attributes: 1,
+            description: 1,
             images_list: 1,
             listing_details: 1,
             page_url: 1,
