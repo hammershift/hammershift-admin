@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       const newDate = new Date();
 
       const defaultInstruction =
-        "You are given a description of a vehicle and you must predict its final selling price. You must also provide a reason for your prediction. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'";
+        "You are given a description of a vehicle to help with data crunching. You must also provide a reason for your prediction. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'";
       const newAgentData = {
         _id: new Types.ObjectId(),
         username: username,
