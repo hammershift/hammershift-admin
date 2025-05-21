@@ -275,7 +275,66 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
           )}
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div className="block md:hidden space-y-4">
+            {adminData &&
+              adminData.map((admin: AdminData, index: number) => (
+                <div
+                  key={index}
+                  className="bg-[#13202D] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
+                >
+                  <div>
+                    <p className="text-xs text-gray-400">First Name</p>
+                    <p className="text-white">{admin.first_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Last Name</p>
+                    <p className="text-white">{admin.last_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Email</p>
+                    <p className="text-white">{admin.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Username</p>
+                    <p className="text-white">{admin.username}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Admin Role</p>
+                    <Badge className={getRoleBadgeColor(admin.role)}>
+                      {admin.role.charAt(0).toUpperCase() +
+                        admin.role.substring(1, admin.role.length)}
+                    </Badge>
+                  </div>
+                  {role == "owner" && (
+                    <div className="flex justify-end space-x-2 pt-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={""}
+                        onClick={() => {
+                          setShowEditModal(true);
+                          setSelectedAdmin({ ...admin, password: "" });
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={"text-red-700"}
+                        onClick={() => {
+                          setShowDeleteModal(true);
+                          setSelectedAdmin(admin);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto w-full">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -360,18 +419,20 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
             </Table>
           </div>
           <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-            <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+            <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
               <DialogHeader>
-                <DialogTitle>Add Admin</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="max-md:text-md">Add Admin</DialogTitle>
+                <DialogDescription className="max-md:text-sm">
                   Provide information for new admin
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">First Name</Label>
+                  <Label className="text-right max-md:text-xs">
+                    First Name
+                  </Label>
                   <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                       emptyInputError && newAdmin?.first_name == ""
                         ? "border-red-500"
                         : ""
@@ -383,9 +444,9 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Last Name</Label>
+                  <Label className="text-right max-md:text-xs">Last Name</Label>
                   <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                       emptyInputError && newAdmin?.last_name == ""
                         ? "border-red-500"
                         : ""
@@ -397,9 +458,9 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Email</Label>
+                  <Label className="text-right max-md:text-xs">Email</Label>
                   <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                       emptyInputError && newAdmin?.email == ""
                         ? "border-red-500"
                         : ""
@@ -411,9 +472,9 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Username</Label>
+                  <Label className="text-right max-md:text-xs">Username</Label>
                   <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                       emptyInputError && newAdmin?.username == ""
                         ? "border-red-500"
                         : ""
@@ -425,9 +486,9 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Password</Label>
+                  <Label className="text-right max-md:text-xs">Password</Label>
                   <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                       (emptyInputError && newAdmin?.password == "") ||
                       passwordMismatchError
                         ? "border-red-500"
@@ -440,10 +501,12 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Confirm Password</Label>
+                  <Label className="text-right max-md:text-xs">
+                    Confirm Password
+                  </Label>
                   <Input
                     defaultValue={newAdmin!.email}
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                       (emptyInputError && newAdmin?.password == "") ||
                       passwordMismatchError
                         ? "border-red-500"
@@ -456,7 +519,7 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                   />
                 </div>
                 <div>
-                  <Label className="mb-2 block">Role</Label>
+                  <Label className="mb-2 block max-md:text-xs">Role</Label>
                   <Select
                     value={newAdmin?.role || ""}
                     onValueChange={handleNewAdminRoleChange}
@@ -471,7 +534,7 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                     >
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1E2A36]">
+                    <SelectContent className="bg-[#1E2A36] max-md:text-sm">
                       <SelectItem value="owner">Owner</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                       <SelectItem value="moderator">Moderator</SelectItem>
@@ -479,21 +542,21 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                     </SelectContent>
                   </Select>
                   {emptyInputError ? (
-                    <p className="mt-4 text-red-500 text-center">
+                    <p className="mt-4 text-red-500 text-center max-md:text-sm">
                       Please fill-out required fields
                     </p>
                   ) : passwordMismatchError ? (
-                    <p className="mt-4 text-red-500 text-center">
+                    <p className="mt-4 text-red-500 text-center max-md:text-sm">
                       Passwords do not match
                     </p>
                   ) : adminInputError ? (
-                    <p className="mt-4 text-red-500 text-center">
+                    <p className="mt-4 text-red-500 text-center max-md:text-sm">
                       {adminInputErrorMessage}
                     </p>
                   ) : null}
                 </div>
               </div>
-              <DialogFooter>
+              <DialogFooter className="flex-row justify-end space-x-2">
                 <form onSubmit={handleNewAdminSubmit}>
                   <Button
                     type="submit"
@@ -511,10 +574,12 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
           {selectedAdmin && (
             <div className="flex items-center gap-1">
               <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-                <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+                <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                   <DialogHeader>
-                    <DialogTitle>Edit Admin</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="max-md:text-md">
+                      Edit Admin
+                    </DialogTitle>
+                    <DialogDescription className="max-md:text-sm">
                       Update information for{" "}
                       <span className="font-semibold text-yellow-400">
                         {selectedAdmin!.username}
@@ -523,9 +588,11 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">First Name</Label>
+                      <Label className="text-right max-md:text-xs">
+                        First Name
+                      </Label>
                       <Input
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                           emptyInputError && selectedAdmin?.first_name == ""
                             ? "border-red-500"
                             : ""
@@ -537,9 +604,11 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">Last Name</Label>
+                      <Label className="text-right max-md:text-xs">
+                        Last Name
+                      </Label>
                       <Input
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                           emptyInputError && selectedAdmin?.last_name == ""
                             ? "border-red-500"
                             : ""
@@ -551,9 +620,9 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">Email</Label>
+                      <Label className="text-right max-md:text-xs">Email</Label>
                       <Input
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                           emptyInputError && selectedAdmin?.email == ""
                             ? "border-red-500"
                             : ""
@@ -565,9 +634,11 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">Username</Label>
+                      <Label className="text-right max-md:text-xs">
+                        Username
+                      </Label>
                       <Input
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                           emptyInputError && selectedAdmin?.username == ""
                             ? "border-red-500"
                             : ""
@@ -579,9 +650,11 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">Password</Label>
+                      <Label className="text-right max-md:text-xs">
+                        Password
+                      </Label>
                       <Input
-                        className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"
+                        className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                         name="password"
                         type="password"
                         value={selectedAdmin?.password || ""}
@@ -589,9 +662,11 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">Confirm Password</Label>
+                      <Label className="text-right max-md:text-xs">
+                        Confirm Password
+                      </Label>
                       <Input
-                        className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"
+                        className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                         name="confirm_password"
                         type="password"
                         value={confirmPassword.confirm_password || ""}
@@ -599,7 +674,7 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                       />
                     </div>
                     <div>
-                      <Label className="mb-2 block">Role</Label>
+                      <Label className="mb-2 block max-md:text-xs">Role</Label>
                       <Select
                         value={selectedAdmin?.role || ""}
                         onValueChange={handleSelectedAdminRoleChange}
@@ -614,7 +689,7 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                         >
                           <SelectValue placeholder="Select role" />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#1E2A36]">
+                        <SelectContent className="bg-[#1E2A36] max-md:text-sm">
                           <SelectItem value="owner">Owner</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
                           <SelectItem value="moderator">Moderator</SelectItem>
@@ -622,21 +697,21 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                         </SelectContent>
                       </Select>
                       {emptyInputError ? (
-                        <p className="mt-4 text-red-500 text-center">
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
                           Please fill-out required fields
                         </p>
                       ) : passwordMismatchError ? (
-                        <p className="mt-4 text-red-500 text-center">
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
                           Passwords do not match
                         </p>
                       ) : adminInputError ? (
-                        <p className="mt-4 text-red-500 text-center">
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
                           {adminInputErrorMessage}
                         </p>
                       ) : null}
                     </div>
                   </div>
-                  <DialogFooter>
+                  <DialogFooter className="flex-row justify-end space-x-2">
                     <form onSubmit={handleSelectedAdminSubmit}>
                       <Button
                         type="submit"
@@ -653,12 +728,12 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
               </Dialog>
 
               <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-                <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+                <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                   <DialogHeader>
-                    <DialogTitle className="text-red-700 text-xl">
+                    <DialogTitle className="text-red-700 text-lg max-md:text-md">
                       Delete Admin
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="max-md:text-sm">
                       Are you sure you want to delete{" "}
                       <span className="font-semibold text-red-700">
                         {selectedAdmin!.username}
@@ -668,16 +743,16 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                   </DialogHeader>
 
                   <div className="p-2 m-2 text-sm">
-                    <p className="text-lg font-bold text-red-700 text-center">
+                    <p className="text-lg max-md:text-md font-bold text-red-700 text-center">
                       Warning
                     </p>
-                    <p className={"text-justify"}>
+                    <p className={"text-justify max-md:text-sm"}>
                       {
                         "By deleting this admin account, they will no longer have access to the Velocity Market App's Admin Dashboard"
                       }
                     </p>
                   </div>
-                  <DialogFooter>
+                  <DialogFooter className="flex-row justify-end space-x-2">
                     <form onSubmit={handleAdminDelete}>
                       <Button
                         type="submit"

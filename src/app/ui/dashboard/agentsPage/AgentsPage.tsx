@@ -68,9 +68,9 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
     switch (e.target.name) {
       case "fullName":
         const fullName = e.target.value.replace(/\s+/g, " ");
-        if (!fullName) {
-          setEmptyInputError(true);
-        }
+        // if (!fullName) {
+        //   setEmptyInputError(true);
+        // }
         setNewAgent({
           ...newAgent,
           fullName: fullName.replace(/\s+/g, " "),
@@ -83,10 +83,9 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
         break;
       case "systemInstruction":
         const systemInstruction = e.target.value.replace(/\s+/g, " ");
-        if (!systemInstruction) {
-          setEmptyInputError(true);
-        }
-
+        // if (!systemInstruction) {
+        //   setEmptyInputError(true);
+        // }
         setNewAgent({
           ...newAgent,
           agentProperties: {
@@ -262,7 +261,71 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div className="block md:hidden space-y-4">
+            {agentData &&
+              agentData.map((agent: AgentData, index: number) => (
+                <div
+                  key={index}
+                  className="bg-[#13202D] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
+                >
+                  <div>
+                    <p className="text-xs text-gray-400">Username</p>
+                    <p className="text-white">{agent.username}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Full Name</p>
+                    <p className="text-white">{agent.fullName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Email</p>
+                    <p className="text-white max-md:text-xs">{agent.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">System Instruction</p>
+                    <p className={"text-white text-justify max-md:text-xs"}>
+                      {agent.agentProperties.systemInstruction}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end space-x-2 pt-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Edit Agent"
+                      className={""}
+                      onClick={() => {
+                        setShowEditModal(true);
+                        setSelectedAgent({
+                          ...agent,
+                          agentProperties: {
+                            systemInstruction:
+                              agent.agentProperties.systemInstruction
+                                .replace(defaultInstruction, "")
+                                .trim(),
+                          },
+                        });
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={"text-red-700"}
+                      title={"Delete Agent"}
+                      onClick={() => {
+                        setShowDeleteModal(true);
+                        setSelectedAgent(agent);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto w-full">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -304,7 +367,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            title="Edit User"
+                            title="Edit Agent"
                             className={""}
                             onClick={() => {
                               setShowEditModal(true);
@@ -326,7 +389,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                             variant="ghost"
                             size="icon"
                             className={"text-red-700"}
-                            title={"Delete User"}
+                            title={"Delete Agent"}
                             onClick={() => {
                               setShowDeleteModal(true);
                               setSelectedAgent(agent);
@@ -342,20 +405,20 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
             </Table>
           </div>
           <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-            <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+            <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
               <DialogHeader>
-                <DialogTitle>Add Agent</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="max-md:text-md">Add Agent</DialogTitle>
+                <DialogDescription className="max-md:text-sm">
                   Provide information for new AI agent
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">
+                  <Label className="text-right max-md:text-xs">
                     {"Full Name (First + Last)"}
                   </Label>
                   <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                       emptyInputError && newAgent?.fullName == ""
                         ? "border-red-500"
                         : ""
@@ -367,11 +430,11 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">
+                  <Label className="text-right max-md:text-xs">
                     {"Username (auto-generated)"}
                   </Label>
                   <Input
-                    className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"
+                    className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                     name="username"
                     type="text"
                     value={
@@ -386,11 +449,11 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">
+                  <Label className="text-right max-md:text-xs">
                     {"Email (auto-generated)"}
                   </Label>
                   <Input
-                    className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"
+                    className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-xs"
                     name="email"
                     type="email"
                     value={
@@ -406,9 +469,11 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">System Instruction</Label>
+                  <Label className="text-right max-md:text-xs">
+                    System Instruction
+                  </Label>
                   <Textarea
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                       emptyInputError &&
                       newAgent?.agentProperties.systemInstruction == ""
                         ? "border-red-500"
@@ -422,16 +487,16 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                   />
                 </div>
                 {emptyInputError ? (
-                  <p className="mt-4 text-red-500 text-center">
+                  <p className="mt-4 text-red-500 text-center max-md:text-sm">
                     Please fill-out required fields
                   </p>
                 ) : agentInputError ? (
-                  <p className="mt-4 text-red-500 text-center">
+                  <p className="mt-4 text-red-500 text-center max-md:text-sm">
                     {agentInputErrorMessage}
                   </p>
                 ) : null}
               </div>
-              <DialogFooter>
+              <DialogFooter className="flex-row justify-end space-x-2">
                 <form onSubmit={handleNewAgentSubmit}>
                   <Button
                     type="submit"
@@ -449,23 +514,25 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
           {selectedAgent && (
             <div className="flex items-center gap-1">
               <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-                <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+                <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                   <DialogHeader>
-                    <DialogTitle>Edit Agent</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="max-md:text-md">
+                      Edit Agent
+                    </DialogTitle>
+                    <DialogDescription className="max-md:text-sm">
                       Update information for{" "}
-                      <span className="font-semibold text-yellow-400">
+                      <span className="font-semibold text-yellow-400 max-md:text-sm">
                         {selectedAgent!.username}
                       </span>
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">
+                      <Label className="text-right max-md:text-xs">
                         {"Full Name (First + Last)"}
                       </Label>
                       <Input
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                           emptyInputError && selectedAgent?.fullName == ""
                             ? "border-red-500"
                             : ""
@@ -477,11 +544,11 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">
+                      <Label className="text-right max-md:text-xs">
                         {"Username (auto-generated)"}
                       </Label>
                       <Input
-                        className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"
+                        className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                         name="username"
                         type="text"
                         value={
@@ -496,11 +563,11 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">
+                      <Label className="text-right max-md:text-xs">
                         {"Email (auto-generated)"}
                       </Label>
                       <Input
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
                           emptyInputError && selectedAgent?.email == ""
                             ? "border-red-500"
                             : ""
@@ -520,9 +587,11 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">System Instruction</Label>
+                      <Label className="text-right max-md:text-xs">
+                        System Instruction
+                      </Label>
                       <Textarea
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
                           emptyInputError &&
                           selectedAgent?.agentProperties.systemInstruction == ""
                             ? "border-red-500"
@@ -538,16 +607,16 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                       />
                     </div>
                     {emptyInputError ? (
-                      <p className="mt-4 text-red-500 text-center">
+                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
                         Please fill-out required fields
                       </p>
                     ) : agentInputError ? (
-                      <p className="mt-4 text-red-500 text-center">
+                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
                         {agentInputErrorMessage}
                       </p>
                     ) : null}
                   </div>
-                  <DialogFooter>
+                  <DialogFooter className="flex-row justify-end space-x-2">
                     <form onSubmit={handleSelectedAgentSubmit}>
                       <Button
                         type="submit"
@@ -564,12 +633,12 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
               </Dialog>
 
               <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-                <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+                <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                   <DialogHeader>
-                    <DialogTitle className="text-red-700 text-xl">
+                    <DialogTitle className="text-red-700 text-lg max-md:text-md">
                       Delete Agent
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="max-md:text-sm">
                       Are you sure you want to delete{" "}
                       <span className="font-semibold text-red-700">
                         {selectedAgent!.username}
@@ -579,16 +648,16 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agentData, fetchData }) => {
                   </DialogHeader>
 
                   <div className="p-2 m-2 text-sm">
-                    <p className="text-lg font-bold text-red-700 text-center">
+                    <p className="text-lg max-md:text-md font-bold text-red-700 text-center">
                       Warning
                     </p>
-                    <p className={"text-justify"}>
+                    <p className={"text-justify max-md:text-sm"}>
                       {
                         "By deleting this agent account, it will no longer generate predictions for Velocity Market"
                       }
                     </p>
                   </div>
-                  <DialogFooter>
+                  <DialogFooter className="flex-row justify-end space-x-2">
                     <form onSubmit={handleAgentDelete}>
                       <Button
                         type="submit"

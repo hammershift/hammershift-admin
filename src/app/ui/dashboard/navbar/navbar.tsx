@@ -6,14 +6,22 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SearchIcon from "@mui/icons-material/Search";
 import { Menu } from "@mui/icons-material";
+import velocityMarketsLogo from "../../../../../public/images/velocity-markets-logo.png";
+import Image from "next/image";
 
 const Navbar = ({ openSidebar }: { openSidebar: () => void }) => {
   return (
     <nav className="flex flex-row h-auto w-auto justify-between items-center bg-slate-800 px-5 rounded-l ">
-      <div className="md:hidden mr-5" onClick={openSidebar}>
+      <Image
+        alt="velocity-markets-logo"
+        src={velocityMarketsLogo}
+        width={250}
+        className="mr-5 py-4"
+      />
+      <div className="md:hidden mr-5 py-2" onClick={openSidebar}>
         <Menu />
       </div>
-      <p className="text-yellow-400">Admin Panel</p>
+      {/* <p className="text-yellow-400">Admin Panel</p>
       <div className="flex items-end justify-end">
         <div className="flex">
           <input
@@ -26,7 +34,7 @@ const Navbar = ({ openSidebar }: { openSidebar: () => void }) => {
           <NotificationsIcon className="m-3" />
           <SettingsIcon className="m-3" />
         </div>
-      </div>
+      </div> */}
     </nav>
   );
 };

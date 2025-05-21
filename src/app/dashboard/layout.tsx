@@ -9,6 +9,9 @@ function Layout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(
     typeof window !== "undefined" ? window.innerWidth >= 768 : false
   );
+  const [navBarOpen, setnavBarOpen] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const { data: session } = useSession();
@@ -22,7 +25,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   const openSidebar = () => {
     if (menuOpen === false) {
       setMenuOpen(true);
-    }
+    } else setMenuOpen(false);
   };
 
   const closeSidebar = () => {
@@ -36,7 +39,10 @@ function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const handleResize = () => {
+        console.log("window.innerWidth");
+        console.log(window.innerWidth);
         setMenuOpen(window.innerWidth >= 768);
+        setnavBarOpen(window.innerWidth < 768);
       };
 
       window.addEventListener("resize", handleResize);
@@ -49,16 +55,20 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div>
       {" "}
-      <div className="flex h-auto w-auto">
-        {menuOpen ? (
-          <div className="flex-4 z-10 w-auto max-md:absolute max-md:w-full">
-            <Sidebar closeSidebar={closeSidebar} />
-          </div>
-        ) : null}
+      <div className="flex max-md:flex-col h-auto w-auto">
+        <div>
+          {navBarOpen ? (
+            <div className="w-auto">
+              <Navbar openSidebar={openSidebar} />
+            </div>
+          ) : null}
+          {menuOpen ? (
+            <div className="flex-4 z-10 w-auto max-md:absolute max-md:w-full max-md:bg-slate-900 max-md:m-1 max-md:p-1 pt-1">
+              <Sidebar closeSidebar={closeSidebar} />
+            </div>
+          ) : null}
+        </div>
         <div className="flex-1 bg-slate-900 m-1 p-1 pt-1 flex flex-col w-auto h-full">
-          {/* <div className="w-auto">
-            <Navbar openSidebar={openSidebar} />
-          </div> */}
           <div className="w-auto">{children}</div>
         </div>
       </div>

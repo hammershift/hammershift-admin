@@ -123,161 +123,6 @@ export default function Comments() {
     });
   };
 
-  // return (
-  //   <div>
-  //     <div className="section-container mt-4">
-  //       <div className="flex justify-between">
-  //         <div className="font-bold">Comments Moderation</div>
-  //         {selectedIDs.length !== 0 && (
-  //           <>
-  //             <button
-  //               onClick={() => setShowDeleteSelectedModal(true)}
-  //               className="text-sm font-bold text-[#C2451E] flex items-center border border-[#C2451E] px-2 gap-2 rounded hover:text-[#1a2c3d] hover:bg-[#C2451E]"
-  //             >
-  //               <div>Delete Selected({selectedIDs.length})</div>
-  //               <DeleteIcon
-  //                 sx={{
-  //                   fontSize: "20px",
-  //                 }}
-  //               />
-  //             </button>
-  //             {showDeleteSelectedModal ? (
-  //               <DeleteCommentModal
-  //                 removeSelectedComments={removeSelectedComments}
-  //                 closeModal={closeModal}
-  //               />
-  //             ) : null}
-  //           </>
-  //         )}
-  //       </div>
-  //       <div className="my-4">
-  //         {isLoading ? (
-  //           <div className="flex justify-center items-center h-[592px]">
-  //             <BeatLoader color="#F2CA16" />
-  //           </div>
-  //         ) : (
-  //           <table className="w-full border-separate border-spacing-y-2 text-center">
-  //             <thead className="w-full">
-  //               <tr className="">
-  //                 <th className="font-bold p-2.5"></th>
-  //                 <th className="font-bold p-2.5">User</th>
-  //                 <th className="font-bold p-2.5">Comment</th>
-  //                 <th className="font-bold p-2.5">
-  //                   <button
-  //                     onClick={() => router.push("/dashboard/comments/likes")}
-  //                   >
-  //                     Likes/Dislikes <ArrowDropDownIcon />
-  //                   </button>
-  //                 </th>
-  //                 <th className="font-bold p-2.5">
-  //                   <button
-  //                     onClick={() => router.push("/dashboard/comments/newest")}
-  //                   >
-  //                     Date Posted <ArrowDropDownIcon />
-  //                   </button>
-  //                 </th>
-  //                 <th className="font-bold p-2.5">Actions</th>
-  //               </tr>
-  //             </thead>
-  //             <tbody className="w-full">
-  //               {comments &&
-  //                 comments.map((item: any, index) => (
-  //                   <tr
-  //                     key={item._id}
-  //                     className={`${
-  //                       matcher.hasMatch(item.comment)
-  //                         ? " bg-rose-700/20 border"
-  //                         : "bg-[#fff]/5"
-  //                     }`}
-  //                   >
-  //                     <td className="p-2.5 w-1/8">
-  //                       <Checkbox
-  //                         sx={{ color: "white" }}
-  //                         onClick={() => addOrRemoveID(item._id)}
-  //                       />
-  //                     </td>
-  //                     <td className="p-2.5 w-1/5">
-  //                       <div>{item.user.username}</div>
-  //                       <div className="text-sm">{item.user.userId}</div>
-  //                     </td>
-  //                     <td className="p-2.5 w-1/3">
-  //                       <div className=" line-clamp-1">{item.comment}</div>
-  //                     </td>
-  //                     <td className="p-2.5 w-1/8">
-  //                       <span className=" text-green-500">
-  //                         {item.likes.length}
-  //                       </span>{" "}
-  //                       /{" "}
-  //                       <span className=" text-red-500">
-  //                         {item.dislikes.length}
-  //                       </span>
-  //                     </td>
-  //                     <td className="p-2.5 w-1/8">
-  //                       {DateTime.fromISO(item.createdAt).toFormat(
-  //                         "MM/dd/yy hh:mm a"
-  //                       )}
-  //                     </td>
-  //                     <td className="p-2.5 w-1/8">
-  //                       <button
-  //                         onClick={() => {
-  //                           setCommentInfoModal(true);
-  //                           setCommentData(item);
-  //                         }}
-  //                       >
-  //                         <PreviewIcon />
-  //                       </button>
-  //                       {commentInfoModal ? (
-  //                         <CommmentInfo
-  //                           commentData={commentData}
-  //                           closeModal={closeModal}
-  //                         />
-  //                       ) : null}
-  //                       <Link
-  //                         target="_blank"
-  //                         rel="noopener noreferrer"
-  //                         href={
-  //                           item.pageType === "auction"
-  //                             ? `https://hammershift.vercel.app/auctions/car_view_page/${item.pageID}`
-  //                             : `https://hammershift.vercel.app/tournaments/${item.pageID}`
-  //                         }
-  //                       >
-  //                         <OpenInNewIcon />
-  //                       </Link>
-  //                       <button
-  //                         onClick={() => {
-  //                           setShowDeleteCommentModal(true);
-  //                           setCommentID(item._id);
-  //                         }}
-  //                       >
-  //                         <DeleteIcon
-  //                           sx={{
-  //                             color: "#C2451E",
-  //                           }}
-  //                         />
-  //                       </button>
-  //                       {showDeleteCommentModal ? (
-  //                         <DeleteCommentModal
-  //                           removeComment={removeComment}
-  //                           closeModal={closeModal}
-  //                           commentID={commentID}
-  //                         />
-  //                       ) : null}
-  //                     </td>
-  //                   </tr>
-  //                 ))}
-  //             </tbody>
-  //           </table>
-  //         )}
-  //       </div>
-  //       <div className="flex flex-col items-center gap-4 py-4">
-  //         <button onClick={loadMoreComments} className="btn-transparent-white">
-  //           Load More
-  //         </button>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
-
   return (
     <div className="section-container mt-4">
       {isLoading ? (
@@ -296,7 +141,67 @@ export default function Comments() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
+              <div className="block md:hidden space-y-4">
+                {comments &&
+                  comments.map((comment: CommentData, index: number) => (
+                    <div
+                      key={index}
+                      className="bg-[#13202D] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
+                    >
+                      <div>
+                        <p className="text-xs text-gray-400">User</p>
+                        <p className="text-white">{comment.user.username}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Comment</p>
+                        <p
+                          className={`text-white text-justify ${
+                            comment.comment.length > 250
+                              ? "max-md:text-xs"
+                              : "max-md:text-sm"
+                          }`}
+                        >
+                          {comment.comment}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Date Posted</p>
+                        <p className="text-white">
+                          {formatDate(comment.createdAt)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Likes/Dislikes</p>
+                        <div>
+                          <span className=" text-green-500">
+                            {comment.likes.length}
+                          </span>{" "}
+                          /{" "}
+                          <span className=" text-red-500">
+                            {comment.dislikes.length}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end space-x-2 pt-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={"text-red-700"}
+                          title={"Delete Comment"}
+                          onClick={() => {
+                            setShowDeleteModal(true);
+                            setSelectedComment(comment);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+
+              <div className="hidden md:block overflow-x-auto w-full">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -435,12 +340,12 @@ export default function Comments() {
                       open={showDeleteModal}
                       onOpenChange={setShowDeleteModal}
                     >
-                      <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+                      <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                         <DialogHeader>
-                          <DialogTitle className="text-red-700 text-xl">
+                          <DialogTitle className="text-red-700 text-lg max-md:text-md">
                             Delete Comment
                           </DialogTitle>
-                          <DialogDescription>
+                          <DialogDescription className="max-md:text-sm">
                             Are you sure you want to delete this comment by{" "}
                             <span className="font-semibold text-red-700">
                               {selectedComment!.user.username}
@@ -450,11 +355,11 @@ export default function Comments() {
                         </DialogHeader>
 
                         <div className="p-2 m-2 text-sm">
-                          <p className={"text-justify"}>
+                          <p className={"max-md:text-sm text-justify"}>
                             {selectedComment?.comment}
                           </p>
                         </div>
-                        <DialogFooter>
+                        <DialogFooter className="flex-row justify-end space-x-2">
                           <form
                             onSubmit={() => removeComment(selectedComment!._id)}
                           >
