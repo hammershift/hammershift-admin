@@ -1,7 +1,23 @@
-import { model, models, Schema, Types } from "mongoose";
-import { Admin } from "../lib/interfaces";
+import mongoose, {
+  Document,
+  Schema,
+  PaginateModel,
+  AggregatePaginateModel,
+  Types,
+} from "mongoose";
+import aggregatePaginate from "mongoose-aggregate-paginate-v2";
+import paginate from "mongoose-paginate-v2";
+export interface Admin extends Document {
+  _id: Types.ObjectId;
+  first_name: string;
+  last_name: string;
+  email: string;
+  username: string;
+  password: string;
+  role: string;
+}
 
-const adminsSchema = new Schema(
+const adminSchema = new Schema(
   {
     _id: { type: Types.ObjectId, required: true },
     first_name: { type: String, required: true },
@@ -14,6 +30,13 @@ const adminsSchema = new Schema(
   { collection: "admins", timestamps: true }
 );
 
-const Admins = models.admins || model<Admin>("admins", adminsSchema);
+adminSchema.plugin(aggregatePaginate);
+adminSchema.plugin(paginate);
+
+type AdminModelType = AggregatePaginateModel<Admin> | PaginateModel<Admin>;
+
+const Admins =
+  (mongoose.models.admins as AdminModelType) ||
+  mongoose.model<Admin, AdminModelType>("admins", adminSchema, "admins");
 
 export default Admins;

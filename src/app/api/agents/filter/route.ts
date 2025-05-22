@@ -1,0 +1,126 @@
+import { Role } from "@/app/lib/interfaces";
+import connectToDB from "@/app/lib/mongoose";
+import Users, { User } from "@/app/models/user.model";
+import { AggregatePaginateModel, PaginateModel } from "mongoose";
+import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(req: NextRequest) {
+  try {
+    await connectToDB();
+    const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
+    const limit = Number(req.nextUrl.searchParams.get("limit")) || 5;
+    const searchedKeyword = req.nextUrl.searchParams.get("search");
+
+    const options = {
+      offset: offset,
+      limit: limit,
+    };
+    if (searchedKeyword) {
+      // const aggregate = Users.aggregate([
+      //   {
+      //     $search: {
+      //       index: "userSearchWildcard",
+      //       wildcard: {
+      //         query: `*${searchedKeyword}*`,
+      //         path: ["username", "fullName", "email"],
+      //         allowAnalyzedField: true,
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $match: { role: Role.AGENT },
+      //   },
+      //   {
+      //     $project: {
+      //       _id: 1,
+      //       username: 1,
+      //       fullName: 1,
+      //       email: 1,
+      //       balance: 1,
+      //       isActive: 1,
+      //       isBanned: 1,
+      //       provider: 1,
+      //       about: 1,
+      //       createdAt: 1,
+      //       updatedAt: 1,
+      //       role: 1,
+      //       agentProperties: 1,
+      //     },
+      //   },
+      // ]);
+      const aggregate = Users.aggregate([
+        {
+          $match: {
+            $and: [
+              { role: Role.AGENT },
+              {
+                $or: [
+                  { username: { $regex: searchedKeyword, $options: "i" } },
+                  { fullName: { $regex: searchedKeyword, $options: "i" } },
+                  { email: { $regex: searchedKeyword, $options: "i" } },
+                  {
+                    "agentProperties.systemInstruction": {
+                      $regex: searchedKeyword,
+                      $options: "i",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            username: 1,
+            fullName: 1,
+            email: 1,
+            balance: 1,
+            isActive: 1,
+            isBanned: 1,
+            provider: 1,
+            about: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            role: 1,
+            agentProperties: 1,
+          },
+        },
+      ]);
+
+      const searchedAgents = await (
+        Users as AggregatePaginateModel<User>
+      ).aggregatePaginate(aggregate, {
+        ...options,
+        sort: { createdAt: -1 },
+      });
+      return NextResponse.json({
+        total: searchedAgents.totalDocs,
+        totalPages: searchedAgents.totalPages,
+        agents: searchedAgents.docs,
+      });
+    }
+    let query: any = {
+      role: Role.AGENT,
+    };
+
+    const filteredAgents = await (Users as PaginateModel<User>).paginate(
+      query,
+      {
+        ...options,
+        sort: { createdAt: -1 },
+      }
+    );
+
+    return NextResponse.json({
+      total: filteredAgents.totalDocs,
+      totalPages: filteredAgents.totalPages,
+      agents: filteredAgents.docs,
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "Internal server error" });
+  }
+}

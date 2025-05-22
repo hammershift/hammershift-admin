@@ -14,13 +14,13 @@ function Layout({ children }: { children: React.ReactNode }) {
   );
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
   useEffect(() => {
-    setIsLoggedIn(!!session);
-    if (session === null) {
+    if (status === "unauthenticated") {
       redirect("/");
     }
-  }, [session]);
+  }, [status]);
 
   const openSidebar = () => {
     if (menuOpen === false) {
@@ -50,7 +50,7 @@ function Layout({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  if (session === null) return null;
+  if (status === "loading") return null;
 
   return (
     <div>

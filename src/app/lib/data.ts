@@ -11,6 +11,12 @@ export interface getCarsWithFilterProps {
   search?: string;
   isPlatformTab?: boolean;
 }
+export interface SearchProps {
+  offset?: number;
+  limit?: number;
+  sort?: string;
+  search?: string;
+}
 
 export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
   const queries = Object.entries(props)
@@ -137,17 +143,45 @@ export const getAdmins = async () => {
   return data;
 };
 
+export const getAdminsWithSearch = async (props: SearchProps) => {
+  const queries = Object.entries(props)
+    .map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return `${key}=${value
+          .map((item) => encodeURIComponent(item))
+          .join("$")}`;
+      } else {
+        return `${key}=${encodeURIComponent(value)}`;
+      }
+    })
+    .join("&");
+  try {
+    const response = await fetch(`/api/admins/filter?` + queries, {
+      cache: "no-store",
+    });
+
+    if (response.ok) {
+      const list = await response.json();
+      console.log(list);
+      let adminsData = {
+        total: list.total,
+        totalPages: list.totalPages,
+        admins: list.admins,
+      };
+
+      return adminsData;
+    } else {
+      throw new Error("Failed to fetch admins list!");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 ///////////////////////// Users //////////////////////////
 // get all users
 export const getUsers = async () => {
   const res = await fetch("/api/users");
-  const data = await res.json();
-  return data;
-};
-
-//get limited users
-export const getLimitedUsers = async (limit: number) => {
-  const res = await fetch(`/api/users?limit=${limit}`);
   const data = await res.json();
   return data;
 };
@@ -160,10 +194,38 @@ export const getOneUser = async (id: string) => {
 };
 
 // search users
-export const getUsersWithSearch = async (searchString: string) => {
-  const res = await fetch("/api/users/filters?search=" + searchString);
-  const data = await res.json();
-  return data;
+export const getUsersWithSearch = async (props: SearchProps) => {
+  const queries = Object.entries(props)
+    .map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return `${key}=${value
+          .map((item) => encodeURIComponent(item))
+          .join("$")}`;
+      } else {
+        return `${key}=${encodeURIComponent(value)}`;
+      }
+    })
+    .join("&");
+  try {
+    const response = await fetch(`/api/users/filter?` + queries, {
+      cache: "no-store",
+    });
+    if (response.ok) {
+      const list = await response.json();
+      console.log(list);
+      let usersData = {
+        total: list.total,
+        totalPages: list.totalPages,
+        users: list.users,
+      };
+
+      return usersData;
+    } else {
+      throw new Error("Failed to fetch users list!");
+    }
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 // edit and ban user
@@ -464,6 +526,41 @@ export const getAllComments = async (limit: number) => {
   return data;
 };
 
+export const getAllCommentsWithSearch = async (props: SearchProps) => {
+  const queries = Object.entries(props)
+    .map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return `${key}=${value
+          .map((item) => encodeURIComponent(item))
+          .join("$")}`;
+      } else {
+        return `${key}=${encodeURIComponent(value)}`;
+      }
+    })
+    .join("&");
+  try {
+    const response = await fetch(`/api/comments/filter?` + queries, {
+      cache: "no-store",
+    });
+
+    if (response.ok) {
+      const list = await response.json();
+      console.log(list);
+      let commentsData = {
+        total: list.total,
+        totalPages: list.totalPages,
+        comments: list.comments,
+      };
+
+      return commentsData;
+    } else {
+      throw new Error("Failed to fetch comments list!");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export const getSortedComments = async (limit: number, sort: string) => {
   const response = await fetch(`/api/comments?limit=${limit}&sort=${sort}`);
   const data = await response.json();
@@ -501,6 +598,42 @@ export const getAgents = async () => {
   const data = await res.json();
   return data;
 };
+
+export const getAgentsWithSearch = async (props: SearchProps) => {
+  const queries = Object.entries(props)
+    .map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return `${key}=${value
+          .map((item) => encodeURIComponent(item))
+          .join("$")}`;
+      } else {
+        return `${key}=${encodeURIComponent(value)}`;
+      }
+    })
+    .join("&");
+  try {
+    const response = await fetch(`/api/agents/filter?` + queries, {
+      cache: "no-store",
+    });
+
+    if (response.ok) {
+      const list = await response.json();
+      console.log(list);
+      let agentsData = {
+        total: list.total,
+        totalPages: list.totalPages,
+        agents: list.agents,
+      };
+
+      return agentsData;
+    } else {
+      throw new Error("Failed to fetch agents list!");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export const editAgentWithId = async (id: string, body: any) => {
   const res = await fetch(`/api/agents?agent_id=${id}`, {
     method: "PUT",

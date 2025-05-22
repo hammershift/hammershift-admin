@@ -1,14 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
 import {
   deleteUserWithId,
   editUserWithId,
-  getLimitedUsers,
   getUsersWithSearch,
 } from "@/app/lib/data";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { BeatLoader } from "react-spinners";
 import {
@@ -35,9 +32,11 @@ import {
   DialogTitle,
 } from "@/app/ui/components/dialog";
 import { Button } from "@/app/ui/components/button";
-import { Ban, Edit, LockOpen, Trash2 } from "lucide-react";
+import { Ban, Edit, LockOpen, Search, Trash2 } from "lucide-react";
 import { Label } from "@/app/ui/components/label";
 import { Input } from "@/app/ui/components/input";
+import ResponsivePagination from "react-responsive-pagination";
+import "react-responsive-pagination/themes/minimal-light-dark.css";
 
 interface UserData {
   _id: string;
@@ -55,66 +54,61 @@ interface UsersPageProps {
   banUser: (_id: string, newBannedStatus: boolean) => Promise<void>;
   setUserData: (userData: UserData[]) => void;
   setSearchValue: (searchValue: string) => void;
-  isSearching: boolean;
+  isLoading: boolean;
+  currentPage: number;
+  totalPages: number;
+  setCurrentPage: (currentPage: number) => void;
 }
 
 const UsersPage = () => {
   const [userData, setUserData] = useState<UserData[]>([]);
-  const [searchValue, setSearchValue] = useState<null | string>(null);
-  const [userDisplayCount, setUserDisplayCount] = useState(12);
+  const [searchValue, setSearchValue] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isSearching, setIsSearching] = useState(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [displayCount, setDisplayCount] = useState(5);
+  const [didAction, setDidAction] = useState(false);
 
   const fetchData = async () => {
+    setIsLoading(true);
     try {
-      const data = await getLimitedUsers(userDisplayCount);
+      const data = await getUsersWithSearch({
+        search: searchValue,
+        offset: (currentPage - 1) * displayCount,
+        limit: displayCount,
+      });
 
       if (data && "users" in data) {
+        setTotalUsers(data.total);
+        setTotalPages(data.totalPages);
         setUserData(data.users as UserData[]);
-        setIsLoading(false);
       } else {
         console.error("Unexpected data structure:", data);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+    setIsLoading(false);
   };
 
-  // get all users data
   useEffect(() => {
     fetchData();
-  }, [userDisplayCount]);
+  }, [currentPage, searchValue]);
 
-  // get users data with search value
   useEffect(() => {
-    console.log("searchValue:", searchValue);
-    const getDataWithSearchValue = async () => {
-      setIsSearching(true);
-      if (searchValue !== null && searchValue !== "") {
-        try {
-          const userData = await getUsersWithSearch(searchValue);
-
-          if (userData) {
-            setUserData(userData.users as UserData[]);
-          } else {
-            console.error("Unexpected data structure:", userData);
-          }
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
-      } else fetchData();
-      setIsSearching(false);
-    };
-    getDataWithSearchValue();
-  }, [searchValue]);
+    if (didAction) {
+      fetchData();
+      setDidAction(false);
+    }
+  }, [didAction]);
 
   const deleteUser = async (_id: string) => {
     try {
       const res = await deleteUserWithId(_id);
 
       if (res && res.status === 200) {
-        console.log(userData);
-        setUserData(userData.filter((user) => user._id !== _id));
+        setDidAction(true);
         alert("User Deleted Successfully");
       }
     } catch (error) {
@@ -128,12 +122,7 @@ const UsersPage = () => {
       const res = await editUserWithId(_id, updatedUser);
 
       if (res && res.status === 200) {
-        console.log(userData);
-        setUserData(
-          userData.map((user) =>
-            user._id === _id ? { ...user, ...updatedUser } : user
-          )
-        );
+        setDidAction(true);
         if (newBannedStatus) alert("User Banned Successfully");
         else alert("User Unbanned Successfully");
       }
@@ -142,27 +131,18 @@ const UsersPage = () => {
     }
   };
 
-  const handleLoadMore = () => {
-    setUserDisplayCount((prevCount) => prevCount + 7);
-  };
-
   return (
-    <div className="section-container mt-4">
-      {isLoading ? (
-        <div className="flex justify-center items-center h-[436px]">
-          <BeatLoader color="#F2CA16" />
-        </div>
-      ) : (
-        <UserTable
-          userData={userData}
-          deleteUser={deleteUser}
-          banUser={banUser}
-          setUserData={setUserData}
-          setSearchValue={setSearchValue}
-          isSearching={isSearching}
-        />
-      )}
-    </div>
+    <UserTable
+      userData={userData}
+      deleteUser={deleteUser}
+      banUser={banUser}
+      setUserData={setUserData}
+      setSearchValue={setSearchValue}
+      isLoading={isLoading}
+      currentPage={currentPage}
+      totalPages={totalPages}
+      setCurrentPage={setCurrentPage}
+    />
   );
 };
 
@@ -174,7 +154,10 @@ const UserTable: React.FC<UsersPageProps> = ({
   banUser,
   setUserData,
   setSearchValue,
-  isSearching,
+  isLoading,
+  currentPage,
+  totalPages,
+  setCurrentPage,
 }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
@@ -209,32 +192,29 @@ const UserTable: React.FC<UsersPageProps> = ({
   };
 
   return (
-    <div>
+    <div className="section-container mt-4">
       <Card className="bg-[#13202D] border-[#1E2A36] mb-8">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold text-yellow-500">
-            Users
-          </CardTitle>
-          <CardDescription>Manage user accounts</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-xl font-bold text-yellow-500">
+              Users
+            </CardTitle>
+            <CardDescription>Manage user accounts</CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto w-full block md:table">
-            <div className="w-auto mb-4 self-center relative">
-              <div className="bg-[#fff]/20 h-auto flex px-2 py-1.5 rounded gap-1">
-                <Image
-                  src={magnifyingGlass}
-                  alt="magnifying glass"
-                  width={20}
-                  height={20}
-                />
-                <input
-                  placeholder={`Search for users`}
-                  className="bg-transparent focus:outline-none"
-                  onChange={(e) => setSearchValue(e.target.value)}
-                />
-              </div>
+            <div className="bg-[#1E2A36] relative h-auto flex px-2 py-1.5 rounded gap-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <Input
+                placeholder="Search by username, name or email"
+                className="pl-10 text-white bg-transparent focus:outline-none placeholder:text-white border-none max-md:text-sm"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchValue(e.target.value)
+                }
+              />
             </div>
-            {isSearching ? (
+            {isLoading ? (
               <div className="flex justify-center items-center h-[436px]">
                 <BeatLoader color="#F2CA16" />
               </div>
@@ -247,17 +227,23 @@ const UserTable: React.FC<UsersPageProps> = ({
                         key={index}
                         className="bg-[#13202D] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
                       >
-                        <div>
-                          <p className="text-xs text-gray-400">Username</p>
-                          <p className="text-white">{user.username}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400">Full Name</p>
-                          <p className="text-white">{user.fullName}</p>
+                        <div className="flex w-full gap-2">
+                          <div className="w-[50%]">
+                            <p className="text-xs text-gray-400">Username</p>
+                            <p className="text-white text-sm">
+                              {user.username}
+                            </p>
+                          </div>
+                          <div className="w-[50%]">
+                            <p className="text-xs text-gray-400">Full Name</p>
+                            <p className="text-white text-sm">
+                              {user.fullName}
+                            </p>
+                          </div>
                         </div>
                         <div>
                           <p className="text-xs text-gray-400">Email</p>
-                          <p className="text-white">{user.email}</p>
+                          <p className="text-white text-sm">{user.email}</p>
                         </div>
                         <div>
                           <p className="text-xs text-gray-400">Status</p>
@@ -587,6 +573,15 @@ const UserTable: React.FC<UsersPageProps> = ({
           </div>
         </CardContent>
       </Card>
+      {!isLoading && (
+        <div className="mx-auto mb-8 w-1/3">
+          <ResponsivePagination
+            current={currentPage}
+            total={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
     </div>
   );
 };
