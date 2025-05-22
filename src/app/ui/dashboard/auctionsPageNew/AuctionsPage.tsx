@@ -506,7 +506,95 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
+                <div className="block md:hidden space-y-4">
+                  {auctionData &&
+                    auctionData.map((auction, index: number) => (
+                      <div
+                        key={index}
+                        className="bg-[#13202D] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
+                      >
+                        <div className="flex w-full gap-2">
+                          <div className="w-[75%]">
+                            <p className="text-xs text-gray-400">Car</p>
+                            <div className="flex items-center gap-3">
+                              <div>
+                                <div className="text-xs">
+                                  {auction.year} {auction.make} {auction.model}
+                                </div>
+                                {/* <div className="text-sm text-gray-400">
+                                  {car.description.substring(0, 30)}...
+                                </div> */}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="w-[25%]">
+                            <div className="w-12 h-12 rounded-md bg-gray-800 overflow-hidden">
+                              {auction.image ? (
+                                <Image
+                                  src={auction.image}
+                                  alt={`${auction.year} ${auction.make} ${auction.model}`}
+                                  title={`${auction.year} ${auction.make} ${auction.model}`}
+                                  className="w-full h-full object-cover"
+                                  objectFit="cover"
+                                  width={100}
+                                  height={100}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <ImageOff className="w-6 h-6 text-gray-500" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex w-full gap-2">
+                          <div className="w-[50%]">
+                            <p className="text-xs text-gray-400">Current Bid</p>
+                            <p className="text-white text-sm font-mono">
+                              ${auction.price.toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="w-[50%]">
+                            <p className="text-xs text-gray-400">Status</p>
+                            <Badge
+                              className={
+                                auction.isActive
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }
+                            >
+                              {auction.isActive ? "Active" : "Ended"}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div></div>
+
+                        <div className="flex justify-end space-x-2 pt-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Edit Car"
+                            className=""
+                            onClick={() => handleEditAuction(auction)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="View Predictions"
+                            className="text-yellow-500"
+                            onClick={() => handleViewPrediction(auction)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+
+                <div className="hidden md:block overflow-x-auto w-full">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -581,7 +669,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                                 variant="ghost"
                                 size="icon"
                                 title="View Predictions"
-                                className=""
+                                className="text-yellow-500"
                                 onClick={() => handleViewPrediction(auction)}
                               >
                                 <Eye className="h-4 w-4" />
@@ -618,10 +706,12 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
         )}
       </Tabs>
       <Dialog open={viewingPredictions} onOpenChange={setViewingPredictions}>
-        <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+        <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
           <DialogHeader>
-            <DialogTitle>Predictions</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg max-md:text-md">
+              Predictions
+            </DialogTitle>
+            <DialogDescription className="max-md:text-sm">
               {currentAuction &&
                 `Viewing predictions for ${currentAuction.year} ${currentAuction.make} ${currentAuction.model}`}
             </DialogDescription>
@@ -714,7 +804,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex-row justify-end space-x-2">
             <Button className="" onClick={() => setViewingPredictions(false)}>
               Close
             </Button>
@@ -722,10 +812,12 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
         </DialogContent>
       </Dialog>
       <Dialog open={editAuction} onOpenChange={setEditAuction}>
-        <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+        <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
           <DialogHeader>
-            <DialogTitle>Edit Auction</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg max-md:text-md">
+              Edit Auction
+            </DialogTitle>
+            <DialogDescription className="max-md:text-sm">
               Make changes to auction details
             </DialogDescription>
           </DialogHeader>
@@ -733,7 +825,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="mb-2 block">Car Image</Label>
+                  <Label className="mb-2 block max-md:text-xs">Car Image</Label>
                   <div className="h-48 bg-gray-800 rounded-md mb-4 overflow-hidden">
                     {currentAuction.image ? (
                       <Image
@@ -754,7 +846,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                   <Input
                     placeholder="Image URL"
                     defaultValue={currentAuction.image}
-                    className="bg-[#1E2A36] border-[#1E2A36]"
+                    className="bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setEditAuctionDetails({
                         ...editAuctionDetails,
@@ -766,10 +858,10 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
 
                 <div className="space-y-4">
                   <div>
-                    <Label>Make</Label>
+                    <Label className="max-md:text-xs">Make</Label>
                     <Input
                       defaultValue={currentAuction.make}
-                      className="bg-[#1E2A36] border-[#1E2A36]"
+                      className="bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setEditAuctionDetails({
                           ...editAuctionDetails,
@@ -780,10 +872,10 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                   </div>
 
                   <div>
-                    <Label>Model</Label>
+                    <Label className="max-md:text-xs">Model</Label>
                     <Input
                       defaultValue={currentAuction.model}
-                      className="bg-[#1E2A36] border-[#1E2A36]"
+                      className="bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setEditAuctionDetails({
                           ...editAuctionDetails,
@@ -794,11 +886,11 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                   </div>
 
                   <div>
-                    <Label>Year</Label>
+                    <Label className="max-md:text-xs">Year</Label>
                     <Input
                       type="number"
                       defaultValue={currentAuction.year}
-                      className="bg-[#1E2A36] border-[#1E2A36]"
+                      className="bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setEditAuctionDetails({
                           ...editAuctionDetails,
@@ -809,11 +901,11 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                   </div>
 
                   <div>
-                    <Label>Current Bid</Label>
+                    <Label className="max-md:text-xs">Current Bid</Label>
                     <Input
                       type="number"
                       defaultValue={currentAuction.price}
-                      className="bg-[#1E2A36] border-[#1E2A36]"
+                      className="bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setEditAuctionDetails({
                           ...editAuctionDetails,
@@ -826,10 +918,10 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
               </div>
 
               <div>
-                <Label>Description</Label>
+                <Label className="max-md:text-xs">Description</Label>
                 <Textarea
                   defaultValue={currentAuction.description}
-                  className="bg-[#1E2A36] border-[#1E2A36]"
+                  className="bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                   rows={3}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                     setEditAuctionDetails({
@@ -841,14 +933,14 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
               </div>
 
               <div className="flex items-center gap-4">
-                <Label>Status</Label>
+                <Label className="max-md:text-xs">Status</Label>
                 <select
                   defaultValue={
                     currentAuction.isActive && !currentAuction.ended
                       ? "active"
                       : "ended"
                   }
-                  className="bg-[#1E2A36] border border-[#1E2A36] rounded-md p-2"
+                  className="bg-[#1E2A36] border border-[#1E2A36] rounded-md p-2 max-md:text-sm"
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                     setEditAuctionDetails({
                       ...editAuctionDetails,
@@ -867,7 +959,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
               </div>
             </div>
           )}
-          <DialogFooter>
+          <DialogFooter className="flex-row justify-end space-x-2">
             <Button
               variant="outline"
               className=""

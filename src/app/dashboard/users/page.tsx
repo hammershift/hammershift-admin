@@ -406,7 +406,7 @@ const UserTable: React.FC<UsersPageProps> = ({
                 <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
                   <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                     <DialogHeader>
-                      <DialogTitle className="max-md:text-md">
+                      <DialogTitle className="text-lg max-md:text-md">
                         Edit User
                       </DialogTitle>
                       <DialogDescription className="max-md:text-sm">
