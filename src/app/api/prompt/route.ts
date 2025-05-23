@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
-        let systemInstruction = agent.agentProperties.systemInstruction;
+        let systemInstruction = agent.agentProperties?.systemInstruction || "";
         //add already submitted prediction values to the system instruction so the agent cannot use them
         if (predictionValues.length > 0) {
           systemInstruction +=
