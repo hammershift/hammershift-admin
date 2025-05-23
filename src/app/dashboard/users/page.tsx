@@ -196,10 +196,12 @@ const UserTable: React.FC<UsersPageProps> = ({
       <Card className="bg-[#13202D] border-[#1E2A36] mb-8">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-yellow-500">
-              Users
+            <CardTitle className="text-2xl max-md:text-xl font-bold text-yellow-500">
+              User Management
             </CardTitle>
-            <CardDescription>Manage user accounts</CardDescription>
+            <CardDescription className="text-md max-md:text-sm">
+              Manage user accounts
+            </CardDescription>
           </div>
         </CardHeader>
         <CardContent>

@@ -254,10 +254,10 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
       <Card className="bg-[#13202D] border-[#1E2A36] mb-8">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-yellow-500">
-              Agents
+            <CardTitle className="text-2xl max-md:text-xl font-bold text-yellow-500">
+              Agent Management
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-md max-md:text-sm">
               Manage AI agents and their system instructions
             </CardDescription>
           </div>

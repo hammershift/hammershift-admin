@@ -268,10 +268,10 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
       <Card className="bg-[#13202D] border-[#1E2A36] mb-8">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-yellow-500">
-              Admins
+            <CardTitle className="text-2xl max-md:text-xl font-bold text-yellow-500">
+              Admin Management
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-md max-md:text-sm">
               Manage administrators and their access levels
             </CardDescription>
           </div>
@@ -285,8 +285,8 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
                 setPasswordMismatchError(false);
               }}
             >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add Admin
+              <UserPlus className="md:mr-2 h-4 w-4" />
+              <span className="max-md:hidden">Add Admin</span>
             </Button>
           )}
         </CardHeader>

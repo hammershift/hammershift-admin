@@ -142,10 +142,10 @@ export default function Comments() {
         <Card className="bg-[#13202D] border-[#1E2A36] mb-8">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-xl font-bold text-yellow-500">
-                Comments
+              <CardTitle className="text-2xl max-md:text-xl font-bold text-yellow-500">
+                Comment Management
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-md max-md:text-sm">
                 Manage and moderate user comments across the platform
               </CardDescription>
             </div>
