@@ -15,7 +15,7 @@ interface SidebarLinkProps {
 const SidebarLink: React.FC<SidebarLinkProps> = ({ item }) => {
   const currentPath = usePathname();
   const isActive = currentPath === item.path;
-  const linkStyles = `flex items-center gap-2 p-3 hover:bg-yellow-400 hover:text-black m-1 rounded ${
+  const linkStyles = `flex items-center gap-2 max-md:p-1 p-3 max-md:text-sm hover:bg-yellow-400 hover:text-black m-1 rounded ${
     isActive ? "bg-gray-400 text-black" : ""
   }`;
 

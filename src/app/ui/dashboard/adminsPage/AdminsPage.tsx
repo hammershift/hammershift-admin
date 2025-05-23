@@ -25,7 +25,7 @@ import {
   DialogTitle,
 } from "@/app/ui/components/dialog";
 import { Badge } from "../../components/badge";
-import { Edit, Trash2, UserPlus } from "lucide-react";
+import { Edit, Search, Trash2, UserPlus } from "lucide-react";
 import { Button } from "../../components/button";
 import { Label } from "../../components/label";
 import { Input } from "../../components/input";
@@ -37,6 +37,9 @@ import {
   SelectValue,
 } from "../../components/select";
 import { useSession } from "next-auth/react";
+import { BeatLoader } from "react-spinners";
+import ResponsivePagination from "react-responsive-pagination";
+import "react-responsive-pagination/themes/minimal-light-dark.css";
 interface AdminData {
   _id: string;
   first_name: string;
@@ -50,9 +53,22 @@ interface AdminData {
 interface AdminsPageProps {
   adminData: AdminData[];
   fetchData: () => void;
+  setSearchValue: (searchValue: string) => void;
+  isLoading: boolean;
+  currentPage: number;
+  totalPages: number;
+  setCurrentPage: (currentPage: number) => void;
 }
 
-const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
+const AdminsPage: React.FC<AdminsPageProps> = ({
+  adminData,
+  fetchData,
+  setSearchValue,
+  isLoading,
+  currentPage,
+  totalPages,
+  setCurrentPage,
+}) => {
   const defaultAdmin: AdminData = {
     _id: "",
     first_name: "",
@@ -252,10 +268,10 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
       <Card className="bg-[#13202D] border-[#1E2A36] mb-8">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-yellow-500">
-              Admin List
+            <CardTitle className="text-2xl max-md:text-xl font-bold text-yellow-500">
+              Admin Management
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-md max-md:text-sm">
               Manage administrators and their access levels
             </CardDescription>
           </div>
@@ -269,67 +285,78 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                 setPasswordMismatchError(false);
               }}
             >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add Admin
+              <UserPlus className="md:mr-2 h-4 w-4" />
+              <span className="max-md:hidden">Add Admin</span>
             </Button>
           )}
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="font-bold text-yellow-500/90">
-                    First Name
-                  </TableHead>
-                  <TableHead className="font-bold text-yellow-500/90">
-                    Last Name
-                  </TableHead>
-                  <TableHead className="font-bold text-yellow-500/90">
-                    Email
-                  </TableHead>
-                  <TableHead className="font-bold text-yellow-500/90">
-                    Username
-                  </TableHead>
-                  <TableHead className="font-bold text-yellow-500/90">
-                    Admin Role
-                  </TableHead>
-                  {role == "owner" && (
-                    <TableHead className="font-bold text-yellow-500/90">
-                      Actions
-                    </TableHead>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {adminData &&
-                  adminData.map((admin: AdminData, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {admin.first_name}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {admin.last_name}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {admin.email}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {admin.username}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <Badge className={getRoleBadgeColor(admin.role)}>
-                          {admin.role.charAt(0).toUpperCase() +
-                            admin.role.substring(1, admin.role.length)}
-                        </Badge>
-                      </TableCell>
-                      {role == "owner" && (
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-1">
+          <div className="overflow-x-auto w-full block md:table">
+            <div className="bg-[#1E2A36] relative h-auto flex px-2 py-1.5 rounded gap-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <Input
+                placeholder="Search by username, name or email"
+                className="pl-10 text-white bg-transparent focus:outline-none placeholder:text-white border-none max-md:text-sm"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchValue(e.target.value)
+                }
+              />
+            </div>
+            {isLoading ? (
+              <div className="flex justify-center items-center h-[436px]">
+                <BeatLoader color="#F2CA16" />
+              </div>
+            ) : (
+              <div>
+                <div className="block md:hidden space-y-4">
+                  {adminData &&
+                    adminData.map((admin: AdminData, index: number) => (
+                      <div
+                        key={index}
+                        className="bg-[#13202D] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
+                      >
+                        <div className="flex w-full gap-2">
+                          <div className="w-[50%]">
+                            <p className="text-xs text-gray-400">First Name</p>
+                            <p className="text-white text-sm">
+                              {admin.first_name}
+                            </p>
+                          </div>
+                          <div className="w-[50%]">
+                            <p className="text-xs text-gray-400">Last Name</p>
+                            <p className="text-white text-sm">
+                              {admin.last_name}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex w-full gap-2">
+                          <div className="w-[50%]">
+                            <p className="text-xs text-gray-400">Username</p>
+                            <p className="text-white text-sm">
+                              {admin.username}
+                            </p>
+                          </div>
+                          <div className="w-[50%]">
+                            <p className="text-xs text-gray-400">Admin Role</p>
+                            <Badge
+                              className={`text-xs ${getRoleBadgeColor(
+                                admin.role
+                              )}`}
+                            >
+                              {admin.role.charAt(0).toUpperCase() +
+                                admin.role.substring(1, admin.role.length)}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400">Email</p>
+                          <p className="text-white text-sm">{admin.email}</p>
+                        </div>
+                        {role == "owner" && (
+                          <div className="flex justify-end space-x-2 pt-2">
                             <Button
                               variant="ghost"
                               size="icon"
-                              title="Edit User"
                               className={""}
                               onClick={() => {
                                 setShowEditModal(true);
@@ -338,364 +365,489 @@ const AdminsPage: React.FC<AdminsPageProps> = ({ adminData, fetchData }) => {
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-
                             <Button
                               variant="ghost"
                               size="icon"
                               className={"text-red-700"}
-                              title={"Delete User"}
                               onClick={() => {
                                 setShowDeleteModal(true);
                                 setSelectedAdmin(admin);
                               }}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
                           </div>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </div>
-          <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-            <DialogContent className="bg-[#13202D] border-[#1E2A36]">
-              <DialogHeader>
-                <DialogTitle>Add Admin</DialogTitle>
-                <DialogDescription>
-                  Provide information for new admin
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">First Name</Label>
-                  <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
-                      emptyInputError && newAdmin?.first_name == ""
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                    name="first_name"
-                    type="text"
-                    value={newAdmin?.first_name || ""}
-                    onChange={handleNewAdminChange}
-                  />
+                        )}
+                      </div>
+                    ))}
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Last Name</Label>
-                  <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
-                      emptyInputError && newAdmin?.last_name == ""
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                    name="last_name"
-                    type="text"
-                    value={newAdmin?.last_name || ""}
-                    onChange={handleNewAdminChange}
-                  />
+                <div className="hidden md:block overflow-x-auto w-full">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="font-bold text-yellow-500/90">
+                          First Name
+                        </TableHead>
+                        <TableHead className="font-bold text-yellow-500/90">
+                          Last Name
+                        </TableHead>
+                        <TableHead className="font-bold text-yellow-500/90">
+                          Email
+                        </TableHead>
+                        <TableHead className="font-bold text-yellow-500/90">
+                          Username
+                        </TableHead>
+                        <TableHead className="font-bold text-yellow-500/90">
+                          Admin Role
+                        </TableHead>
+                        {role == "owner" && (
+                          <TableHead className="font-bold text-yellow-500/90">
+                            Actions
+                          </TableHead>
+                        )}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {adminData &&
+                        adminData.map((admin: AdminData, index: number) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">
+                              {admin.first_name}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {admin.last_name}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {admin.email}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {admin.username}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              <Badge className={getRoleBadgeColor(admin.role)}>
+                                {admin.role.charAt(0).toUpperCase() +
+                                  admin.role.substring(1, admin.role.length)}
+                              </Badge>
+                            </TableCell>
+                            {role == "owner" && (
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    title="Edit User"
+                                    className={""}
+                                    onClick={() => {
+                                      setShowEditModal(true);
+                                      setSelectedAdmin({
+                                        ...admin,
+                                        password: "",
+                                      });
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={"text-red-700"}
+                                    title={"Delete User"}
+                                    onClick={() => {
+                                      setShowDeleteModal(true);
+                                      setSelectedAdmin(admin);
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            )}
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Email</Label>
-                  <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
-                      emptyInputError && newAdmin?.email == ""
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                    name="email"
-                    type="email"
-                    value={newAdmin?.email || ""}
-                    onChange={handleNewAdminChange}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Username</Label>
-                  <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
-                      emptyInputError && newAdmin?.username == ""
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                    name="username"
-                    type="text"
-                    value={newAdmin?.username || ""}
-                    onChange={handleNewAdminChange}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Password</Label>
-                  <Input
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
-                      (emptyInputError && newAdmin?.password == "") ||
-                      passwordMismatchError
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                    name="password"
-                    type="password"
-                    value={newAdmin?.password || ""}
-                    onChange={handleNewAdminChange}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Confirm Password</Label>
-                  <Input
-                    defaultValue={newAdmin!.email}
-                    className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
-                      (emptyInputError && newAdmin?.password == "") ||
-                      passwordMismatchError
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                    name="confirm_password"
-                    type="password"
-                    value={confirmPassword.confirm_password || ""}
-                    onChange={handleConfirmPasswordChange}
-                  />
-                </div>
-                <div>
-                  <Label className="mb-2 block">Role</Label>
-                  <Select
-                    value={newAdmin?.role || ""}
-                    onValueChange={handleNewAdminRoleChange}
-                    name="role"
-                  >
-                    <SelectTrigger
-                      className={`bg-[#1E2A36] border-[#1E2A36] ${
-                        emptyInputError && newAdmin?.role == ""
+              </div>
+            )}
+            <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                <DialogHeader>
+                  <DialogTitle className="max-md:text-md">
+                    Add Admin
+                  </DialogTitle>
+                  <DialogDescription className="max-md:text-sm">
+                    Provide information for new admin
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">
+                      First Name
+                    </Label>
+                    <Input
+                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                        emptyInputError && newAdmin?.first_name == ""
                           ? "border-red-500"
                           : ""
                       }`}
+                      name="first_name"
+                      type="text"
+                      value={newAdmin?.first_name || ""}
+                      onChange={handleNewAdminChange}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">
+                      Last Name
+                    </Label>
+                    <Input
+                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                        emptyInputError && newAdmin?.last_name == ""
+                          ? "border-red-500"
+                          : ""
+                      }`}
+                      name="last_name"
+                      type="text"
+                      value={newAdmin?.last_name || ""}
+                      onChange={handleNewAdminChange}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">Email</Label>
+                    <Input
+                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                        emptyInputError && newAdmin?.email == ""
+                          ? "border-red-500"
+                          : ""
+                      }`}
+                      name="email"
+                      type="email"
+                      value={newAdmin?.email || ""}
+                      onChange={handleNewAdminChange}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">
+                      Username
+                    </Label>
+                    <Input
+                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                        emptyInputError && newAdmin?.username == ""
+                          ? "border-red-500"
+                          : ""
+                      }`}
+                      name="username"
+                      type="text"
+                      value={newAdmin?.username || ""}
+                      onChange={handleNewAdminChange}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">
+                      Password
+                    </Label>
+                    <Input
+                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                        (emptyInputError && newAdmin?.password == "") ||
+                        passwordMismatchError
+                          ? "border-red-500"
+                          : ""
+                      }`}
+                      name="password"
+                      type="password"
+                      value={newAdmin?.password || ""}
+                      onChange={handleNewAdminChange}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">
+                      Confirm Password
+                    </Label>
+                    <Input
+                      defaultValue={newAdmin!.email}
+                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                        (emptyInputError && newAdmin?.password == "") ||
+                        passwordMismatchError
+                          ? "border-red-500"
+                          : ""
+                      }`}
+                      name="confirm_password"
+                      type="password"
+                      value={confirmPassword.confirm_password || ""}
+                      onChange={handleConfirmPasswordChange}
+                    />
+                  </div>
+                  <div>
+                    <Label className="mb-2 block max-md:text-xs">Role</Label>
+                    <Select
+                      value={newAdmin?.role || ""}
+                      onValueChange={handleNewAdminRoleChange}
+                      name="role"
                     >
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1E2A36]">
-                      <SelectItem value="owner">Owner</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="moderator">Moderator</SelectItem>
-                      <SelectItem value="guest">Guest</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {emptyInputError ? (
-                    <p className="mt-4 text-red-500 text-center">
-                      Please fill-out required fields
-                    </p>
-                  ) : passwordMismatchError ? (
-                    <p className="mt-4 text-red-500 text-center">
-                      Passwords do not match
-                    </p>
-                  ) : adminInputError ? (
-                    <p className="mt-4 text-red-500 text-center">
-                      {adminInputErrorMessage}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-              <DialogFooter>
-                <form onSubmit={handleNewAdminSubmit}>
-                  <Button
-                    type="submit"
-                    className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
-                      isSubmitting ? "pointer-events-none opacity-50" : ""
-                    }`}
-                    aria-disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Submitting..." : "Submit"}
-                  </Button>
-                </form>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          {selectedAdmin && (
-            <div className="flex items-center gap-1">
-              <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-                <DialogContent className="bg-[#13202D] border-[#1E2A36]">
-                  <DialogHeader>
-                    <DialogTitle>Edit Admin</DialogTitle>
-                    <DialogDescription>
-                      Update information for{" "}
-                      <span className="font-semibold text-yellow-400">
-                        {selectedAdmin!.username}
-                      </span>
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">First Name</Label>
-                      <Input
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
-                          emptyInputError && selectedAdmin?.first_name == ""
+                      <SelectTrigger
+                        className={`bg-[#1E2A36] border-[#1E2A36] ${
+                          emptyInputError && newAdmin?.role == ""
                             ? "border-red-500"
                             : ""
                         }`}
-                        name="first_name"
-                        type="text"
-                        value={selectedAdmin?.first_name || ""}
-                        onChange={handleSelectedAdminChange}
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">Last Name</Label>
-                      <Input
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
-                          emptyInputError && selectedAdmin?.last_name == ""
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                        name="last_name"
-                        type="text"
-                        value={selectedAdmin?.last_name || ""}
-                        onChange={handleSelectedAdminChange}
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">Email</Label>
-                      <Input
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
-                          emptyInputError && selectedAdmin?.email == ""
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                        name="email"
-                        type="email"
-                        value={selectedAdmin?.email || ""}
-                        onChange={handleSelectedAdminChange}
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">Username</Label>
-                      <Input
-                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] ${
-                          emptyInputError && selectedAdmin?.username == ""
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                        name="username"
-                        type="text"
-                        value={selectedAdmin?.username || ""}
-                        onChange={handleSelectedAdminChange}
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">Password</Label>
-                      <Input
-                        className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"
-                        name="password"
-                        type="password"
-                        value={selectedAdmin?.password || ""}
-                        onChange={handleSelectedAdminChange}
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right">Confirm Password</Label>
-                      <Input
-                        className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"
-                        name="confirm_password"
-                        type="password"
-                        value={confirmPassword.confirm_password || ""}
-                        onChange={handleConfirmPasswordChange}
-                      />
-                    </div>
-                    <div>
-                      <Label className="mb-2 block">Role</Label>
-                      <Select
-                        value={selectedAdmin?.role || ""}
-                        onValueChange={handleSelectedAdminRoleChange}
-                        name="role"
                       >
-                        <SelectTrigger
-                          className={`bg-[#1E2A36] border-[#1E2A36] ${
-                            emptyInputError && selectedAdmin?.role == ""
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                        <SelectItem value="owner">Owner</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="moderator">Moderator</SelectItem>
+                        <SelectItem value="guest">Guest</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {emptyInputError ? (
+                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                        Please fill-out required fields
+                      </p>
+                    ) : passwordMismatchError ? (
+                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                        Passwords do not match
+                      </p>
+                    ) : adminInputError ? (
+                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                        {adminInputErrorMessage}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+                <DialogFooter className="flex-row justify-end space-x-2">
+                  <form onSubmit={handleNewAdminSubmit}>
+                    <Button
+                      type="submit"
+                      className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
+                        isSubmitting ? "pointer-events-none opacity-50" : ""
+                      }`}
+                      aria-disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Submitting..." : "Submit"}
+                    </Button>
+                  </form>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            {selectedAdmin && (
+              <div className="flex items-center gap-1">
+                <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                    <DialogHeader>
+                      <DialogTitle className="max-md:text-md">
+                        Edit Admin
+                      </DialogTitle>
+                      <DialogDescription className="max-md:text-sm">
+                        Update information for{" "}
+                        <span className="font-semibold text-yellow-400">
+                          {selectedAdmin!.username}
+                        </span>
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right max-md:text-xs">
+                          First Name
+                        </Label>
+                        <Input
+                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                            emptyInputError && selectedAdmin?.first_name == ""
                               ? "border-red-500"
                               : ""
                           }`}
+                          name="first_name"
+                          type="text"
+                          value={selectedAdmin?.first_name || ""}
+                          onChange={handleSelectedAdminChange}
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right max-md:text-xs">
+                          Last Name
+                        </Label>
+                        <Input
+                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                            emptyInputError && selectedAdmin?.last_name == ""
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                          name="last_name"
+                          type="text"
+                          value={selectedAdmin?.last_name || ""}
+                          onChange={handleSelectedAdminChange}
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right max-md:text-xs">
+                          Email
+                        </Label>
+                        <Input
+                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                            emptyInputError && selectedAdmin?.email == ""
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                          name="email"
+                          type="email"
+                          value={selectedAdmin?.email || ""}
+                          onChange={handleSelectedAdminChange}
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right max-md:text-xs">
+                          Username
+                        </Label>
+                        <Input
+                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                            emptyInputError && selectedAdmin?.username == ""
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                          name="username"
+                          type="text"
+                          value={selectedAdmin?.username || ""}
+                          onChange={handleSelectedAdminChange}
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right max-md:text-xs">
+                          Password
+                        </Label>
+                        <Input
+                          className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
+                          name="password"
+                          type="password"
+                          value={selectedAdmin?.password || ""}
+                          onChange={handleSelectedAdminChange}
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right max-md:text-xs">
+                          Confirm Password
+                        </Label>
+                        <Input
+                          className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
+                          name="confirm_password"
+                          type="password"
+                          value={confirmPassword.confirm_password || ""}
+                          onChange={handleConfirmPasswordChange}
+                        />
+                      </div>
+                      <div>
+                        <Label className="mb-2 block max-md:text-xs">
+                          Role
+                        </Label>
+                        <Select
+                          value={selectedAdmin?.role || ""}
+                          onValueChange={handleSelectedAdminRoleChange}
+                          name="role"
                         >
-                          <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#1E2A36]">
-                          <SelectItem value="owner">Owner</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="moderator">Moderator</SelectItem>
-                          <SelectItem value="guest">Guest</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {emptyInputError ? (
-                        <p className="mt-4 text-red-500 text-center">
-                          Please fill-out required fields
-                        </p>
-                      ) : passwordMismatchError ? (
-                        <p className="mt-4 text-red-500 text-center">
-                          Passwords do not match
-                        </p>
-                      ) : adminInputError ? (
-                        <p className="mt-4 text-red-500 text-center">
-                          {adminInputErrorMessage}
-                        </p>
-                      ) : null}
+                          <SelectTrigger
+                            className={`bg-[#1E2A36] border-[#1E2A36] ${
+                              emptyInputError && selectedAdmin?.role == ""
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                          >
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                            <SelectItem value="owner">Owner</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="moderator">Moderator</SelectItem>
+                            <SelectItem value="guest">Guest</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {emptyInputError ? (
+                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                            Please fill-out required fields
+                          </p>
+                        ) : passwordMismatchError ? (
+                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                            Passwords do not match
+                          </p>
+                        ) : adminInputError ? (
+                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                            {adminInputErrorMessage}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                  <DialogFooter>
-                    <form onSubmit={handleSelectedAdminSubmit}>
-                      <Button
-                        type="submit"
-                        className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
-                          isSubmitting ? "pointer-events-none opacity-50" : ""
-                        }`}
-                        aria-disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Updating..." : "Update"}
-                      </Button>
-                    </form>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                    <DialogFooter className="flex-row justify-end space-x-2">
+                      <form onSubmit={handleSelectedAdminSubmit}>
+                        <Button
+                          type="submit"
+                          className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
+                            isSubmitting ? "pointer-events-none opacity-50" : ""
+                          }`}
+                          aria-disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Updating..." : "Update"}
+                        </Button>
+                      </form>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
 
-              <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-                <DialogContent className="bg-[#13202D] border-[#1E2A36]">
-                  <DialogHeader>
-                    <DialogTitle className="text-red-700 text-xl">
-                      Delete Admin
-                    </DialogTitle>
-                    <DialogDescription>
-                      Are you sure you want to delete{" "}
-                      <span className="font-semibold text-red-700">
-                        {selectedAdmin!.username}
-                      </span>
-                      ?
-                    </DialogDescription>
-                  </DialogHeader>
+                <Dialog
+                  open={showDeleteModal}
+                  onOpenChange={setShowDeleteModal}
+                >
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-red-700 text-lg max-md:text-md">
+                        Delete Admin
+                      </DialogTitle>
+                      <DialogDescription className="max-md:text-sm">
+                        Are you sure you want to delete{" "}
+                        <span className="font-semibold text-red-700">
+                          {selectedAdmin!.username}
+                        </span>
+                        ?
+                      </DialogDescription>
+                    </DialogHeader>
 
-                  <div className="p-2 m-2 text-sm">
-                    <p className="text-lg font-bold text-red-700 text-center">
-                      Warning
-                    </p>
-                    <p className={"text-justify"}>
-                      {
-                        "By deleting this admin account, they will no longer have access to the Velocity Market App's Admin Dashboard"
-                      }
-                    </p>
-                  </div>
-                  <DialogFooter>
-                    <form onSubmit={handleAdminDelete}>
-                      <Button
-                        type="submit"
-                        className={`bg-red-700 text-[#0C1924] hover:bg-red-700/90" ${
-                          isSubmitting ? "pointer-events-none opacity-50" : ""
-                        }`}
-                        aria-disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Deleting..." : "Delete"}
-                      </Button>
-                    </form>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          )}
+                    <div className="p-2 m-2 text-sm">
+                      <p className="text-lg max-md:text-md font-bold text-red-700 text-center">
+                        Warning
+                      </p>
+                      <p className={"text-justify max-md:text-sm"}>
+                        {
+                          "By deleting this admin account, they will no longer have access to the Velocity Market App's Admin Dashboard"
+                        }
+                      </p>
+                    </div>
+                    <DialogFooter className="flex-row justify-end space-x-2">
+                      <form onSubmit={handleAdminDelete}>
+                        <Button
+                          type="submit"
+                          className={`bg-red-700 text-[#0C1924] hover:bg-red-700/90" ${
+                            isSubmitting ? "pointer-events-none opacity-50" : ""
+                          }`}
+                          aria-disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Deleting..." : "Delete"}
+                        </Button>
+                      </form>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
+      {!isLoading && (
+        <div className="mx-auto mb-8 w-1/3">
+          <ResponsivePagination
+            current={currentPage}
+            total={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
     </div>
   );
 };

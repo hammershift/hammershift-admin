@@ -83,16 +83,12 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
 
   return (
     <div className="sticky top-0 bg-slate-800 h-full p-5 max-md:bg-opacity-75 max-md:backdrop-blur">
-      <div className="pb-3 pt-1 md:hidden">
-        <ArrowBackIosIcon onClick={closeSidebar} />
-      </div>
-
       <div className="top-auto">
         <Image
           alt="velocity-markets-logo"
           src={velocityMarketsLogo}
           width={250}
-          className="m-1 mb-5"
+          className="m-1 mb-5 max-md:hidden"
         />
         <div className="flex flex-row items-center gap-5 mb-5">
           <Image

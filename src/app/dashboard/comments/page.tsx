@@ -3,12 +3,9 @@
 import {
   deleteComment,
   deleteMultipleComments,
-  getAllComments,
-  getSortedComments,
+  getAllCommentsWithSearch,
 } from "@/app/lib/data";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { DateTime } from "luxon";
 import {
   RegExpMatcher,
   TextCensor,
@@ -41,11 +38,12 @@ import {
   DialogTitle,
 } from "@/app/ui/components/dialog";
 import { Button } from "@/app/ui/components/button";
-import { Ban, Edit, LockOpen, Trash2 } from "lucide-react";
-import { Label } from "@/app/ui/components/label";
-import { Input } from "@/app/ui/components/input";
+import { Search, Trash2 } from "lucide-react";
 import { BeatLoader } from "react-spinners";
 import { formatDate } from "@/app/helpers/utils";
+import ResponsivePagination from "react-responsive-pagination";
+import "react-responsive-pagination/themes/minimal-light-dark.css";
+import { Input } from "@/app/ui/components/input";
 interface CommentData {
   _id: string;
   comment: string;
@@ -68,29 +66,44 @@ export default function Comments() {
   const [selectedIDs, setSelectedIDs] = useState<string[]>([]);
   const [selectedComment, setSelectedComment] = useState<CommentData>();
   const [showDeleteSelectedModal, setShowDeleteSelectedModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [commentInfoModal, setCommentInfoModal] = useState(false);
-  const [displayCount, setDisplayCount] = useState(7);
   const [commentID, setCommentID] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const matcher = new RegExpMatcher({
     ...englishDataset.build(),
     ...englishRecommendedTransformers,
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalComments, setTotalComments] = useState(0);
+  const [displayCount, setDisplayCount] = useState(5);
+
+  const fetchData = async () => {
+    try {
+      const data = await getAllCommentsWithSearch({
+        search: searchValue,
+        offset: (currentPage - 1) * displayCount,
+        limit: displayCount,
+      });
+
+      if (data && "comments" in data) {
+        setTotalComments(data.total);
+        setTotalPages(data.totalPages);
+        setComments(data.comments as CommentData[]);
+      } else {
+        console.error("Unexpected data structure:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getAllComments(displayCount);
-        setComments(data.comments as CommentData[]);
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
     fetchData();
-  }, [displayCount]);
+  }, [currentPage, searchValue]);
 
   const removeComment = async (commentID: string) => {
     await deleteComment(commentID);
@@ -123,228 +136,160 @@ export default function Comments() {
     });
   };
 
-  // return (
-  //   <div>
-  //     <div className="section-container mt-4">
-  //       <div className="flex justify-between">
-  //         <div className="font-bold">Comments Moderation</div>
-  //         {selectedIDs.length !== 0 && (
-  //           <>
-  //             <button
-  //               onClick={() => setShowDeleteSelectedModal(true)}
-  //               className="text-sm font-bold text-[#C2451E] flex items-center border border-[#C2451E] px-2 gap-2 rounded hover:text-[#1a2c3d] hover:bg-[#C2451E]"
-  //             >
-  //               <div>Delete Selected({selectedIDs.length})</div>
-  //               <DeleteIcon
-  //                 sx={{
-  //                   fontSize: "20px",
-  //                 }}
-  //               />
-  //             </button>
-  //             {showDeleteSelectedModal ? (
-  //               <DeleteCommentModal
-  //                 removeSelectedComments={removeSelectedComments}
-  //                 closeModal={closeModal}
-  //               />
-  //             ) : null}
-  //           </>
-  //         )}
-  //       </div>
-  //       <div className="my-4">
-  //         {isLoading ? (
-  //           <div className="flex justify-center items-center h-[592px]">
-  //             <BeatLoader color="#F2CA16" />
-  //           </div>
-  //         ) : (
-  //           <table className="w-full border-separate border-spacing-y-2 text-center">
-  //             <thead className="w-full">
-  //               <tr className="">
-  //                 <th className="font-bold p-2.5"></th>
-  //                 <th className="font-bold p-2.5">User</th>
-  //                 <th className="font-bold p-2.5">Comment</th>
-  //                 <th className="font-bold p-2.5">
-  //                   <button
-  //                     onClick={() => router.push("/dashboard/comments/likes")}
-  //                   >
-  //                     Likes/Dislikes <ArrowDropDownIcon />
-  //                   </button>
-  //                 </th>
-  //                 <th className="font-bold p-2.5">
-  //                   <button
-  //                     onClick={() => router.push("/dashboard/comments/newest")}
-  //                   >
-  //                     Date Posted <ArrowDropDownIcon />
-  //                   </button>
-  //                 </th>
-  //                 <th className="font-bold p-2.5">Actions</th>
-  //               </tr>
-  //             </thead>
-  //             <tbody className="w-full">
-  //               {comments &&
-  //                 comments.map((item: any, index) => (
-  //                   <tr
-  //                     key={item._id}
-  //                     className={`${
-  //                       matcher.hasMatch(item.comment)
-  //                         ? " bg-rose-700/20 border"
-  //                         : "bg-[#fff]/5"
-  //                     }`}
-  //                   >
-  //                     <td className="p-2.5 w-1/8">
-  //                       <Checkbox
-  //                         sx={{ color: "white" }}
-  //                         onClick={() => addOrRemoveID(item._id)}
-  //                       />
-  //                     </td>
-  //                     <td className="p-2.5 w-1/5">
-  //                       <div>{item.user.username}</div>
-  //                       <div className="text-sm">{item.user.userId}</div>
-  //                     </td>
-  //                     <td className="p-2.5 w-1/3">
-  //                       <div className=" line-clamp-1">{item.comment}</div>
-  //                     </td>
-  //                     <td className="p-2.5 w-1/8">
-  //                       <span className=" text-green-500">
-  //                         {item.likes.length}
-  //                       </span>{" "}
-  //                       /{" "}
-  //                       <span className=" text-red-500">
-  //                         {item.dislikes.length}
-  //                       </span>
-  //                     </td>
-  //                     <td className="p-2.5 w-1/8">
-  //                       {DateTime.fromISO(item.createdAt).toFormat(
-  //                         "MM/dd/yy hh:mm a"
-  //                       )}
-  //                     </td>
-  //                     <td className="p-2.5 w-1/8">
-  //                       <button
-  //                         onClick={() => {
-  //                           setCommentInfoModal(true);
-  //                           setCommentData(item);
-  //                         }}
-  //                       >
-  //                         <PreviewIcon />
-  //                       </button>
-  //                       {commentInfoModal ? (
-  //                         <CommmentInfo
-  //                           commentData={commentData}
-  //                           closeModal={closeModal}
-  //                         />
-  //                       ) : null}
-  //                       <Link
-  //                         target="_blank"
-  //                         rel="noopener noreferrer"
-  //                         href={
-  //                           item.pageType === "auction"
-  //                             ? `https://hammershift.vercel.app/auctions/car_view_page/${item.pageID}`
-  //                             : `https://hammershift.vercel.app/tournaments/${item.pageID}`
-  //                         }
-  //                       >
-  //                         <OpenInNewIcon />
-  //                       </Link>
-  //                       <button
-  //                         onClick={() => {
-  //                           setShowDeleteCommentModal(true);
-  //                           setCommentID(item._id);
-  //                         }}
-  //                       >
-  //                         <DeleteIcon
-  //                           sx={{
-  //                             color: "#C2451E",
-  //                           }}
-  //                         />
-  //                       </button>
-  //                       {showDeleteCommentModal ? (
-  //                         <DeleteCommentModal
-  //                           removeComment={removeComment}
-  //                           closeModal={closeModal}
-  //                           commentID={commentID}
-  //                         />
-  //                       ) : null}
-  //                     </td>
-  //                   </tr>
-  //                 ))}
-  //             </tbody>
-  //           </table>
-  //         )}
-  //       </div>
-  //       <div className="flex flex-col items-center gap-4 py-4">
-  //         <button onClick={loadMoreComments} className="btn-transparent-white">
-  //           Load More
-  //         </button>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
-
   return (
     <div className="section-container mt-4">
-      {isLoading ? (
-        <div className="flex justify-center items-center h-[592px]">
-          <BeatLoader color="#F2CA16" />
-        </div>
-      ) : (
-        <div>
-          <Card className="bg-[#13202D] border-[#1E2A36] mb-8">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-yellow-500">
-                Comments
+      <div>
+        <Card className="bg-[#13202D] border-[#1E2A36] mb-8">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl max-md:text-xl font-bold text-yellow-500">
+                Comment Management
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-md max-md:text-sm">
                 Manage and moderate user comments across the platform
               </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="font-bold text-yellow-500/90">
-                        User
-                      </TableHead>
-                      <TableHead className="font-bold text-yellow-500/90">
-                        Comment
-                      </TableHead>
-                      <TableHead className="font-bold text-yellow-500/90">
-                        Date Posted
-                      </TableHead>
-                      <TableHead className="font-bold text-yellow-500/90">
-                        {"Likes/Dislikes"}
-                      </TableHead>
-                      {/* <TableHead>Car</TableHead> */}
-                      <TableHead className="font-bold text-yellow-500/90">
-                        Actions
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto w-full block md:table">
+              <div className="bg-[#1E2A36] relative h-auto flex px-2 py-1.5 rounded gap-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <Input
+                  placeholder="Search by user or comment"
+                  className="pl-10 text-white bg-transparent focus:outline-none placeholder:text-white border-none max-md:text-sm"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSearchValue(e.target.value)
+                  }
+                />
+              </div>
+              {isLoading ? (
+                <div className="flex justify-center items-center h-[436px]">
+                  <BeatLoader color="#F2CA16" />
+                </div>
+              ) : (
+                <div>
+                  <div className="block md:hidden space-y-4">
                     {comments &&
                       comments.map((comment: CommentData, index: number) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">
-                            {comment.user.username}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            <div className="max-w-xs truncate">
-                              {comment.comment}
+                        <div
+                          key={index}
+                          className="bg-[#13202D] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
+                        >
+                          <div className="flex w-full gap-2">
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">User</p>
+                              <p className="text-white text-sm">
+                                {comment.user.username}
+                              </p>
                             </div>
-                          </TableCell>
-                          <TableCell>{formatDate(comment.createdAt)}</TableCell>
-                          <TableCell>
-                            <div>
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">
+                                Date Posted
+                              </p>
+                              <p className="text-white text-sm">
+                                {formatDate(comment.createdAt)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex w-full gap-2">
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">Likes</p>
                               <span className=" text-green-500">
                                 {comment.likes.length}
-                              </span>{" "}
-                              /{" "}
+                              </span>
+                            </div>
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">Dislikes</p>
                               <span className=" text-red-500">
                                 {comment.dislikes.length}
                               </span>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              {/* <Button
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-400">Comment</p>
+                            <p
+                              className={`text-white text-justify ${
+                                comment.comment.length > 250
+                                  ? "max-md:text-xs"
+                                  : "max-md:text-sm"
+                              }`}
+                            >
+                              {comment.comment}
+                            </p>
+                          </div>
+
+                          <div className="flex justify-end space-x-2 pt-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={"text-red-700"}
+                              title={"Delete Comment"}
+                              onClick={() => {
+                                setShowDeleteModal(true);
+                                setSelectedComment(comment);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+
+                  <div className="hidden md:block overflow-x-auto w-full">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="font-bold text-yellow-500/90">
+                            User
+                          </TableHead>
+                          <TableHead className="font-bold text-yellow-500/90">
+                            Date Posted
+                          </TableHead>
+                          <TableHead className="font-bold text-yellow-500/90">
+                            Likes
+                          </TableHead>
+                          <TableHead className="font-bold text-yellow-500/90">
+                            Dislikes
+                          </TableHead>
+                          <TableHead className="font-bold text-yellow-500/90">
+                            Comment
+                          </TableHead>
+                          {/* <TableHead>Car</TableHead> */}
+                          <TableHead className="font-bold text-yellow-500/90">
+                            Actions
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {comments &&
+                          comments.map(
+                            (comment: CommentData, index: number) => (
+                              <TableRow key={index}>
+                                <TableCell className="font-medium">
+                                  {comment.user.username}
+                                </TableCell>
+                                <TableCell>
+                                  {formatDate(comment.createdAt)}
+                                </TableCell>
+                                <TableCell>
+                                  <span className=" text-green-500">
+                                    {comment.likes.length}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  <span className=" text-red-500">
+                                    {comment.dislikes.length}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  <div className="text-justify">
+                                    {comment.comment}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-1">
+                                    {/* <Button
                               variant="ghost"
                               size="icon"
                               title="Edit User"
@@ -357,27 +302,31 @@ export default function Comments() {
                               <Edit className="h-4 w-4" />
                             </Button> */}
 
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className={"text-red-700"}
-                                title={"Delete Comment"}
-                                onClick={() => {
-                                  setShowDeleteModal(true);
-                                  setSelectedComment(comment);
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-                {selectedComment && (
-                  <div className="flex items-center gap-1">
-                    {/* <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className={"text-red-700"}
+                                      title={"Delete Comment"}
+                                      onClick={() => {
+                                        setShowDeleteModal(true);
+                                        setSelectedComment(comment);
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            )
+                          )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+              {selectedComment && (
+                <div className="flex items-center gap-1">
+                  {/* <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
                     <DialogContent className="bg-[#13202D] border-[#1E2A36]">
                       <DialogHeader>
                         <DialogTitle>Edit User</DialogTitle>
@@ -431,50 +380,58 @@ export default function Comments() {
                     </DialogContent>
                   </Dialog> */}
 
-                    <Dialog
-                      open={showDeleteModal}
-                      onOpenChange={setShowDeleteModal}
-                    >
-                      <DialogContent className="bg-[#13202D] border-[#1E2A36]">
-                        <DialogHeader>
-                          <DialogTitle className="text-red-700 text-xl">
-                            Delete Comment
-                          </DialogTitle>
-                          <DialogDescription>
-                            Are you sure you want to delete this comment by{" "}
-                            <span className="font-semibold text-red-700">
-                              {selectedComment!.user.username}
-                            </span>
-                            ?
-                          </DialogDescription>
-                        </DialogHeader>
+                  <Dialog
+                    open={showDeleteModal}
+                    onOpenChange={setShowDeleteModal}
+                  >
+                    <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-red-700 text-lg max-md:text-md">
+                          Delete Comment
+                        </DialogTitle>
+                        <DialogDescription className="max-md:text-sm">
+                          Are you sure you want to delete this comment by{" "}
+                          <span className="font-semibold text-red-700">
+                            {selectedComment!.user.username}
+                          </span>
+                          ?
+                        </DialogDescription>
+                      </DialogHeader>
 
-                        <div className="p-2 m-2 text-sm">
-                          <p className={"text-justify"}>
-                            {selectedComment?.comment}
-                          </p>
-                        </div>
-                        <DialogFooter>
-                          <form
-                            onSubmit={() => removeComment(selectedComment!._id)}
+                      <div className="p-2 m-2 text-sm">
+                        <p className={"max-md:text-sm text-justify"}>
+                          {selectedComment?.comment}
+                        </p>
+                      </div>
+                      <DialogFooter className="flex-row justify-end space-x-2">
+                        <form
+                          onSubmit={() => removeComment(selectedComment!._id)}
+                        >
+                          <Button
+                            type="submit"
+                            className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
                           >
-                            <Button
-                              type="submit"
-                              className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
-                            >
-                              Delete
-                            </Button>
-                          </form>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+                            Delete
+                          </Button>
+                        </form>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        {!isLoading && (
+          <div className="mx-auto mb-8 w-1/3">
+            <ResponsivePagination
+              current={currentPage}
+              total={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
