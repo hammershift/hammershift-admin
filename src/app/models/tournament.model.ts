@@ -1,18 +1,72 @@
-import mongoose from "mongoose";
-import TournamentsPage from "../dashboard/tournaments/page";
+import mongoose, {
+  Document,
+  Schema,
+  PaginateModel,
+  AggregatePaginateModel,
+  Types,
+} from "mongoose";
+import aggregatePaginate from "mongoose-aggregate-paginate-v2";
+import paginate from "mongoose-paginate-v2";
 
-const winnerSchema = new mongoose.Schema(
+export interface TournamentUser {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  fullName: string;
+  username: string;
+  role: string;
+}
+export interface Tournament extends Document {
+  _id: Types.ObjectId;
+  tournament_id: number;
+  name: string;
+  description: string;
+  type: string;
+  prizePool: number;
+  buyInFee: number;
+  isActive: boolean;
+  startTime: Date;
+  endTime: Date;
+  auction_ids: string[];
+  users: TournamentUser[];
+  maxUsers: number;
+  createdAt: Date;
+}
+
+const tournamentUserSchema = new mongoose.Schema(
   {
-    id: mongoose.Types.ObjectId,
-    username: String,
-    winnings: Number,
+    userId: {
+      type: mongoose.Types.ObjectId,
+      required: true,
+    },
+    fullName: {
+      type: String,
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
   },
   { _id: false }
 );
 
-const tournamentSchema = new mongoose.Schema(
+// const winnerSchema = new mongoose.Schema(
+//   {
+//     id: mongoose.Types.ObjectId,
+//     username: String,
+//     winnings: Number,
+//   },
+//   { _id: false }
+// );
+
+const tournamentSchema = new Schema(
   {
-    title: {
+    tournament_id: {
+      type: Number,
+      required: true,
+      unique: true,
+    },
+    name: {
       type: String,
       required: true,
     },
@@ -20,42 +74,59 @@ const tournamentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // winner: [winnerSchema],
-    buyInFee: {
-      type: Number,
+    type: {
+      type: String,
       required: true,
     },
-    pot: {
+    prizePool: {
       type: Number,
+      required: true,
       default: 0,
+    },
+    buyInFee: {
+      type: Number,
       required: true,
     },
     isActive: {
       type: Boolean,
       default: true,
     },
-    status: {
-      type: Number,
-      default: 1,
-    },
     startTime: {
-      type: String,
+      type: Date,
       required: true,
     },
     endTime: {
-      type: String,
+      type: Date,
       required: true,
     },
-    tournamentEndTime: {
-      type: String,
+    auction_ids: {
+      type: [String],
+      default: [],
+    },
+    users: {
+      type: [tournamentUserSchema],
+      default: [],
+    },
+    maxUsers: {
+      type: Number,
       required: true,
     },
   },
-  { timestamps: true }
+  { collection: "tournaments", timestamps: true }
 );
 
+tournamentSchema.plugin(aggregatePaginate);
+tournamentSchema.plugin(paginate);
+
+type TournamentModelType =
+  | AggregatePaginateModel<Tournament>
+  | PaginateModel<Tournament>;
 const Tournaments =
-  mongoose.models.tournaments ||
-  mongoose.model("tournaments", tournamentSchema);
+  (mongoose.models.tournaments as TournamentModelType) ||
+  mongoose.model<Tournament, TournamentModelType>(
+    "tournaments",
+    tournamentSchema,
+    "tournaments"
+  );
 
 export default Tournaments;

@@ -51,8 +51,8 @@ export const Button = ({
   variant = "default",
   size = "default",
   children,
-  props,
   onClick,
+  ...props
 }: IProps) => {
   return (
     <button

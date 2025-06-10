@@ -542,10 +542,8 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
                   <form onSubmit={handleNewAgentSubmit}>
                     <Button
                       type="submit"
-                      className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
-                        isSubmitting ? "pointer-events-none opacity-50" : ""
-                      }`}
-                      aria-disabled={isSubmitting}
+                      className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                      disabled={isSubmitting}
                     >
                       {isSubmitting ? "Submitting..." : "Submit"}
                     </Button>
@@ -664,10 +662,8 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
                       <form onSubmit={handleSelectedAgentSubmit}>
                         <Button
                           type="submit"
-                          className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
-                            isSubmitting ? "pointer-events-none opacity-50" : ""
-                          }`}
-                          aria-disabled={isSubmitting}
+                          className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                          disabled={isSubmitting}
                         >
                           {isSubmitting ? "Updating..." : "Update"}
                         </Button>
@@ -708,10 +704,8 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
                       <form onSubmit={handleAgentDelete}>
                         <Button
                           type="submit"
-                          className={`bg-red-700 text-[#0C1924] hover:bg-red-700/90" ${
-                            isSubmitting ? "pointer-events-none opacity-50" : ""
-                          }`}
-                          aria-disabled={isSubmitting}
+                          className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
+                          disabled={isSubmitting}
                         >
                           {isSubmitting ? "Deleting..." : "Delete"}
                         </Button>

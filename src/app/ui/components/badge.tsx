@@ -28,7 +28,7 @@ interface IProps {
   children: React.ReactNode;
   [x: string]: any;
 }
-const Badge = ({ className, variant, children, props }: IProps) => {
+const Badge = ({ className, variant, children, ...props }: IProps) => {
   return (
     <div className={cn(badgeVariants({ variant }), className)} {...props}>
       {children}

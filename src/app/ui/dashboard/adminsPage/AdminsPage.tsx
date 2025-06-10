@@ -24,18 +24,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/app/ui/components/dialog";
-import { Badge } from "../../components/badge";
+import { Badge } from "@/app/ui/components/badge";
 import { Edit, Search, Trash2, UserPlus } from "lucide-react";
-import { Button } from "../../components/button";
-import { Label } from "../../components/label";
-import { Input } from "../../components/input";
+import { Button } from "@/app/ui/components/button";
+import { Label } from "@/app/ui/components/label";
+import { Input } from "@/app/ui/components/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/select";
+} from "@/app/ui/components/select";
 import { useSession } from "next-auth/react";
 import { BeatLoader } from "react-spinners";
 import ResponsivePagination from "react-responsive-pagination";
@@ -128,10 +128,14 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
     setNewAdmin({ ...newAdmin!, role: role });
   };
 
-  const handleSelectedAdminChange = (e: any) => {
+  const emptyErrors = () => {
     setEmptyInputError(false);
     setPasswordMismatchError(false);
     setAdminInputError(false);
+  };
+
+  const handleSelectedAdminChange = (e: any) => {
+    emptyErrors();
     const { name, value } = e.target;
     if (name) setSelectedAdmin({ ...selectedAdmin!, [name]: value });
   };
@@ -149,6 +153,7 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
   const handleNewAdminSubmit = async (e: any) => {
     e.preventDefault();
     setIsSubmitting(true);
+    emptyErrors();
     if (
       !newAdmin.first_name ||
       !newAdmin.last_name ||
@@ -620,10 +625,8 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
                   <form onSubmit={handleNewAdminSubmit}>
                     <Button
                       type="submit"
-                      className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
-                        isSubmitting ? "pointer-events-none opacity-50" : ""
-                      }`}
-                      aria-disabled={isSubmitting}
+                      className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                      disabled={isSubmitting}
                     >
                       {isSubmitting ? "Submitting..." : "Submit"}
                     </Button>
@@ -779,10 +782,8 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
                       <form onSubmit={handleSelectedAdminSubmit}>
                         <Button
                           type="submit"
-                          className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
-                            isSubmitting ? "pointer-events-none opacity-50" : ""
-                          }`}
-                          aria-disabled={isSubmitting}
+                          className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                          disabled={isSubmitting}
                         >
                           {isSubmitting ? "Updating..." : "Update"}
                         </Button>
@@ -823,10 +824,8 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
                       <form onSubmit={handleAdminDelete}>
                         <Button
                           type="submit"
-                          className={`bg-red-700 text-[#0C1924] hover:bg-red-700/90" ${
-                            isSubmitting ? "pointer-events-none opacity-50" : ""
-                          }`}
-                          aria-disabled={isSubmitting}
+                          className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
+                          disabled={isSubmitting}
                         >
                           {isSubmitting ? "Deleting..." : "Delete"}
                         </Button>
