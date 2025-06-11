@@ -89,7 +89,6 @@ export async function POST(req: NextRequest) {
   try {
     await connectToDB();
     const tournamentData = await req.json();
-    console.log(tournamentData);
     // check if there is a request body
     if (!tournamentData) {
       return NextResponse.json(
@@ -101,7 +100,6 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    console.log("here");
     // const { auctionID, ...newTournamentData } = tournamentData;
 
     if (tournamentData.type == "both") {
@@ -203,14 +201,13 @@ export async function PUT(req: NextRequest) {
 
     // api/tournaments?id=657ab7edd422075ea7871f65
     if (tournament_id) {
-      const tournament = Tournaments.findOneAndUpdate(
-        { tournament_id },
+      const tournament = await Tournaments.findOneAndUpdate(
+        { tournament_id: tournament_id },
         { $set: editData },
         {
           returnDocument: "after",
         }
       );
-
       if (tournament) {
         console.log("message: Tournament edited successfully");
         return NextResponse.json(tournament, { status: 200 });
@@ -229,5 +226,58 @@ export async function PUT(req: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: "Internal server error" });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (
+    session?.user.role !== "owner" &&
+    session?.user.role !== "admin" &&
+    session?.user.role !== "moderator"
+  ) {
+    return NextResponse.json(
+      { message: "Unauthorized. Only owners can delete admins." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    await connectToDB();
+
+    const { tournament_id } = await req.json();
+
+    console.log(tournament_id);
+    if (!tournament_id) {
+      return NextResponse.json(
+        { message: "Tournament ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const existingTournament = await Tournaments.findOne({
+      tournament_id: parseInt(tournament_id),
+    });
+
+    if (!existingTournament) {
+      return NextResponse.json(
+        { message: "Tournament not found" },
+        { status: 404 }
+      );
+    }
+
+    await Tournaments.deleteOne({ tournament_id: parseInt(tournament_id) });
+
+    return NextResponse.json(
+      { message: "Tournament account deleted" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting tournament:", error);
+    return NextResponse.json(
+      { message: "Internal server error", error },
+      { status: 500 }
+    );
   }
 }

@@ -2,8 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { BeatLoader } from "react-spinners";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import {
   changeActiveStatusForTournament,
+  getSelectedTournamentAuctions,
+  getTournamentAuctions,
   getTournamentsWithSearch,
 } from "@/app/lib/data";
 import {
@@ -32,11 +35,16 @@ import {
 import { Badge } from "@/app/ui/components/badge";
 import {
   CalendarPlus,
+  Car,
+  CheckSquare,
   Edit,
+  ImageOff,
   Search,
+  Square,
   ToggleLeft,
   ToggleRight,
   Trash2,
+  X,
 } from "lucide-react";
 import { Button } from "@/app/ui/components/button";
 import { Label } from "@/app/ui/components/label";
@@ -68,12 +76,28 @@ interface TournamentData {
   prizePool: number;
   buyInFee: number;
   isActive: boolean;
-  startTime: Date | null;
-  endTime: Date | null;
+  startTime: Date | string | null;
+  endTime: Date | string | null;
   auction_ids: string[];
   users: TournamentUser[];
   maxUsers: number;
   createdAt: Date | null;
+}
+interface TournamentAuctionData {
+  auction_id: string;
+  description: string[];
+  price: number;
+  year: string;
+  make: string;
+  model: string;
+  category: string;
+  location: string;
+  bids: number;
+  image: string;
+  page_url: string;
+  isActive: boolean;
+  ended: boolean;
+  deadline: Date;
 }
 
 const TournamentsPage = () => {
@@ -116,7 +140,6 @@ const TournamentsPage = () => {
       //   ],
       // };
       if (data && "tournaments" in data) {
-        console.log(data);
         setTotalTournaments(data.total);
         setTotalPages(data.totalPages);
         setTournamentData(data.tournaments as TournamentData[]);
@@ -189,6 +212,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSelectModal, setShowSelectModal] = useState(false);
   const [selectedTournament, setSelectedTournament] =
     useState<TournamentData>();
   const [newTournament, setNewTournament] =
@@ -201,6 +225,27 @@ const TournamentTable: React.FC<TournamentProps> = ({
     useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [currentStartTime, setCurrentStartTime] = useState<
+    Date | string | null
+  >(null);
+  const [availableAuctionData, setAvailableAuctionData] = useState<
+    TournamentAuctionData[]
+  >([]);
+  const [selectedAuctions, setSelectedAuctions] = useState<
+    TournamentAuctionData[]
+  >([]);
+  const [currentAuctions, setCurrentAuctions] = useState<
+    TournamentAuctionData[]
+  >([]);
+  const [currentAuctionPage, setCurrentAuctionPage] = useState<number>(1);
+  const [totalAuctionPages, setTotalAuctionPages] = useState<number>(1);
+  const [totalAuctions, setTotalAuctions] = useState(0);
+  const [auctionDisplayCount, setAuctionDisplayCount] = useState(4); //TODO: temp value
+  const [isAuctionLoading, setIsAuctionLoading] = useState(true);
+  const [searchAuctionValue, setSearchAuctionValue] = useState<string>("");
+  const [currentModalType, setCurrentModalType] = useState<string>();
+  const [isPastCutoff, setIsPastCutoff] = useState<boolean>(false);
+
   const { data } = useSession();
   const [role, setRole] = useState("");
 
@@ -210,20 +255,146 @@ const TournamentTable: React.FC<TournamentProps> = ({
     }
   }, [data]);
 
-  const handleChange = (e: any) => {
-    //temp
+  useEffect(() => {
+    const fetchAuctionData = async () => {
+      try {
+        setIsAuctionLoading(true);
+
+        //load auction for external tab
+        const data = await getTournamentAuctions({
+          search: searchAuctionValue,
+          offset: (currentAuctionPage - 1) * auctionDisplayCount,
+          limit: auctionDisplayCount,
+          startTime: currentStartTime,
+        });
+        if (data && "auctions" in data) {
+          setTotalAuctions(data.total);
+          setTotalAuctionPages(data.totalPages);
+          setAvailableAuctionData(data.auctions as TournamentAuctionData[]);
+        } else {
+          console.error("Unexpected data structure:", data);
+        }
+        //}
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsAuctionLoading(false);
+      }
+    };
+    if (currentStartTime != null) fetchAuctionData();
+  }, [currentStartTime, currentAuctionPage, searchAuctionValue]);
+
+  const handleSelectedAuctionsOnEdit = async (
+    auction_ids: string[],
+    startTime: Date
+  ) => {
+    const data = (await getSelectedTournamentAuctions(
+      auction_ids
+    )) as TournamentAuctionData[];
+    if (data) {
+      setSelectedAuctions(data);
+      const selectedDate = startTime ? new Date(startTime) : null;
+
+      const cutoffDate = selectedDate
+        ? new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000)
+        : null;
+
+      //handling if there is auction
+      setIsPastCutoff(
+        cutoffDate
+          ? cutoffDate < data[data.length - 1].deadline ||
+              data[data.length - 1].deadline < new Date()
+          : false
+      );
+    }
   };
 
   const emptyErrors = () => {
     setEmptyInputError(false);
     setTournamentInputError(false);
-    setEmptyInputError(false);
+  };
+
+  const handleAuctionSelection = (
+    auction: TournamentAuctionData,
+    setType: string = "current"
+  ) => {
+    if (setType == "current")
+      setCurrentAuctions((prev) => {
+        if (prev.some((a) => a.auction_id === auction.auction_id)) {
+          return prev.filter((a) => a.auction_id !== auction.auction_id);
+        } else {
+          return [...prev, auction];
+        }
+      });
+    else
+      setSelectedAuctions((prev) => {
+        return prev.filter((a) => a.auction_id !== auction.auction_id);
+      });
+  };
+
+  const handleSelectAuctionSubmit = async (
+    e: any,
+    actionType: string = "add"
+  ) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const sortedAuctions = [...currentAuctions].sort(
+      (a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime()
+    );
+    setSelectedAuctions(sortedAuctions);
+    if (sortedAuctions.length > 0) {
+      const latestDeadline = new Date(sortedAuctions[0].deadline)
+        .toISOString()
+        .slice(0, 16);
+      if (actionType == "add") {
+        setNewTournament({ ...newTournament!, endTime: latestDeadline });
+      } else
+        setSelectedTournament({
+          ...selectedTournament!,
+          endTime: latestDeadline,
+        });
+    } else {
+      if (actionType == "add")
+        setNewTournament({ ...newTournament!, endTime: null });
+      else setSelectedTournament({ ...selectedTournament!, endTime: null });
+    }
+    setCurrentAuctions([]);
+    setShowSelectModal(false);
+    setIsSubmitting(false);
   };
 
   const handleNewTournamentChange = (e: any) => {
-    emptyErrors;
+    emptyErrors();
     const { name, value } = e.target;
     if (name) setNewTournament({ ...newTournament!, [name]: value });
+    if (name === "startTime") {
+      const selectedDate = new Date(value);
+      const cutoffDate = new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000);
+
+      setSelectedAuctions((prev) =>
+        prev.filter((auction) => {
+          const deadline = new Date(auction.deadline);
+          return deadline > cutoffDate;
+        })
+      );
+    }
+  };
+
+  const handleSelectedTournamentChange = (e: any) => {
+    emptyErrors();
+    const { name, value } = e.target;
+    if (name) setSelectedTournament({ ...selectedTournament!, [name]: value });
+    if (name === "startTime") {
+      const selectedDate = new Date(value);
+      const cutoffDate = new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000);
+
+      setSelectedAuctions((prev) =>
+        prev.filter((auction) => {
+          const deadline = new Date(auction.deadline);
+          return deadline > cutoffDate;
+        })
+      );
+    }
   };
 
   const handleNewTournamentSubmit = async (e: any) => {
@@ -244,8 +415,10 @@ const TournamentTable: React.FC<TournamentProps> = ({
       // newTournament.maxUsers == 0 ||
       currentTournamentType == ""
     ) {
-      console.log(newTournament.prizePool);
       setEmptyInputError(true);
+    } else if (selectedAuctions.length < 2 || selectedAuctions.length > 10) {
+      setTournamentInputError(true);
+      setTournamentInputErrorMessage("Please select from 2-10 auctions");
     } else {
       try {
         const response = await fetch("/api/tournaments", {
@@ -253,6 +426,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
           headers: { "Content-type": "application/json" },
           body: JSON.stringify({
             ...newTournament,
+            auction_ids: selectedAuctions.map((a) => a.auction_id),
             type: currentTournamentType,
           }),
         });
@@ -275,6 +449,56 @@ const TournamentTable: React.FC<TournamentProps> = ({
     setIsSubmitting(false);
   };
 
+  const handleSelectedTournamentSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    emptyErrors();
+    if (
+      !selectedTournament!.name ||
+      !selectedTournament!.description ||
+      !selectedTournament!.startTime ||
+      (selectedTournament!.buyInFee <= 0 &&
+        selectedTournament!.type == "standard") ||
+      (selectedTournament!.prizePool <= 0 &&
+        selectedTournament!.type == "standard") ||
+      !selectedTournament!.maxUsers
+    ) {
+      setEmptyInputError(true);
+    } else if (selectedAuctions.length < 2 || selectedAuctions.length > 10) {
+      setTournamentInputError(true);
+      setTournamentInputErrorMessage("Please select from 2-10 auctions");
+    } else {
+      try {
+        const response = await fetch(
+          `/api/tournaments?tournament_id=${selectedTournament?.tournament_id}`,
+          {
+            method: "PUT",
+            headers: { "Content-type": "application/json" },
+            body: JSON.stringify({
+              ...selectedTournament,
+              auction_ids: selectedAuctions.map((a) => a.auction_id),
+            }),
+          }
+        );
+
+        const data = await response.json();
+        if (response.status === 400) {
+          setTournamentInputError(true);
+          setTournamentInputErrorMessage(data.message);
+        } else if (!response.ok) {
+          console.error("Error editing tournament");
+        } else {
+          alert("Tournament edited successfully!");
+          setShowEditModal(false);
+          fetchData();
+        }
+      } catch (error) {
+        return console.error("Internal server error", error);
+      }
+    }
+    setIsSubmitting(false);
+  };
+
   const handleTournamentDelete = async (e: any) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -282,7 +506,9 @@ const TournamentTable: React.FC<TournamentProps> = ({
       const response = await fetch("/api/tournaments", {
         method: "DELETE",
         headers: { "Content-type": "application/json" },
-        body: JSON.stringify(selectedTournament),
+        body: JSON.stringify({
+          tournament_id: selectedTournament!.tournament_id,
+        }),
       });
 
       await response.json();
@@ -336,7 +562,9 @@ const TournamentTable: React.FC<TournamentProps> = ({
               className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
               onClick={() => {
                 setShowAddModal(true);
+                setCurrentModalType("add");
                 setNewTournament(defaultTournament);
+                setSelectedAuctions([]);
                 setCurrentTournamentType("");
                 setEmptyInputError(false);
               }}
@@ -372,69 +600,151 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           key={index}
                           className="bg-[#13202D] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
                         >
-                          {/* <div className="flex w-full gap-2">
-                          <div className="w-[50%]">
-                            <p className="text-xs text-gray-400">First Name</p>
+                          <div>
+                            <p className="text-xs text-gray-400">Name</p>
                             <p className="text-white text-sm">
-                              {admin.first_name}
+                              {tournament.name}
                             </p>
                           </div>
-                          <div className="w-[50%]">
-                            <p className="text-xs text-gray-400">Last Name</p>
+                          <div>
+                            <p className="text-xs text-gray-400">Description</p>
                             <p className="text-white text-sm">
-                              {admin.last_name}
+                              {tournament.description}
                             </p>
                           </div>
-                        </div>
-                        <div className="flex w-full gap-2">
-                          <div className="w-[50%]">
-                            <p className="text-xs text-gray-400">Username</p>
-                            <p className="text-white text-sm">
-                              {admin.username}
-                            </p>
+                          <div className="flex w-full gap-2">
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">
+                                Buy-in Fee
+                              </p>
+                              <p className="text-white text-sm">
+                                {tournament.buyInFee}
+                              </p>
+                            </div>
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">
+                                Prize Pool
+                              </p>
+                              <p className="text-white text-sm">
+                                {tournament.prizePool}
+                              </p>
+                            </div>
                           </div>
-                          <div className="w-[50%]">
-                            <p className="text-xs text-gray-400">Admin Role</p>
-                            <Badge
-                              className={`text-xs ${getRoleBadgeColor(
-                                admin.role
-                              )}`}
-                            >
-                              {admin.role.charAt(0).toUpperCase() +
-                                admin.role.substring(1, admin.role.length)}
-                            </Badge>
+                          <div className="flex w-full gap-2">
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">
+                                Start Time
+                              </p>
+                              <p className="text-white text-sm">
+                                {formatDate(tournament.startTime! as Date)}
+                              </p>
+                            </div>
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">End Time</p>
+                              <p className="text-white text-sm">
+                                {formatDate(tournament.endTime! as Date)}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400">Email</p>
-                          <p className="text-white text-sm">{admin.email}</p>
-                        </div>
-                        {role == "owner" && (
-                          <div className="flex justify-end space-x-2 pt-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={""}
-                              onClick={() => {
-                                setShowEditModal(true);
-                                setSelectedAdmin({ ...admin, password: "" });
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={"text-red-700"}
-                              onClick={() => {
-                                setShowDeleteModal(true);
-                                setSelectedAdmin(admin);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </Button>
+                          <div className="flex w-full gap-2">
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">Users</p>
+                              <p className="text-white text-sm">
+                                {tournament.users.length}
+                              </p>
+                            </div>
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">Auctions</p>
+                              <p className="text-white text-sm">
+                                {tournament.auction_ids.length}
+                              </p>
+                            </div>
                           </div>
-                        )} */}
+                          <div className="flex w-full gap-2">
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">Status</p>
+                              <div className="items-center justify-center">
+                                {tournament.type === "free_play" ? (
+                                  <Badge className="bg-purple-500/20 border-purple-400 text-purple-400 mr-2 text-xs mt-2">
+                                    Free Play
+                                  </Badge>
+                                ) : (
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-yellow-500/20 border-yellow-400 text-yellow-400 mr-2 text-xs mt-2"
+                                  >
+                                    Standard
+                                  </Badge>
+                                )}
+                                {new Date(tournament.startTime!) >
+                                  new Date() && (
+                                  <Badge className="bg-blue-100 border-blue-800 text-blue-800 mr-2 text-xs mt-2">
+                                    Upcoming
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className="w-[50%]">
+                              <p className="text-xs text-gray-400">Active</p>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title={
+                                  tournament.isActive
+                                    ? "Deactivate Tournament"
+                                    : "Activate Tournament"
+                                }
+                                className={""}
+                                onClick={(e: any) => {
+                                  e.preventDefault();
+                                  handleActiveStatusForTournament(tournament);
+                                }}
+                                disabled={
+                                  new Date(tournament.endTime!) < new Date()
+                                }
+                              >
+                                {tournament.isActive ? (
+                                  <ToggleRight className="text-green-500 h-4 w-4" />
+                                ) : (
+                                  <ToggleLeft className="text-red-500 h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                          {role != "guest" && (
+                            <div className="flex justify-end space-x-2 pt-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={""}
+                                onClick={() => {
+                                  setShowEditModal(true);
+                                  setCurrentModalType("edit");
+                                  setEmptyInputError(false);
+                                  setTournamentInputError(false);
+                                  setSelectedTournament(tournament);
+                                  handleSelectedAuctionsOnEdit(
+                                    tournament.auction_ids,
+                                    tournament.startTime as Date
+                                  );
+                                  setCurrentStartTime(tournament.startTime);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={"text-red-700"}
+                                onClick={() => {
+                                  setShowDeleteModal(true);
+                                  setSelectedTournament(tournament);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       )
                     )}
@@ -498,10 +808,10 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 {tournament.prizePool}
                               </TableCell>
                               <TableCell className="font-medium">
-                                {formatDate(tournament.startTime!)}
+                                {formatDate(tournament.startTime! as Date)}
                               </TableCell>
                               <TableCell className="font-medium">
-                                {formatDate(tournament.endTime!)}
+                                {formatDate(tournament.endTime! as Date)}
                               </TableCell>
                               <TableCell className="font-medium">
                                 {tournament.users.length +
@@ -513,7 +823,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                               </TableCell>
                               <TableCell className="font-medium">
                                 {tournament.type === "free_play" ? (
-                                  <Badge className="bg-purple-500/20 border-purple-400 text-purple-400 mr-2 max-md:text-xs">
+                                  <Badge className="bg-purple-500/20 border-purple-400 text-purple-400 mr-2">
                                     Free Play
                                   </Badge>
                                 ) : (
@@ -544,13 +854,19 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  title="Activate Tournament"
+                                  title={
+                                    tournament.isActive
+                                      ? "Deactivate Tournament"
+                                      : "Activate Tournament"
+                                  }
                                   className={""}
                                   onClick={(e: any) => {
                                     e.preventDefault();
                                     handleActiveStatusForTournament(tournament);
                                   }}
-                                  disabled={tournament.endTime! < new Date()}
+                                  disabled={
+                                    new Date(tournament.endTime!) < new Date()
+                                  }
                                 >
                                   {tournament.isActive ? (
                                     <ToggleRight className="text-green-500 h-4 w-4" />
@@ -569,7 +885,17 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                       className={""}
                                       onClick={() => {
                                         setShowEditModal(true);
+                                        setCurrentModalType("edit");
+                                        setEmptyInputError(false);
+                                        setTournamentInputError(false);
                                         setSelectedTournament(tournament);
+                                        handleSelectedAuctionsOnEdit(
+                                          tournament.auction_ids,
+                                          tournament.startTime as Date
+                                        );
+                                        setCurrentStartTime(
+                                          tournament.startTime
+                                        );
                                       }}
                                     >
                                       <Edit className="h-4 w-4" />
@@ -579,7 +905,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                       variant="ghost"
                                       size="icon"
                                       className={"text-red-700"}
-                                      title={"Delete User"}
+                                      title={"Delete Tournament"}
                                       onClick={() => {
                                         setShowDeleteModal(true);
                                         setSelectedTournament(tournament);
@@ -599,7 +925,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
               </div>
             )}
             <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-3xl w-[95%] overflow-y-auto rounded-xl">
+              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-6xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                 <DialogHeader>
                   <DialogTitle className="max-md:text-md">
                     Add Tournament
@@ -609,7 +935,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
+                  <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
                     <Label className="text-right max-md:text-xs">
                       Tournament Name
                     </Label>
@@ -625,12 +951,12 @@ const TournamentTable: React.FC<TournamentProps> = ({
                       onChange={handleNewTournamentChange}
                     />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
+                  <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
                     <Label className="text-right max-md:text-xs">
                       Description
                     </Label>
                     <Textarea
-                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                      className={`max-md:col-span-3 col-span-7 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                         emptyInputError && newTournament?.description == ""
                           ? "border-red-500"
                           : ""
@@ -642,122 +968,216 @@ const TournamentTable: React.FC<TournamentProps> = ({
                       onChange={handleNewTournamentChange}
                     />
                   </div>
-                  <div className="grid grid-cols-8 items-center gap-4">
-                    <Label className="text-right max-md:text-xs">
-                      {"Start Time"}
-                    </Label>
-                    <Input
-                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                        emptyInputError && newTournament?.startTime == null
-                          ? "border-red-500"
-                          : ""
-                      }`}
-                      name="startTime"
-                      type="datetime-local"
-                      value={newTournament?.startTime || null}
-                      onChange={handleNewTournamentChange}
-                    />
-                    <Label className="text-right max-md:text-xs">
-                      End Time
-                    </Label>
-                    <Input
-                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                        emptyInputError && newTournament?.endTime == null
-                          ? "border-red-500"
-                          : ""
-                      }`}
-                      name="endTime"
-                      type="datetime-local"
-                      value={newTournament?.endTime || null}
-                      onChange={handleNewTournamentChange}
-                    />
+                  <div className="md:grid md:grid-cols-2 md:gap-4">
+                    <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                      <Label className="text-right max-md:text-xs">
+                        {"Start Time"}
+                      </Label>
+                      <Input
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                          emptyInputError &&
+                          (newTournament?.startTime == null ||
+                            newTournament?.startTime.toString().trim() === "")
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                        name="startTime"
+                        type="datetime-local"
+                        value={newTournament?.startTime || null}
+                        onChange={handleNewTournamentChange}
+                        // min={new Date().toISOString().slice(0, 16)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label className="text-right max-md:text-xs">
+                        End Time
+                      </Label>
+                      <Input
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                          emptyInputError && newTournament?.endTime == null
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                        name="endTime"
+                        type="datetime-local"
+                        value={newTournament?.endTime || null}
+                        disabled
+                        onChange={handleNewTournamentChange}
+                      />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-8 items-center gap-4">
-                    <Label className="text-right max-md:text-xs">
-                      {"Buy-in Fee"}
-                    </Label>
-                    <Input
-                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                        emptyInputError &&
-                        newTournament?.buyInFee == 0 &&
-                        currentTournamentType != "free_play"
-                          ? "border-red-500"
-                          : ""
-                      }`}
-                      name="buyInFee"
-                      type="number"
-                      value={newTournament?.buyInFee || 0}
-                      disabled={
-                        currentTournamentType == "" ||
-                        currentTournamentType == "free_play"
-                      }
-                      onChange={handleNewTournamentChange}
-                    />
-                    <Label className="text-right max-md:text-xs">
-                      Prize Pool
-                    </Label>
-                    <Input
-                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                        emptyInputError &&
-                        newTournament?.prizePool == 0 &&
-                        currentTournamentType != "free_play"
-                          ? "border-red-500"
-                          : ""
-                      }`}
-                      name="prizePool"
-                      type="text"
-                      value={newTournament?.prizePool || 0}
-                      disabled={
-                        currentTournamentType == "" ||
-                        currentTournamentType == "free_play"
-                      }
-                      onChange={handleNewTournamentChange}
-                    />
+                  <div className="md:grid md:grid-cols-2 md:gap-4">
+                    <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                      <Label className="text-right max-md:text-xs">
+                        {"Buy-in Fee"}
+                      </Label>
+                      <Input
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                          emptyInputError &&
+                          newTournament?.buyInFee == 0 &&
+                          currentTournamentType != "free_play" &&
+                          currentTournamentType != ""
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                        name="buyInFee"
+                        type="number"
+                        value={newTournament?.buyInFee || 0}
+                        disabled={
+                          currentTournamentType == "" ||
+                          currentTournamentType == "free_play"
+                        }
+                        onChange={handleNewTournamentChange}
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label className="text-right max-md:text-xs">
+                        Prize Pool
+                      </Label>
+                      <Input
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                          emptyInputError &&
+                          newTournament?.prizePool == 0 &&
+                          currentTournamentType != "free_play" &&
+                          currentTournamentType != ""
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                        name="prizePool"
+                        type="text"
+                        value={newTournament?.prizePool || 0}
+                        disabled={
+                          currentTournamentType == "" ||
+                          currentTournamentType == "free_play"
+                        }
+                        onChange={handleNewTournamentChange}
+                      />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-8 items-center gap-4">
-                    <Label className="text-right max-md:text-xs">
-                      Max Users
+                  <div className="md:grid md:grid-cols-2 md:gap-4">
+                    <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                      <Label className="text-right max-md:text-xs">
+                        Max Users
+                      </Label>
+                      <Input
+                        className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                          emptyInputError && newTournament?.maxUsers == 0
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                        name="maxUsers"
+                        type="number"
+                        value={newTournament?.maxUsers || 0}
+                        onChange={handleNewTournamentChange}
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label className="text-right max-md:text-xs">
+                        Tournament Type
+                      </Label>
+                      <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                        <Select
+                          value={currentTournamentType || ""}
+                          onValueChange={(value: string) => {
+                            setEmptyInputError(false);
+                            setTournamentInputError(false);
+                            setCurrentTournamentType(value);
+                          }}
+                          name="role"
+                        >
+                          <SelectTrigger
+                            className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                              emptyInputError && currentTournamentType == ""
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                          >
+                            <SelectValue
+                              className="max-md:text-xs"
+                              placeholder="Select tournament type"
+                            />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                            <SelectItem value="free_play">Free Play</SelectItem>
+                            <SelectItem value="standard">Standard</SelectItem>
+                            <SelectItem value="both">Both</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid max-md:grid-cols-8 grid-cols-6 items-center gap-4">
+                    <Label className="max-md:col-span-3 max-md:text-xs">
+                      Auctions ({selectedAuctions.length})
                     </Label>
-                    <Input
-                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                        emptyInputError && newTournament?.maxUsers == 0
-                          ? "border-red-500"
-                          : ""
-                      }`}
-                      name="maxUsers"
-                      type="number"
-                      value={newTournament?.maxUsers || 0}
-                      onChange={handleNewTournamentChange}
-                    />
-                    <Label className="mb-2 block max-md:text-xs">
-                      Tournament Type
-                    </Label>
-                    <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
-                      <Select
-                        value={currentTournamentType || ""}
-                        onValueChange={(value: string) => {
+                    <div className="max-md:col-span-1 col-span-4"></div>
+
+                    <div className="relative max-md:col-span-4 group">
+                      <Button
+                        className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          setShowSelectModal(true);
+                          setCurrentAuctions([...selectedAuctions]);
+                          setCurrentStartTime(newTournament.startTime!);
+                          setCurrentAuctionPage(1);
                           setEmptyInputError(false);
                           setTournamentInputError(false);
-                          setCurrentTournamentType(value);
                         }}
-                        name="role"
+                        disabled={
+                          newTournament.startTime == null ||
+                          newTournament?.startTime.toString().trim() === ""
+                        }
                       >
-                        <SelectTrigger
-                          className={`bg-[#1E2A36] border-[#1E2A36] ${
-                            emptyInputError && currentTournamentType == ""
-                              ? "border-red-500"
-                              : ""
-                          }`}
-                        >
-                          <SelectValue placeholder="Select tournament type" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                          <SelectItem value="free_play">Free Play</SelectItem>
-                          <SelectItem value="standard">Standard</SelectItem>
-                          <SelectItem value="both">Both</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <Car className="h-4 w-4" />
+                        <span className="max-md:text-xs">Select Auctions</span>
+                      </Button>
+
+                      {(newTournament.startTime == null ||
+                        newTournament?.startTime.toString().trim() === "") && (
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                          Set a start time first
+                        </div>
+                      )}
                     </div>
+                  </div>
+
+                  <div className="bg-[#1E2A36] border border-[#1E2A36] rounded-md p-2 min-h-[60px]">
+                    {selectedAuctions.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedAuctions.map((selectedAuction) => {
+                          const currentAuctionId = selectedAuction.auction_id;
+                          const auction = availableAuctionData.find(
+                            (auction) => auction.auction_id === currentAuctionId
+                          );
+                          return (
+                            <Badge
+                              key={currentAuctionId}
+                              variant="secondary"
+                              className="flex items-center gap-1"
+                            >
+                              {auction
+                                ? `${auction.year} ${auction.make} ${auction.model}`
+                                : currentAuctionId}
+                              <button
+                                onClick={() =>
+                                  handleAuctionSelection(
+                                    selectedAuction,
+                                    "selected"
+                                  )
+                                }
+                                className="ml-1 hover:text-red-400"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 text-sm">
+                        No auctions selected
+                      </p>
+                    )}
                   </div>
                   {emptyInputError ? (
                     <p className="mt-4 text-red-500 text-center max-md:text-sm">
@@ -784,158 +1204,315 @@ const TournamentTable: React.FC<TournamentProps> = ({
             </Dialog>
             {selectedTournament && (
               <div className="flex items-center gap-1">
-                <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                <Dialog
+                  open={showEditModal}
+                  onOpenChange={(isOpen) => {
+                    setShowEditModal(isOpen);
+                    setCurrentStartTime(null);
+                  }}
+                >
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-6xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                     <DialogHeader>
                       <DialogTitle className="max-md:text-md">
                         Edit Tournament
                       </DialogTitle>
                       <DialogDescription className="max-md:text-sm">
-                        Update information for{" "}
+                        Update information for tournament:{" "}
                         <span className="font-semibold text-yellow-400">
                           {selectedTournament!.name}
                         </span>
                       </DialogDescription>
                     </DialogHeader>
+
                     <div className="grid gap-4 py-4">
-                      {/* <div className="grid grid-cols-4 items-center gap-4">
+                      <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
                         <Label className="text-right max-md:text-xs">
-                          First Name
+                          Tournament Name
                         </Label>
                         <Input
                           className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                            emptyInputError && selectedAdmin?.first_name == ""
+                            emptyInputError && selectedTournament?.name == ""
                               ? "border-red-500"
                               : ""
                           }`}
-                          name="first_name"
+                          name="name"
                           type="text"
-                          value={selectedAdmin?.first_name || ""}
-                          onChange={handleSelectedAdminChange}
+                          value={selectedTournament?.name || ""}
+                          onChange={handleSelectedTournamentChange}
                         />
                       </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
+                      <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
                         <Label className="text-right max-md:text-xs">
-                          Last Name
+                          Description
                         </Label>
-                        <Input
-                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                            emptyInputError && selectedAdmin?.last_name == ""
+                        <Textarea
+                          className={`max-md:col-span-3 col-span-7 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                            emptyInputError &&
+                            selectedTournament?.description == ""
                               ? "border-red-500"
                               : ""
                           }`}
-                          name="last_name"
+                          name="description"
                           type="text"
-                          value={selectedAdmin?.last_name || ""}
-                          onChange={handleSelectedAdminChange}
+                          row={10}
+                          value={selectedTournament?.description || ""}
+                          onChange={handleSelectedTournamentChange}
                         />
                       </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right max-md:text-xs">
-                          Email
-                        </Label>
-                        <Input
-                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                            emptyInputError && selectedAdmin?.email == ""
-                              ? "border-red-500"
-                              : ""
-                          }`}
-                          name="email"
-                          type="email"
-                          value={selectedAdmin?.email || ""}
-                          onChange={handleSelectedAdminChange}
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right max-md:text-xs">
-                          Username
-                        </Label>
-                        <Input
-                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                            emptyInputError && selectedAdmin?.username == ""
-                              ? "border-red-500"
-                              : ""
-                          }`}
-                          name="username"
-                          type="text"
-                          value={selectedAdmin?.username || ""}
-                          onChange={handleSelectedAdminChange}
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right max-md:text-xs">
-                          Password
-                        </Label>
-                        <Input
-                          className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
-                          name="password"
-                          type="password"
-                          value={selectedAdmin?.password || ""}
-                          onChange={handleSelectedAdminChange}
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right max-md:text-xs">
-                          Confirm Password
-                        </Label>
-                        <Input
-                          className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
-                          name="confirm_password"
-                          type="password"
-                          value={confirmPassword.confirm_password || ""}
-                          onChange={handleConfirmPasswordChange}
-                        />
-                      </div>
-                      <div>
-                        <Label className="mb-2 block max-md:text-xs">
-                          Role
-                        </Label>
-                        <Select
-                          value={selectedAdmin?.role || ""}
-                          onValueChange={handleSelectedAdminRoleChange}
-                          name="role"
-                        >
-                          <SelectTrigger
-                            className={`bg-[#1E2A36] border-[#1E2A36] ${
-                              emptyInputError && selectedAdmin?.role == ""
+                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                        <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                          <Label className="text-right max-md:text-xs">
+                            {"Start Time"}
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError &&
+                              (selectedTournament?.startTime == null ||
+                                selectedTournament?.startTime
+                                  .toString()
+                                  .trim() === "")
                                 ? "border-red-500"
                                 : ""
                             }`}
+                            name="startTime"
+                            type="datetime-local"
+                            value={
+                              new Date(selectedTournament?.startTime!)
+                                .toISOString()
+                                .slice(0, 16) || null
+                            }
+                            // disabled={isPastCutoff}
+                            onChange={handleSelectedTournamentChange}
+                            // min={new Date().toISOString().slice(0, 16)}
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right max-md:text-xs">
+                            End Time
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError &&
+                              selectedTournament?.endTime == null
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="endTime"
+                            type="datetime-local"
+                            value={
+                              new Date(selectedTournament?.endTime!)
+                                .toISOString()
+                                .slice(0, 16) || null
+                            }
+                            disabled
+                            onChange={handleSelectedTournamentChange}
+                          />
+                        </div>
+                      </div>
+                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                        <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                          <Label className="text-right max-md:text-xs">
+                            {"Buy-in Fee"}
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError &&
+                              selectedTournament?.buyInFee == 0 &&
+                              selectedTournament?.type == "standard"
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="buyInFee"
+                            type="number"
+                            value={selectedTournament?.buyInFee || 0}
+                            disabled={selectedTournament?.type == "free_play"}
+                            onChange={handleSelectedTournamentChange}
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right max-md:text-xs">
+                            Prize Pool
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError &&
+                              selectedTournament?.prizePool == 0 &&
+                              selectedTournament?.type == "standard"
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="prizePool"
+                            type="text"
+                            value={selectedTournament?.prizePool || 0}
+                            disabled={selectedTournament?.type == "free_play"}
+                            onChange={handleSelectedTournamentChange}
+                          />
+                        </div>
+                      </div>
+                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                        <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                          <Label className="text-right max-md:text-xs">
+                            Max Users
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError &&
+                              selectedTournament?.maxUsers == 0
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="maxUsers"
+                            type="number"
+                            value={selectedTournament?.maxUsers || 0}
+                            onChange={handleSelectedTournamentChange}
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right max-md:text-xs">
+                            Tournament Type
+                          </Label>
+                          <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                            <Select
+                              value={selectedTournament?.type || ""}
+                              onValueChange={(value: string) => {
+                                //can't edit this
+                              }}
+                              disabled
+                              name="role"
+                            >
+                              <SelectTrigger
+                                className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                                  emptyInputError &&
+                                  selectedTournament?.type == ""
+                                    ? "border-red-500"
+                                    : ""
+                                }`}
+                              >
+                                <SelectValue
+                                  className="max-md:text-xs"
+                                  placeholder="Select tournament type"
+                                />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                                <SelectItem value="free_play">
+                                  Free Play
+                                </SelectItem>
+                                <SelectItem value="standard">
+                                  Standard
+                                </SelectItem>
+                                <SelectItem value="both">Both</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid max-md:grid-cols-8 grid-cols-6 items-center gap-4">
+                        <Label className="max-md:col-span-3 max-md:text-xs">
+                          Auctions ({selectedAuctions.length})
+                        </Label>
+                        <div className="max-md:col-span-1 col-span-4"></div>
+
+                        <div className="relative max-md:col-span-4 group">
+                          <Button
+                            className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 disabled:cursor-not-allowed"
+                            onClick={() => {
+                              setShowSelectModal(true);
+                              setCurrentAuctions([...selectedAuctions]);
+                              setCurrentStartTime(
+                                selectedTournament.startTime!
+                              );
+                              setCurrentAuctionPage(1);
+                              setEmptyInputError(false);
+                              setTournamentInputError(false);
+                            }}
+                            disabled={
+                              selectedTournament.startTime == null ||
+                              selectedTournament?.startTime
+                                .toString()
+                                .trim() === ""
+                            }
                           >
-                            <SelectValue placeholder="Select role" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                            <SelectItem value="owner">Owner</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="moderator">Moderator</SelectItem>
-                            <SelectItem value="guest">Guest</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {emptyInputError ? (
-                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                            Please fill-out required fields
-                          </p>
-                        ) : passwordMismatchError ? (
-                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                            Passwords do not match
-                          </p>
-                        ) : tournamentInputError ? (
-                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                            {tournamentInputErrorMessage}
-                          </p>
-                        ) : null}
-                      </div> */}
+                            <Car className="h-4 w-4" />
+                            <span className="max-md:text-xs">
+                              Select Auctions
+                            </span>
+                          </Button>
+
+                          {(selectedTournament.startTime == null ||
+                            selectedTournament?.startTime.toString().trim() ===
+                              "") && (
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                              Set a start time first
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {isAuctionLoading ? (
+                        <div className="flex justify-center items-center w-full my-4">
+                          <BeatLoader color="#F2CA16" />
+                        </div>
+                      ) : (
+                        <div className="bg-[#1E2A36] border border-[#1E2A36] rounded-md p-2 min-h-[60px]">
+                          {selectedAuctions.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {selectedAuctions.map((selectedAuction) => {
+                                const currentAuctionId =
+                                  selectedAuction.auction_id;
+                                const auction = availableAuctionData.find(
+                                  (auction) =>
+                                    auction.auction_id === currentAuctionId
+                                );
+                                return (
+                                  <Badge
+                                    key={currentAuctionId}
+                                    variant="secondary"
+                                    className="flex items-center gap-1"
+                                  >
+                                    {auction
+                                      ? `${auction.year} ${auction.make} ${auction.model}`
+                                      : currentAuctionId}
+                                    <button
+                                      onClick={() =>
+                                        handleAuctionSelection(
+                                          selectedAuction,
+                                          "selected"
+                                        )
+                                      }
+                                      className="ml-1 hover:text-red-400"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </Badge>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className="text-gray-400 text-sm">
+                              No auctions selected
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      {emptyInputError ? (
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                          Please fill-out required fields
+                        </p>
+                      ) : tournamentInputError ? (
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                          {tournamentInputErrorMessage}
+                        </p>
+                      ) : null}
                     </div>
                     <DialogFooter className="flex-row justify-end space-x-2">
-                      {/* <form onSubmit={handleSelectedAdminSubmit}>
+                      <form onSubmit={handleSelectedTournamentSubmit}>
                         <Button
                           type="submit"
                           className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
                           disabled={isSubmitting}
                         >
-                          {isSubmitting ? "Updating..." : "Update"}
+                          {isSubmitting ? "Submitting..." : "Submit"}
                         </Button>
-                      </form> */}
+                      </form>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -983,6 +1560,120 @@ const TournamentTable: React.FC<TournamentProps> = ({
                 </Dialog>
               </div>
             )}
+            {/* select auction modal for add */}
+            <Dialog open={showSelectModal} onOpenChange={setShowSelectModal}>
+              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-5xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                <DialogHeader>
+                  <DialogTitle className="max-md:text-md">
+                    Select Auctions for Tournament
+                  </DialogTitle>
+                  <DialogDescription className="max-md:text-sm">
+                    Choose the cars that will be included in this tournament
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="bg-[#1E2A36] relative h-auto flex px-2 py-1.5 rounded gap-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                    <Input
+                      placeholder="Search by make, model or year"
+                      className="pl-10 text-white bg-transparent focus:outline-none placeholder:text-white border-none max-md:text-sm"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setSearchAuctionValue(e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+                {isAuctionLoading ? (
+                  <div className="flex justify-center items-center w-full mt-4">
+                    <BeatLoader color="#F2CA16" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {availableAuctionData.map((auction) => (
+                        <div
+                          key={auction.auction_id}
+                          className={`flex items-center p-3 rounded-md border cursor-pointer transition-colors ${
+                            currentAuctions.some(
+                              (a) => a.auction_id === auction.auction_id
+                            )
+                              ? "bg-[#F2CA16]/10 border-[#F2CA16]"
+                              : "bg-[#1E2A36] border-[#1E2A36] hover:bg-[#1E2A36]/80"
+                          }`}
+                          onClick={() => handleAuctionSelection(auction)}
+                        >
+                          {currentAuctions.some(
+                            (a) => a.auction_id === auction.auction_id
+                          ) ? (
+                            <CheckSquare className="h-5 w-5 text-[#F2CA16] mr-3 flex-shrink-0" />
+                          ) : (
+                            <Square className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
+                          )}
+
+                          <div className="grid grid-cols-4">
+                            <div className="col-span-3 flex-1 min-w-0">
+                              <div className="max-md:text-xs text-sm truncate">
+                                {`${auction.year} ${auction.make} ${auction.model}`}
+                              </div>
+                              <div className="max-md:text-xs text-sm text-gray-400 truncate">
+                                Current Bid: $
+                                {(auction.price || 0).toLocaleString()}
+                              </div>
+                              <div className="max-md:text-xs text-sm text-gray-400 truncate">
+                                Ends In: {formatDate(auction.deadline)}
+                              </div>
+                            </div>
+                            {auction.image ? (
+                              <Image
+                                src={auction.image}
+                                alt={`${auction.year} ${auction.make} ${auction.model}`}
+                                title={`${auction.year} ${auction.make} ${auction.model}`}
+                                className="w-full h-full object-cover"
+                                objectFit="cover"
+                                width={100}
+                                height={100}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <ImageOff className="w-6 h-6 text-gray-500" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="items-center">
+                      <div className="mx-auto mb-8 w-1/3">
+                        <ResponsivePagination
+                          current={currentAuctionPage}
+                          total={totalAuctionPages}
+                          onPageChange={setCurrentAuctionPage}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <DialogFooter className="flex-row justify-end space-x-2">
+                  <form
+                    onSubmit={(e: any) =>
+                      handleSelectAuctionSubmit(e, currentModalType)
+                    }
+                  >
+                    <Button
+                      type="submit"
+                      className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting
+                        ? "Confirming Selection..."
+                        : "Confirm Selection" +
+                          (" (" + currentAuctions.length + ")")}
+                    </Button>
+                  </form>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardContent>
       </Card>

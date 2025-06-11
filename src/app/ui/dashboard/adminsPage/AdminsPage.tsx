@@ -583,43 +583,45 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
                       onChange={handleConfirmPasswordChange}
                     />
                   </div>
-                  <div>
-                    <Label className="mb-2 block max-md:text-xs">Role</Label>
-                    <Select
-                      value={newAdmin?.role || ""}
-                      onValueChange={handleNewAdminRoleChange}
-                      name="role"
-                    >
-                      <SelectTrigger
-                        className={`bg-[#1E2A36] border-[#1E2A36] ${
-                          emptyInputError && newAdmin?.role == ""
-                            ? "border-red-500"
-                            : ""
-                        }`}
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">Role</Label>
+                    <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                      <Select
+                        value={newAdmin?.role || ""}
+                        onValueChange={handleNewAdminRoleChange}
+                        name="role"
                       >
-                        <SelectValue placeholder="Select role" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                        <SelectItem value="owner">Owner</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="moderator">Moderator</SelectItem>
-                        <SelectItem value="guest">Guest</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {emptyInputError ? (
-                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                        Please fill-out required fields
-                      </p>
-                    ) : passwordMismatchError ? (
-                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                        Passwords do not match
-                      </p>
-                    ) : adminInputError ? (
-                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                        {adminInputErrorMessage}
-                      </p>
-                    ) : null}
+                        <SelectTrigger
+                          className={`bg-[#1E2A36] border-[#1E2A36] ${
+                            emptyInputError && newAdmin?.role == ""
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                        >
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                          <SelectItem value="owner">Owner</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="moderator">Moderator</SelectItem>
+                          <SelectItem value="guest">Guest</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
+                  {emptyInputError ? (
+                    <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                      Please fill-out required fields
+                    </p>
+                  ) : passwordMismatchError ? (
+                    <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                      Passwords do not match
+                    </p>
+                  ) : adminInputError ? (
+                    <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                      {adminInputErrorMessage}
+                    </p>
+                  ) : null}
                 </div>
                 <DialogFooter className="flex-row justify-end space-x-2">
                   <form onSubmit={handleNewAdminSubmit}>
@@ -738,45 +740,49 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
                           onChange={handleConfirmPasswordChange}
                         />
                       </div>
-                      <div>
-                        <Label className="mb-2 block max-md:text-xs">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right max-md:text-xs">
                           Role
                         </Label>
-                        <Select
-                          value={selectedAdmin?.role || ""}
-                          onValueChange={handleSelectedAdminRoleChange}
-                          name="role"
-                        >
-                          <SelectTrigger
-                            className={`bg-[#1E2A36] border-[#1E2A36] ${
-                              emptyInputError && selectedAdmin?.role == ""
-                                ? "border-red-500"
-                                : ""
-                            }`}
+                        <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                          <Select
+                            value={selectedAdmin?.role || ""}
+                            onValueChange={handleSelectedAdminRoleChange}
+                            name="role"
                           >
-                            <SelectValue placeholder="Select role" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                            <SelectItem value="owner">Owner</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="moderator">Moderator</SelectItem>
-                            <SelectItem value="guest">Guest</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {emptyInputError ? (
-                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                            Please fill-out required fields
-                          </p>
-                        ) : passwordMismatchError ? (
-                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                            Passwords do not match
-                          </p>
-                        ) : adminInputError ? (
-                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                            {adminInputErrorMessage}
-                          </p>
-                        ) : null}
+                            <SelectTrigger
+                              className={`bg-[#1E2A36] border-[#1E2A36] ${
+                                emptyInputError && selectedAdmin?.role == ""
+                                  ? "border-red-500"
+                                  : ""
+                              }`}
+                            >
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                              <SelectItem value="owner">Owner</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="moderator">
+                                Moderator
+                              </SelectItem>
+                              <SelectItem value="guest">Guest</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
+                      {emptyInputError ? (
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                          Please fill-out required fields
+                        </p>
+                      ) : passwordMismatchError ? (
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                          Passwords do not match
+                        </p>
+                      ) : adminInputError ? (
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                          {adminInputErrorMessage}
+                        </p>
+                      ) : null}
                     </div>
                     <DialogFooter className="flex-row justify-end space-x-2">
                       <form onSubmit={handleSelectedAdminSubmit}>

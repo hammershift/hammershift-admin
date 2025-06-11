@@ -445,7 +445,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
               </div>
             )}
             <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-4xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                 <DialogHeader>
                   <DialogTitle className="max-md:text-md">
                     Add Agent
@@ -554,7 +554,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
             {selectedAgent && (
               <div className="flex items-center gap-1">
                 <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-4xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                     <DialogHeader>
                       <DialogTitle className="max-md:text-md">
                         Edit Agent
