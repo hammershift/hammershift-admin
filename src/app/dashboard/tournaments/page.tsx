@@ -37,6 +37,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Trash2,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/app/ui/components/button";
 import { Label } from "@/app/ui/components/label";
@@ -189,6 +190,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showComputeModal, setShowComputeModal] = useState(false);
+  const [showScoreModal, setShowScoreModal] = useState(false);
   const [selectedTournament, setSelectedTournament] =
     useState<TournamentData>();
   const [newTournament, setNewTournament] =
@@ -297,6 +300,12 @@ const TournamentTable: React.FC<TournamentProps> = ({
       return console.error("Internal server error", error);
     }
     setIsSubmitting(false);
+  };
+
+  const handleTournamentCompute = async () => {
+    // setIsSubmitting(true);
+    // try {
+    // }
   };
 
   const handleActiveStatusForTournament = async (
@@ -562,6 +571,21 @@ const TournamentTable: React.FC<TournamentProps> = ({
                               {role != "guest" && (
                                 <TableCell className="font-medium">
                                   <div className="flex items-center gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      title="Compute Winner"
+                                      className={""}
+                                      onClick={() => {
+                                        setShowComputeModal(true);
+                                        setSelectedTournament(tournament);
+                                      }}
+                                    >
+                                      <Trophy
+                                        className="h-4 w-4"
+                                        color="#F2CA16"
+                                      />
+                                    </Button>
                                     <Button
                                       variant="ghost"
                                       size="icon"
@@ -981,6 +1005,46 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+                <Dialog
+                  open={showComputeModal}
+                  onOpenChange={setShowComputeModal}
+                >
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-[#F2CA16] text-lg max-wd:text-md">
+                        Compute User Scores
+                      </DialogTitle>
+                    </DialogHeader>
+                    {selectedTournament.endTime !== null &&
+                    selectedTournament.endTime > new Date() ? (
+                      <div className="p-2 m-2 text-sm">
+                        <p className="text-justify max-md:text-sm">
+                          {
+                            "This tournament is currently active. Please wait for the tournament to end before computing user scores."
+                          }
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <DialogFooter className="flex-row justify-end space-x-2">
+                          <form onSubmit={handleTournamentCompute}>
+                            <Button
+                              type="submit"
+                              className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                              disabled={isSubmitting}
+                            >
+                              {isSubmitting ? "Computing..." : "Compute"}
+                            </Button>
+                          </form>
+                        </DialogFooter>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
+                <Dialog
+                  open={showScoreModal}
+                  onOpenChange={setShowScoreModal}
+                ></Dialog>
               </div>
             )}
           </div>
