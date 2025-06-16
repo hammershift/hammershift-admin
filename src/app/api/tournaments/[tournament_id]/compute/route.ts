@@ -2,11 +2,63 @@ import connectToDB from "@/app/lib/mongoose";
 import Tournaments from "@/app/models/tournament.model";
 import Auctions from "@/app/models/auction.model";
 import Predictions from "@/app/models/prediction.model";
+import Points from "@/app/models/auction_points.model";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
 import { Types } from "mongoose";
 
+interface Player {
+  userId: Types.ObjectId;
+  fullName: string;
+  username: string;
+  role: string;
+  delta: number;
+  correctCount: number;
+}
+async function getWinner(tournament_id: number, players: Player[]) {
+  //check if there is a tie with the number of correct predictions
+
+  if (players.length > 1) {
+    //TODO: sort scores via their delta and get the lowest
+    const sortedUsers = players.sort((a, b) => a.delta - b.delta);
+
+    //check for tiebreaker in deltas
+    if (sortedUsers.some((x) => x.delta === sortedUsers[0].delta)) {
+      //TEMP!!!
+      return sortedUsers[0];
+    } else {
+      const winner = sortedUsers[0];
+      await Points.create({
+        tournament_id: tournament_id,
+        points: 10, //temp, maybe 10 * the number of correct predictions?
+        rank: 1, //temp
+        user: {
+          userId: winner.userId,
+          fullName: winner.fullName,
+          username: winner.username,
+          role: winner.role,
+        },
+      });
+      return winner;
+    }
+  } else {
+    //TODO: award the winner
+    const winner = players[0];
+    await Points.create({
+      tournament_id: tournament_id,
+      points: 10,
+      rank: 1,
+      user: {
+        userId: winner.userId,
+        fullName: winner.fullName,
+        username: winner.username,
+        role: winner.role,
+      },
+    });
+    return winner;
+  }
+}
 export async function PUT(
   req: NextRequest,
   context: { params: { tournament_id: string } }
@@ -93,6 +145,7 @@ export async function PUT(
 
       let userScore = {
         userId: user.userId,
+        fullName: user.fullName,
         username: user.username,
         role: user.role,
         delta: 0,
@@ -143,18 +196,72 @@ export async function PUT(
       (user) => user.correctCount === highestCount
     );
 
-    //check if there is a tie
-    if (usersToCheck.length > 1) {
-      //TODO: sort scores via their delta and get the lowest
-    } else {
-      //TODO: award the winner
+    const winner = await getWinner(parseInt(tournament_id), usersToCheck);
+
+    //update all predictions for tournament, set isActive to false
+    await Predictions.updateMany(
+      {
+        tournament_id: tournament.tournament_id,
+        isActive: true,
+      },
+      {
+        $set: {
+          isActive: false,
+        },
+      }
+    );
+
+    //TODO: assumption that there's only 1 winner, change to loop if multiple are needed
+    const winnerObject = {
+      userId: winner.userId,
+      tournament_id: tournament.tournament_id,
+      username: winner.username,
+      winningDate: new Date(),
+    };
+
+    const result = await Tournaments.findOneAndUpdate(
+      {
+        tournament_id: tournament.tournament_id,
+      },
+      {
+        $push: {
+          winners: winnerObject,
+        },
+        $set: {
+          isActive: false,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+
+    //go over all auctions and then update status
+    for (let auction of auctions) {
+      await Auctions.updateOne(
+        {
+          auction_id: auction.auction_id,
+        },
+        {
+          $set: {
+            isProcessed: true,
+            ended: true,
+          },
+        }
+      );
     }
 
-    //sort users by delta, asc
-    const sortedScores = userScores.sort((a, b) => a.delta - b.delta);
+    return NextResponse.json(
+      {
+        message: `Successfully computed scores for tournament ${tournament_id}`,
+        result: result,
+      },
+      { status: 201 }
+    );
+
+    //todo update tournament object, add winner
 
     //TODO: figure out how many winners are needed
-    //TODO: implement tiebreakers
   } catch (e) {
     console.log(e);
     return NextResponse.json(
