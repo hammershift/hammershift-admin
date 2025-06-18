@@ -38,6 +38,7 @@ import {
   Car,
   CheckSquare,
   Edit,
+  Eye,
   ImageOff,
   Search,
   Square,
@@ -211,6 +212,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
   };
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [selectedTournament, setSelectedTournament] =
@@ -732,6 +734,27 @@ const TournamentTable: React.FC<TournamentProps> = ({
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
+
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={"text-yellow-500"}
+                                title={"View Tournament"}
+                                onClick={() => {
+                                  setShowViewModal(true);
+                                  setCurrentModalType("view");
+                                  setEmptyInputError(false);
+                                  setTournamentInputError(false);
+                                  setSelectedTournament(tournament);
+                                  handleSelectedAuctionsOnEdit(
+                                    tournament.auction_ids,
+                                    tournament.startTime as Date
+                                  );
+                                  setCurrentStartTime(tournament.startTime);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -899,6 +922,29 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                       }}
                                     >
                                       <Edit className="h-4 w-4" />
+                                    </Button>
+
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className={"text-yellow-500"}
+                                      title={"View Tournament"}
+                                      onClick={() => {
+                                        setShowViewModal(true);
+                                        setCurrentModalType("edit");
+                                        setEmptyInputError(false);
+                                        setTournamentInputError(false);
+                                        setSelectedTournament(tournament);
+                                        handleSelectedAuctionsOnEdit(
+                                          tournament.auction_ids,
+                                          tournament.startTime as Date
+                                        );
+                                        setCurrentStartTime(
+                                          tournament.startTime
+                                        );
+                                      }}
+                                    >
+                                      <Eye className="h-4 w-4" />
                                     </Button>
 
                                     <Button
@@ -1141,36 +1187,66 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     </div>
                   </div>
 
-                  <div className="bg-[#1E2A36] border border-[#1E2A36] rounded-md p-2 min-h-[60px]">
+                  <div
+                    className={`p-2 min-h-[60px] ${
+                      selectedAuctions.length === 0 &&
+                      "bg-[#1E2A36] border border-[#1E2A36]"
+                    }`}
+                  >
                     {selectedAuctions.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {selectedAuctions.map((selectedAuction) => {
                           const currentAuctionId = selectedAuction.auction_id;
                           const auction = availableAuctionData.find(
                             (auction) => auction.auction_id === currentAuctionId
                           );
-                          return (
-                            <Badge
-                              key={currentAuctionId}
-                              variant="secondary"
-                              className="flex items-center gap-1"
-                            >
-                              {auction
-                                ? `${auction.year} ${auction.make} ${auction.model}`
-                                : currentAuctionId}
-                              <button
-                                onClick={() =>
-                                  handleAuctionSelection(
-                                    selectedAuction,
-                                    "selected"
-                                  )
-                                }
-                                className="ml-1 hover:text-red-400"
+                          if (auction)
+                            return (
+                              <div
+                                key={currentAuctionId}
+                                className="flex items-center p-3 rounded-md border cursor-pointer transition-colors bg-[#1E2A36] border-[#FFFFFF] hover:bg-[#1E2A36]/80"
                               >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          );
+                                <button
+                                  onClick={() =>
+                                    handleAuctionSelection(auction, "selected")
+                                  }
+                                  className="ml-1 hover:text-red-400"
+                                >
+                                  <X className="h-5 w-5 text-white-500 mr-3 flex-shrink-0" />
+                                </button>
+
+                                <div className="grid grid-cols-4">
+                                  <div className="col-span-3 flex-1 min-w-0">
+                                    <div className="max-md:text-xs text-sm truncate">
+                                      {`${auction.year} ${auction.make} ${auction.model}`}
+                                    </div>
+                                    <div className="max-md:text-xs text-sm text-gray-400 truncate">
+                                      Current Bid: $
+                                      {(auction.price || 0).toLocaleString()}
+                                    </div>
+                                    <div className="max-md:text-xs text-sm text-gray-400 truncate">
+                                      Ends In: {formatDate(auction.deadline)}
+                                    </div>
+                                  </div>
+                                  {auction.image ? (
+                                    <Image
+                                      src={auction.image}
+                                      alt={`${auction.year} ${auction.make} ${auction.model}`}
+                                      title={`${auction.year} ${auction.make} ${auction.model}`}
+                                      className="w-full h-full object-cover"
+                                      objectFit="cover"
+                                      width={100}
+                                      height={100}
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <ImageOff className="w-6 h-6 text-gray-500" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          else return "";
                         })}
                       </div>
                     ) : (
@@ -1452,9 +1528,14 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           <BeatLoader color="#F2CA16" />
                         </div>
                       ) : (
-                        <div className="bg-[#1E2A36] border border-[#1E2A36] rounded-md p-2 min-h-[60px]">
+                        <div
+                          className={`p-2 min-h-[60px] ${
+                            selectedAuctions.length === 0 &&
+                            "bg-[#1E2A36] border border-[#1E2A36]"
+                          }`}
+                        >
                           {selectedAuctions.length > 0 ? (
-                            <div className="flex flex-wrap gap-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                               {selectedAuctions.map((selectedAuction) => {
                                 const currentAuctionId =
                                   selectedAuction.auction_id;
@@ -1462,28 +1543,59 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                   (auction) =>
                                     auction.auction_id === currentAuctionId
                                 );
-                                return (
-                                  <Badge
-                                    key={currentAuctionId}
-                                    variant="secondary"
-                                    className="flex items-center gap-1"
-                                  >
-                                    {auction
-                                      ? `${auction.year} ${auction.make} ${auction.model}`
-                                      : currentAuctionId}
-                                    <button
-                                      onClick={() =>
-                                        handleAuctionSelection(
-                                          selectedAuction,
-                                          "selected"
-                                        )
-                                      }
-                                      className="ml-1 hover:text-red-400"
+                                if (auction)
+                                  return (
+                                    <div
+                                      key={currentAuctionId}
+                                      className="flex items-center p-3 rounded-md border cursor-pointer transition-colors bg-[#1E2A36] border-[#FFFFFF] hover:bg-[#1E2A36]/80"
                                     >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </Badge>
-                                );
+                                      <button
+                                        onClick={() =>
+                                          handleAuctionSelection(
+                                            auction,
+                                            "selected"
+                                          )
+                                        }
+                                        className="ml-1 hover:text-red-400"
+                                      >
+                                        <X className="h-5 w-5 text-white-500 mr-3 flex-shrink-0" />
+                                      </button>
+
+                                      <div className="grid grid-cols-4">
+                                        <div className="col-span-3 flex-1 min-w-0">
+                                          <div className="max-md:text-xs text-sm truncate">
+                                            {`${auction.year} ${auction.make} ${auction.model}`}
+                                          </div>
+                                          <div className="max-md:text-xs text-sm text-gray-400 truncate">
+                                            Current Bid: $
+                                            {(
+                                              auction.price || 0
+                                            ).toLocaleString()}
+                                          </div>
+                                          <div className="max-md:text-xs text-sm text-gray-400 truncate">
+                                            Ends In:{" "}
+                                            {formatDate(auction.deadline)}
+                                          </div>
+                                        </div>
+                                        {auction.image ? (
+                                          <Image
+                                            src={auction.image}
+                                            alt={`${auction.year} ${auction.make} ${auction.model}`}
+                                            title={`${auction.year} ${auction.make} ${auction.model}`}
+                                            className="w-full h-full object-cover"
+                                            objectFit="cover"
+                                            width={100}
+                                            height={100}
+                                          />
+                                        ) : (
+                                          <div className="w-full h-full flex items-center justify-center">
+                                            <ImageOff className="w-6 h-6 text-gray-500" />
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                else return "";
                               })}
                             </div>
                           ) : (
@@ -1514,6 +1626,326 @@ const TournamentTable: React.FC<TournamentProps> = ({
                         </Button>
                       </form>
                     </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog
+                  open={showViewModal}
+                  onOpenChange={(isOpen) => {
+                    setShowViewModal(isOpen);
+                    setCurrentStartTime(null);
+                  }}
+                >
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-6xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                    <DialogHeader>
+                      <DialogTitle className="max-md:text-md">
+                        View Tournament
+                      </DialogTitle>
+                      <DialogDescription className="max-md:text-sm">
+                        View information for tournament:{" "}
+                        <span className="font-semibold text-yellow-400">
+                          {selectedTournament!.name}
+                        </span>
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid gap-4 py-4">
+                      <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
+                        <Label className="text-right max-md:text-xs">
+                          Tournament Name
+                        </Label>
+                        <Input
+                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                            emptyInputError && selectedTournament?.name == ""
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                          name="name"
+                          type="text"
+                          value={selectedTournament?.name || ""}
+                          onChange={handleSelectedTournamentChange}
+                          disabled
+                        />
+                      </div>
+                      <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
+                        <Label className="text-right max-md:text-xs">
+                          Description
+                        </Label>
+                        <Textarea
+                          className={`max-md:col-span-3 col-span-7 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                            emptyInputError &&
+                            selectedTournament?.description == ""
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                          name="description"
+                          type="text"
+                          row={10}
+                          value={selectedTournament?.description || ""}
+                          onChange={handleSelectedTournamentChange}
+                          disabled
+                        />
+                      </div>
+                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                        <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                          <Label className="text-right max-md:text-xs">
+                            {"Start Time"}
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError &&
+                              (selectedTournament?.startTime == null ||
+                                selectedTournament?.startTime
+                                  .toString()
+                                  .trim() === "")
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="startTime"
+                            type="datetime-local"
+                            value={
+                              new Date(selectedTournament?.startTime!)
+                                .toISOString()
+                                .slice(0, 16) || null
+                            }
+                            onChange={handleSelectedTournamentChange}
+                            disabled
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right max-md:text-xs">
+                            End Time
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError &&
+                              selectedTournament?.endTime == null
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="endTime"
+                            type="datetime-local"
+                            value={
+                              new Date(selectedTournament?.endTime!)
+                                .toISOString()
+                                .slice(0, 16) || null
+                            }
+                            onChange={handleSelectedTournamentChange}
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                        <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                          <Label className="text-right max-md:text-xs">
+                            {"Buy-in Fee"}
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError &&
+                              selectedTournament?.buyInFee == 0 &&
+                              selectedTournament?.type == "standard"
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="buyInFee"
+                            type="number"
+                            value={selectedTournament?.buyInFee || 0}
+                            onChange={handleSelectedTournamentChange}
+                            disabled
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right max-md:text-xs">
+                            Prize Pool
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError &&
+                              selectedTournament?.prizePool == 0 &&
+                              selectedTournament?.type == "standard"
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="prizePool"
+                            type="text"
+                            value={selectedTournament?.prizePool || 0}
+                            onChange={handleSelectedTournamentChange}
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                        <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                          <Label className="text-right max-md:text-xs">
+                            Max Users
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError &&
+                              selectedTournament?.maxUsers == 0
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="maxUsers"
+                            type="number"
+                            value={selectedTournament?.maxUsers || 0}
+                            onChange={handleSelectedTournamentChange}
+                            disabled
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right max-md:text-xs">
+                            Tournament Type
+                          </Label>
+                          <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                            <Select
+                              value={selectedTournament?.type || ""}
+                              onValueChange={(value: string) => {
+                                //can't edit this
+                              }}
+                              disabled
+                              name="role"
+                            >
+                              <SelectTrigger
+                                className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                                  emptyInputError &&
+                                  selectedTournament?.type == ""
+                                    ? "border-red-500"
+                                    : ""
+                                }`}
+                              >
+                                <SelectValue
+                                  className="max-md:text-xs"
+                                  placeholder="Select tournament type"
+                                />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                                <SelectItem value="free_play">
+                                  Free Play
+                                </SelectItem>
+                                <SelectItem value="standard">
+                                  Standard
+                                </SelectItem>
+                                <SelectItem value="both">Both</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid max-md:grid-cols-8 grid-cols-6 items-center gap-4">
+                        <Label className="max-md:col-span-3 max-md:text-xs">
+                          Auctions ({selectedAuctions.length})
+                        </Label>
+                        <div className="max-md:col-span-1 col-span-4"></div>
+
+                        <div className="relative max-md:col-span-4 group">
+                          {/* <Button
+                            className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 disabled:cursor-not-allowed"
+                            onClick={() => {
+                              setShowSelectModal(true);
+                              setCurrentAuctions([...selectedAuctions]);
+                              setCurrentStartTime(
+                                selectedTournament.startTime!
+                              );
+                              setCurrentAuctionPage(1);
+                              setEmptyInputError(false);
+                              setTournamentInputError(false);
+                            }}
+                            disabled={
+                              selectedTournament.startTime == null ||
+                              selectedTournament?.startTime
+                                .toString()
+                                .trim() === ""
+                            }
+                          >
+                            <Car className="h-4 w-4" />
+                            <span className="max-md:text-xs">
+                              Select Auctions
+                            </span>
+                          </Button>
+
+                          {(selectedTournament.startTime == null ||
+                            selectedTournament?.startTime.toString().trim() ===
+                              "") && (
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                              Set a start time first
+                            </div>
+                          )} */}
+                        </div>
+                      </div>
+                      {isAuctionLoading ? (
+                        <div className="flex justify-center items-center w-full my-4">
+                          <BeatLoader color="#F2CA16" />
+                        </div>
+                      ) : (
+                        <div
+                          className={`p-2 min-h-[60px] ${
+                            selectedAuctions.length === 0 &&
+                            "bg-[#1E2A36] border border-[#1E2A36]"
+                          }`}
+                        >
+                          {selectedAuctions.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {selectedAuctions.map((selectedAuction) => {
+                                const currentAuctionId =
+                                  selectedAuction.auction_id;
+                                const auction = availableAuctionData.find(
+                                  (auction) =>
+                                    auction.auction_id === currentAuctionId
+                                );
+                                if (auction)
+                                  return (
+                                    <div
+                                      key={currentAuctionId}
+                                      className="flex items-center p-3 rounded-md border cursor-pointer transition-colors bg-[#1E2A36] border-[#FFFFFF] hover:bg-[#1E2A36]/80"
+                                    >
+                                      <div className="grid grid-cols-4">
+                                        <div className="col-span-3 flex-1 min-w-0">
+                                          <div className="max-md:text-xs text-sm truncate">
+                                            {`${auction.year} ${auction.make} ${auction.model}`}
+                                          </div>
+                                          <div className="max-md:text-xs text-sm text-gray-400 truncate">
+                                            Current Bid: $
+                                            {(
+                                              auction.price || 0
+                                            ).toLocaleString()}
+                                          </div>
+                                          <div className="max-md:text-xs text-sm text-gray-400 truncate">
+                                            Ends In:{" "}
+                                            {formatDate(auction.deadline)}
+                                          </div>
+                                        </div>
+                                        {auction.image ? (
+                                          <Image
+                                            src={auction.image}
+                                            alt={`${auction.year} ${auction.make} ${auction.model}`}
+                                            title={`${auction.year} ${auction.make} ${auction.model}`}
+                                            className="w-full h-full object-cover"
+                                            objectFit="cover"
+                                            width={100}
+                                            height={100}
+                                          />
+                                        ) : (
+                                          <div className="w-full h-full flex items-center justify-center">
+                                            <ImageOff className="w-6 h-6 text-gray-500" />
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                else return "";
+                              })}
+                            </div>
+                          ) : (
+                            <p className="text-gray-400 text-sm">
+                              No auctions selected
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <DialogFooter className="flex-row justify-end space-x-2"></DialogFooter>
                   </DialogContent>
                 </Dialog>
 
