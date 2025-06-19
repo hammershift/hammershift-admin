@@ -1,10 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { Types } from "mongoose";
 import { BeatLoader } from "react-spinners";
 import { useSession } from "next-auth/react";
 import {
   changeActiveStatusForTournament,
   getTournamentsWithSearch,
+  computeTournamentResults,
 } from "@/app/lib/data";
 import {
   Card,
@@ -59,6 +61,13 @@ interface TournamentUser {
   fullName: string;
   username: string;
   role: string;
+  delta?: number;
+  rank?: number;
+  points?: number;
+}
+interface TournamentWinner extends TournamentUser {
+  rank: number;
+  points: number;
 }
 interface TournamentData {
   _id: string;
@@ -69,12 +78,14 @@ interface TournamentData {
   prizePool: number;
   buyInFee: number;
   isActive: boolean;
+  haveWinners: boolean;
   startTime: Date | null;
   endTime: Date | null;
   auction_ids: string[];
   users: TournamentUser[];
   maxUsers: number;
   createdAt: Date | null;
+  winners?: TournamentWinner[];
 }
 
 const TournamentsPage = () => {
@@ -180,6 +191,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
     prizePool: 0,
     buyInFee: 0,
     isActive: false,
+    haveWinners: false,
     startTime: null,
     endTime: null,
     auction_ids: [],
@@ -191,7 +203,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showComputeModal, setShowComputeModal] = useState(false);
-  const [showScoreModal, setShowScoreModal] = useState(false);
+  const [showWinnersModal, setShowWinnersModal] = useState(false);
   const [selectedTournament, setSelectedTournament] =
     useState<TournamentData>();
   const [newTournament, setNewTournament] =
@@ -302,7 +314,23 @@ const TournamentTable: React.FC<TournamentProps> = ({
     setIsSubmitting(false);
   };
 
-  const handleTournamentCompute = async () => {
+  const handleTournamentCompute = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log(selectedTournament);
+    setIsSubmitting(true);
+    try {
+      const response = await computeTournamentResults(
+        selectedTournament!.tournament_id
+      );
+      if (response.ok) {
+        alert("Results computed successfully!");
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSubmitting(false);
+    }
     // setIsSubmitting(true);
     // try {
     // }
@@ -577,8 +605,12 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                       title="Compute Winner"
                                       className={""}
                                       onClick={() => {
-                                        setShowComputeModal(true);
                                         setSelectedTournament(tournament);
+                                        if (tournament.haveWinners) {
+                                          setShowWinnersModal(true);
+                                        } else {
+                                          setShowComputeModal(true);
+                                        }
                                       }}
                                     >
                                       <Trophy
@@ -1012,7 +1044,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                   <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                     <DialogHeader>
                       <DialogTitle className="text-[#F2CA16] text-lg max-wd:text-md">
-                        Compute User Scores
+                        Compute User Scores {selectedTournament.name}
                       </DialogTitle>
                     </DialogHeader>
                     {selectedTournament.endTime !== null &&
@@ -1027,24 +1059,74 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     ) : (
                       <div>
                         <DialogFooter className="flex-row justify-end space-x-2">
-                          <form onSubmit={handleTournamentCompute}>
-                            <Button
-                              type="submit"
-                              className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
-                              disabled={isSubmitting}
-                            >
-                              {isSubmitting ? "Computing..." : "Compute"}
-                            </Button>
-                          </form>
+                          <Button
+                            type="submit"
+                            className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                            disabled={isSubmitting}
+                            onClick={handleTournamentCompute}
+                          >
+                            {isSubmitting ? "Computing..." : "Compute"}
+                          </Button>
                         </DialogFooter>
                       </div>
                     )}
                   </DialogContent>
                 </Dialog>
                 <Dialog
-                  open={showScoreModal}
-                  onOpenChange={setShowScoreModal}
-                ></Dialog>
+                  open={showWinnersModal}
+                  onOpenChange={setShowWinnersModal}
+                >
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-2xl w-[95%] max-h[90vh] overflow-y-auto rounded-xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-[#F2CA16] text-lg max-wd:text-md">
+                        Tournament Results
+                      </DialogTitle>
+                    </DialogHeader>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="font-bold text-yellow-500/90">
+                            Rank
+                          </TableHead>
+                          <TableHead className="font-bold text-yellow-500/90">
+                            Name
+                          </TableHead>
+                          <TableHead className="font-bold text-yellow-500/90">
+                            Score
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedTournament &&
+                          selectedTournament.users
+                            .sort((a, b) => a.rank! - b.rank!)
+                            .map((user, index) => (
+                              <TableRow key={user.userId}>
+                                <TableCell className="font-medium flex">
+                                  <Trophy
+                                    className="h-6 w-6"
+                                    color={`${
+                                      user.rank === 1
+                                        ? "#F2CA16"
+                                        : user.rank === 2
+                                        ? "#C0C0C0"
+                                        : "#CD7F32"
+                                    } `}
+                                  />
+                                  {user.rank}
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  {user.username}
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  {user.points}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                      </TableBody>
+                    </Table>
+                  </DialogContent>
+                </Dialog>
               </div>
             )}
           </div>
