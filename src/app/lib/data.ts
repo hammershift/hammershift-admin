@@ -527,6 +527,21 @@ export const searchTournaments = async (searchWord: string) => {
   }
 };
 
+// compute tournament results
+
+export const computeTournamentResults = async (tournament_id: number) => {
+  const res = await fetch(`/api/tournaments/${tournament_id}/compute`, {
+    method: "PUT",
+  });
+  if (res.status === 200) {
+    console.log(res);
+    return res;
+  } else {
+    console.log("Compute error");
+    return res;
+  }
+};
+
 ///////////////////////// Wagers //////////////////////////
 
 // export interface CreateWagerProps {

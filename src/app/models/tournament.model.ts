@@ -14,7 +14,11 @@ export interface TournamentUser {
   fullName: string;
   username: string;
   role: string;
+  delta?: number;
+  rank?: number;
+  points?: number;
 }
+
 export interface Tournament extends Document {
   _id: Types.ObjectId;
   tournament_id: number;
@@ -23,6 +27,7 @@ export interface Tournament extends Document {
   type: string;
   prizePool: number;
   buyInFee: number;
+  haveWinners: boolean;
   isActive: boolean;
   startTime: Date;
   endTime: Date;
@@ -46,9 +51,32 @@ const tournamentUserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    role: {
+      type: String,
+      enum: ["USER", "AGENT"],
+      required: true,
+    },
+    delta: {
+      type: Number,
+      required: false,
+    },
+    rank: {
+      type: Number,
+      required: false,
+    },
+    points: {
+      type: Number,
+      required: false,
+    },
   },
   { _id: false }
 );
+
+const tournamentWinnerSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Types.ObjectId,
+  },
+});
 
 // const winnerSchema = new mongoose.Schema(
 //   {
@@ -91,6 +119,10 @@ const tournamentSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    haveWinners: {
+      type: Boolean,
+      default: false,
+    },
     startTime: {
       type: Date,
       required: true,
@@ -111,6 +143,10 @@ const tournamentSchema = new Schema(
       type: Number,
       required: true,
     },
+    // winners: {
+    //   type: [TournamentWinner],
+    //   default: [],
+    // }
   },
   { collection: "tournaments", timestamps: true }
 );
