@@ -65,6 +65,7 @@ import "react-responsive-pagination/themes/minimal-light-dark.css";
 import { Textarea } from "@/app/ui/components/textarea";
 import { formatDate } from "@/app/helpers/utils";
 import LoadingModal from "@/app/ui/components/LoadingModal";
+import AlertModal from "@/app/ui/components/AlertModal";
 
 interface TournamentUser {
   userId: string;
@@ -244,6 +245,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [showViewModal, setShowViewModal] = useState(false);
   const [showLoadingModal, setShowLoadingModal] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [showComputeModal, setShowComputeModal] = useState(false);
@@ -473,7 +476,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
         } else if (!response.ok) {
           console.error("Error creating tournament");
         } else {
-          alert("Tournament created successfully!");
+          setShowAlertModal(true);
+          setAlertMessage("Tournament created successfully!");
           setShowAddModal(false);
           fetchData();
         }
@@ -523,7 +527,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
         } else if (!response.ok) {
           console.error("Error editing tournament");
         } else {
-          alert("Tournament edited successfully!");
+          setShowAlertModal(true);
+          setAlertMessage("Tournament edited successfully!");
           setShowEditModal(false);
           fetchData();
         }
@@ -550,7 +555,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
       if (!response.ok) {
         console.error("Error deleting tournament");
       } else {
-        alert("Tournament delete successfully!");
+        setShowAlertModal(true);
+        setAlertMessage("Tournament deleted successfully!");
         setShowDeleteModal(false);
         fetchData();
       }
@@ -569,7 +575,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
         selectedTournament!.tournament_id
       );
       if (response.ok) {
-        alert("Results computed successfully!");
+        setShowAlertModal(true);
+        setAlertMessage("Results computed successfully!");
         fetchData();
       }
     } catch (e) {
@@ -599,7 +606,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
       if (!response.isSuccessful) {
         console.error("Error changing active status for tournament");
       } else {
-        // alert("Change active status for tournament successfully!");
+        setShowAlertModal(true);
+        setAlertMessage("Changed tournament active status!");
         fetchData();
       }
     } catch (error) {
@@ -1051,6 +1059,12 @@ const TournamentTable: React.FC<TournamentProps> = ({
                 </div>
               </div>
             )}
+            <AlertModal
+              open={showAlertModal}
+              setOpen={setShowAlertModal}
+              message={alertMessage}
+            />
+
             <LoadingModal show={showLoadingModal} message={loadingMessage} />
             <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
               <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-6xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
