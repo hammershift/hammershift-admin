@@ -141,10 +141,18 @@ export async function POST(req: NextRequest) {
                 console.error("Failed to get a response from Vertex AI");
               }
             } catch (e) {
-              console.error("An error has occured: ", e);
+              console.error("An error has occurred: ", e);
               continue;
             }
           }
+        }
+        for (const agent of agents) {
+          tournament.users.push({
+            userId: agent._id,
+            fullName: agent.fullName,
+            username: agent.username,
+            role: agent.role,
+          });
         }
       }
       tournament.isActive = true;

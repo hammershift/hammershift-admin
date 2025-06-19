@@ -9,7 +9,7 @@ import aggregatePaginate from "mongoose-aggregate-paginate-v2";
 import paginate from "mongoose-paginate-v2";
 
 export interface TournamentUser {
-  _id: Types.ObjectId;
+  // _id: Types.ObjectId;
   userId: Types.ObjectId;
   fullName: string;
   username: string;

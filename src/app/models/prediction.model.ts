@@ -3,7 +3,7 @@ import { Document, Schema, model, models, Types } from "mongoose";
 export interface Prediction {
   _id: Types.ObjectId;
   auction_id: string;
-  tournament_id?: string;
+  tournament_id?: number;
   predictedPrice: number;
   predictionType: string;
   isActive: boolean;
@@ -22,7 +22,7 @@ const predictionsSchema = new Schema(
     // carId: { type: String, required: true },
     // carObjectId: { type: Types.ObjectId, required: true },
     auction_id: { type: String, required: true },
-    tournament_id: { type: String, required: false },
+    tournament_id: { type: Number, required: false },
     predictedPrice: { type: Number, required: true },
     reasoning: { type: String, required: false },
     predictionType: { type: String, required: true },
