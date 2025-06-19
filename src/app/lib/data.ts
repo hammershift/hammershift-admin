@@ -157,6 +157,22 @@ export const getTournamentAuctions = async (
   }
 };
 
+export const getTournamentPredictions = async (tournament_id: number) => {
+  try {
+    const response = await fetch(
+      `/api/predictions?tournament_id=${tournament_id}`
+    );
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      console.error("Failed to fetch tournament predictions!");
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const getSelectedTournamentAuctions = async (auction_ids: string[]) => {
   try {
     const query = `auction_ids=${auction_ids.join(",")}`;

@@ -10,6 +10,7 @@ import {
   getTournamentAuctions,
   getTournamentsWithSearch,
   computeTournamentResults,
+  getTournamentPredictions,
 } from "@/app/lib/data";
 import {
   Card,
@@ -63,9 +64,15 @@ import {
 import ResponsivePagination from "react-responsive-pagination";
 import "react-responsive-pagination/themes/minimal-light-dark.css";
 import { Textarea } from "@/app/ui/components/textarea";
-import { formatDate } from "@/app/helpers/utils";
+import {
+  formatDate,
+  formatTimeDistance,
+  getDisplayName,
+  getInitials,
+} from "@/app/helpers/utils";
 import LoadingModal from "@/app/ui/components/LoadingModal";
 import AlertModal from "@/app/ui/components/AlertModal";
+import { Prediction } from "@/app/models/prediction.model";
 
 interface TournamentUser {
   userId: string;
@@ -282,7 +289,15 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [isAuctionLoading, setIsAuctionLoading] = useState(true);
   const [searchAuctionValue, setSearchAuctionValue] = useState<string>("");
   const [currentModalType, setCurrentModalType] = useState<string>();
-  const [isPastCutoff, setIsPastCutoff] = useState<boolean>(false);
+  const [currentPredictions, setCurrentPredictions] = useState<Prediction[]>(
+    []
+  );
+  const [filteredPredictions, setFilteredPredictions] = useState<Prediction[]>(
+    []
+  );
+
+  const [viewAuction, setViewAuction] =
+    useState<TournamentAuctionData | null>();
 
   const { data } = useSession();
   const [role, setRole] = useState("");
@@ -322,6 +337,43 @@ const TournamentTable: React.FC<TournamentProps> = ({
     if (currentStartTime != null) fetchAuctionData();
   }, [currentStartTime, currentAuctionPage, searchAuctionValue]);
 
+  useEffect(() => {
+    const fetchTournamentPredictions = async (
+      auction: TournamentAuctionData
+    ) => {
+      const data = await getTournamentPredictions(
+        selectedTournament!.tournament_id
+      );
+      console.log("after getTournamentPredictions");
+      console.log(data);
+      if (data) {
+        setCurrentPredictions(data);
+        setFilteredPredictions(
+          data.filter((p: Prediction) => p.auction_id === auction.auction_id)
+        );
+        console.log("after setFilteredPredictions");
+        console.log("after setFilteredPredictions");
+        console.log(
+          data.filter((p: Prediction) => p.auction_id === auction.auction_id)
+        );
+      }
+    };
+    if (currentModalType == "view" && selectedAuctions.length > 0) {
+      setViewAuction(selectedAuctions[0]);
+      fetchTournamentPredictions(selectedAuctions[0]);
+    }
+  }, [selectedAuctions]);
+
+  useEffect(() => {
+    if (viewAuction != null && currentPredictions.length > 0)
+      setFilteredPredictions(
+        currentPredictions.filter(
+          (p: Prediction) => p.auction_id === viewAuction.auction_id
+        )
+      );
+    console.log(viewAuction);
+  }, [viewAuction]);
+
   const handleSelectedAuctionsOnEdit = async (
     auction_ids: string[],
     startTime: Date
@@ -331,19 +383,19 @@ const TournamentTable: React.FC<TournamentProps> = ({
     )) as TournamentAuctionData[];
     if (data) {
       setSelectedAuctions(data);
-      const selectedDate = startTime ? new Date(startTime) : null;
+      // const selectedDate = startTime ? new Date(startTime) : null;
 
-      const cutoffDate = selectedDate
-        ? new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000)
-        : null;
+      // const cutoffDate = selectedDate
+      //   ? new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000)
+      //   : null;
 
       //handling if there is auction
-      setIsPastCutoff(
-        cutoffDate
-          ? cutoffDate < data[data.length - 1].deadline ||
-              data[data.length - 1].deadline < new Date()
-          : false
-      );
+      // setIsPastCutoff(
+      //   cutoffDate
+      //     ? cutoffDate < data[data.length - 1].deadline ||
+      //         data[data.length - 1].deadline < new Date()
+      //     : false
+      // );
     }
   };
 
@@ -1020,7 +1072,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                       title={"View Tournament"}
                                       onClick={() => {
                                         setShowViewModal(true);
-                                        setCurrentModalType("edit");
+                                        setCurrentModalType("view");
                                         setEmptyInputError(false);
                                         setTournamentInputError(false);
                                         setSelectedTournament(tournament);
@@ -1217,6 +1269,35 @@ const TournamentTable: React.FC<TournamentProps> = ({
                       <Label className="text-right max-md:text-xs">
                         Tournament Type
                       </Label>
+                      <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                        <Select
+                          value={currentTournamentType || ""}
+                          onValueChange={(value: string) => {
+                            setEmptyInputError(false);
+                            setTournamentInputError(false);
+                            setCurrentTournamentType(value);
+                          }}
+                          name="role"
+                        >
+                          <SelectTrigger
+                            className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                              emptyInputError && currentTournamentType == ""
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                          >
+                            <SelectValue
+                              className="max-md:text-xs"
+                              placeholder="Select tournament type"
+                            />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                            <SelectItem value="free_play">Free Play</SelectItem>
+                            {/* <SelectItem value="standard">Standard</SelectItem>
+                            <SelectItem value="both">Both</SelectItem> */}
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
                         <Select
                           value={currentTournamentType || ""}
@@ -1729,6 +1810,9 @@ const TournamentTable: React.FC<TournamentProps> = ({
                   open={showViewModal}
                   onOpenChange={(isOpen) => {
                     setShowViewModal(isOpen);
+                    setViewAuction(null);
+                    setCurrentPredictions([]);
+                    setFilteredPredictions([]);
                     setCurrentStartTime(null);
                   }}
                 >
@@ -1929,45 +2013,63 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           </div>
                         </div>
                       </div>
-                      <div className="grid max-md:grid-cols-8 grid-cols-6 items-center gap-4">
-                        <Label className="max-md:col-span-3 max-md:text-xs">
+                      <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
+                        <Label className="max-md:text-xs">
                           Auctions ({selectedAuctions.length})
                         </Label>
-                        <div className="max-md:col-span-1 col-span-4"></div>
+                        <div className="max-md:hidden col-span-3"></div>
 
-                        <div className="relative max-md:col-span-4 group">
-                          {/* <Button
-                            className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 disabled:cursor-not-allowed"
-                            onClick={() => {
-                              setShowSelectModal(true);
-                              setCurrentAuctions([...selectedAuctions]);
-                              setCurrentStartTime(
-                                selectedTournament.startTime!
-                              );
-                              setCurrentAuctionPage(1);
-                              setEmptyInputError(false);
-                              setTournamentInputError(false);
-                            }}
-                            disabled={
-                              selectedTournament.startTime == null ||
-                              selectedTournament?.startTime
-                                .toString()
-                                .trim() === ""
-                            }
-                          >
-                            <Car className="h-4 w-4" />
-                            <span className="max-md:text-xs">
-                              Select Auctions
-                            </span>
-                          </Button>
-
-                          {(selectedTournament.startTime == null ||
-                            selectedTournament?.startTime.toString().trim() ===
-                              "") && (
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                              Set a start time first
-                            </div>
-                          )} */}
+                        <div className="relative max-md:col-span-3 col-span-4 max-md:text-sm group">
+                          {/* <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"> */}
+                          {selectedAuctions.length > 0 &&
+                            viewAuction != null && (
+                              <Select
+                                value={viewAuction.auction_id || ""}
+                                onValueChange={(value: string) => {
+                                  setEmptyInputError(false);
+                                  setTournamentInputError(false);
+                                  setViewAuction(
+                                    selectedAuctions.find(
+                                      (auction) => auction.auction_id == value
+                                    )
+                                  );
+                                }}
+                                name="role"
+                              >
+                                <SelectTrigger
+                                  className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                                    emptyInputError &&
+                                    currentTournamentType == ""
+                                      ? "border-red-500"
+                                      : ""
+                                  }`}
+                                >
+                                  <SelectValue
+                                    className="max-md:text-xs"
+                                    placeholder="Select auction"
+                                  />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                                  {selectedAuctions.map((selectedAuction) => {
+                                    const currentAuctionId =
+                                      selectedAuction.auction_id;
+                                    const auction = availableAuctionData.find(
+                                      (auction) =>
+                                        auction.auction_id === currentAuctionId
+                                    );
+                                    if (auction)
+                                      return (
+                                        <SelectItem
+                                          value={auction.auction_id}
+                                          className="truncate max-md:max-w-[250px] text-ellipsis overflow-hidden"
+                                        >
+                                          {`${auction.year} ${auction.make} ${auction.model}`}
+                                        </SelectItem>
+                                      );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                            )}
                         </div>
                       </div>
                       {isAuctionLoading ? (
@@ -1975,13 +2077,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           <BeatLoader color="#F2CA16" />
                         </div>
                       ) : (
-                        <div
-                          className={`p-2 min-h-[60px] ${
-                            selectedAuctions.length === 0 &&
-                            "bg-[#1E2A36] border border-[#1E2A36]"
-                          }`}
-                        >
-                          {selectedAuctions.length > 0 ? (
+                        <div className="p-2 min-h-[60px]">
+                          {/* {selectedAuctions.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                               {selectedAuctions.map((selectedAuction) => {
                                 const currentAuctionId =
@@ -2037,7 +2134,118 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             <p className="text-gray-400 text-sm">
                               No auctions selected
                             </p>
-                          )}
+                          )} */}
+                          {(() => {
+                            const auction = availableAuctionData.find(
+                              (a) => a.auction_id === viewAuction?.auction_id
+                            );
+                            if (auction)
+                              return (
+                                <div
+                                  key={auction.auction_id}
+                                  className="flex items-center p-3 rounded-md border cursor-pointer transition-colors bg-[#1E2A36] border-[#FFFFFF] hover:bg-[#1E2A36]/80"
+                                >
+                                  <div className="grid grid-cols-4 gap-2 w-full">
+                                    <div className="col-span-3 flex flex-col justify-center min-w-0 overflow-hidden">
+                                      <div
+                                        className="max-md:text-xs text-sm truncate text-white"
+                                        title={`${auction.year} ${auction.make} ${auction.model}`}
+                                      >
+                                        {`${auction.year} ${auction.make} ${auction.model}`}
+                                      </div>
+                                      <div className="max-md:text-xs text-sm text-gray-400 truncate">
+                                        Current Bid: $
+                                        {auction.price?.toLocaleString() ?? "0"}
+                                      </div>
+                                      <div className="max-md:text-xs text-sm text-gray-400 truncate">
+                                        Ends In: {formatDate(auction.deadline)}
+                                      </div>
+                                    </div>
+
+                                    <div className="w-full h-full  flex justify-end items-center">
+                                      {auction.image ? (
+                                        <Image
+                                          src={auction.image}
+                                          alt={`${auction.year} ${auction.make} ${auction.model}`}
+                                          title={`${auction.year} ${auction.make} ${auction.model}`}
+                                          className="object-cover rounded-md"
+                                          width={100}
+                                          height={100}
+                                        />
+                                      ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                          <ImageOff className="w-6 h-6 text-gray-500" />
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                          })()}
+                        </div>
+                      )}
+                      {!isAuctionLoading && (
+                        <div>
+                          <Label className="max-md:col-span-4 max-md:text-xs">
+                            Predictions
+                          </Label>
+                          <div className="grid max-md:grid-cols-1 grid-cols-3 gap-2 w-full pt-4">
+                            {filteredPredictions &&
+                            filteredPredictions.length > 0 ? (
+                              filteredPredictions.map((prediction, index) => {
+                                return (
+                                  <div
+                                    key={index}
+                                    className="flex items-center justify-between rounded-lg bg-[#1E2A36] p-4"
+                                  >
+                                    <div className="flex items-center gap-4">
+                                      <div
+                                        className={`max-md:h-7 max-md:w-7 h-10 w-10 rounded-full ${
+                                          prediction.user.role === "AGENT"
+                                            ? "bg-purple-600"
+                                            : "bg-[#F2CA16]"
+                                        } flex items-center justify-center text-white  max-md:text-xs text-sm`}
+                                      >
+                                        {prediction.user.role === "AGENT"
+                                          ? "AI"
+                                          : getInitials(
+                                              getDisplayName(prediction)
+                                            )}
+                                      </div>
+                                      <div>
+                                        <div className="flex items-center gap-2 max-md:text-xs text-sm">
+                                          {getDisplayName(prediction)}
+                                          {/* {prediction.user.role === "AGENT" && (
+                                            <Badge
+                                              variant="outline"
+                                              className="bg-purple-500/20 text-xs text-purple-500"
+                                            >
+                                              AGENT
+                                            </Badge>
+                                          )} */}
+                                        </div>
+                                        <div className="max-md:text-xs text-sm text-gray-400">
+                                          {prediction.createdAt
+                                            ? formatTimeDistance(
+                                                prediction.createdAt.toString()
+                                              )
+                                            : "recently"}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="max-md:text-xs text-md font-bold text-[#F2CA16]">
+                                      {"$" +
+                                        prediction.predictedPrice.toLocaleString()}
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <div className="max-md:col-span-1 col-span-2 py-4 max-md:text-xs text-md text-center text-gray-400 bg-[#1E2A36]">
+                                No predictions yet
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -2247,7 +2455,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 alt={`${auction.year} ${auction.make} ${auction.model}`}
                                 title={`${auction.year} ${auction.make} ${auction.model}`}
                                 className="w-full h-full object-cover"
-                                objectFit="cover"
                                 width={100}
                                 height={100}
                               />
