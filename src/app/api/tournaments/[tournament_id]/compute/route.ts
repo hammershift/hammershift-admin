@@ -16,49 +16,7 @@ interface Player {
   delta: number;
   correctCount: number;
 }
-async function getWinner(tournament_id: number, players: Player[]) {
-  //check if there is a tie with the number of correct predictions
 
-  if (players.length > 1) {
-    //TODO: sort scores via their delta and get the lowest
-    const sortedUsers = players.sort((a, b) => a.delta - b.delta);
-
-    //check for tiebreaker in deltas
-    if (sortedUsers.some((x) => x.delta === sortedUsers[0].delta)) {
-      //TEMP!!!
-      return sortedUsers[0];
-    } else {
-      const winner = sortedUsers[0];
-      await Points.create({
-        tournament_id: tournament_id,
-        points: 10, //temp, maybe 10 * the number of correct predictions?
-        rank: 1, //temp
-        user: {
-          userId: winner.userId,
-          fullName: winner.fullName,
-          username: winner.username,
-          role: winner.role,
-        },
-      });
-      return winner;
-    }
-  } else {
-    //TODO: award the winner
-    const winner = players[0];
-    await Points.create({
-      tournament_id: tournament_id,
-      points: 10,
-      rank: 1,
-      user: {
-        userId: winner.userId,
-        fullName: winner.fullName,
-        username: winner.username,
-        role: winner.role,
-      },
-    });
-    return winner;
-  }
-}
 export async function PUT(
   req: NextRequest,
   context: { params: { tournament_id: string } }
@@ -133,7 +91,8 @@ export async function PUT(
     );
     //start computation of user scores
     const userScores = [];
-    for (let user of tournament.users) {
+    //console.log(tournament.users);
+    for (const user of tournament.users) {
       //get user's predictions for the tournament
       const userPredictions = await Predictions.find({
         "user.userId": user.userId,
@@ -148,6 +107,8 @@ export async function PUT(
         fullName: user.fullName,
         username: user.username,
         role: user.role,
+        rank: 0,
+        points: 0,
         delta: 0,
         correctCount: 0,
       };
@@ -186,17 +147,76 @@ export async function PUT(
       userScores.push(userScore);
     }
 
-    //get the highest value of correctCount
-    const highestCount = Math.max(
-      ...userScores.map((user) => user.correctCount)
-    );
+    //differentiate between free play and paid, if free play use number of auctions * 10 for points, then for paid use whatever is set for the pot
+    //TODO: currently defaulted to free
+    const pot = 10 * tournament.auction_ids.length;
+    const rankings = [];
+    let currentDelta = -1;
+    let currentRankingIndex = -1;
 
-    //get userScore with highest correctCount
-    const usersToCheck = userScores.filter(
-      (user) => user.correctCount === highestCount
-    );
+    const sortedUsers = userScores.sort((a, b) => {
+      //sort correctCount in descending order
+      if (a.correctCount < b.correctCount) return 1;
+      if (a.correctCount > b.correctCount) return -1;
 
-    const winner = await getWinner(parseInt(tournament_id), usersToCheck);
+      //sort delta in ascending order if correctCount is equal
+      if (a.delta < b.delta) return -1;
+      if (a.delta > b.delta) return 1;
+
+      return 0;
+    });
+
+    for (let i = 0; i < sortedUsers.length; i++) {
+      const user = sortedUsers[i];
+      if (currentDelta === -1) currentDelta = user.delta;
+      if (currentRankingIndex === -1) currentRankingIndex = 0;
+
+      if (currentDelta === user.delta) {
+        if (!rankings[currentRankingIndex]) {
+          rankings[currentRankingIndex] = {
+            delta: currentDelta,
+            users: [],
+          };
+        }
+
+        (rankings[currentRankingIndex].users as Player[]).push(user);
+      } else {
+        currentDelta = user.delta;
+        currentRankingIndex++;
+        if (i < 3) {
+          rankings[currentRankingIndex] = {
+            delta: currentDelta,
+            users: [user],
+          };
+        } else break;
+      }
+    }
+    const distribution = [50, 30, 20];
+    for (let i = 0; i < rankings.length; i++) {
+      for (const user of rankings[i].users) {
+        const points =
+          (pot * (distribution[i] / 100)) / rankings[i].users.length;
+        await Points.create({
+          tournament_id: tournament_id,
+          points: points,
+          rank: i + 1,
+          user: {
+            userId: user.userId,
+            fullName: user.fullName,
+            username: user.username,
+            role: user.role,
+          },
+        });
+        //update user object in ranking
+        const userIndex = tournament.users.findIndex(
+          (x) => x.userId === user.userId
+        );
+
+        tournament.users[userIndex].points = points;
+        tournament.users[userIndex].rank = i + 1;
+        tournament.users[userIndex].delta = user.delta;
+      }
+    }
 
     //update all predictions for tournament, set isActive to false
     await Predictions.updateMany(
@@ -211,50 +231,28 @@ export async function PUT(
       }
     );
 
-    //TODO: assumption that there's only 1 winner, change to loop if multiple are needed
-    const winnerObject = {
-      userId: winner.userId,
-      tournament_id: tournament.tournament_id,
-      username: winner.username,
-      winningDate: new Date(),
-    };
+    tournament.haveWinners = true;
 
-    const result = await Tournaments.findOneAndUpdate(
-      {
-        tournament_id: tournament.tournament_id,
-      },
-      {
-        $push: {
-          winners: winnerObject,
-        },
-        $set: {
-          isActive: false,
-        },
-      },
-      {
-        new: true,
-      }
-    );
+    await tournament.save();
 
     //go over all auctions and then update status
-    for (let auction of auctions) {
-      await Auctions.updateOne(
-        {
-          auction_id: auction.auction_id,
-        },
-        {
-          $set: {
-            isProcessed: true,
-            ended: true,
-          },
-        }
-      );
-    }
+    // for (let auction of auctions) {
+    //   await Auctions.updateOne(
+    //     {
+    //       auction_id: auction.auction_id,
+    //     },
+    //     {
+    //       $set: {
+    //         isProcessed: true,
+    //         ended: true,
+    //       },
+    //     }
+    //   );
+    // }
 
     return NextResponse.json(
       {
         message: `Successfully computed scores for tournament ${tournament_id}`,
-        result: result,
       },
       { status: 201 }
     );
