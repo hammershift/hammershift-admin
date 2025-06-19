@@ -64,6 +64,7 @@ import ResponsivePagination from "react-responsive-pagination";
 import "react-responsive-pagination/themes/minimal-light-dark.css";
 import { Textarea } from "@/app/ui/components/textarea";
 import { formatDate } from "@/app/helpers/utils";
+import LoadingModal from "@/app/ui/components/LoadingModal";
 
 interface TournamentUser {
   userId: string;
@@ -241,6 +242,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [showComputeModal, setShowComputeModal] = useState(false);
@@ -583,6 +586,12 @@ const TournamentTable: React.FC<TournamentProps> = ({
     tournament: TournamentData
   ) => {
     setIsSubmitting(true);
+    setShowLoadingModal(true);
+    if (tournament.type === "free_play")
+      setLoadingMessage(
+        "Activating tournament and generating agent predictions..."
+      );
+    else setLoadingMessage("Activating tournament...");
     try {
       const response = await changeActiveStatusForTournament(
         tournament?.tournament_id
@@ -597,6 +606,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
       return console.error("Internal server error", error);
     }
     setIsSubmitting(false);
+    setShowLoadingModal(false);
   };
 
   return (
@@ -1041,6 +1051,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                 </div>
               </div>
             )}
+            <LoadingModal show={showLoadingModal} message={loadingMessage} />
             <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
               <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-6xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                 <DialogHeader>
@@ -1216,8 +1227,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           </SelectTrigger>
                           <SelectContent className="bg-[#1E2A36] max-md:text-sm">
                             <SelectItem value="free_play">Free Play</SelectItem>
-                            <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="both">Both</SelectItem>
+                            {/* <SelectItem value="standard">Standard</SelectItem>
+                            <SelectItem value="both">Both</SelectItem> */}
                           </SelectContent>
                         </Select>
                       </div>
