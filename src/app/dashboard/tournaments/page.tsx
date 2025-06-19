@@ -1544,10 +1544,10 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 <SelectItem value="free_play">
                                   Free Play
                                 </SelectItem>
-                                <SelectItem value="standard">
+                                {/* <SelectItem value="standard">
                                   Standard
                                 </SelectItem>
-                                <SelectItem value="both">Both</SelectItem>
+                                <SelectItem value="both">Both</SelectItem> */}
                               </SelectContent>
                             </Select>
                           </div>
@@ -1895,10 +1895,10 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 <SelectItem value="free_play">
                                   Free Play
                                 </SelectItem>
-                                <SelectItem value="standard">
+                                {/* <SelectItem value="standard">
                                   Standard
                                 </SelectItem>
-                                <SelectItem value="both">Both</SelectItem>
+                                <SelectItem value="both">Both</SelectItem> */}
                               </SelectContent>
                             </Select>
                           </div>
