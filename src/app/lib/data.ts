@@ -80,7 +80,7 @@ export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
           bids: data.attributes[13].value,
           status: data.attributes[14].value,
           isActive: data.isActive,
-          display: data.display,
+          statusAndPriceChecked: data.isActive,
         })),
       };
 

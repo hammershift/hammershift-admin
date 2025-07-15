@@ -5,6 +5,7 @@ import { AggregatePaginateModel, PaginateModel } from "mongoose";
 import { SortOrder } from "mongoose";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
+import { addDays } from "date-fns";
 export const dynamic = "force-dynamic";
 
 interface SortQuery {
@@ -90,7 +91,21 @@ export async function GET(req: NextRequest) {
           $match:
             isPlatformTab === "true"
               ? { $or: [{ isActive: true }, { ended: true }] }
-              : { isActive: { $exists: true } },
+              : {
+                  isActive: { $exists: true },
+                  $expr: {
+                    $lt: [
+                      {
+                        $dateSubtract: {
+                          startDate: "$sort.deadline",
+                          unit: "day",
+                          amount: 1,
+                        },
+                      },
+                      "$$NOW",
+                    ],
+                  },
+                },
         },
         {
           $project: {
@@ -103,8 +118,8 @@ export async function GET(req: NextRequest) {
             page_url: 1,
             image: 1,
             isActive: 1,
+            statusAndPriceChecked: 1,
             website: 1,
-            display: 1,
             make: {
               $arrayElemAt: [
                 {
@@ -241,9 +256,9 @@ export async function GET(req: NextRequest) {
         case "Least Bids":
           sort = { "sort.bids": 1 };
           break;
-        case "On Display":
-          sort = { display: -1 };
-          break;
+        // case "On Display":
+        //   sort = { display: -1 };
+        //   break;
         //other sorts here
         default:
           break;
@@ -255,17 +270,43 @@ export async function GET(req: NextRequest) {
     //use "%20" or " " for 2-word queries
     //for ex. api/cars/filter?make=Porsche$Ferrari&location=New%20York$North%20Carolina&sort=Most%20Bids
     //if you don't add a sort query, it automatically defaults to sorting by Newly Listed for now
-    let query: any = {
-      attributes: { $all: [] },
-      $or: [
-        {
-          isActive: isPlatformTab === "true" ? true : { $exists: true },
+    let query: any = {};
+    if (isPlatformTab === "true") {
+      query = {
+        attributes: { $all: [] },
+        $or: [
+          {
+            isActive: true,
+          },
+          {
+            ended: true,
+          },
+        ],
+      };
+    } else {
+      query = {
+        attributes: { $all: [] },
+        "sort.deadline": {
+          $gt: addDays(new Date(), 1),
         },
-        {
-          ended: true,
-        },
-      ],
-    };
+      };
+    }
+    // query = {
+    //   attributes: { $all: [] },
+    //   $or: [
+    //     {
+    //       isActive:
+    //         isPlatformTab === "true"
+    //           ? true
+    //           : {
+    //               $exists: true,
+    //             },
+    //     },
+    //     {
+    //       ended: true,
+    //     },
+    //   ],
+    // };
 
     if (make !== "All") {
       query.attributes.$all.push({

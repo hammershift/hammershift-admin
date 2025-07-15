@@ -1,8 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { formatDistanceToNow, isValid } from "date-fns";
-
+import { formatDistanceToNow, isValid, subDays } from "date-fns";
 import { BeatLoader, ClipLoader } from "react-spinners";
 import {
   Tabs,
@@ -196,7 +195,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     if (!dateString) return "No end date";
 
     try {
-      const endDate = new Date(dateString);
+      const endDate = subDays(new Date(dateString), 1);
 
       if (!isValid(endDate)) {
         return "Invalid date";
@@ -275,7 +274,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     }
     if (
       !auction.isActive &&
-      Date.parse(auction.deadline.toString()) < Date.now()
+      Date.parse(subDays(auction.deadline, 1).toString()) < Date.now()
     ) {
       alert("Deadline has passed for this auction");
       return;
