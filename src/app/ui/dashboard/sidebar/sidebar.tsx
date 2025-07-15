@@ -20,6 +20,7 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import velocityMarketsLogo from "../../../../../public/images/velocity-markets-logo.png";
 import userImg from "../../../../../public/images/user.svg";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
   const { data } = useSession();
@@ -44,6 +45,11 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           title: "Auctions",
           path: "/dashboard/auctions",
           icon: <DirectionsCarIcon />,
+        },
+        {
+          title: "Tournaments",
+          path: "/dashboard/tournaments",
+          icon: <EmojiEventsIcon />,
         },
         { title: "Users", path: "/dashboard/users", icon: <PersonIcon /> },
         {

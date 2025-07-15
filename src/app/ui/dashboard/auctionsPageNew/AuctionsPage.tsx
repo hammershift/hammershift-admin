@@ -226,7 +226,6 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
 
   async function handleSaveEdits() {
     try {
-      console.log(editAuctionDetails);
       if (currentAuction === null || currentAuction === undefined) {
         alert("No auction selected");
         return;

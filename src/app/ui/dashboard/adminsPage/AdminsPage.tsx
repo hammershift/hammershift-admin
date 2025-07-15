@@ -24,18 +24,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/app/ui/components/dialog";
-import { Badge } from "../../components/badge";
+import { Badge } from "@/app/ui/components/badge";
 import { Edit, Search, Trash2, UserPlus } from "lucide-react";
-import { Button } from "../../components/button";
-import { Label } from "../../components/label";
-import { Input } from "../../components/input";
+import { Button } from "@/app/ui/components/button";
+import { Label } from "@/app/ui/components/label";
+import { Input } from "@/app/ui/components/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/select";
+} from "@/app/ui/components/select";
 import { useSession } from "next-auth/react";
 import { BeatLoader } from "react-spinners";
 import ResponsivePagination from "react-responsive-pagination";
@@ -128,10 +128,14 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
     setNewAdmin({ ...newAdmin!, role: role });
   };
 
-  const handleSelectedAdminChange = (e: any) => {
+  const emptyErrors = () => {
     setEmptyInputError(false);
     setPasswordMismatchError(false);
     setAdminInputError(false);
+  };
+
+  const handleSelectedAdminChange = (e: any) => {
+    emptyErrors();
     const { name, value } = e.target;
     if (name) setSelectedAdmin({ ...selectedAdmin!, [name]: value });
   };
@@ -149,6 +153,7 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
   const handleNewAdminSubmit = async (e: any) => {
     e.preventDefault();
     setIsSubmitting(true);
+    emptyErrors();
     if (
       !newAdmin.first_name ||
       !newAdmin.last_name ||
@@ -578,52 +583,52 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
                       onChange={handleConfirmPasswordChange}
                     />
                   </div>
-                  <div>
-                    <Label className="mb-2 block max-md:text-xs">Role</Label>
-                    <Select
-                      value={newAdmin?.role || ""}
-                      onValueChange={handleNewAdminRoleChange}
-                      name="role"
-                    >
-                      <SelectTrigger
-                        className={`bg-[#1E2A36] border-[#1E2A36] ${
-                          emptyInputError && newAdmin?.role == ""
-                            ? "border-red-500"
-                            : ""
-                        }`}
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">Role</Label>
+                    <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                      <Select
+                        value={newAdmin?.role || ""}
+                        onValueChange={handleNewAdminRoleChange}
+                        name="role"
                       >
-                        <SelectValue placeholder="Select role" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                        <SelectItem value="owner">Owner</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="moderator">Moderator</SelectItem>
-                        <SelectItem value="guest">Guest</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {emptyInputError ? (
-                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                        Please fill-out required fields
-                      </p>
-                    ) : passwordMismatchError ? (
-                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                        Passwords do not match
-                      </p>
-                    ) : adminInputError ? (
-                      <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                        {adminInputErrorMessage}
-                      </p>
-                    ) : null}
+                        <SelectTrigger
+                          className={`bg-[#1E2A36] border-[#1E2A36] ${
+                            emptyInputError && newAdmin?.role == ""
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                        >
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                          <SelectItem value="owner">Owner</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="moderator">Moderator</SelectItem>
+                          <SelectItem value="guest">Guest</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
+                  {emptyInputError ? (
+                    <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                      Please fill-out required fields
+                    </p>
+                  ) : passwordMismatchError ? (
+                    <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                      Passwords do not match
+                    </p>
+                  ) : adminInputError ? (
+                    <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                      {adminInputErrorMessage}
+                    </p>
+                  ) : null}
                 </div>
                 <DialogFooter className="flex-row justify-end space-x-2">
                   <form onSubmit={handleNewAdminSubmit}>
                     <Button
                       type="submit"
-                      className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
-                        isSubmitting ? "pointer-events-none opacity-50" : ""
-                      }`}
-                      aria-disabled={isSubmitting}
+                      className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                      disabled={isSubmitting}
                     >
                       {isSubmitting ? "Submitting..." : "Submit"}
                     </Button>
@@ -735,54 +740,56 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
                           onChange={handleConfirmPasswordChange}
                         />
                       </div>
-                      <div>
-                        <Label className="mb-2 block max-md:text-xs">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right max-md:text-xs">
                           Role
                         </Label>
-                        <Select
-                          value={selectedAdmin?.role || ""}
-                          onValueChange={handleSelectedAdminRoleChange}
-                          name="role"
-                        >
-                          <SelectTrigger
-                            className={`bg-[#1E2A36] border-[#1E2A36] ${
-                              emptyInputError && selectedAdmin?.role == ""
-                                ? "border-red-500"
-                                : ""
-                            }`}
+                        <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                          <Select
+                            value={selectedAdmin?.role || ""}
+                            onValueChange={handleSelectedAdminRoleChange}
+                            name="role"
                           >
-                            <SelectValue placeholder="Select role" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                            <SelectItem value="owner">Owner</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="moderator">Moderator</SelectItem>
-                            <SelectItem value="guest">Guest</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {emptyInputError ? (
-                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                            Please fill-out required fields
-                          </p>
-                        ) : passwordMismatchError ? (
-                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                            Passwords do not match
-                          </p>
-                        ) : adminInputError ? (
-                          <p className="mt-4 text-red-500 text-center max-md:text-sm">
-                            {adminInputErrorMessage}
-                          </p>
-                        ) : null}
+                            <SelectTrigger
+                              className={`bg-[#1E2A36] border-[#1E2A36] ${
+                                emptyInputError && selectedAdmin?.role == ""
+                                  ? "border-red-500"
+                                  : ""
+                              }`}
+                            >
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                              <SelectItem value="owner">Owner</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="moderator">
+                                Moderator
+                              </SelectItem>
+                              <SelectItem value="guest">Guest</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
+                      {emptyInputError ? (
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                          Please fill-out required fields
+                        </p>
+                      ) : passwordMismatchError ? (
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                          Passwords do not match
+                        </p>
+                      ) : adminInputError ? (
+                        <p className="mt-4 text-red-500 text-center max-md:text-sm">
+                          {adminInputErrorMessage}
+                        </p>
+                      ) : null}
                     </div>
                     <DialogFooter className="flex-row justify-end space-x-2">
                       <form onSubmit={handleSelectedAdminSubmit}>
                         <Button
                           type="submit"
-                          className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
-                            isSubmitting ? "pointer-events-none opacity-50" : ""
-                          }`}
-                          aria-disabled={isSubmitting}
+                          className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                          disabled={isSubmitting}
                         >
                           {isSubmitting ? "Updating..." : "Update"}
                         </Button>
@@ -823,10 +830,8 @@ const AdminsPage: React.FC<AdminsPageProps> = ({
                       <form onSubmit={handleAdminDelete}>
                         <Button
                           type="submit"
-                          className={`bg-red-700 text-[#0C1924] hover:bg-red-700/90" ${
-                            isSubmitting ? "pointer-events-none opacity-50" : ""
-                          }`}
-                          aria-disabled={isSubmitting}
+                          className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
+                          disabled={isSubmitting}
                         >
                           {isSubmitting ? "Deleting..." : "Delete"}
                         </Button>

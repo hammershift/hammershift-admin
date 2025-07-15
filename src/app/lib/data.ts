@@ -11,6 +11,18 @@ export interface getCarsWithFilterProps {
   search?: string;
   isPlatformTab?: boolean;
 }
+
+export interface getTournamentAuctionsProps {
+  // make?: string[];
+  // category?: string[];
+  // era?: string[];
+  // location?: string[];
+  offset?: number;
+  limit?: number;
+  sort?: string;
+  search?: string;
+  startTime: Date | string | null;
+}
 export interface SearchProps {
   offset?: number;
   limit?: number;
@@ -75,6 +87,136 @@ export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
       return auctions;
     } else {
       throw new Error("Failed to fetch cars list!");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const getTournamentAuctions = async (
+  props: getTournamentAuctionsProps
+) => {
+  const queries = Object.entries(props)
+    .map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return `${key}=${value
+          .map((item) => encodeURIComponent(item))
+          .join("$")}`;
+      } else if (value instanceof Date) {
+        return `${key}=${encodeURIComponent(value.toISOString().slice(0, 16))}`;
+      } else {
+        return `${key}=${encodeURIComponent(value)}`;
+      }
+    })
+    .join("&");
+  try {
+    const response = await fetch(`/api/tournaments/auction-filter?` + queries, {
+      cache: "no-store", //dynamic rendering
+    });
+
+    if (response.ok) {
+      const list = await response.json();
+      let auctions = {
+        total: list.total,
+        totalPages: list.totalPages,
+        auctions: list.auctions.map((data: any) => ({
+          _id: data._id,
+          auction_id: data.auction_id,
+          description: [...data.description],
+          images_list: [...data.images_list],
+          listing_details: [...data.listing_details],
+          image: data.image,
+          page_url: data.page_url,
+          website: data.website,
+          price: data.attributes[0].value,
+          year: data.attributes[1].value,
+          make: data.attributes[2].value,
+          model: data.attributes[3].value,
+          category: data.attributes[4].value,
+          era: data.attributes[5].value,
+          chassis: data.attributes[6].value,
+          seller: data.attributes[7].value,
+          location: data.attributes[8].value,
+          state: data.attributes[9].value,
+          lot_num: data.attributes[10].value,
+          listing_type: data.attributes[11].value,
+          deadline: data.attributes[12].value,
+          bids: data.attributes[13].value,
+          status: data.attributes[14].value,
+          isActive: data.isActive,
+          display: data.display,
+        })),
+      };
+
+      return auctions;
+    } else {
+      throw new Error("Failed to fetch auctions list for tournament!");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const getTournamentPredictions = async (tournament_id: number) => {
+  try {
+    const response = await fetch(
+      `/api/predictions?tournament_id=${tournament_id}`
+    );
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      console.error("Failed to fetch tournament predictions!");
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const getSelectedTournamentAuctions = async (auction_ids: string[]) => {
+  try {
+    const query = `auction_ids=${auction_ids.join(",")}`;
+
+    const response = await fetch(
+      `/api/tournaments/selected-auctions?${query}`,
+      {
+        cache: "no-store",
+      }
+    );
+
+    if (response.ok) {
+      const list = await response.json();
+      console.log(list);
+      let auctions = list.auctions.map((data: any) => ({
+        _id: data._id,
+        auction_id: data.auction_id,
+        description: [...data.description],
+        images_list: [...data.images_list],
+        listing_details: [...data.listing_details],
+        image: data.image,
+        page_url: data.page_url,
+        website: data.website,
+        price: data.attributes[0].value,
+        year: data.attributes[1].value,
+        make: data.attributes[2].value,
+        model: data.attributes[3].value,
+        category: data.attributes[4].value,
+        era: data.attributes[5].value,
+        chassis: data.attributes[6].value,
+        seller: data.attributes[7].value,
+        location: data.attributes[8].value,
+        state: data.attributes[9].value,
+        lot_num: data.attributes[10].value,
+        listing_type: data.attributes[11].value,
+        deadline: data.attributes[12].value,
+        bids: data.attributes[13].value,
+        status: data.attributes[14].value,
+        isActive: data.isActive,
+        display: data.display,
+      }));
+      return auctions;
+    } else {
+      throw new Error("Failed to fetch selected auctions list for tournament!");
     }
   } catch (err) {
     console.error(err);
@@ -162,7 +304,6 @@ export const getAdminsWithSearch = async (props: SearchProps) => {
 
     if (response.ok) {
       const list = await response.json();
-      console.log(list);
       let adminsData = {
         total: list.total,
         totalPages: list.totalPages,
@@ -212,7 +353,6 @@ export const getUsersWithSearch = async (props: SearchProps) => {
     });
     if (response.ok) {
       const list = await response.json();
-      console.log(list);
       let usersData = {
         total: list.total,
         totalPages: list.totalPages,
@@ -269,6 +409,9 @@ export const deleteUserWithId = async (id: string) => {
 export const createTournament = async (body: any) => {
   const res = await fetch(`/api/tournaments`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(body),
   });
   if (res.status === 200) {
@@ -297,6 +440,57 @@ export const getTournamentData = async (id: string) => {
     return await res.json();
   } else {
     console.error("Get Tournament Unsuccessful");
+  }
+};
+
+export const getTournamentsWithSearch = async (props: SearchProps) => {
+  const queries = Object.entries(props)
+    .map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return `${key}=${value
+          .map((item) => encodeURIComponent(item))
+          .join("$")}`;
+      } else {
+        return `${key}=${encodeURIComponent(value)}`;
+      }
+    })
+    .join("&");
+  try {
+    const response = await fetch(`/api/tournaments/filter?` + queries, {
+      cache: "no-store",
+    });
+
+    if (response.ok) {
+      const list = await response.json();
+      let tournamentsData = {
+        total: list.total,
+        totalPages: list.totalPages,
+        tournaments: list.tournaments,
+      };
+
+      return tournamentsData;
+    } else {
+      throw new Error("Failed to fetch tournaments list!");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const changeActiveStatusForTournament = async (tournament_id: any) => {
+  const res = await fetch(`/api/tournaments/toggle-active`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ tournament_id }),
+  });
+  if (res.status === 200) {
+    console.log("Change Active Status for Tournament Successful");
+    return { isSuccessful: true };
+  } else {
+    console.log("Change Active Status for Tournament Unsuccessful");
+    return { isSuccessful: false };
   }
 };
 
@@ -346,6 +540,21 @@ export const searchTournaments = async (searchWord: string) => {
     return res;
   } else {
     console.log("search Unsuccessful");
+  }
+};
+
+// compute tournament results
+
+export const computeTournamentResults = async (tournament_id: number) => {
+  const res = await fetch(`/api/tournaments/${tournament_id}/compute`, {
+    method: "PUT",
+  });
+  if (res.status === 200) {
+    console.log(res);
+    return res;
+  } else {
+    console.log("Compute error");
+    return res;
   }
 };
 
@@ -522,7 +731,6 @@ export const toggleAuctionDisplay = async (
 export const getAllComments = async (limit: number) => {
   const response = await fetch(`/api/comments?limit=${limit}`);
   const data = await response.json();
-  console.log(data);
   return data;
 };
 
@@ -545,7 +753,6 @@ export const getAllCommentsWithSearch = async (props: SearchProps) => {
 
     if (response.ok) {
       const list = await response.json();
-      console.log(list);
       let commentsData = {
         total: list.total,
         totalPages: list.totalPages,
@@ -618,7 +825,6 @@ export const getAgentsWithSearch = async (props: SearchProps) => {
 
     if (response.ok) {
       const list = await response.json();
-      console.log(list);
       let agentsData = {
         total: list.total,
         totalPages: list.totalPages,

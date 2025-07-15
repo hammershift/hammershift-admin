@@ -445,7 +445,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
               </div>
             )}
             <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-4xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                 <DialogHeader>
                   <DialogTitle className="max-md:text-md">
                     Add Agent
@@ -542,10 +542,8 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
                   <form onSubmit={handleNewAgentSubmit}>
                     <Button
                       type="submit"
-                      className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
-                        isSubmitting ? "pointer-events-none opacity-50" : ""
-                      }`}
-                      aria-disabled={isSubmitting}
+                      className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                      disabled={isSubmitting}
                     >
                       {isSubmitting ? "Submitting..." : "Submit"}
                     </Button>
@@ -556,7 +554,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
             {selectedAgent && (
               <div className="flex items-center gap-1">
                 <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-4xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                     <DialogHeader>
                       <DialogTitle className="max-md:text-md">
                         Edit Agent
@@ -664,10 +662,8 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
                       <form onSubmit={handleSelectedAgentSubmit}>
                         <Button
                           type="submit"
-                          className={`bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90 ${
-                            isSubmitting ? "pointer-events-none opacity-50" : ""
-                          }`}
-                          aria-disabled={isSubmitting}
+                          className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
+                          disabled={isSubmitting}
                         >
                           {isSubmitting ? "Updating..." : "Update"}
                         </Button>
@@ -708,10 +704,8 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
                       <form onSubmit={handleAgentDelete}>
                         <Button
                           type="submit"
-                          className={`bg-red-700 text-[#0C1924] hover:bg-red-700/90" ${
-                            isSubmitting ? "pointer-events-none opacity-50" : ""
-                          }`}
-                          aria-disabled={isSubmitting}
+                          className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
+                          disabled={isSubmitting}
                         >
                           {isSubmitting ? "Deleting..." : "Delete"}
                         </Button>
