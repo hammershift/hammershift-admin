@@ -86,6 +86,26 @@ export async function PUT(
       );
     }
 
+    if (auctions.every((a) => a.attributes[14].value === 3)) {
+      //all auctions are unsuccessful
+
+      await Predictions.updateMany(
+        {
+          tournament_id: tournament.tournament_id,
+          isActive: true,
+        },
+        {
+          $set: {
+            isActive: false,
+          },
+        }
+      );
+      return NextResponse.json({
+        message: "All auctions in the tournament are unsuccessful",
+        status: 200,
+      });
+    }
+
     const auctionMap = new Map(
       auctions.map((auction) => [auction.auction_id, auction])
     );
@@ -191,13 +211,15 @@ export async function PUT(
         } else break;
       }
     }
+
     const distribution = [50, 30, 20];
     for (let i = 0; i < rankings.length; i++) {
       for (const user of rankings[i].users) {
         const points =
           (pot * (distribution[i] / 100)) / rankings[i].users.length;
         await Points.create({
-          tournament_id: tournament_id,
+          refId: tournament._id,
+          refCollection: "tournaments",
           points: points,
           rank: i + 1,
           user: {
@@ -217,7 +239,6 @@ export async function PUT(
         tournament.users[userIndex].delta = user.delta;
       }
     }
-
     //update all predictions for tournament, set isActive to false
     await Predictions.updateMany(
       {
@@ -252,14 +273,11 @@ export async function PUT(
 
     return NextResponse.json(
       {
+        data: tournament,
         message: `Successfully computed scores for tournament ${tournament_id}`,
       },
       { status: 201 }
     );
-
-    //todo update tournament object, add winner
-
-    //TODO: figure out how many winners are needed
   } catch (e) {
     console.log(e);
     return NextResponse.json(
