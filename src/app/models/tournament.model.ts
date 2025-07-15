@@ -24,6 +24,7 @@ export interface Tournament extends Document {
   tournament_id: number;
   name: string;
   description: string;
+  banner: string;
   type: string;
   prizePool: number;
   buyInFee: number;
@@ -59,14 +60,17 @@ const tournamentUserSchema = new mongoose.Schema(
     delta: {
       type: Number,
       required: false,
+      default: 0,
     },
     rank: {
       type: Number,
       required: false,
+      default: 0,
     },
     points: {
       type: Number,
       required: false,
+      default: 0,
     },
   },
   { _id: false }
@@ -101,6 +105,11 @@ const tournamentSchema = new Schema(
     description: {
       type: String,
       required: true,
+    },
+    banner: {
+      type: String,
+      required: false,
+      default: "",
     },
     type: {
       type: String,
