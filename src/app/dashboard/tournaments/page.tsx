@@ -254,6 +254,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [loadingMessage, setLoadingMessage] = useState("");
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [showComputeModal, setShowComputeModal] = useState(false);
@@ -269,6 +270,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [tournamentInputErrorMessage, setTournamentInputErrorMessage] =
     useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isComputed, setIsComputed] = useState<boolean>(false);
 
   const [currentStartTime, setCurrentStartTime] = useState<
     Date | string | null
@@ -516,6 +518,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
           headers: { "Content-type": "application/json" },
           body: JSON.stringify({
             ...newTournament,
+            banner: selectedAuctions[0].image,
             auction_ids: selectedAuctions.map((a) => a.auction_id),
             type: currentTournamentType,
           }),
@@ -622,14 +625,21 @@ const TournamentTable: React.FC<TournamentProps> = ({
     e.preventDefault();
     console.log(selectedTournament);
     setIsSubmitting(true);
+    setErrorMessage("");
     try {
       const response = await computeTournamentResults(
         selectedTournament!.tournament_id
       );
       if (response.ok) {
+        const newTournament = await response.json();
+        setSelectedTournament(newTournament.data);
         setShowAlertModal(true);
         setAlertMessage("Results computed successfully!");
         fetchData();
+      } else {
+        console.error("Error computing tournament results");
+        const res = await response.json();
+        setErrorMessage(res.message);
       }
     } catch (e) {
       console.error(e);
@@ -668,6 +678,10 @@ const TournamentTable: React.FC<TournamentProps> = ({
     setIsSubmitting(false);
     setShowLoadingModal(false);
   };
+
+  useEffect(() => {
+    setErrorMessage("");
+  }, [showComputeModal]);
 
   return (
     <div>
@@ -820,6 +834,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 }
                                 className={""}
                                 onClick={(e: any) => {
+                                  console.log("test");
                                   e.preventDefault();
                                   handleActiveStatusForTournament(tournament);
                                 }}
@@ -1298,7 +1313,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                      {/* <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
                         <Select
                           value={currentTournamentType || ""}
                           onValueChange={(value: string) => {
@@ -1322,11 +1337,11 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           </SelectTrigger>
                           <SelectContent className="bg-[#1E2A36] max-md:text-sm">
                             <SelectItem value="free_play">Free Play</SelectItem>
-                            {/* <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="both">Both</SelectItem> */}
+                            <SelectItem value="standard">Standard</SelectItem>
+                            <SelectItem value="both">Both</SelectItem>
                           </SelectContent>
                         </Select>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                   <div className="grid max-md:grid-cols-8 grid-cols-6 items-center gap-4">
@@ -2298,10 +2313,10 @@ const TournamentTable: React.FC<TournamentProps> = ({
                   open={showComputeModal}
                   onOpenChange={setShowComputeModal}
                 >
-                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl ">
                     <DialogHeader>
                       <DialogTitle className="text-[#F2CA16] text-lg max-wd:text-md">
-                        Compute User Scores {selectedTournament.name}
+                        Compute User Scores for {selectedTournament.name}
                       </DialogTitle>
                     </DialogHeader>
                     {selectedTournament.endTime !== null &&
@@ -2315,11 +2330,76 @@ const TournamentTable: React.FC<TournamentProps> = ({
                       </div>
                     ) : (
                       <div>
+                        <div className="p-2 m-2 text-sm">
+                          <p className="text-justify max-md:text-sm">
+                            {errorMessage && (
+                              <div className="mb-4 rounded-md border border-red-900/50 bg-red-900/20 p-3 text-red-500">
+                                {errorMessage}
+                              </div>
+                            )}
+                          </p>
+                        </div>
+
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="font-bold text-yellow-500/90">
+                                Rank
+                              </TableHead>
+                              <TableHead className="font-bold text-yellow-500/90">
+                                Name
+                              </TableHead>
+                              <TableHead className="font-bold text-yellow-500/90">
+                                Score
+                              </TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {selectedTournament &&
+                              selectedTournament.users
+                                .sort((a, b) => {
+                                  return b.points! - a.points!;
+                                })
+                                .map((user, index) => (
+                                  <TableRow key={user.userId}>
+                                    <TableCell className="font-medium flex">
+                                      {selectedTournament.haveWinners && (
+                                        <Trophy
+                                          className={`h-6 w-6 ${
+                                            user.rank! > 3 || user.rank === 0
+                                              ? "hidden"
+                                              : ""
+                                          }`}
+                                          color={`${
+                                            user.rank === 1
+                                              ? "#F2CA16"
+                                              : user.rank === 2
+                                              ? "#C0C0C0"
+                                              : "#CD7F32"
+                                          } `}
+                                        />
+                                      )}
+
+                                      {user.rank !== 0 ? user.rank : ""}
+                                    </TableCell>
+                                    <TableCell className="font-medium">
+                                      {user.username}
+                                    </TableCell>
+                                    <TableCell className="font-medium">
+                                      {user.points}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                          </TableBody>
+                        </Table>
+
                         <DialogFooter className="flex-row justify-end space-x-2">
                           <Button
                             type="submit"
                             className="bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
-                            disabled={isSubmitting}
+                            disabled={
+                              isSubmitting || selectedTournament.haveWinners
+                            }
                             onClick={handleTournamentCompute}
                           >
                             {isSubmitting ? "Computing..." : "Compute"}
