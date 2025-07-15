@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { formatDistanceToNow, isValid } from "date-fns";
-import { useSession } from "next-auth/react";
+
 import { BeatLoader, ClipLoader } from "react-spinners";
 import {
   Tabs,
@@ -57,6 +57,7 @@ import {
   Clock,
 } from "lucide-react";
 import { Label } from "../../components/label";
+import { DateTime } from "luxon";
 import { Textarea } from "../../components/textarea";
 import {
   Dialog,
@@ -67,7 +68,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/app/ui/components/dialog";
-import { set } from "mongoose";
+
 interface AuctionsPageProps {
   auctionData: CarData[];
   currentPage: number;
@@ -616,6 +617,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                           <TableHeader>
                             <TableRow>
                               <TableHead>Car</TableHead>
+                              <TableHead>End Date</TableHead>
                               <TableHead>Current Bid</TableHead>
                               <TableHead>Status</TableHead>
                               <TableHead>Actions</TableHead>
@@ -653,6 +655,16 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                                 </div> */}
                                     </div>
                                   </div>
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  {DateTime.fromJSDate(
+                                    new Date(auction.deadline)
+                                  ).toLocaleString(DateTime.DATETIME_FULL)}{" "}
+                                  (
+                                  {formatTimeLeft(
+                                    new Date(auction.deadline).toString()
+                                  )}
+                                  )
                                 </TableCell>
                                 <TableCell className="font-mono">
                                   ${auction.price.toLocaleString()}
