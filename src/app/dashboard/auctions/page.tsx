@@ -6,6 +6,7 @@ import { getCarsWithFilter } from "../../lib/data";
 // import sampleData from "../../sample_data.json";
 
 export interface CarData {
+  _id: string;
   auction_id: string;
   description: string[];
   price: number;
