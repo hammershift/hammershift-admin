@@ -41,7 +41,8 @@ export interface Tournament extends Document {
 const tournamentUserSchema = new mongoose.Schema(
   {
     userId: {
-      type: mongoose.Types.ObjectId,
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     fullName: {
@@ -141,7 +142,9 @@ const tournamentSchema = new Schema(
       required: true,
     },
     auction_ids: {
-      type: [String],
+      type: [Schema.Types.ObjectId],
+      required: true,
+      ref: "Auction",
       default: [],
     },
     users: {
@@ -167,9 +170,9 @@ type TournamentModelType =
   | AggregatePaginateModel<Tournament>
   | PaginateModel<Tournament>;
 const Tournaments =
-  (mongoose.models.tournaments as TournamentModelType) ||
+  (mongoose.models.Tournament as TournamentModelType) ||
   mongoose.model<Tournament, TournamentModelType>(
-    "tournaments",
+    "Tournament",
     tournamentSchema,
     "tournaments"
   );

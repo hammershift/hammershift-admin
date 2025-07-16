@@ -36,7 +36,7 @@ adminSchema.plugin(paginate);
 type AdminModelType = AggregatePaginateModel<Admin> | PaginateModel<Admin>;
 
 const Admins =
-  (mongoose.models.admins as AdminModelType) ||
-  mongoose.model<Admin, AdminModelType>("admins", adminSchema, "admins");
+  (mongoose.models.Admin as AdminModelType) ||
+  mongoose.model<Admin, AdminModelType>("Admin", adminSchema, "admins");
 
 export default Admins;

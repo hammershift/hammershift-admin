@@ -104,9 +104,9 @@ type CommentModelType =
   | PaginateModel<Comment>;
 
 const Comments =
-  (mongoose.models.comments as CommentModelType) ||
+  (mongoose.models.Comment as CommentModelType) ||
   mongoose.model<Comment, CommentModelType>(
-    "comments",
+    "Comment",
     commentSchema,
     "comments"
   );

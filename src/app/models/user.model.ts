@@ -55,7 +55,7 @@ userSchema.plugin(paginate);
 type UserModelType = AggregatePaginateModel<User> | PaginateModel<User>;
 
 const Users =
-  (mongoose.models.users as UserModelType) ||
-  mongoose.model<User, UserModelType>("users", userSchema, "users");
+  (mongoose.models.User as UserModelType) ||
+  mongoose.model<User, UserModelType>("User", userSchema, "users");
 
 export default Users;

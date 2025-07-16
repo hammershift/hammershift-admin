@@ -21,14 +21,18 @@ const predictionsSchema = new Schema(
   {
     // carId: { type: String, required: true },
     // carObjectId: { type: Types.ObjectId, required: true },
-    auction_id: { type: String, required: true },
-    tournament_id: { type: Number, required: false },
+    auction_id: { type: Schema.Types.ObjectId, required: true, ref: "Auction" },
+    tournament_id: {
+      type: Schema.Types.ObjectId,
+      required: false,
+      ref: "Tournament",
+    },
     predictedPrice: { type: Number, required: true },
     reasoning: { type: String, required: false },
     predictionType: { type: String, required: true },
     wagerAmount: { type: Number, required: false, default: 0 },
     user: {
-      userId: { type: Types.ObjectId, required: true },
+      userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
       fullName: { type: String, required: true },
       username: { type: String, required: true },
       role: { type: String, enum: ["USER", "AGENT"], required: true },
@@ -44,7 +48,6 @@ const predictionsSchema = new Schema(
   }
 );
 
-const Predictions =
-  models.predictions || model("predictions", predictionsSchema);
+const Predictions = models.Prediction || model("Prediction", predictionsSchema);
 
 export default Predictions;

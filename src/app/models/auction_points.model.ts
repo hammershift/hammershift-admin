@@ -1,8 +1,14 @@
 import mongoose, { Schema } from "mongoose";
 const pointsSchema = new Schema(
   {
-    auction_id: { type: String, required: false },
-    tournament_id: { type: Number, required: false },
+    refId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+    },
+    refCollection: {
+      type: String,
+      required: true,
+    },
     user: {
       userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
       fullName: { type: String, required: true },
@@ -19,6 +25,6 @@ const pointsSchema = new Schema(
   }
 );
 
-const Points = mongoose.models.points || mongoose.model("points", pointsSchema);
+const Points = mongoose.models.Point || mongoose.model("Point", pointsSchema);
 
 export default Points;
