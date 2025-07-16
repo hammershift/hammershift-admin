@@ -48,9 +48,7 @@ export async function PUT(
 
     await connectToDB();
 
-    const tournament = await Tournaments.findOne({
-      tournament_id: parseInt(tournament_id),
-    });
+    const tournament = await Tournaments.findById(tournament_id);
 
     if (!tournament) {
       return NextResponse.json(
@@ -67,7 +65,7 @@ export async function PUT(
     }
 
     const auctions = await Auctions.find({
-      auction_id: {
+      _id: {
         $in: tournament.auction_ids,
       },
     });

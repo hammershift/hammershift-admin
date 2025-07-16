@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     const auctionIds = auctionIdQuery.split(",");
 
-    const auctions = await Auctions.find({ auction_id: { $in: auctionIds } })
+    const auctions = await Auctions.find({ _id: { $in: auctionIds } })
       .sort({ "sort.deadline": -1 })
       .lean();
 
