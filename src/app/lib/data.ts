@@ -157,7 +157,7 @@ export const getTournamentAuctions = async (
   }
 };
 
-export const getTournamentPredictions = async (tournament_id: number) => {
+export const getTournamentPredictions = async (tournament_id: string) => {
   try {
     const response = await fetch(
       `/api/predictions?tournament_id=${tournament_id}`
