@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 import clientPromise from "@/app/lib/mongoDB";
+import connectToDB from "@/app/lib/mongoose";
 
 export const dynamic = "force-dynamic";
 
@@ -53,27 +54,28 @@ export async function PUT(req: NextRequest) {
   console.log("User is Authorized!");
 
   try {
-    const client = await clientPromise;
-    const db = client.db();
-    // await connectToDB();
+    await connectToDB();
     const auction_id = req.nextUrl.searchParams.get("auction_id");
     const newAuctionDetails = await req.json();
 
-    const updatedAuction = await db
-      .collection("auctions")
-      .findOneAndUpdate(
-        { auction_id: auction_id },
-        { $set: newAuctionDetails },
-        { returnDocument: "after" }
-      );
-
+    const updatedAuction = await Auctions.findByIdAndUpdate(
+      auction_id,
+      { $set: newAuctionDetails },
+      { new: true }
+    );
     if (!updatedAuction) {
-      return NextResponse.json({ message: "Auction not found" });
+      return NextResponse.json(
+        { message: "Auction not found" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(updatedAuction);
+    return NextResponse.json(updatedAuction, { status: 200 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: "Internal server error" });
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
