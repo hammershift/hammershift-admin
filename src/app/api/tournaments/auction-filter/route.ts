@@ -35,10 +35,8 @@ export async function GET(req: NextRequest) {
       req.nextUrl.searchParams.get("location") || "All";
     let sort: string | SortQuery =
       req.nextUrl.searchParams.get("sort") || "Newly Listed";
-    const startPlusOneDay = new Date(
-      new Date(startTime!).getTime() + 24 * 60 * 60 * 1000
-    );
 
+    const startDate = new Date(startTime!);
     const options = {
       offset: offset,
       limit: limit,
@@ -51,7 +49,7 @@ export async function GET(req: NextRequest) {
         completed = [1];
       }
       if (completed === "all") {
-        completed = [1, 2];
+        completed = [1, 2, 3, 4];
       }
     }
 
@@ -70,7 +68,7 @@ export async function GET(req: NextRequest) {
           },
         },
         {
-          $match: { isActive: true, "sort.deadline": { $gt: startPlusOneDay } },
+          $match: { isActive: true, "sort.deadline": { $gt: startDate } },
         },
         {
           $project: {
@@ -191,11 +189,7 @@ export async function GET(req: NextRequest) {
     //if you don't add a sort query, it automatically defaults to sorting by Newly Listed for now
     let query: any = {
       attributes: { $all: [] },
-      $or: [
-        {
-          isActive: true,
-        },
-      ],
+      isActive: true,
     };
 
     if (make !== "All") {
@@ -226,8 +220,7 @@ export async function GET(req: NextRequest) {
         $elemMatch: { key: "status", value: { $in: completed } },
       });
     }
-
-    query["sort.deadline"] = { $gte: startPlusOneDay };
+    query["sort.deadline"] = { $gt: startDate };
 
     const filteredAuctions = await (
       Auctions as PaginateModel<Auction>
