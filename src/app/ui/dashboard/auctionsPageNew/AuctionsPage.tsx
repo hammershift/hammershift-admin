@@ -160,7 +160,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     const initialActiveAuctions = auctionData.reduce(
       (acc, item) => ({
         ...acc,
-        [item.auction_id]: item.isActive,
+        [item._id]: item.isActive,
       }),
       {}
     );
@@ -168,7 +168,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     const auctionLoadingStates = auctionData.reduce(
       (acc, item) => ({
         ...acc,
-        [item.auction_id]: "off",
+        [item._id]: "off",
       }),
       {}
     );
@@ -180,7 +180,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   useEffect(() => {
     async function fetchPredictions() {
       if (currentAuction) {
-        const predictions = await getPredictions(currentAuction.auction_id);
+        const predictions = await getPredictions(currentAuction._id);
         setPredictions(predictions);
       } else {
         setPredictions([]);
@@ -232,7 +232,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
       }
       setEditLoading(true);
       const response = await editAuctionWithId(
-        currentAuction.auction_id,
+        currentAuction._id,
         editAuctionDetails
       );
     } catch (e) {
@@ -265,7 +265,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     }
   }
   async function handleStatusToggle(id: string) {
-    const auction = auctionData.find((x) => x.auction_id === id);
+    const auction = auctionData.find((x) => x._id === id);
 
     if (!auction) {
       alert("Auction not found");
@@ -290,6 +290,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
 
     try {
       if (!activeAuctions[id]) {
+        //TODO: merge the two functions into one
         await updateAuctionStatus(id, !activeAuctions[id]);
         await promptAgentPredictions(id);
       }
@@ -434,22 +435,20 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                                 <Badge
                                   className={
                                     auction.isActive ||
-                                    auctionLoadingStates[auction.auction_id] ===
+                                    auctionLoadingStates[auction._id] ===
                                       "added"
                                       ? "bg-green-100 text-green-800"
                                       : "bg-red-100 text-red-800"
                                   }
                                 >
                                   {auction.isActive ||
-                                  auctionLoadingStates[auction.auction_id] ===
-                                    "added"
+                                  auctionLoadingStates[auction._id] === "added"
                                     ? "Active"
                                     : "Inactive"}
                                 </Badge>
                               </div>
                               {auction.isActive ||
-                              auctionLoadingStates[auction.auction_id] ===
-                                "added" ? (
+                              auctionLoadingStates[auction._id] === "added" ? (
                                 <Button
                                   className="w-full bg-green-600 text-[#0C1924] cursor-default "
                                   disabled
@@ -457,7 +456,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                                   <CircleCheck className="mr-2 h-4 w-4" />
                                   Added to Platform
                                 </Button>
-                              ) : auctionLoadingStates[auction.auction_id] ===
+                              ) : auctionLoadingStates[auction._id] ===
                                 "loading" ? (
                                 <Button
                                   className="w-full bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
@@ -469,7 +468,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                                 <Button
                                   className="w-full bg-[#F2CA16] text-[#0C1924] hover:bg-[#F2CA16]/90"
                                   onClick={() =>
-                                    handleStatusToggle(auction.auction_id)
+                                    handleStatusToggle(auction._id)
                                   }
                                 >
                                   <PlusCircle className="mr-2 h-4 w-4" />
