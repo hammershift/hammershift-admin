@@ -121,6 +121,7 @@ interface TournamentAuctionData {
   deadline: Date;
 }
 interface TournamentAuctionData {
+  _id: string;
   auction_id: string;
   description: string[];
   price: number;
@@ -322,6 +323,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
           limit: auctionDisplayCount,
           startTime: currentStartTime,
         });
+
         if (data && "auctions" in data) {
           setTotalAuctions(data.total);
           setTotalAuctionPages(data.totalPages);
@@ -343,20 +345,12 @@ const TournamentTable: React.FC<TournamentProps> = ({
     const fetchTournamentPredictions = async (
       auction: TournamentAuctionData
     ) => {
-      const data = await getTournamentPredictions(
-        selectedTournament!.tournament_id
-      );
-      console.log("after getTournamentPredictions");
-      console.log(data);
+      const data = await getTournamentPredictions(selectedTournament!._id);
+
       if (data) {
         setCurrentPredictions(data);
         setFilteredPredictions(
-          data.filter((p: Prediction) => p.auction_id === auction.auction_id)
-        );
-        console.log("after setFilteredPredictions");
-        console.log("after setFilteredPredictions");
-        console.log(
-          data.filter((p: Prediction) => p.auction_id === auction.auction_id)
+          data.filter((p: Prediction) => p.auction_id === auction._id)
         );
       }
     };
@@ -367,13 +361,20 @@ const TournamentTable: React.FC<TournamentProps> = ({
   }, [selectedAuctions]);
 
   useEffect(() => {
-    if (viewAuction != null && currentPredictions.length > 0)
-      setFilteredPredictions(
+    console.log("viewing auction");
+    if (viewAuction != null && currentPredictions.length > 0) {
+      console.log(viewAuction);
+      console.log(
         currentPredictions.filter(
-          (p: Prediction) => p.auction_id === viewAuction.auction_id
+          (p: Prediction) => p.auction_id === viewAuction._id
         )
       );
-    console.log(viewAuction);
+      setFilteredPredictions(
+        currentPredictions.filter(
+          (p: Prediction) => p.auction_id === viewAuction._id
+        )
+      );
+    }
   }, [viewAuction]);
 
   const handleSelectedAuctionsOnEdit = async (
@@ -623,7 +624,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
 
   const handleTournamentCompute = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(selectedTournament);
     setIsSubmitting(true);
     setErrorMessage("");
     try {
@@ -820,6 +820,11 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                     Upcoming
                                   </Badge>
                                 )}
+                                {tournament.haveWinners && (
+                                  <Badge className="bg-green-100 border-green-800 text-green-800 mr-2 text-xs mt-2">
+                                    Completed
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                             <div className="w-[50%]">
@@ -834,7 +839,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 }
                                 className={""}
                                 onClick={(e: any) => {
-                                  console.log("test");
                                   e.preventDefault();
                                   handleActiveStatusForTournament(tournament);
                                 }}
@@ -868,6 +872,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                   );
                                   setCurrentStartTime(tournament.startTime);
                                 }}
+                                title={"Edit Tournament"}
+                                disabled={tournament.haveWinners}
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -1009,6 +1015,11 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                     Upcoming
                                   </Badge>
                                 )}
+                                {tournament.haveWinners && (
+                                  <Badge className="bg-green-100 border-green-800 text-green-800 mr-2 text-xs mt-2">
+                                    Completed
+                                  </Badge>
+                                )}
                               </TableCell>
                               <TableCell className="font-medium">
                                 <Button
@@ -1041,7 +1052,11 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      title="Compute Winner"
+                                      title={`${
+                                        tournament.haveWinners
+                                          ? "View Tournament Results"
+                                          : "Compute Tournament Results"
+                                      }`}
                                       className={""}
                                       onClick={() => {
                                         setSelectedTournament(tournament);
@@ -1057,28 +1072,42 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                         color="#F2CA16"
                                       />
                                     </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      title="Edit Tournament"
-                                      className={""}
-                                      onClick={() => {
-                                        setShowEditModal(true);
-                                        setCurrentModalType("edit");
-                                        setEmptyInputError(false);
-                                        setTournamentInputError(false);
-                                        setSelectedTournament(tournament);
-                                        handleSelectedAuctionsOnEdit(
-                                          tournament.auction_ids,
-                                          tournament.startTime as Date
-                                        );
-                                        setCurrentStartTime(
-                                          tournament.startTime
-                                        );
-                                      }}
+
+                                    <span
+                                      className="inline-block relative"
+                                      title="Tournament has ended"
                                     >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title={`${
+                                          tournament.haveWinners
+                                            ? "Tournament has ended"
+                                            : "Edit Tournament"
+                                        }`}
+                                        className={`${
+                                          tournament.haveWinners
+                                            ? "text-gray-400 pointer-events-none"
+                                            : "text-yellow-500"
+                                        }`}
+                                        onClick={() => {
+                                          setShowEditModal(true);
+                                          setCurrentModalType("edit");
+                                          setEmptyInputError(false);
+                                          setTournamentInputError(false);
+                                          setSelectedTournament(tournament);
+                                          handleSelectedAuctionsOnEdit(
+                                            tournament.auction_ids,
+                                            tournament.startTime as Date
+                                          );
+                                          setCurrentStartTime(
+                                            tournament.startTime
+                                          );
+                                        }}
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                    </span>
 
                                     <Button
                                       variant="ghost"
@@ -1735,6 +1764,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                   (auction) =>
                                     auction.auction_id === currentAuctionId
                                 );
+
                                 if (auction)
                                   return (
                                     <div
@@ -2066,21 +2096,27 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 </SelectTrigger>
                                 <SelectContent className="bg-[#1E2A36] max-md:text-sm">
                                   {selectedAuctions.map((selectedAuction) => {
-                                    const currentAuctionId =
-                                      selectedAuction.auction_id;
-                                    const auction = availableAuctionData.find(
-                                      (auction) =>
-                                        auction.auction_id === currentAuctionId
+                                    // const currentAuctionId =
+                                    //   selectedAuction.auction_id;
+                                    // console.log(
+                                    //   `Auction id here: ${currentAuctionId}`
+                                    // );
+
+                                    // console.log({ availableAuctionData });
+                                    // const auction = availableAuctionData.find(
+                                    //   (auction) =>
+                                    //     auction.auction_id === currentAuctionId
+                                    // );
+                                    // console.log({ auction });
+                                    return (
+                                      <SelectItem
+                                        key={selectedAuction.auction_id}
+                                        value={selectedAuction.auction_id}
+                                        className="truncate max-md:max-w-[250px] text-ellipsis overflow-hidden"
+                                      >
+                                        {`${selectedAuction.year} ${selectedAuction.make} ${selectedAuction.model}`}
+                                      </SelectItem>
                                     );
-                                    if (auction)
-                                      return (
-                                        <SelectItem
-                                          value={auction.auction_id}
-                                          className="truncate max-md:max-w-[250px] text-ellipsis overflow-hidden"
-                                        >
-                                          {`${auction.year} ${auction.make} ${auction.model}`}
-                                        </SelectItem>
-                                      );
                                   })}
                                 </SelectContent>
                               </Select>
@@ -2151,7 +2187,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             </p>
                           )} */}
                           {(() => {
-                            const auction = availableAuctionData.find(
+                            const auction = selectedAuctions.find(
                               (a) => a.auction_id === viewAuction?.auction_id
                             );
                             if (auction)
@@ -2429,14 +2465,14 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             Name
                           </TableHead>
                           <TableHead className="font-bold text-yellow-500/90">
-                            Score
+                            Points
                           </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {selectedTournament &&
                           selectedTournament.users
-                            .sort((a, b) => a.rank! - b.rank!)
+                            .sort((a, b) => b.points! - a.points!)
                             .map((user, index) => (
                               <TableRow key={user.userId}>
                                 <TableCell className="font-medium flex">
