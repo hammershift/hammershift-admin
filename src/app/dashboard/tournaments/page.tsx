@@ -361,7 +361,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
   }, [selectedAuctions]);
 
   useEffect(() => {
-    console.log("viewing auction");
     if (viewAuction != null && currentPredictions.length > 0) {
       console.log(viewAuction);
       console.log(
@@ -1299,13 +1298,13 @@ const TournamentTable: React.FC<TournamentProps> = ({
                       </Label>
                       <Input
                         className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                          emptyInputError && newTournament?.maxUsers == 0
+                          emptyInputError && newTournament?.maxUsers < 20
                             ? "border-red-500"
                             : ""
                         }`}
                         name="maxUsers"
                         type="number"
-                        value={newTournament?.maxUsers || 0}
+                        value={newTournament?.maxUsers || 20}
                         onChange={handleNewTournamentChange}
                       />
                     </div>
@@ -1416,15 +1415,16 @@ const TournamentTable: React.FC<TournamentProps> = ({
                   >
                     {selectedAuctions.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {selectedAuctions.map((selectedAuction) => {
-                          const currentAuctionId = selectedAuction.auction_id;
-                          const auction = availableAuctionData.find(
-                            (auction) => auction.auction_id === currentAuctionId
-                          );
+                        {selectedAuctions.map((auction) => {
+                          // const currentAuctionId = selectedAuction.auction_id;
+                          // console.log(availableAuctionData);
+                          // const auction = availableAuctionData.find(
+                          //   (auction) => auction.auction_id === currentAuctionId
+                          // );
                           if (auction)
                             return (
                               <div
-                                key={currentAuctionId}
+                                key={auction.auction_id}
                                 className="flex items-center p-3 rounded-md border cursor-pointer transition-colors bg-[#1E2A36] border-[#FFFFFF] hover:bg-[#1E2A36]/80"
                               >
                                 <button
@@ -1654,13 +1654,13 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           <Input
                             className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                               emptyInputError &&
-                              selectedTournament?.maxUsers == 0
+                              selectedTournament?.maxUsers < 20
                                 ? "border-red-500"
                                 : ""
                             }`}
                             name="maxUsers"
                             type="number"
-                            value={selectedTournament?.maxUsers || 0}
+                            value={selectedTournament?.maxUsers || 20}
                             onChange={handleSelectedTournamentChange}
                           />
                         </div>
@@ -2008,13 +2008,13 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           <Input
                             className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
                               emptyInputError &&
-                              selectedTournament?.maxUsers == 0
+                              selectedTournament?.maxUsers < 20
                                 ? "border-red-500"
                                 : ""
                             }`}
                             name="maxUsers"
                             type="number"
-                            value={selectedTournament?.maxUsers || 0}
+                            value={selectedTournament?.maxUsers || 20}
                             onChange={handleSelectedTournamentChange}
                             disabled
                           />
