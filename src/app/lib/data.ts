@@ -21,6 +21,7 @@ export interface getTournamentAuctionsProps {
   limit?: number;
   sort?: string;
   search?: string;
+  completed?: string;
   startTime: Date | string | null;
 }
 export interface SearchProps {
