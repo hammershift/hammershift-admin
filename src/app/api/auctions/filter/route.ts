@@ -58,13 +58,13 @@ export async function GET(req: NextRequest) {
     };
     if (completed) {
       if (completed === "true") {
-        completed = [2];
+        completed = [2, 3, 4];
       }
       if (completed === "false") {
         completed = [1];
       }
       if (completed === "all") {
-        completed = [1, 2];
+        completed = [1, 2, 3, 4];
       }
     }
 
