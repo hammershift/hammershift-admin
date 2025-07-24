@@ -1,5 +1,13 @@
-import mongoose, { model, models, Schema, Types } from "mongoose";
-export interface Comment {
+import mongoose, {
+  Document,
+  Schema,
+  PaginateModel,
+  AggregatePaginateModel,
+  Types,
+} from "mongoose";
+import aggregatePaginate from "mongoose-aggregate-paginate-v2";
+import paginate from "mongoose-paginate-v2";
+export interface Comment extends Document {
   _id: Types.ObjectId;
   comment: string;
   pageID: string;
@@ -89,6 +97,18 @@ const commentSchema = new Schema(
   { collection: "comments", timestamps: true }
 );
 
-const Comments = models.comments || model<Comment>("comments", commentSchema);
+commentSchema.plugin(aggregatePaginate);
+commentSchema.plugin(paginate);
+type CommentModelType =
+  | AggregatePaginateModel<Comment>
+  | PaginateModel<Comment>;
+
+const Comments =
+  (mongoose.models.Comment as CommentModelType) ||
+  mongoose.model<Comment, CommentModelType>(
+    "Comment",
+    commentSchema,
+    "comments"
+  );
 
 export default Comments;

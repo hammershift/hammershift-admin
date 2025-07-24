@@ -1,6 +1,6 @@
 "use client";
 
-import { getAdmins } from "@/app/lib/data";
+import { getAdminsWithSearch } from "@/app/lib/data";
 import AdminsPage from "@/app/ui/dashboard/adminsPage/AdminsPage";
 import React, { useEffect, useState } from "react";
 import { BeatLoader } from "react-spinners";
@@ -16,14 +16,25 @@ interface AdminData {
 
 const Admins = () => {
   const [adminData, setAdminData] = useState<AdminData[]>([]);
+  const [searchValue, setSearchValue] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalAdmins, setTotalAdmins] = useState(0);
+  const [displayCount, setDisplayCount] = useState(5);
 
   const fetchData = async () => {
+    setIsLoading(true);
     try {
-      const data = await getAdmins();
+      const data = await getAdminsWithSearch({
+        search: searchValue,
+        offset: (currentPage - 1) * displayCount,
+        limit: displayCount,
+      });
 
       if (data && "admins" in data) {
-        console.log(data);
+        setTotalAdmins(data.total);
+        setTotalPages(data.totalPages);
         setAdminData(data.admins as AdminData[]);
         setIsLoading(false);
       } else {
@@ -32,21 +43,24 @@ const Admins = () => {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage, searchValue]);
 
   return (
     <div className="section-container mt-4">
-      {isLoading ? (
-        <div className="flex justify-center items-center h-[592px]">
-          <BeatLoader color="#F2CA16" />
-        </div>
-      ) : (
-        <AdminsPage adminData={adminData} fetchData={fetchData} />
-      )}
+      <AdminsPage
+        adminData={adminData}
+        fetchData={fetchData}
+        setSearchValue={setSearchValue}
+        isLoading={isLoading}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+      />
     </div>
   );
 };

@@ -119,9 +119,9 @@ type AuctionModelType =
   | AggregatePaginateModel<Auction>
   | PaginateModel<Auction>;
 const Auctions =
-  (mongoose.models.auctions as AuctionModelType) ||
+  (mongoose.models.Auction as AuctionModelType) ||
   mongoose.model<Auction, AuctionModelType>(
-    "auctions",
+    "Auction",
     auctionSchema,
     "auctions"
   );

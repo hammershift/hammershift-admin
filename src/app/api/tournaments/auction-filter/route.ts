@@ -5,7 +5,6 @@ import { AggregatePaginateModel, PaginateModel } from "mongoose";
 import { SortOrder } from "mongoose";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
-import { addDays } from "date-fns";
 export const dynamic = "force-dynamic";
 
 interface SortQuery {
@@ -25,8 +24,8 @@ export async function GET(req: NextRequest) {
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
     const limit = Number(req.nextUrl.searchParams.get("limit")) || 7;
     const searchedKeyword = req.nextUrl.searchParams.get("search");
-    const isPlatformTab = req.nextUrl.searchParams.get("isPlatformTab");
-    const tournamentID = req.nextUrl.searchParams.get("tournament_id");
+    // const tournamentID = req.nextUrl.searchParams.get("tournament_id");
+    const startTime = req.nextUrl.searchParams.get("startTime");
     let completed = req.nextUrl.searchParams.get("completed") || [1];
     let era: string | string[] = req.nextUrl.searchParams.get("era") || "All";
     let category: string | string[] =
@@ -37,28 +36,14 @@ export async function GET(req: NextRequest) {
     let sort: string | SortQuery =
       req.nextUrl.searchParams.get("sort") || "Newly Listed";
 
-    if (tournamentID) {
-      const tournamentAuctions = await Auctions.find({
-        tournamentID: new ObjectId(tournamentID),
-      });
-
-      if (tournamentAuctions) {
-        return NextResponse.json({
-          total: tournamentAuctions.length,
-          auctions: tournamentAuctions,
-        });
-      } else {
-        return NextResponse.json({ message: "No auctions found" });
-      }
-    }
-
+    const startDate = new Date(startTime!);
     const options = {
       offset: offset,
       limit: limit,
     };
     if (completed) {
       if (completed === "true") {
-        completed = [2, 3, 4];
+        completed = [2];
       }
       if (completed === "false") {
         completed = [1];
@@ -67,11 +52,6 @@ export async function GET(req: NextRequest) {
         completed = [1, 2, 3, 4];
       }
     }
-
-    // SEARCH is NOT used in combination with other filters EXCEPT completed filter (completed=true === status: 2 and vice versa)
-    //api/auctions/filter?search=911 Coupe or api/auctions/filter?search=911%20Coupe
-    //api/auctions/filter?search=911%20Coupe&completed=true
-    //(search queries are case insensitive) api/auctions/filter?search=land%20cruiser&completed=true
 
     if (searchedKeyword) {
       const aggregate = Auctions.aggregate([
@@ -88,24 +68,7 @@ export async function GET(req: NextRequest) {
           },
         },
         {
-          $match:
-            isPlatformTab === "true"
-              ? { $or: [{ isActive: true }, { ended: true }] }
-              : {
-                  isActive: { $exists: true },
-                  $expr: {
-                    $lt: [
-                      {
-                        $dateSubtract: {
-                          startDate: "$sort.deadline",
-                          unit: "day",
-                          amount: 1,
-                        },
-                      },
-                      "$$NOW",
-                    ],
-                  },
-                },
+          $match: { isActive: true, "sort.deadline": { $gt: startDate } },
         },
         {
           $project: {
@@ -118,8 +81,8 @@ export async function GET(req: NextRequest) {
             page_url: 1,
             image: 1,
             isActive: 1,
-            statusAndPriceChecked: 1,
             website: 1,
+            display: 1,
             make: {
               $arrayElemAt: [
                 {
@@ -153,64 +116,18 @@ export async function GET(req: NextRequest) {
                 0,
               ],
             },
-            // price: {
-            //   $arrayElemAt: [
-            //     {
-            //       $filter: {
-            //         input: "$attributes",
-            //         cond: { $eq: ["$$this.key", "price"] },
-            //       },
-            //     },
-            //     0,
-            //   ],
-            // },
-            // bids: {
-            //   $arrayElemAt: [
-            //     {
-            //       $filter: {
-            //         input: "$attributes",
-            //         cond: { $eq: ["$$this.key", "bids"] },
-            //       },
-            //     },
-            //     0,
-            //   ],
-            // },
-            // deadline: {
-            //   $arrayElemAt: [
-            //     {
-            //       $filter: {
-            //         input: "$attributes",
-            //         cond: { $eq: ["$$this.key", "deadline"] },
-            //       },
-            //     },
-            //     0,
-            //   ],
-            // },
           },
         },
-        // {
-        //   $project: {
-        //     auction_id: 1,
-        //     make: "$make.value",
-        //     model: "$model.value",
-        //     year: "$year.value",
-        //     price: "$price.value",
-        //     bids: "$bids.value",
-        //     deadline: "$deadline.value",
-        //     image: "$image",
-        //     isActive: "$isActive",
-        //   },
-        // },
       ]);
 
-      const searchedCars = await (
+      const searchedAuctions = await (
         Auctions as AggregatePaginateModel<Auction>
       ).aggregatePaginate(aggregate, { ...options, sort: { createdAt: -1 } });
 
       return NextResponse.json({
-        total: searchedCars.totalDocs,
-        totalPages: searchedCars.totalPages,
-        cars: searchedCars.docs,
+        total: searchedAuctions.totalDocs,
+        totalPages: searchedAuctions.totalPages,
+        auctions: searchedAuctions.docs,
       });
     }
 
@@ -256,9 +173,9 @@ export async function GET(req: NextRequest) {
         case "Least Bids":
           sort = { "sort.bids": 1 };
           break;
-        // case "On Display":
-        //   sort = { display: -1 };
-        //   break;
+        case "On Display":
+          sort = { display: -1 };
+          break;
         //other sorts here
         default:
           break;
@@ -270,43 +187,10 @@ export async function GET(req: NextRequest) {
     //use "%20" or " " for 2-word queries
     //for ex. api/cars/filter?make=Porsche$Ferrari&location=New%20York$North%20Carolina&sort=Most%20Bids
     //if you don't add a sort query, it automatically defaults to sorting by Newly Listed for now
-    let query: any = {};
-    if (isPlatformTab === "true") {
-      query = {
-        attributes: { $all: [] },
-        $or: [
-          {
-            isActive: true,
-          },
-          {
-            ended: true,
-          },
-        ],
-      };
-    } else {
-      query = {
-        attributes: { $all: [] },
-        "sort.deadline": {
-          $gt: addDays(new Date(), 1),
-        },
-      };
-    }
-    // query = {
-    //   attributes: { $all: [] },
-    //   $or: [
-    //     {
-    //       isActive:
-    //         isPlatformTab === "true"
-    //           ? true
-    //           : {
-    //               $exists: true,
-    //             },
-    //     },
-    //     {
-    //       ended: true,
-    //     },
-    //   ],
-    // };
+    let query: any = {
+      attributes: { $all: [] },
+      isActive: true,
+    };
 
     if (make !== "All") {
       query.attributes.$all.push({
@@ -336,28 +220,19 @@ export async function GET(req: NextRequest) {
         $elemMatch: { key: "status", value: { $in: completed } },
       });
     }
+    query["sort.deadline"] = { $gt: startDate };
 
-    //const totalCars = await Auctions.countDocuments(query);
-
-    // const filteredCars = await Auctions.find({
-    //   $and: [query],
-    // })
-    //   .limit(limit)
-    //   .skip(offset)
-    //   .sort(sort as { [key: string]: SortOrder | { $meta: any } });
-
-    const filteredCars = await (Auctions as PaginateModel<Auction>).paginate(
-      query,
-      {
-        ...options,
-        sort: sort as { [key: string]: SortOrder | { $meta: any } },
-      }
-    );
+    const filteredAuctions = await (
+      Auctions as PaginateModel<Auction>
+    ).paginate(query, {
+      ...options,
+      sort: sort as { [key: string]: SortOrder | { $meta: any } },
+    });
 
     return NextResponse.json({
-      total: filteredCars.totalDocs,
-      cars: filteredCars.docs,
-      totalPages: filteredCars.totalPages,
+      total: filteredAuctions.totalDocs,
+      auctions: filteredAuctions.docs,
+      totalPages: filteredAuctions.totalPages,
     });
   } catch (error) {
     console.error(error);

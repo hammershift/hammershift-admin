@@ -1,14 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import magnifyingGlass from "@/../public/images/magnifying-glass.svg";
 import {
   deleteUserWithId,
   editUserWithId,
-  getLimitedUsers,
   getUsersWithSearch,
 } from "@/app/lib/data";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { BeatLoader } from "react-spinners";
 import {
@@ -35,9 +32,11 @@ import {
   DialogTitle,
 } from "@/app/ui/components/dialog";
 import { Button } from "@/app/ui/components/button";
-import { Ban, Edit, LockOpen, Trash2 } from "lucide-react";
+import { Ban, Edit, LockOpen, Search, Trash2 } from "lucide-react";
 import { Label } from "@/app/ui/components/label";
 import { Input } from "@/app/ui/components/input";
+import ResponsivePagination from "react-responsive-pagination";
+import "react-responsive-pagination/themes/minimal-light-dark.css";
 
 interface UserData {
   _id: string;
@@ -55,62 +54,61 @@ interface UsersPageProps {
   banUser: (_id: string, newBannedStatus: boolean) => Promise<void>;
   setUserData: (userData: UserData[]) => void;
   setSearchValue: (searchValue: string) => void;
+  isLoading: boolean;
+  currentPage: number;
+  totalPages: number;
+  setCurrentPage: (currentPage: number) => void;
 }
 
 const UsersPage = () => {
   const [userData, setUserData] = useState<UserData[]>([]);
-  const [searchValue, setSearchValue] = useState<null | string>(null);
-  const [userDisplayCount, setUserDisplayCount] = useState(12);
+  const [searchValue, setSearchValue] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [displayCount, setDisplayCount] = useState(5);
+  const [didAction, setDidAction] = useState(false);
 
   const fetchData = async () => {
+    setIsLoading(true);
     try {
-      const data = await getLimitedUsers(userDisplayCount);
+      const data = await getUsersWithSearch({
+        search: searchValue,
+        offset: (currentPage - 1) * displayCount,
+        limit: displayCount,
+      });
 
       if (data && "users" in data) {
+        setTotalUsers(data.total);
+        setTotalPages(data.totalPages);
         setUserData(data.users as UserData[]);
-        setIsLoading(false);
       } else {
         console.error("Unexpected data structure:", data);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+    setIsLoading(false);
   };
 
-  // get all users data
   useEffect(() => {
     fetchData();
-  }, [userDisplayCount]);
+  }, [currentPage, searchValue]);
 
-  // get users data with search value
   useEffect(() => {
-    console.log("searchValue:", searchValue);
-    const getDataWithSearchValue = async () => {
-      if (searchValue !== null && searchValue !== "") {
-        try {
-          const userData = await getUsersWithSearch(searchValue);
-
-          if (userData) {
-            setUserData(userData.users as UserData[]);
-          } else {
-            console.error("Unexpected data structure:", userData);
-          }
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
-      } else fetchData();
-    };
-    getDataWithSearchValue();
-  }, [searchValue]);
+    if (didAction) {
+      fetchData();
+      setDidAction(false);
+    }
+  }, [didAction]);
 
   const deleteUser = async (_id: string) => {
     try {
       const res = await deleteUserWithId(_id);
 
       if (res && res.status === 200) {
-        console.log(userData);
-        setUserData(userData.filter((user) => user._id !== _id));
+        setDidAction(true);
         alert("User Deleted Successfully");
       }
     } catch (error) {
@@ -124,12 +122,7 @@ const UsersPage = () => {
       const res = await editUserWithId(_id, updatedUser);
 
       if (res && res.status === 200) {
-        console.log(userData);
-        setUserData(
-          userData.map((user) =>
-            user._id === _id ? { ...user, ...updatedUser } : user
-          )
-        );
+        setDidAction(true);
         if (newBannedStatus) alert("User Banned Successfully");
         else alert("User Unbanned Successfully");
       }
@@ -138,26 +131,18 @@ const UsersPage = () => {
     }
   };
 
-  const handleLoadMore = () => {
-    setUserDisplayCount((prevCount) => prevCount + 7);
-  };
-
   return (
-    <div className="section-container mt-4">
-      {isLoading ? (
-        <div className="flex justify-center items-center h-[436px]">
-          <BeatLoader color="#F2CA16" />
-        </div>
-      ) : (
-        <UserTable
-          userData={userData}
-          deleteUser={deleteUser}
-          banUser={banUser}
-          setUserData={setUserData}
-          setSearchValue={setSearchValue}
-        />
-      )}
-    </div>
+    <UserTable
+      userData={userData}
+      deleteUser={deleteUser}
+      banUser={banUser}
+      setUserData={setUserData}
+      setSearchValue={setSearchValue}
+      isLoading={isLoading}
+      currentPage={currentPage}
+      totalPages={totalPages}
+      setCurrentPage={setCurrentPage}
+    />
   );
 };
 
@@ -169,6 +154,10 @@ const UserTable: React.FC<UsersPageProps> = ({
   banUser,
   setUserData,
   setSearchValue,
+  isLoading,
+  currentPage,
+  totalPages,
+  setCurrentPage,
 }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
@@ -203,141 +192,236 @@ const UserTable: React.FC<UsersPageProps> = ({
   };
 
   return (
-    <div>
+    <div className="section-container mt-4">
       <Card className="bg-[#13202D] border-[#1E2A36] mb-8">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold text-yellow-500">
-            Users
-          </CardTitle>
-          <CardDescription>
-            Manage user accounts, balances, and statuses
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-2xl max-md:text-xl font-bold text-yellow-500">
+              User Management
+            </CardTitle>
+            <CardDescription className="text-md max-md:text-sm">
+              Manage user accounts
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <div className="w-auto mb-4 self-center relative">
-              <div className="bg-[#fff]/20 h-auto flex px-2 py-1.5 rounded gap-1">
-                <Image
-                  src={magnifyingGlass}
-                  alt="magnifying glass"
-                  width={20}
-                  height={20}
-                />
-                <input
-                  placeholder={`Search for users`}
-                  className="bg-transparent focus:outline-none"
-                  onChange={(e) => setSearchValue(e.target.value)}
-                />
-              </div>
+          <div className="overflow-x-auto w-full block md:table">
+            <div className="bg-[#1E2A36] relative h-auto flex px-2 py-1.5 rounded gap-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <Input
+                placeholder="Search by username, name or email"
+                className="pl-10 text-white bg-transparent focus:outline-none placeholder:text-white border-none max-md:text-sm"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchValue(e.target.value)
+                }
+              />
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="font-bold text-yellow-500/90">
-                    Username
-                  </TableHead>
-                  <TableHead className="font-bold text-yellow-500/90">
-                    Full Name
-                  </TableHead>
-                  <TableHead className="font-bold text-yellow-500/90">
-                    Email
-                  </TableHead>
-                  <TableHead className="font-bold text-yellow-500/90">
-                    Status
-                  </TableHead>
-                  <TableHead className="font-bold text-yellow-500/90">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {userData &&
-                  userData.map((user: UserData, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {user.username}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {user.fullName}
-                      </TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <div
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            user.isBanned
-                              ? "bg-red-100 text-red-800"
-                              : "bg-green-100 text-green-800"
-                          }`}
-                        >
-                          {user.isBanned ? "Banned" : "Active"}
+            {isLoading ? (
+              <div className="flex justify-center items-center h-[436px]">
+                <BeatLoader color="#F2CA16" />
+              </div>
+            ) : (
+              <div>
+                <div className="block md:hidden space-y-4">
+                  {userData &&
+                    userData.map((user: UserData, index: number) => (
+                      <div
+                        key={index}
+                        className="bg-[#13202D] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
+                      >
+                        <div className="flex w-full gap-2">
+                          <div className="w-[50%]">
+                            <p className="text-xs text-gray-400">Username</p>
+                            <p className="text-white text-sm">
+                              {user.username}
+                            </p>
+                          </div>
+                          <div className="w-[50%]">
+                            <p className="text-xs text-gray-400">Full Name</p>
+                            <p className="text-white text-sm">
+                              {user.fullName}
+                            </p>
+                          </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
+                        <div>
+                          <p className="text-xs text-gray-400">Email</p>
+                          <p className="text-white text-sm">{user.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400">Status</p>
+                          <span
+                            className={`inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full ${
+                              user.isBanned
+                                ? "bg-red-100 text-red-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {user.isBanned ? "Banned" : "Active"}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-end space-x-2 pt-2">
                           <Button
                             variant="ghost"
                             size="icon"
-                            title="Edit User"
                             className={""}
                             onClick={() => {
-                              setShowEditModal(true);
                               setSelectedUser(user);
+                              setShowEditModal(true);
                             }}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-
                           <Button
                             variant="ghost"
                             size="icon"
                             className={"text-red-700"}
-                            title={"Delete User"}
                             onClick={() => {
-                              setShowDeleteModal(true);
                               setSelectedUser(user);
+                              setShowDeleteModal(true);
                             }}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4 text-red-500" />
                           </Button>
-
                           <Button
                             variant="ghost"
                             size="icon"
                             className={"text-yellow-500"}
-                            title={`${user.isBanned ? "Unban" : "Ban"} User`}
                             onClick={() => {
-                              setShowBanModal(true);
                               setSelectedUser(user);
                               setBannedStatus(user.isBanned);
+                              setShowBanModal(true);
                             }}
                           >
                             {user.isBanned ? (
-                              <LockOpen className="h-4 w-4" />
+                              <LockOpen className="h-4 w-4 text-yellow-500" />
                             ) : (
-                              <Ban className="h-4 w-4" />
+                              <Ban className="h-4 w-4 text-yellow-500" />
                             )}
                           </Button>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
+                      </div>
+                    ))}
+                </div>
+
+                <div className="hidden md:block overflow-x-auto w-full">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="font-bold text-yellow-500/90">
+                          Username
+                        </TableHead>
+                        <TableHead className="font-bold text-yellow-500/90">
+                          Full Name
+                        </TableHead>
+                        <TableHead className="font-bold text-yellow-500/90">
+                          Email
+                        </TableHead>
+                        <TableHead className="font-bold text-yellow-500/90">
+                          Status
+                        </TableHead>
+                        <TableHead className="font-bold text-yellow-500/90">
+                          Actions
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {userData &&
+                        userData.map((user: UserData, index: number) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">
+                              {user.username}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {user.fullName}
+                            </TableCell>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>
+                              <div
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  user.isBanned
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-green-100 text-green-800"
+                                }`}
+                              >
+                                {user.isBanned ? "Banned" : "Active"}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  title="Edit User"
+                                  className={""}
+                                  onClick={() => {
+                                    setShowEditModal(true);
+                                    setSelectedUser(user);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className={"text-red-700"}
+                                  title={"Delete User"}
+                                  onClick={() => {
+                                    setShowDeleteModal(true);
+                                    setSelectedUser(user);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className={"text-yellow-500"}
+                                  title={`${
+                                    user.isBanned ? "Unban" : "Ban"
+                                  } User`}
+                                  onClick={() => {
+                                    setShowBanModal(true);
+                                    setSelectedUser(user);
+                                    setBannedStatus(user.isBanned);
+                                  }}
+                                >
+                                  {user.isBanned ? (
+                                    <LockOpen className="h-4 w-4" />
+                                  ) : (
+                                    <Ban className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
             {selectedUser && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 mx-4">
                 <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-                  <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                     <DialogHeader>
-                      <DialogTitle>Edit User</DialogTitle>
-                      <DialogDescription>
+                      <DialogTitle className="text-lg max-md:text-md">
+                        Edit User
+                      </DialogTitle>
+                      <DialogDescription className="max-md:text-sm">
                         Update user information for {selectedUser!.username}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">Username</Label>
+                        <Label className="text-right max-md:text-xs">
+                          Username
+                        </Label>
                         <Input
-                          className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"
+                          className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                           name="username"
                           type="text"
                           value={selectedUser?.username || ""}
@@ -345,9 +429,11 @@ const UserTable: React.FC<UsersPageProps> = ({
                         />
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">Full Name</Label>
+                        <Label className="text-right max-md:text-xs">
+                          Full Name
+                        </Label>
                         <Input
-                          className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"
+                          className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                           name="fullName"
                           type="text"
                           value={selectedUser?.fullName || ""}
@@ -355,10 +441,12 @@ const UserTable: React.FC<UsersPageProps> = ({
                         />
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">Email</Label>
+                        <Label className="text-right max-md:text-xs">
+                          Email
+                        </Label>
                         <Input
                           defaultValue={selectedUser!.email}
-                          className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"
+                          className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm"
                           name="email"
                           type="text"
                           value={selectedUser?.email || ""}
@@ -376,7 +464,7 @@ const UserTable: React.FC<UsersPageProps> = ({
                         </select>
                       </div> */}
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="flex-row justify-end space-x-2">
                       <form onSubmit={handleSubmit}>
                         <Button
                           type="submit"
@@ -393,12 +481,12 @@ const UserTable: React.FC<UsersPageProps> = ({
                   open={showDeleteModal}
                   onOpenChange={setShowDeleteModal}
                 >
-                  <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                     <DialogHeader>
-                      <DialogTitle className="text-red-700 text-xl">
+                      <DialogTitle className="text-red-700 text-lg max-md:text-md">
                         Delete User
                       </DialogTitle>
-                      <DialogDescription>
+                      <DialogDescription className="max-md:text-sm">
                         Are you sure you want to delete{" "}
                         <span className="font-semibold text-red-700">
                           {selectedUser!.username}
@@ -408,16 +496,16 @@ const UserTable: React.FC<UsersPageProps> = ({
                     </DialogHeader>
 
                     <div className="p-2 m-2 text-sm">
-                      <p className="text-lg font-bold text-red-700 text-center">
+                      <p className="text-lg max-md:text-md font-bold text-red-700 text-center">
                         Warning
                       </p>
-                      <p className={"text-justify"}>
+                      <p className={"text-justify max-md:text-sm"}>
                         {
                           "By deleting this account, this user will have their data deleted from the Hammershift / Velocity Market App's database"
                         }
                       </p>
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="flex-row justify-end space-x-2">
                       <form
                         onSubmit={async (e) => {
                           e.preventDefault();
@@ -438,12 +526,12 @@ const UserTable: React.FC<UsersPageProps> = ({
                 </Dialog>
 
                 <Dialog open={showBanModal} onOpenChange={setShowBanModal}>
-                  <DialogContent className="bg-[#13202D] border-[#1E2A36]">
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
                     <DialogHeader>
-                      <DialogTitle className="text-yellow-500 text-xl">
+                      <DialogTitle className="text-yellow-500 text-lg max-md:text-md">
                         {bannedStatus ? "Unban " : "Ban "} User
                       </DialogTitle>
-                      <DialogDescription>
+                      <DialogDescription className="max-md:text-sm">
                         Are you sure you want to{" "}
                         {bannedStatus ? "unban " : "ban "}
                         <span className="font-semibold text-yellow-400">
@@ -454,16 +542,16 @@ const UserTable: React.FC<UsersPageProps> = ({
                     </DialogHeader>
 
                     <div className="p-2 m-2 text-sm">
-                      <p className="text-lg font-bold text-yellow-500 text-center">
+                      <p className="text-lg max-md:text-md font-bold text-yellow-500 text-center">
                         Warning
                       </p>
-                      <p className={"text-justify"}>
+                      <p className={"text-justify max-md:text-sm"}>
                         {bannedStatus
                           ? "By unbanning this account, this user WILL HAVE ACCESS again to the Hammershift / Velocity Market App"
                           : "By banning this account, this user WILL NO LONGER HAVE ACCESS to the Hammershift / Velocity Market App"}
                       </p>
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="flex-row justify-end space-x-2">
                       <form
                         onSubmit={async (e) => {
                           e.preventDefault();
@@ -487,6 +575,15 @@ const UserTable: React.FC<UsersPageProps> = ({
           </div>
         </CardContent>
       </Card>
+      {!isLoading && (
+        <div className="mx-auto mb-8 w-1/3">
+          <ResponsivePagination
+            current={currentPage}
+            total={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
     </div>
   );
 };

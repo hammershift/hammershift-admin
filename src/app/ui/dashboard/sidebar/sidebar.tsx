@@ -20,6 +20,7 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import velocityMarketsLogo from "../../../../../public/images/velocity-markets-logo.png";
 import userImg from "../../../../../public/images/user.svg";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
   const { data } = useSession();
@@ -44,6 +45,11 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           title: "Auctions",
           path: "/dashboard/auctions",
           icon: <DirectionsCarIcon />,
+        },
+        {
+          title: "Tournaments",
+          path: "/dashboard/tournaments",
+          icon: <EmojiEventsIcon />,
         },
         { title: "Users", path: "/dashboard/users", icon: <PersonIcon /> },
         {
@@ -83,16 +89,12 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
 
   return (
     <div className="sticky top-0 bg-slate-800 h-full p-5 max-md:bg-opacity-75 max-md:backdrop-blur">
-      <div className="pb-3 pt-1 md:hidden">
-        <ArrowBackIosIcon onClick={closeSidebar} />
-      </div>
-
       <div className="top-auto">
         <Image
           alt="velocity-markets-logo"
           src={velocityMarketsLogo}
           width={250}
-          className="m-1 mb-5"
+          className="m-1 mb-5 max-md:hidden"
         />
         <div className="flex flex-row items-center gap-5 mb-5">
           <Image

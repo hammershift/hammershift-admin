@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     const auction_id = req.nextUrl.searchParams.get("auction_id");
 
     //get the description of the auction
-    const auction = await Auctions.findOne({ auction_id: auction_id });
+    const auction = await Auctions.findById(auction_id);
 
     if (!auction) {
       return NextResponse.json(
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
-        let systemInstruction = agent.agentProperties.systemInstruction;
+        let systemInstruction = agent.agentProperties?.systemInstruction || "";
         //add already submitted prediction values to the system instruction so the agent cannot use them
         if (predictionValues.length > 0) {
           systemInstruction +=
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
           );
 
           const prediction = await Predictions.create({
-            auction_id: auction.auction_id,
+            auction_id: auction._id,
             predictedPrice: response.predictedPrice,
             reasoning: response.reasoning,
             predictionType: "free_play",
