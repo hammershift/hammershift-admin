@@ -519,7 +519,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
           body: JSON.stringify({
             ...newTournament,
             banner: selectedAuctions[0].image,
-            auction_ids: selectedAuctions.map((a) => a.auction_id),
+            auction_ids: selectedAuctions.map((a) => a._id),
             type: currentTournamentType,
           }),
         });
@@ -570,7 +570,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
             headers: { "Content-type": "application/json" },
             body: JSON.stringify({
               ...selectedTournament,
-              auction_ids: selectedAuctions.map((a) => a.auction_id),
+              auction_ids: selectedAuctions.map((a) => a._id),
             }),
           }
         );
