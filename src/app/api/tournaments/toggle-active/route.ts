@@ -19,8 +19,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("tournament_id");
-    console.log(tournament_id);
     const tournament = await Tournaments.findOne({
       tournament_id: parseInt(tournament_id),
     });
@@ -43,7 +41,11 @@ export async function POST(req: NextRequest) {
         }
 
         for (const auction_id of tournament.auction_ids) {
-          const auction = await Auctions.findOne({ auction_id: auction_id });
+          const auction = await Auctions.findOne({ _id: auction_id });
+          if (!auction) {
+            console.error("Auction not found");
+            return NextResponse.json({ message: "Auction not found" });
+          }
           const description = auction!.description.join(" ");
 
           const vertexAI = getVertexAI(app);
@@ -68,7 +70,7 @@ export async function POST(req: NextRequest) {
               //check if agent has already submitted a prediction
               const existingPrediction = await Predictions.findOne({
                 auction_id: auction_id,
-                tournament_id: tournament_id,
+                tournament_id: tournament._id,
                 "user.userId": agent._id,
               });
 
@@ -119,8 +121,8 @@ export async function POST(req: NextRequest) {
                 );
 
                 const prediction = await Predictions.create({
-                  auction_id: auction!.auction_id,
-                  tournament_id: tournament_id,
+                  auction_id: auction!._id,
+                  tournament_id: tournament._id,
                   predictedPrice: response.predictedPrice,
                   reasoning: response.reasoning,
                   predictionType: "free_play",
