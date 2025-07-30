@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       const predictionExists = !!(await Predictions.exists({ tournament_id }));
       if (!predictionExists) {
         const agents = await Users.find({ role: "AGENT" });
-
+        const agentSuccess = Array(agents.length).fill(false);
         if (agents.length === 0) {
           console.error("No AI agents found");
           return NextResponse.json({ message: "No AI agents found" });
@@ -139,6 +139,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 predictionValues.push(response.predictedPrice);
+                agentSuccess[agents.indexOf(agent)] = true;
               } else {
                 console.error("Failed to get a response from Vertex AI");
               }
@@ -149,12 +150,33 @@ export async function POST(req: NextRequest) {
           }
         }
         for (const agent of agents) {
-          tournament.users.push({
-            userId: agent._id,
-            fullName: agent.fullName,
-            username: agent.username,
-            role: agent.role,
-          });
+          //check if agent is already in the tournament
+          //mostly for when the prompt above encounters an error
+          // if (
+          //   !tournament.users.some(
+          //     (user) => user.userId.toString() === agent._id.toString()
+          //   )
+          // ) {
+          //   tournament.users.push({
+          //     userId: agent._id,
+          //     fullName: agent.fullName,
+          //     username: agent.username,
+          //     role: agent.role,
+          //   });
+          // }
+          if (
+            agentSuccess[agents.indexOf(agent)] &&
+            !tournament.users.some(
+              (user) => user.userId.toString() === agent._id.toString()
+            )
+          ) {
+            tournament.users.push({
+              userId: agent._id,
+              fullName: agent.fullName,
+              username: agent.username,
+              role: agent.role,
+            });
+          }
         }
       }
       tournament.isActive = true;
