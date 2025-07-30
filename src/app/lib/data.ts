@@ -478,7 +478,9 @@ export const getTournamentsWithSearch = async (props: SearchProps) => {
   }
 };
 
-export const changeActiveStatusForTournament = async (tournament_id: any) => {
+export const changeActiveStatusForTournament = async (
+  tournament_id: string
+) => {
   const res = await fetch(`/api/tournaments/toggle-active`, {
     method: "POST",
     headers: {

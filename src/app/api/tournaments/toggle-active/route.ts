@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     const tournament = await Tournaments.findOne({
-      tournament_id: parseInt(tournament_id),
+      _id: tournament_id,
     });
 
     if (!tournament) {

@@ -661,9 +661,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
       );
     else setLoadingMessage("Activating tournament...");
     try {
-      const response = await changeActiveStatusForTournament(
-        tournament?.tournament_id
-      );
+      const response = await changeActiveStatusForTournament(tournament?._id);
       if (!response.isSuccessful) {
         console.error("Error changing active status for tournament");
       } else {
