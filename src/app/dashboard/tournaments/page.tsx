@@ -245,7 +245,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
     endTime: null,
     auction_ids: [],
     users: [],
-    maxUsers: 0,
+    maxUsers: 20,
     createdAt: null,
   };
   const [showAddModal, setShowAddModal] = useState(false);
