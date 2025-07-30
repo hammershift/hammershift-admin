@@ -84,7 +84,10 @@ const Auctions = () => {
       auctionData={carData}
       currentPage={currentPage}
       currentTab={currentTab}
-      setCurrentTab={setCurrentTab}
+      setCurrentTab={(tab: string) => {
+        setCurrentPage(1);
+        setCurrentTab(tab);
+      }}
       totalPages={totalPages}
       isLoading={isLoading}
       refreshToggle={refreshToggle}
