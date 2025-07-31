@@ -5,8 +5,11 @@ export async function GET(req: NextRequest) {
   try {
     await connectToDB();
 
-    const date: string | null = req.nextUrl.searchParams.get("date");
+    const date = req.nextUrl.searchParams.get("date");
 
+    if (!date) {
+      return NextResponse.error();
+    }
     return NextResponse.json({ date: date });
     //date string for end of day
     // const endOfToday = new Date(date as string);
