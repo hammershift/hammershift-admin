@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
         $lt: endOfToday,
       },
     });
-    return NextResponse.json(predictions.length);
+    return NextResponse.json({ total: predictions.length }, { status: 200 });
   } catch (error) {
     console.error("Failed to fetch predictions:", error);
     return NextResponse.error();

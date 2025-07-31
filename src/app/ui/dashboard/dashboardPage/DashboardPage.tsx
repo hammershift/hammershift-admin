@@ -178,7 +178,7 @@ const DashboardPage = () => {
       const predictionsOnDay = await getPredictionsOnDate(date.date);
       return {
         date: `${date.day}, ${date.date}`,
-        predictions: predictionsOnDay,
+        predictions: predictionsOnDay.total,
       };
     });
 
