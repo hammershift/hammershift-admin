@@ -682,7 +682,7 @@ export const getWagersWithSearch = async (searchString: string) => {
 // };
 
 export const getPredictionsOnDate = async (date: string) => {
-  const res = await fetch(`/api/predictions/day?date=${date}`);
+  const res = await fetch(`/api/predictions/day?predictionDate=${date}`);
   if (res.status === 200) {
     const data = await res.json();
     return data;

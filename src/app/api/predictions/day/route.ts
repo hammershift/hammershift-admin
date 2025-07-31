@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   try {
     await connectToDB();
 
-    const date = req.nextUrl.searchParams.get("date");
+    const date = req.nextUrl.searchParams.get("predictionDate");
 
     if (!date) {
       return NextResponse.error();
