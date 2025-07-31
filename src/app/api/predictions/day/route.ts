@@ -19,7 +19,17 @@ export async function GET(req: NextRequest) {
         $lt: endOfToday,
       },
     });
-    return NextResponse.json({ total: predictions.length }, { status: 200 });
+    if (predictions) {
+      return NextResponse.json(
+        { total: predictions.length, predictions: predictions },
+        { status: 200 }
+      );
+    } else {
+      return NextResponse.json(
+        { message: "Cannot find Predictions" },
+        { status: 404 }
+      );
+    }
   } catch (error) {
     console.error("Failed to fetch predictions:", error);
     return NextResponse.error();
