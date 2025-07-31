@@ -5,6 +5,7 @@ export async function GET(req: NextRequest) {
   try {
     await connectToDB();
     const date: string | null = req.nextUrl.searchParams.get("date");
+    console.log(`Fetching predictions for date: ${date}`);
     const startOfToday = new Date(date as string);
     startOfToday.setHours(0, 0, 0, 0);
 
