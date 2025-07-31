@@ -89,7 +89,7 @@ export async function PUT(
 
       await Predictions.updateMany(
         {
-          tournament_id: tournament.tournament_id,
+          tournament_id: tournament._id,
           isActive: true,
         },
         {
@@ -117,7 +117,7 @@ export async function PUT(
         auction_id: {
           $in: tournament.auction_ids,
         },
-        tournament_id: tournament.tournament_id,
+        tournament_id: tournament._id,
       });
 
       let userScore = {
@@ -240,7 +240,7 @@ export async function PUT(
     //update all predictions for tournament, set isActive to false
     await Predictions.updateMany(
       {
-        tournament_id: tournament.tournament_id,
+        tournament_id: tournament._id,
         isActive: true,
       },
       {

@@ -576,7 +576,7 @@ export const searchTournaments = async (searchWord: string) => {
 
 // compute tournament results
 
-export const computeTournamentResults = async (tournament_id: number) => {
+export const computeTournamentResults = async (tournament_id: string) => {
   const res = await fetch(`/api/tournaments/${tournament_id}/compute`, {
     method: "PUT",
   });

@@ -626,9 +626,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
     setIsSubmitting(true);
     setErrorMessage("");
     try {
-      const response = await computeTournamentResults(
-        selectedTournament!.tournament_id
-      );
+      const response = await computeTournamentResults(selectedTournament!._id);
       if (response.ok) {
         const newTournament = await response.json();
         setSelectedTournament(newTournament.data);
