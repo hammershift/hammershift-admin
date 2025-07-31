@@ -263,6 +263,34 @@ export const getPredictions = async (auction_id: string) => {
   }
 };
 
+export const getTotalPredictionCount = async () => {
+  try {
+    const response = await fetch(`/api/predictions/count`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.total;
+    } else {
+      console.error(`Failed to fetch total prediction count`);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const getAllPredictions = async () => {
+  try {
+    const response = await fetch(`/api/predictions`, { method: "GET" });
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      console.error(`Failed to fetch all predictions`);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 // get one auction by id
 export const getOneAuction = async (auction_id: string) => {
   try {
@@ -644,13 +672,22 @@ export const getWagersWithSearch = async (searchString: string) => {
 };
 
 // get wagers on Date
-export const getWagersOnDate = async (date: string) => {
-  const res = await fetch(`/api/wagers/day?date=${date}`);
+// export const getWagersOnDate = async (date: string) => {
+//   const res = await fetch(`/api/wagers/day?date=${date}`);
+//   if (res.status === 200) {
+//     const data = await res.json();
+//     return data;
+//   }
+//   console.error("Failed to fetch wagers!");
+// };
+
+export const getPredictionsOnDate = async (date: string) => {
+  const res = await fetch(`/api/predictions/day?date=${date}`);
   if (res.status === 200) {
     const data = await res.json();
     return data;
   }
-  console.error("Failed to fetch wagers!");
+  console.error("Failed to fetch predictions!");
 };
 
 export const refundWager = async (wager_id: string) => {

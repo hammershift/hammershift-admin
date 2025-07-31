@@ -26,6 +26,9 @@ export async function GET(req: NextRequest) {
       });
       return NextResponse.json(predictions);
     }
+
+    const predictions = await Predictions.find({}).sort({ createdAt: -1 });
+    return NextResponse.json(predictions);
   } catch (e) {
     console.error(e);
     return NextResponse.json({ message: "Internal server error" });

@@ -18,17 +18,20 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { getUsers, getCarsWithFilter } from "@/app/lib/data";
 import {
-  getLimitedWagers,
-  getWagersCount,
-  getWagersOnDate,
+  getUsers,
+  getCarsWithFilter,
+  getTotalPredictionCount,
+  getPredictionsOnDate,
 } from "@/app/lib/data";
+import { Prediction } from "@/app/models/prediction.model";
 import Link from "next/link";
+import { set } from "mongoose";
 
 const DashboardPage = () => {
   const [userData, setUsersData] = useState({ total: 0, users: [] });
   const [wagersData, setWagersData] = useState({ total: 0, wagers: [] });
+  const [predictionTotal, setPredictionTotal] = useState<number>(0);
   const [totalWagers, setTotalWagers] = useState(0);
   const [totalAuctions, setTotalAuctions] = useState(0);
   const [carsData, setCarsData] = useState({ total: 0, cars: [] });
@@ -57,42 +60,60 @@ const DashboardPage = () => {
   }, []);
 
   // fetch wagers data
-  useEffect(() => {
-    const fetchWagersData = async () => {
-      setTableLoading(true);
-      try {
-        const data = await getLimitedWagers(6);
+  // useEffect(() => {
+  //   const fetchWagersData = async () => {
+  //     setTableLoading(true);
+  //     try {
+  //       const data = await getLimitedWagers(6);
 
-        if (data && "wagers" in data) {
-          setWagersData(data);
+  //       if (data && "wagers" in data) {
+  //         setWagersData(data);
+  //       } else {
+  //         console.error("Unexpected data structure:", data);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //     }
+  //     setTableLoading(false);
+  //   };
+  //   fetchWagersData();
+  // }, []);
+
+  //fetch total wagers
+  // useEffect(() => {
+  //   const fetchTotalWagers = async () => {
+  //     try {
+  //       const data = await getWagersCount();
+
+  //       if (data && "total" in data) {
+  //         setTotalWagers(data.total);
+  //       } else {
+  //         console.error("Error in getting total wagers:", data);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching total wagers:", error);
+  //     }
+  //   };
+  //   fetchTotalWagers();
+  // }, [wagersData]);
+
+  //get all predictions
+  useEffect(() => {
+    const fetchAllPredictions = async () => {
+      try {
+        const data = await getTotalPredictionCount();
+
+        if (data) {
+          setPredictionTotal(data);
         } else {
           console.error("Unexpected data structure:", data);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-      setTableLoading(false);
     };
-    fetchWagersData();
+    fetchAllPredictions();
   }, []);
-
-  //fetch total wagers
-  useEffect(() => {
-    const fetchTotalWagers = async () => {
-      try {
-        const data = await getWagersCount();
-
-        if (data && "total" in data) {
-          setTotalWagers(data.total);
-        } else {
-          console.error("Error in getting total wagers:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching total wagers:", error);
-      }
-    };
-    fetchTotalWagers();
-  }, [wagersData]);
 
   // get total car auctions
   useEffect(() => {
@@ -142,17 +163,30 @@ const DashboardPage = () => {
     const dates = await getLastWeekDates();
 
     //maps through the dates array and gets the wagers on each day
-    const wagersPerDayPromises = dates.map(async (date: any) => {
-      // gets wagers on a specific date
-      const wagersOnDay = await getWagersOnDate(date.date);
+    // const wagersPerDayPromises = dates.map(async (date: any) => {
+    //   // gets wagers on a specific date
+    //   const wagersOnDay = await getWagersOnDate(date.date);
 
+    //   return {
+    //     date: `${date.day}, ${date.date}`,
+    //     wagers: wagersOnDay.totalAmount,
+    //   };
+    // });
+
+    const predictionsPerDayPromises = dates.map(async (date: any) => {
+      // gets wagers on a specific date
+      const predictionsOnDay = await getPredictionsOnDate(date.date);
       return {
         date: `${date.day}, ${date.date}`,
-        wagers: wagersOnDay.totalAmount,
+        predictions: predictionsOnDay,
       };
     });
-    const wagersPerDay = await Promise.all(wagersPerDayPromises);
-    return wagersPerDay;
+
+    const predictionsPerDay = await Promise.all(predictionsPerDayPromises);
+    return predictionsPerDay;
+
+    // const wagersPerDay = await Promise.all(wagersPerDayPromises);
+    // return wagersPerDay;
   };
 
   useEffect(() => {
@@ -162,9 +196,8 @@ const DashboardPage = () => {
       setChartLoading(false);
       setData(result);
     };
-
     fetchData();
-  }, []);
+  }, [predictionTotal]);
 
   return (
     <div className="w-full grid gap-4 ">
@@ -179,8 +212,8 @@ const DashboardPage = () => {
         <div className="section-container flex flex-row gap-2">
           <PaidIcon />
           <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
-            <div>Total Wagers</div>
-            <div className="text-lg font-bold">{totalWagers}</div>
+            <div>Total Active Predictions</div>
+            <div className="text-lg font-bold">{predictionTotal}</div>
           </div>
         </div>
         <div className="section-container flex flex-row gap-2">
@@ -191,7 +224,7 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
-      <div className="section-container">
+      {/* <div className="section-container">
         <div className="mb-4">LATEST WAGERS</div>
         {tableLoading ? (
           <div className="flex justify-center items-center h-[200px]">
@@ -203,7 +236,7 @@ const DashboardPage = () => {
         <Link href="../../../dashboard/wagers" className="flex justify-end">
           <h2 className="text-sm text-yellow-400 m-2 px-2">See All</h2>
         </Link>
-      </div>
+      </div> */}
       <div className="section-container">
         <div className="mb-4">{`WEEKLY RECAP: ${dates[0]?.date} - ${dates[6]?.date}`}</div>
         <div className="w-full h-[300px] sm:h-[450px]">
@@ -298,7 +331,7 @@ const Chart = ({ data }: { data: any }) => {
         <Legend />
         <Line
           type="monotone"
-          dataKey="wagers"
+          dataKey="predictions"
           stroke="#82ca9d"
           activeDot={{ r: 8 }}
         />
