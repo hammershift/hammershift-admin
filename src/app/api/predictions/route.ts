@@ -23,7 +23,10 @@ export async function GET(req: NextRequest) {
     if (auction_id) {
       const predictions = await Predictions.find({
         auction_id: auction_id,
-      });
+        tournament_id: {
+          $exists: false,
+        },
+      }).sort({ createdAt: -1 });
       return NextResponse.json(predictions);
     }
 
