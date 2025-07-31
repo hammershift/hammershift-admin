@@ -105,7 +105,7 @@ export async function PUT(
     }
 
     const auctionMap = new Map(
-      auctions.map((auction) => [auction.auction_id, auction])
+      auctions.map((auction) => [auction._id, auction])
     );
     //start computation of user scores
     const userScores = [];
