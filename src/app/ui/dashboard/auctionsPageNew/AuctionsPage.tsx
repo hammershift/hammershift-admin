@@ -435,9 +435,18 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                               </Badge>
                             </div>
                             <CardContent className="p-4">
-                              <h3 className="text-xl max-md:text-lg font-bold mb-1 truncate">
+                              {auction.year && auction.make && auction.model ? (
+                                <h3 className="text-xl max-md:text-lg font-bold mb-1 truncate">
+                                  {auction.year} {auction.make} {auction.model}
+                                </h3>
+                              ) : (
+                                <h3 className="text-xl max-md:text-lg font-bold mb-1 truncate">
+                                  {auction.title}
+                                </h3>
+                              )}
+                              {/* <h3 className="text-xl max-md:text-lg font-bold mb-1 truncate">
                                 {auction.year} {auction.make} {auction.model}
-                              </h3>
+                              </h3> */}
                               <p className="text-sm text-gray-400">
                                 {auction.auction_id}
                               </p>

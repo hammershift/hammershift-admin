@@ -112,6 +112,7 @@ export async function GET(req: NextRequest) {
             _id: 1,
             auction_id: 1,
             attributes: 1,
+            title: 1,
             description: 1,
             images_list: 1,
             listing_details: 1,
