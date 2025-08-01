@@ -237,7 +237,7 @@ const DashboardPage = () => {
           <h2 className="text-sm text-yellow-400 m-2 px-2">See All</h2>
         </Link>
       </div> */}
-      <div className="section-container">
+      {/* <div className="section-container">
         <div className="mb-4">{`WEEKLY RECAP: ${dates[0]?.date} - ${dates[6]?.date}`}</div>
         <div className="w-full h-[300px] sm:h-[450px]">
           {chartLoading ? (
@@ -248,7 +248,7 @@ const DashboardPage = () => {
             data && data.length > 0 && <Chart data={data} />
           )}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
