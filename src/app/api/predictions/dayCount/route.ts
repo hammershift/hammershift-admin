@@ -7,12 +7,12 @@ export async function GET(req: NextRequest) {
 
     const date = req.nextUrl.searchParams.get("predictionDate");
 
-    if (!date) {
-      return NextResponse.json(
-        { message: "No date provided" },
-        { status: 400 }
-      );
-    }
+    // if (!date) {
+    //   return NextResponse.json(
+    //     { message: "No date provided" },
+    //     { status: 400 }
+    //   );
+    // }
     return NextResponse.json({ date: date });
     //date string for end of day
     // const endOfToday = new Date(date as string);
