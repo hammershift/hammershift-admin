@@ -577,10 +577,19 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                                     <p className="text-xs text-gray-400">Car</p>
                                     <div className="flex items-center gap-3">
                                       <div>
-                                        <div className="text-xs">
-                                          {auction.year} {auction.make}{" "}
-                                          {auction.model}
-                                        </div>
+                                        {auction.year &&
+                                        auction.make &&
+                                        auction.model ? (
+                                          <div className="text-xs">
+                                            {auction.year} {auction.make}{" "}
+                                            {auction.model}{" "}
+                                          </div>
+                                        ) : (
+                                          <div className="text-xs">
+                                            {auction.title}
+                                          </div>
+                                        )}
+
                                         {/* <div className="text-sm text-gray-400">
                                   {car.description.substring(0, 30)}...
                                 </div> */}
@@ -694,10 +703,19 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                                         )}
                                       </div>
                                       <div>
-                                        <div className="font-medium truncate">
-                                          {auction.year} {auction.make}{" "}
-                                          {auction.model}
-                                        </div>
+                                        {auction.year &&
+                                        auction.make &&
+                                        auction.model ? (
+                                          <div className="font-medium truncate">
+                                            {auction.year} {auction.make}{" "}
+                                            {auction.model}
+                                          </div>
+                                        ) : (
+                                          <div className="font-medium truncate">
+                                            {auction.title}
+                                          </div>
+                                        )}
+
                                         {/* <div className="text-sm text-gray-400">
                                   {car.description.substring(0, 30)}...
                                 </div> */}
