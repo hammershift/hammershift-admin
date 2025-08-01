@@ -123,6 +123,7 @@ interface TournamentAuctionData {
 interface TournamentAuctionData {
   _id: string;
   auction_id: string;
+  title: string;
   description: string[];
   price: number;
   year: string;
@@ -2550,9 +2551,18 @@ const TournamentTable: React.FC<TournamentProps> = ({
 
                           <div className="grid grid-cols-4">
                             <div className="col-span-3 flex-1 min-w-0">
-                              <div className="max-md:text-xs text-sm truncate">
+                              {auction.year && auction.make && auction.model ? (
+                                <div className="max-md:text-xs text-sm truncate">
+                                  {`${auction.year} ${auction.make} ${auction.model}`}
+                                </div>
+                              ) : (
+                                <div className="max-md:text-xs text-sm truncate">
+                                  {auction.title}
+                                </div>
+                              )}
+                              {/* <div className="max-md:text-xs text-sm truncate">
                                 {`${auction.year} ${auction.make} ${auction.model}`}
-                              </div>
+                              </div> */}
                               <div className="max-md:text-xs text-sm text-gray-400 truncate">
                                 Current Bid: $
                                 {(auction.price || 0).toLocaleString()}

@@ -124,6 +124,7 @@ export const getTournamentAuctions = async (
         auctions: list.auctions.map((data: any) => ({
           _id: data._id,
           auction_id: data.auction_id,
+          title: data.title,
           description: [...data.description],
           images_list: [...data.images_list],
           listing_details: [...data.listing_details],
