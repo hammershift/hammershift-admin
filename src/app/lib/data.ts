@@ -776,10 +776,13 @@ export const getUnsuccessfulAgents = async (
 
 export const repromptAgentPrediction = async (
   auction_id: string,
-  agent_id: string
+  agent_id: string,
+  tournament_id?: string
 ) => {
   const res = await fetch(
-    `/api/prompt/reprompt?auction_id=${auction_id}&agent_id=${agent_id}`,
+    `/api/prompt/reprompt?auction_id=${auction_id}&agent_id=${agent_id}${
+      tournament_id ? `&tournament_id=${tournament_id}` : ""
+    }`,
     {
       method: "POST",
       headers: {

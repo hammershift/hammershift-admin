@@ -11,6 +11,8 @@ import {
   getTournamentsWithSearch,
   computeTournamentResults,
   getTournamentPredictions,
+  getUnsuccessfulAgents,
+  repromptAgentPrediction,
 } from "@/app/lib/data";
 import {
   Card,
@@ -50,6 +52,8 @@ import {
   Trash2,
   Trophy,
   X,
+  Redo,
+  Check,
 } from "lucide-react";
 import { Button } from "@/app/ui/components/button";
 import { Label } from "@/app/ui/components/label";
@@ -73,7 +77,8 @@ import {
 import LoadingModal from "@/app/ui/components/LoadingModal";
 import AlertModal from "@/app/ui/components/AlertModal";
 import { Prediction } from "@/app/models/prediction.model";
-
+import { AgentProperties } from "@/app/lib/interfaces";
+import { CarData } from "../auctions/page";
 interface TournamentUser {
   userId: string;
   fullName: string;
@@ -137,6 +142,22 @@ interface TournamentAuctionData {
   isActive: boolean;
   ended: boolean;
   deadline: Date;
+}
+
+interface Agent {
+  _id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  balance: number;
+  isActive: boolean;
+  isBanned: boolean;
+  provider: string;
+  about: string;
+  createdAt: Date;
+  updatedAt: Date;
+  role: string;
+  agentProperties?: AgentProperties;
 }
 
 const TournamentsPage = () => {
@@ -299,6 +320,17 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [filteredPredictions, setFilteredPredictions] = useState<Prediction[]>(
     []
   );
+
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [currentAuction, setCurrentAuction] = useState<TournamentAuctionData>();
+  const [currentTournamentAuctions, setCurrentTournamentAuctions] = useState<
+    TournamentAuctionData[]
+  >([]);
+  const [agentLoadingStates, setAgentLoadingStates] = useState<{
+    [key: string]: string;
+  }>({});
+  const [showRePrompt, setShowRePrompt] = useState<boolean>(false);
+  const [agentLoading, setAgentLoading] = useState<boolean>(false);
 
   const [viewAuction, setViewAuction] =
     useState<TournamentAuctionData | null>();
@@ -674,6 +706,87 @@ const TournamentTable: React.FC<TournamentProps> = ({
     setIsSubmitting(false);
     setShowLoadingModal(false);
   };
+
+  const handleRepromptAgent = async (agent: Agent) => {
+    try {
+      if (!currentAuction || !selectedTournament) return;
+      setAgentLoadingStates((prevStates) => ({
+        ...prevStates,
+        [agent._id]: "loading",
+      }));
+      const response = await repromptAgentPrediction(
+        currentAuction._id,
+        agent._id,
+        selectedTournament._id
+      );
+      if (response.status === "success") {
+        setAgentLoadingStates((prevStates) => ({
+          ...prevStates,
+          [agent._id]: "success",
+        }));
+      } else {
+        setAgentLoadingStates((prevStates) => ({
+          ...prevStates,
+          [agent._id]: "unsuccessful",
+        }));
+      }
+    } catch (e) {
+      console.error(e);
+      setAgentLoadingStates((prevStates) => ({
+        ...prevStates,
+        [agent._id]: "unsuccessful",
+      }));
+    }
+  };
+
+  const handleViewRepromptAuction = async (tournament: TournamentData) => {
+    setShowRePrompt(true);
+    setAgentLoading(true);
+    setSelectedTournament(tournament);
+
+    //get auctions from tournament first
+    try {
+      const auctions = await getSelectedTournamentAuctions(
+        tournament.auction_ids
+      );
+      if (auctions.length > 0) {
+        setCurrentAuction(auctions[0]);
+        setCurrentTournamentAuctions(auctions);
+      } else {
+        throw new Error("No auctions found for this tournament");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    async function fetchUnsuccessfulAgents() {
+      try {
+        setAgentLoading(true);
+        setAgentLoadingStates({});
+        if (currentAuction && selectedTournament) {
+          const response = await getUnsuccessfulAgents(
+            currentAuction._id,
+            selectedTournament._id
+          );
+          setAgents(response.agents);
+
+          for (const agent of response.agents) {
+            setAgentLoadingStates((prevStates) => ({
+              ...prevStates,
+              [agent._id.toString()]: "unsuccessful",
+            }));
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setAgentLoading(false);
+      }
+    }
+    fetchUnsuccessfulAgents();
+  }, [currentAuction, selectedTournament]);
 
   useEffect(() => {
     setErrorMessage("");
@@ -1139,6 +1252,17 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                       }}
                                     >
                                       <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className={"text-yellow-500"}
+                                      title={"Reprompt Agents for Tournament"}
+                                      onClick={() => {
+                                        handleViewRepromptAuction(tournament);
+                                      }}
+                                    >
+                                      <Redo className="h-4 w-4" />
                                     </Button>
                                   </div>
                                 </TableCell>
@@ -2093,18 +2217,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 </SelectTrigger>
                                 <SelectContent className="bg-[#1E2A36] max-md:text-sm">
                                   {selectedAuctions.map((selectedAuction) => {
-                                    // const currentAuctionId =
-                                    //   selectedAuction.auction_id;
-                                    // console.log(
-                                    //   `Auction id here: ${currentAuctionId}`
-                                    // );
-
-                                    // console.log({ availableAuctionData });
-                                    // const auction = availableAuctionData.find(
-                                    //   (auction) =>
-                                    //     auction.auction_id === currentAuctionId
-                                    // );
-                                    // console.log({ auction });
                                     return (
                                       <SelectItem
                                         key={selectedAuction.auction_id}
@@ -2126,63 +2238,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                         </div>
                       ) : (
                         <div className="p-2 min-h-[60px]">
-                          {/* {selectedAuctions.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {selectedAuctions.map((selectedAuction) => {
-                                const currentAuctionId =
-                                  selectedAuction.auction_id;
-                                const auction = availableAuctionData.find(
-                                  (auction) =>
-                                    auction.auction_id === currentAuctionId
-                                );
-                                if (auction)
-                                  return (
-                                    <div
-                                      key={currentAuctionId}
-                                      className="flex items-center p-3 rounded-md border cursor-pointer transition-colors bg-[#1E2A36] border-[#FFFFFF] hover:bg-[#1E2A36]/80"
-                                    >
-                                      <div className="grid grid-cols-4">
-                                        <div className="col-span-3 flex-1 min-w-0">
-                                          <div className="max-md:text-xs text-sm truncate">
-                                            {`${auction.year} ${auction.make} ${auction.model}`}
-                                          </div>
-                                          <div className="max-md:text-xs text-sm text-gray-400 truncate">
-                                            Current Bid: $
-                                            {(
-                                              auction.price || 0
-                                            ).toLocaleString()}
-                                          </div>
-                                          <div className="max-md:text-xs text-sm text-gray-400 truncate">
-                                            Ends In:{" "}
-                                            {formatDate(auction.deadline)}
-                                          </div>
-                                        </div>
-                                        {auction.image ? (
-                                          <Image
-                                            src={auction.image}
-                                            alt={`${auction.year} ${auction.make} ${auction.model}`}
-                                            title={`${auction.year} ${auction.make} ${auction.model}`}
-                                            className="w-full h-full object-cover"
-                                            objectFit="cover"
-                                            width={100}
-                                            height={100}
-                                          />
-                                        ) : (
-                                          <div className="w-full h-full flex items-center justify-center">
-                                            <ImageOff className="w-6 h-6 text-gray-500" />
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                else return "";
-                              })}
-                            </div>
-                          ) : (
-                            <p className="text-gray-400 text-sm">
-                              No auctions selected
-                            </p>
-                          )} */}
                           {(() => {
                             const auction = selectedAuctions.find(
                               (a) => a.auction_id === viewAuction?.auction_id
@@ -2619,6 +2674,115 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     </Button>
                   </form>
                 </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={showRePrompt} onOpenChange={setShowRePrompt}>
+              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-6xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                <DialogHeader>
+                  <DialogTitle className="text-lg max-md:text-md">
+                    Reprompt Agent Prediction
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-300 max-md:text-sm">
+                    In case an agent&apos;s prediction was unsuccessful due to
+                    the response not having the proper format to get the final
+                    price.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
+                  <Label className="max-md:text-xs">
+                    Auctions ({currentTournamentAuctions.length})
+                  </Label>
+                  <div className="max-md:hidden col-span-3"></div>
+                  <div className="relative max-md:col-span-3 col-span-4 max-md:text-sm group">
+                    {/* <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"> */}
+                    {currentTournamentAuctions.length > 0 &&
+                      currentAuction != null && (
+                        <Select
+                          value={currentAuction.auction_id || ""}
+                          onValueChange={(value: string) => {
+                            setCurrentAuction(
+                              currentTournamentAuctions.find(
+                                (auction) => auction.auction_id == value
+                              )
+                            );
+                          }}
+                          name="role"
+                        >
+                          <SelectTrigger
+                            className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs
+                        }`}
+                          >
+                            <SelectValue
+                              className="max-md:text-xs"
+                              placeholder="Select auction"
+                            />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                            {currentTournamentAuctions.map(
+                              (selectedAuction) => {
+                                return (
+                                  <SelectItem
+                                    key={selectedAuction.auction_id}
+                                    value={selectedAuction.auction_id}
+                                    className="truncate max-md:max-w-[250px] text-ellipsis overflow-hidden"
+                                  >
+                                    {`${selectedAuction.year} ${selectedAuction.make} ${selectedAuction.model}`}
+                                  </SelectItem>
+                                );
+                              }
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )}
+                  </div>
+                </div>
+
+                {agentLoading ? (
+                  <div className="flex justify-center items-center w-full mt-4">
+                    <BeatLoader color="#F2CA16" />
+                  </div>
+                ) : (
+                  <div className="py-4">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="">Agent Name</TableHead>
+                          <TableHead className="flex items-center justify-center">
+                            Action
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {agents.map((agent) => (
+                          <TableRow key={agent._id.toString()}>
+                            <TableCell className="font-medium">
+                              {agent.username}
+                            </TableCell>
+                            <TableCell className="flex items-center justify-center">
+                              {agentLoadingStates[agent._id.toString()] ===
+                              "loading" ? (
+                                <BeatLoader color="#F2CA16" size="0.5rem" />
+                              ) : agentLoadingStates[agent._id.toString()] ===
+                                "success" ? (
+                                <Check className="h-4 w-4" color="green" />
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  title="Reprompt Prediction for Agent"
+                                  className="text-yellow-500"
+                                  onClick={() => handleRepromptAgent(agent)}
+                                >
+                                  <Redo className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </DialogContent>
             </Dialog>
           </div>
