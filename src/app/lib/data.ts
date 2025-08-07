@@ -751,6 +751,51 @@ export const deleteAgentPrediction = async (id: string) => {
   }
 };
 
+export const getUnsuccessfulAgents = async (
+  auction_id: string,
+  tournament_id?: string
+) => {
+  const res = await fetch(
+    `/api/agents?auction_id=${auction_id}${
+      tournament_id ? `&tournament_id=${tournament_id}` : ""
+    }`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch unsuccessful agents");
+  }
+  const data = await res.json();
+  return data;
+};
+
+export const repromptAgentPrediction = async (
+  auction_id: string,
+  agent_id: string
+) => {
+  const res = await fetch(
+    `/api/prompt/reprompt?auction_id=${auction_id}&agent_id=${agent_id}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to prompt Vertex AI");
+  } else {
+    const data = await res.json();
+    return data;
+  }
+};
+
 //toggle auction display
 export const toggleAuctionDisplay = async (
   auction_id: string,

@@ -32,6 +32,7 @@ import { Badge } from "@/app/ui/components/badge";
 import { CarData } from "@/app/dashboard/auctions/page";
 import ResponsivePagination from "react-responsive-pagination";
 import { Prediction } from "@/app/models/prediction.model";
+import { User } from "@/app/models/user.model";
 //import "react-responsive-pagination/themes/classic.css";
 import "react-responsive-pagination/themes/minimal-light-dark.css";
 import {
@@ -40,6 +41,8 @@ import {
   getPredictions,
   deleteAgentPrediction,
   editAuctionWithId,
+  getUnsuccessfulAgents,
+  repromptAgentPrediction,
 } from "@/app/lib/data";
 import {
   Car,
@@ -54,6 +57,8 @@ import {
   Calendar,
   CircleCheck,
   Clock,
+  Redo,
+  Check,
 } from "lucide-react";
 import { Label } from "../../components/label";
 import { DateTime } from "luxon";
@@ -67,7 +72,8 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/app/ui/components/dialog";
-
+import { AgentProperties } from "@/app/lib/interfaces";
+import { set } from "mongoose";
 interface AuctionsPageProps {
   auctionData: CarData[];
   currentPage: number;
@@ -92,6 +98,21 @@ interface EditDetails {
   status: string | null;
 }
 
+interface Agent {
+  _id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  balance: number;
+  isActive: boolean;
+  isBanned: boolean;
+  provider: string;
+  about: string;
+  createdAt: Date;
+  updatedAt: Date;
+  role: string;
+  agentProperties?: AgentProperties;
+}
 const AuctionsPage: React.FC<AuctionsPageProps> = ({
   auctionData: auctionData,
   currentTab,
@@ -111,12 +132,17 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   const [auctionLoadingStates, setAuctionLoadingStates] = useState<{
     [key: string]: string;
   }>({});
+  const [agentLoadingStates, setAgentLoadingStates] = useState<{
+    [key: string]: string;
+  }>({});
   const [editAuction, setEditAuction] = useState<boolean>(false);
   const [deleteAuction, setDeleteAuction] = useState<boolean>(false);
   const [editLoading, setEditLoading] = useState<boolean>(false);
   const [viewingPredictions, setViewingPredictions] = useState<boolean>(false);
+  const [rePrompt, setRePrompt] = useState<boolean>(false);
   const [currentAuction, setCurrentAuction] = useState<CarData | null>();
   const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [refreshPrediction, setRefreshPrediction] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [viewportWidth, setViewportWidth] = useState(0);
@@ -125,6 +151,7 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
     direction: "asc",
   });
   const [predictionLoading, setPredictionLoading] = useState<boolean>(false);
+  const [agentLoading, setAgentLoading] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>("");
   const [editAuctionDetails, setEditAuctionDetails] = useState<EditDetails>({
     image: "",
@@ -181,7 +208,6 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
 
   useEffect(() => {
     async function fetchPredictions() {
-      console.log("test");
       if (currentAuction) {
         const predictions = await getPredictions(currentAuction._id);
         setPredictions(predictions);
@@ -217,14 +243,41 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   };
   async function handleViewPrediction(auction: CarData) {
     //get predictions from auction_id
-    setCurrentAuction(auction);
-    setPredictionLoading(true);
-    setViewingPredictions(true);
+    if (currentAuction && currentAuction._id === auction._id) {
+      setViewingPredictions(true);
+    } else {
+      setCurrentAuction(auction);
+      setPredictionLoading(true);
+      setViewingPredictions(true);
+    }
   }
 
   async function handleDeleteAuction(auction: CarData) {
     setCurrentAuction(auction);
     setDeleteAuction(true);
+  }
+
+  async function handleViewRePromptAuction(auction: CarData) {
+    setCurrentAuction(auction);
+    setRePrompt(true);
+    setAgentLoading(true);
+
+    try {
+      const response = await getUnsuccessfulAgents(auction._id);
+      setAgents(response.agents);
+
+      for (const agent of response.agents) {
+        setAgentLoadingStates((prevStates) => ({
+          ...prevStates,
+          [agent._id.toString()]: "unsuccessful",
+        }));
+      }
+    } catch (e) {
+      console.log(e);
+      alert("An error occured while getting agents");
+    } finally {
+      setAgentLoading(false);
+    }
   }
 
   async function handleToggleInactive(e: any) {
@@ -298,6 +351,37 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
       setPredictionLoading(true);
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  async function handleRepromptAgent(agent: Agent) {
+    try {
+      if (!currentAuction) return;
+      setAgentLoadingStates((prevStates) => ({
+        ...prevStates,
+        [agent._id]: "loading",
+      }));
+      const response = await repromptAgentPrediction(
+        currentAuction._id,
+        agent._id
+      );
+      if (response.status === "success") {
+        setAgentLoadingStates((prevStates) => ({
+          ...prevStates,
+          [agent._id]: "success",
+        }));
+      } else {
+        setAgentLoadingStates((prevStates) => ({
+          ...prevStates,
+          [agent._id]: "unsuccessful",
+        }));
+      }
+    } catch (e) {
+      console.error(e);
+      setAgentLoadingStates((prevStates) => ({
+        ...prevStates,
+        [agent._id]: "unsuccessful",
+      }));
     }
   }
   async function handleStatusToggle(id: string) {
@@ -664,6 +748,17 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                                   >
                                     <Eye className="h-4 w-4" />
                                   </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    title="Reprompt Agent Prediction"
+                                    className="text-yellow-500"
+                                    onClick={() =>
+                                      handleViewRePromptAuction(auction)
+                                    }
+                                  >
+                                    <Redo className="h-4 w-4" />
+                                  </Button>
                                 </div>
                               </div>
                             ))}
@@ -787,6 +882,17 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                                         }
                                       >
                                         <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Reprompt Agent Prediction"
+                                        className="text-yellow-500"
+                                        onClick={() =>
+                                          handleViewRePromptAuction(auction)
+                                        }
+                                      >
+                                        <Redo className="h-4 w-4" />
                                       </Button>
                                       {/* <Button
                                 variant="ghost"
@@ -1117,6 +1223,66 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                     )}
                   </Button>
                 </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={rePrompt} onOpenChange={setRePrompt}>
+              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                <DialogHeader>
+                  <DialogTitle className="text-lg max-md:text-md">
+                    Reprompt Agent Prediction
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-300 max-md:text-sm">
+                    In case an agent&apos;s prediction was unsuccessful due to
+                    the response not having the proper format to get the final
+                    price.
+                  </DialogDescription>
+                </DialogHeader>
+                {agentLoading ? (
+                  <div className="flex justify-center items-center w-full mt-4">
+                    <BeatLoader color="#F2CA16" />
+                  </div>
+                ) : (
+                  <div className="py-4">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="">Agent Name</TableHead>
+                          <TableHead className="flex items-center justify-center">
+                            Action
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {agents.map((agent) => (
+                          <TableRow key={agent._id.toString()}>
+                            <TableCell className="font-medium">
+                              {agent.username}
+                            </TableCell>
+                            <TableCell className="flex items-center justify-center">
+                              {agentLoadingStates[agent._id.toString()] ===
+                              "loading" ? (
+                                <BeatLoader color="#F2CA16" size="0.5rem" />
+                              ) : agentLoadingStates[agent._id.toString()] ===
+                                "success" ? (
+                                <Check className="h-4 w-4" color="green" />
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  title="Reprompt Prediction for Agent"
+                                  className="text-yellow-500"
+                                  onClick={() => handleRepromptAgent(agent)}
+                                >
+                                  <Redo className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </DialogContent>
             </Dialog>
             <Dialog open={deleteAuction} onOpenChange={setDeleteAuction}>
