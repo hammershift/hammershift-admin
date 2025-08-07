@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDB from "@/app/lib/mongoose";
 import { app } from "@/app/lib/firebase";
-import { getVertexAI, getGenerativeModel, Schema } from "firebase/vertexai";
+import {
+  getAI,
+  getGenerativeModel,
+  Schema,
+  VertexAIBackend,
+  Tool,
+} from "firebase/ai";
+
 import Auctions from "@/app/models/auction.model";
 import Users from "@/app/models/user.model";
 import Predictions from "@/app/models/prediction.model";
+import GroundingMetadata from "@/app/models/grounding_metadata.model";
+
 export async function POST(req: NextRequest) {
   try {
     await connectToDB();
@@ -22,21 +31,23 @@ export async function POST(req: NextRequest) {
     }
     const description = auction.description.join(" ");
 
-    const vertexAI = getVertexAI(app);
+    //initialize Vertex AI
+    const vertexAI = getAI(app, { backend: new VertexAIBackend("global") });
 
     //initialize model and schema
-    const jsonSchema = Schema.object({
-      properties: {
-        predictedPrice: Schema.number(),
-        reasoning: Schema.string(),
-      },
-    });
+    // const jsonSchema = Schema.object({
+    //   properties: {
+    //     predictedPrice: Schema.number(),
+    //     reasoning: Schema.string(),
+    //   },
+    // });
     const model = getGenerativeModel(vertexAI, {
-      model: "gemini-2.0-flash-lite",
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: jsonSchema,
-      },
+      model: process.env.GEMINI_MODEL_NAME || "gemini-2.5-flash-lite", //default to gemini-2.5-flash-lite
+      // generationConfig: {
+      //   responseMimeType: "application/json",
+      //   responseSchema: jsonSchema,
+      // },
+      tools: [{ googleSearch: {} }],
     });
 
     const agents = await Users.find({ role: "AGENT" });
@@ -70,10 +81,6 @@ export async function POST(req: NextRequest) {
             predictionValues.join(", ");
         }
         const result = await model.generateContent({
-          //TODO: replace this with the agent's system instruction
-          // systemInstruction: {
-          //   text: "You are a veteran predictor of car auction pricing. You are given a description of a vehicle and you must predict its final selling price. You must also provide a reason for your prediction. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'",
-          // },
           systemInstruction: {
             text: systemInstruction,
           },
@@ -99,15 +106,25 @@ export async function POST(req: NextRequest) {
             continue;
           }
 
+          //get the final price from the response enclosed in brackets
+          const response = result.response.text();
+          const regex = /\[(\d+)\]/;
+
+          const match = response.match(regex);
+
+          if (!match) {
+            console.error("No predictedPrice found");
+            continue;
+          }
+          const predictedPrice = match[1];
+
           //get the structured response object
-          const response = JSON.parse(
-            result.response.candidates[0].content.parts[0].text!
-          );
+          // console.log(result.response.text());
 
           const prediction = await Predictions.create({
             auction_id: auction._id,
-            predictedPrice: response.predictedPrice,
-            reasoning: response.reasoning,
+            predictedPrice: Number(predictedPrice),
+            reasoning: response,
             predictionType: "free_play",
             wagerAmount: 0,
             user: {
@@ -121,7 +138,31 @@ export async function POST(req: NextRequest) {
             prize: 0,
           });
 
-          predictionValues.push(response.predictedPrice);
+          const groundingMetadata =
+            result.response.candidates?.[0]?.groundingMetadata;
+
+          if (
+            groundingMetadata !== undefined &&
+            Object.keys(groundingMetadata).length !== 0
+          ) {
+            const webSearchQueries = groundingMetadata?.webSearchQueries;
+            const renderedContent =
+              groundingMetadata?.searchEntryPoint?.renderedContent;
+
+            const groundingChunks = groundingMetadata?.groundingChunks;
+
+            //create grounding metadata for archival
+            await GroundingMetadata.create({
+              prediction_id: prediction._id,
+              webSearchQueries: webSearchQueries,
+              searchEntryPoint: {
+                renderedContent: renderedContent,
+              },
+              groundingChunks: groundingChunks,
+            });
+          }
+
+          predictionValues.push(Number(predictedPrice));
           newPredictions.push(prediction);
         } else {
           console.error("Failed to get a response from Vertex AI");
