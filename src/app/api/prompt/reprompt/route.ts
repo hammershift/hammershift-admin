@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
 
     const model = getGenerativeModel(vertexAI, {
       model: process.env.GEMINI_MODEL_NAME || "gemini-2.5-flash-lite",
+      tools: [{ googleSearch: {} }],
     });
 
     const agent = await Users.findById(agent_id);
