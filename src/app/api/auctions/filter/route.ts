@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
     //api/auctions/filter?search=911 Coupe or api/auctions/filter?search=911%20Coupe
     //api/auctions/filter?search=911%20Coupe&completed=true
     //(search queries are case insensitive) api/auctions/filter?search=land%20cruiser&completed=true
-
+    const now = new Date();
     if (searchedKeyword) {
       const aggregate = Auctions.aggregate([
         {
@@ -93,17 +93,8 @@ export async function GET(req: NextRequest) {
               ? { $or: [{ isActive: true }, { ended: true }] }
               : {
                   isActive: { $exists: true },
-                  $expr: {
-                    $lt: [
-                      {
-                        $dateSubtract: {
-                          startDate: "$sort.deadline",
-                          unit: "day",
-                          amount: 1,
-                        },
-                      },
-                      "$$NOW",
-                    ],
+                  "sort.deadline": {
+                    $gte: now,
                   },
                 },
         },
@@ -288,7 +279,7 @@ export async function GET(req: NextRequest) {
       query = {
         attributes: { $all: [] },
         "sort.deadline": {
-          $gt: addDays(new Date(), 1),
+          $gt: now,
         },
       };
     }
