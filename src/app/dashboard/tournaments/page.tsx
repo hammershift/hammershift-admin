@@ -13,6 +13,7 @@ import {
   getTournamentPredictions,
   getUnsuccessfulAgents,
   repromptAgentPrediction,
+  deleteAgentPrediction,
 } from "@/app/lib/data";
 import {
   Card,
@@ -167,7 +168,7 @@ const TournamentsPage = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalTournaments, setTotalTournaments] = useState(0);
-  const [displayCount, setDisplayCount] = useState(5);
+  const [displayCount, setDisplayCount] = useState(10);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -279,6 +280,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [alertMessage, setAlertMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeletePredictionModal, setShowDeletePredictionModal] =
+    useState(false);
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [showComputeModal, setShowComputeModal] = useState(false);
   const [showWinnersModal, setShowWinnersModal] = useState(false);
@@ -320,7 +323,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [filteredPredictions, setFilteredPredictions] = useState<Prediction[]>(
     []
   );
-
+  const [selectedPrediction, setSelectedPrediction] = useState<Prediction>();
+  const [refreshPrediction, setRefreshPrediction] = useState<boolean>(false);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [currentAuction, setCurrentAuction] = useState<TournamentAuctionData>();
   const [currentTournamentAuctions, setCurrentTournamentAuctions] = useState<
@@ -391,7 +395,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
       setViewAuction(selectedAuctions[0]);
       fetchTournamentPredictions(selectedAuctions[0]);
     }
-  }, [selectedAuctions]);
+  }, [selectedAuctions, refreshPrediction]);
 
   useEffect(() => {
     if (viewAuction != null && currentPredictions.length > 0) {
@@ -758,6 +762,25 @@ const TournamentTable: React.FC<TournamentProps> = ({
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleDeletePrediction = async () => {
+    if (!selectedPrediction) return;
+    setIsSubmitting(true);
+    try {
+      await deleteAgentPrediction(selectedPrediction._id.toHexString());
+      setRefreshPrediction(!refreshPrediction);
+      setShowDeletePredictionModal(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleShowDeletePredictionModal = async (prediction: Prediction) => {
+    setShowDeletePredictionModal(true);
+    setSelectedPrediction(prediction);
   };
 
   useEffect(() => {
@@ -1292,8 +1315,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     Provide information for new tournament
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
+                <div className="md:grid md:grid-cols-2 md:gap-4">
+                  <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                     <Label className="text-right max-md:text-xs">
                       Tournament Name
                     </Label>
@@ -1309,6 +1332,58 @@ const TournamentTable: React.FC<TournamentProps> = ({
                       onChange={handleNewTournamentChange}
                     />
                   </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">
+                      Tournament Type
+                    </Label>
+                    <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                      <Select
+                        value={currentTournamentType || ""}
+                        onValueChange={(value: string) => {
+                          setEmptyInputError(false);
+                          setTournamentInputError(false);
+                          setCurrentTournamentType(value);
+                        }}
+                        name="role"
+                      >
+                        <SelectTrigger
+                          className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                            emptyInputError && currentTournamentType == ""
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                        >
+                          <SelectValue
+                            className="max-md:text-xs"
+                            placeholder="Select tournament type"
+                          />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                          <SelectItem value="free_play">Free Play</SelectItem>
+                          {/* <SelectItem value="standard">Standard</SelectItem>
+                            <SelectItem value="both">Both</SelectItem> */}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid gap-4">
+                  {/* <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">
+                      Tournament Name
+                    </Label>
+                    <Input
+                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                        emptyInputError && newTournament?.name == ""
+                          ? "border-red-500"
+                          : ""
+                      }`}
+                      name="name"
+                      type="text"
+                      value={newTournament?.name || ""}
+                      onChange={handleNewTournamentChange}
+                    />
+                  </div> */}
                   <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
                     <Label className="text-right max-md:text-xs">
                       Description
@@ -1364,7 +1439,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-4">
+                  {/* <div className="md:grid md:grid-cols-2 md:gap-4">
                     <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                       <Label className="text-right max-md:text-xs">
                         {"Buy-in Fee"}
@@ -1411,7 +1486,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                         onChange={handleNewTournamentChange}
                       />
                     </div>
-                  </div>
+                  </div> */}
                   <div className="md:grid md:grid-cols-2 md:gap-4">
                     <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                       <Label className="text-right max-md:text-xs">
@@ -1428,69 +1503,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                         value={newTournament?.maxUsers || 20}
                         onChange={handleNewTournamentChange}
                       />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right max-md:text-xs">
-                        Tournament Type
-                      </Label>
-                      <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
-                        <Select
-                          value={currentTournamentType || ""}
-                          onValueChange={(value: string) => {
-                            setEmptyInputError(false);
-                            setTournamentInputError(false);
-                            setCurrentTournamentType(value);
-                          }}
-                          name="role"
-                        >
-                          <SelectTrigger
-                            className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
-                              emptyInputError && currentTournamentType == ""
-                                ? "border-red-500"
-                                : ""
-                            }`}
-                          >
-                            <SelectValue
-                              className="max-md:text-xs"
-                              placeholder="Select tournament type"
-                            />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                            <SelectItem value="free_play">Free Play</SelectItem>
-                            {/* <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="both">Both</SelectItem> */}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {/* <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
-                        <Select
-                          value={currentTournamentType || ""}
-                          onValueChange={(value: string) => {
-                            setEmptyInputError(false);
-                            setTournamentInputError(false);
-                            setCurrentTournamentType(value);
-                          }}
-                          name="role"
-                        >
-                          <SelectTrigger
-                            className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
-                              emptyInputError && currentTournamentType == ""
-                                ? "border-red-500"
-                                : ""
-                            }`}
-                          >
-                            <SelectValue
-                              className="max-md:text-xs"
-                              placeholder="Select tournament type"
-                            />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                            <SelectItem value="free_play">Free Play</SelectItem>
-                            <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="both">Both</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div> */}
                     </div>
                   </div>
                   <div className="grid max-md:grid-cols-8 grid-cols-6 items-center gap-4">
@@ -1643,22 +1655,63 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
-                      <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
-                        <Label className="text-right max-md:text-xs">
-                          Tournament Name
-                        </Label>
-                        <Input
-                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                            emptyInputError && selectedTournament?.name == ""
-                              ? "border-red-500"
-                              : ""
-                          }`}
-                          name="name"
-                          type="text"
-                          value={selectedTournament?.name || ""}
-                          onChange={handleSelectedTournamentChange}
-                        />
+                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                        <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                          <Label className="text-right max-md:text-xs">
+                            Tournament Name
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError && selectedTournament?.name == ""
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="name"
+                            type="text"
+                            value={selectedTournament?.name || ""}
+                            onChange={handleSelectedTournamentChange}
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right max-md:text-xs">
+                            Tournament Type
+                          </Label>
+                          <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                            <Select
+                              value={selectedTournament?.type || ""}
+                              onValueChange={(value: string) => {
+                                //can't edit this
+                              }}
+                              disabled
+                              name="role"
+                            >
+                              <SelectTrigger
+                                className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                                  emptyInputError &&
+                                  selectedTournament?.type == ""
+                                    ? "border-red-500"
+                                    : ""
+                                }`}
+                              >
+                                <SelectValue
+                                  className="max-md:text-xs"
+                                  placeholder="Select tournament type"
+                                />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                                <SelectItem value="free_play">
+                                  Free Play
+                                </SelectItem>
+                                {/* <SelectItem value="standard">
+                                  Standard
+                                </SelectItem>
+                                <SelectItem value="both">Both</SelectItem> */}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                       </div>
+
                       <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
                         <Label className="text-right max-md:text-xs">
                           Description
@@ -1727,7 +1780,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           />
                         </div>
                       </div>
-                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                      {/* <div className="md:grid md:grid-cols-2 md:gap-4">
                         <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                           <Label className="text-right max-md:text-xs">
                             {"Buy-in Fee"}
@@ -1766,7 +1819,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             onChange={handleSelectedTournamentChange}
                           />
                         </div>
-                      </div>
+                      </div> */}
                       <div className="md:grid md:grid-cols-2 md:gap-4">
                         <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                           <Label className="text-right max-md:text-xs">
@@ -1784,44 +1837,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             value={selectedTournament?.maxUsers || 20}
                             onChange={handleSelectedTournamentChange}
                           />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label className="text-right max-md:text-xs">
-                            Tournament Type
-                          </Label>
-                          <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
-                            <Select
-                              value={selectedTournament?.type || ""}
-                              onValueChange={(value: string) => {
-                                //can't edit this
-                              }}
-                              disabled
-                              name="role"
-                            >
-                              <SelectTrigger
-                                className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
-                                  emptyInputError &&
-                                  selectedTournament?.type == ""
-                                    ? "border-red-500"
-                                    : ""
-                                }`}
-                              >
-                                <SelectValue
-                                  className="max-md:text-xs"
-                                  placeholder="Select tournament type"
-                                />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                                <SelectItem value="free_play">
-                                  Free Play
-                                </SelectItem>
-                                {/* <SelectItem value="standard">
-                                  Standard
-                                </SelectItem>
-                                <SelectItem value="both">Both</SelectItem> */}
-                              </SelectContent>
-                            </Select>
-                          </div>
                         </div>
                       </div>
                       <div className="grid max-md:grid-cols-8 grid-cols-6 items-center gap-4">
@@ -1996,23 +2011,64 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
-                      <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
-                        <Label className="text-right max-md:text-xs">
-                          Tournament Name
-                        </Label>
-                        <Input
-                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                            emptyInputError && selectedTournament?.name == ""
-                              ? "border-red-500"
-                              : ""
-                          }`}
-                          name="name"
-                          type="text"
-                          value={selectedTournament?.name || ""}
-                          onChange={handleSelectedTournamentChange}
-                          disabled
-                        />
+                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                        <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                          <Label className="text-right max-md:text-xs">
+                            Tournament Name
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError && selectedTournament?.name == ""
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="name"
+                            type="text"
+                            value={selectedTournament?.name || ""}
+                            onChange={handleSelectedTournamentChange}
+                            disabled
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right max-md:text-xs">
+                            Tournament Type
+                          </Label>
+                          <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                            <Select
+                              value={selectedTournament?.type || ""}
+                              onValueChange={(value: string) => {
+                                //can't edit this
+                              }}
+                              disabled
+                              name="role"
+                            >
+                              <SelectTrigger
+                                className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                                  emptyInputError &&
+                                  selectedTournament?.type == ""
+                                    ? "border-red-500"
+                                    : ""
+                                }`}
+                              >
+                                <SelectValue
+                                  className="max-md:text-xs"
+                                  placeholder="Select tournament type"
+                                />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                                <SelectItem value="free_play">
+                                  Free Play
+                                </SelectItem>
+                                {/* <SelectItem value="standard">
+                                  Standard
+                                </SelectItem>
+                                <SelectItem value="both">Both</SelectItem> */}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                       </div>
+
                       <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
                         <Label className="text-right max-md:text-xs">
                           Description
@@ -2081,7 +2137,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           />
                         </div>
                       </div>
-                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                      {/* <div className="md:grid md:grid-cols-2 md:gap-4">
                         <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                           <Label className="text-right max-md:text-xs">
                             {"Buy-in Fee"}
@@ -2120,7 +2176,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             disabled
                           />
                         </div>
-                      </div>
+                      </div> */}
                       <div className="md:grid md:grid-cols-2 md:gap-4">
                         <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                           <Label className="text-right max-md:text-xs">
@@ -2139,44 +2195,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             onChange={handleSelectedTournamentChange}
                             disabled
                           />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label className="text-right max-md:text-xs">
-                            Tournament Type
-                          </Label>
-                          <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
-                            <Select
-                              value={selectedTournament?.type || ""}
-                              onValueChange={(value: string) => {
-                                //can't edit this
-                              }}
-                              disabled
-                              name="role"
-                            >
-                              <SelectTrigger
-                                className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
-                                  emptyInputError &&
-                                  selectedTournament?.type == ""
-                                    ? "border-red-500"
-                                    : ""
-                                }`}
-                              >
-                                <SelectValue
-                                  className="max-md:text-xs"
-                                  placeholder="Select tournament type"
-                                />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                                <SelectItem value="free_play">
-                                  Free Play
-                                </SelectItem>
-                                {/* <SelectItem value="standard">
-                                  Standard
-                                </SelectItem>
-                                <SelectItem value="both">Both</SelectItem> */}
-                              </SelectContent>
-                            </Select>
-                          </div>
                         </div>
                       </div>
                       <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
@@ -2299,8 +2317,21 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 return (
                                   <div
                                     key={index}
-                                    className="flex items-center justify-between rounded-lg bg-[#1E2A36] p-4"
+                                    className="flex items-center justify-between rounded-lg bg-[#1E2A36] p-4 relative"
                                   >
+                                    {prediction.user.role === "AGENT" && (
+                                      <button
+                                        className="absolute top-0 right-0 p-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs"
+                                        title="Delete Prediction"
+                                        onClick={() =>
+                                          handleShowDeletePredictionModal(
+                                            prediction
+                                          )
+                                        }
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    )}
                                     <div className="flex items-center gap-4">
                                       <div
                                         className={`max-md:h-7 max-md:w-7 h-10 w-10 rounded-full ${
@@ -2386,6 +2417,43 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     </div>
                     <DialogFooter className="flex-row justify-end space-x-2">
                       <form onSubmit={handleTournamentDelete}>
+                        <Button
+                          type="submit"
+                          className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Deleting..." : "Delete"}
+                        </Button>
+                      </form>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Dialog
+                  open={showDeletePredictionModal}
+                  onOpenChange={setShowDeletePredictionModal}
+                >
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-red-700 text-lg max-md:text-md">
+                        Delete Prediction
+                      </DialogTitle>
+                      <DialogDescription className="max-md:text-sm">
+                        Are you sure you want to delete this prediction?
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="p-2 m-2 text-sm">
+                      <p className="text-lg max-md:text-md font-bold text-red-700 text-center">
+                        Warning
+                      </p>
+                      <p className={"text-justify max-md:text-sm"}>
+                        {
+                          "By deleting this prediction, it will no longer be accessible in the Velocity Market App's Tournament Dashboard"
+                        }
+                      </p>
+                    </div>
+                    <DialogFooter className="flex-row justify-end space-x-2">
+                      <form onSubmit={handleDeletePrediction}>
                         <Button
                           type="submit"
                           className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
