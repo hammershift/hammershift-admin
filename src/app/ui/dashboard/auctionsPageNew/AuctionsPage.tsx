@@ -412,7 +412,8 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
       if (!activeAuctions[id]) {
         //TODO: merge the two functions into one
         await updateAuctionStatus(id, !activeAuctions[id]);
-        await promptAgentPredictions(id);
+        //call prompt function but don't await
+        promptAgentPredictions(id);
       }
     } catch (error) {
       alert("An error has occured while enabling the auction.");
