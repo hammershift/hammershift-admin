@@ -23,9 +23,15 @@ export async function GET(req: NextRequest) {
     if (auction_id) {
       const predictions = await Predictions.find({
         auction_id: auction_id,
-      });
+        tournament_id: {
+          $exists: false,
+        },
+      }).sort({ createdAt: -1 });
       return NextResponse.json(predictions);
     }
+
+    const predictions = await Predictions.find({}).sort({ createdAt: -1 });
+    return NextResponse.json(predictions);
   } catch (e) {
     console.error(e);
     return NextResponse.json({ message: "Internal server error" });

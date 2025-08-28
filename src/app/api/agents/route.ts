@@ -4,6 +4,7 @@ import { authOptions } from "../auth/[...nextauth]/options";
 import { ObjectId } from "mongodb";
 import connectToDB from "@/app/lib/mongoose";
 import Users from "@/app/models/user.model";
+import Predictions from "@/app/models/prediction.model";
 import { Types } from "mongoose";
 import { Role } from "@/app/lib/interfaces";
 
@@ -15,11 +16,33 @@ export async function GET(req: NextRequest) {
     const agent_id = req.nextUrl.searchParams.get("agent_id");
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
     const limit = Number(req.nextUrl.searchParams.get("limit"));
+    const auction_id = req.nextUrl.searchParams.get("auction_id");
+    const tournament_id = req.nextUrl.searchParams.get("tournament_id");
 
     // api/agents?_id=213123 to get a single agent
     if (agent_id) {
       const agent = await Users.findOne({ _id: new ObjectId(agent_id) });
       return NextResponse.json(agent, { status: 200 });
+    }
+
+    if (auction_id) {
+      //get agents who haven't bid to this auction
+      const agents = await Users.find({
+        role: Role.AGENT,
+      });
+
+      const predictions = await Predictions.find({
+        auction_id: auction_id,
+        tournament_id: tournament_id ? tournament_id : { $exists: false },
+        "user.role": Role.AGENT,
+      });
+
+      const repromptAgents = agents.filter((agent) => {
+        return !predictions.some((prediction) => {
+          return prediction.user.userId.toString() === agent._id.toString();
+        });
+      });
+      return NextResponse.json({ agents: repromptAgents }, { status: 200 });
     }
     // api/agents to get all AI agents
     const agents = await Users.find({
@@ -65,7 +88,7 @@ export async function POST(req: NextRequest) {
       const newDate = new Date();
 
       const defaultInstruction =
-        "You are given a description of a vehicle to help with data crunching. You must also provide a reason for your prediction. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'";
+        "You are given a description of a vehicle to help with data crunching and you must predict its final selling price. You must also provide a reason for your prediction, and you must place the final selling price inside brackets ([]) without any spaces inside for parsing. As much as possible, use Google Search to supplement your research on the final price. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'";
       const newAgentData = {
         _id: new Types.ObjectId(),
         username: username,

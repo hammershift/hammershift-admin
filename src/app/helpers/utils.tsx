@@ -23,7 +23,7 @@ export const formatDate = (dateString: Date) => {
 
 export const getDisplayName = (prediction: Prediction) => {
   if (prediction.user.role === "AGENT") {
-    return `AI Agent ${prediction.user.fullName || ""}`;
+    return `Agent ${prediction.user.fullName || ""}`;
   }
 
   if (prediction.user?.username) {

@@ -89,7 +89,7 @@ export async function PUT(
 
       await Predictions.updateMany(
         {
-          tournament_id: tournament.tournament_id,
+          tournament_id: tournament._id,
           isActive: true,
         },
         {
@@ -105,7 +105,7 @@ export async function PUT(
     }
 
     const auctionMap = new Map(
-      auctions.map((auction) => [auction.auction_id, auction])
+      auctions.map((auction) => [auction._id, auction])
     );
     //start computation of user scores
     const userScores = [];
@@ -117,7 +117,7 @@ export async function PUT(
         auction_id: {
           $in: tournament.auction_ids,
         },
-        tournament_id: tournament.tournament_id,
+        tournament_id: tournament._id,
       });
 
       let userScore = {
@@ -172,17 +172,19 @@ export async function PUT(
     let currentDelta = -1;
     let currentRankingIndex = -1;
 
-    const sortedUsers = userScores.sort((a, b) => {
-      //sort correctCount in descending order
-      if (a.correctCount < b.correctCount) return 1;
-      if (a.correctCount > b.correctCount) return -1;
+    const sortedUsers = userScores
+      .filter((u) => u.correctCount > 0)
+      .sort((a, b) => {
+        //sort correctCount in descending order
+        if (a.correctCount < b.correctCount) return 1;
+        if (a.correctCount > b.correctCount) return -1;
 
-      //sort delta in ascending order if correctCount is equal
-      if (a.delta < b.delta) return -1;
-      if (a.delta > b.delta) return 1;
+        //sort delta in ascending order if correctCount is equal
+        if (a.delta < b.delta) return -1;
+        if (a.delta > b.delta) return 1;
 
-      return 0;
-    });
+        return 0;
+      });
 
     for (let i = 0; i < sortedUsers.length; i++) {
       const user = sortedUsers[i];
@@ -240,7 +242,7 @@ export async function PUT(
     //update all predictions for tournament, set isActive to false
     await Predictions.updateMany(
       {
-        tournament_id: tournament.tournament_id,
+        tournament_id: tournament._id,
         isActive: true,
       },
       {

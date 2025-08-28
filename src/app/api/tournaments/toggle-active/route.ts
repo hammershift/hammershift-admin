@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDB from "@/app/lib/mongoose";
 import { app } from "@/app/lib/firebase";
-import { getVertexAI, getGenerativeModel, Schema } from "firebase/vertexai";
+import { getAI, getGenerativeModel, VertexAIBackend } from "firebase/ai";
 import Auctions from "@/app/models/auction.model";
 import Users from "@/app/models/user.model";
 import Predictions from "@/app/models/prediction.model";
 import Tournaments, { Tournament } from "@/app/models/tournament.model";
+import GroundingMetadata from "@/app/models/grounding_metadata.model";
+
 export async function POST(req: NextRequest) {
   try {
     await connectToDB();
@@ -19,10 +21,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("tournament_id");
-    console.log(tournament_id);
     const tournament = await Tournaments.findOne({
-      tournament_id: parseInt(tournament_id),
+      _id: tournament_id,
     });
 
     if (!tournament) {
@@ -36,31 +36,29 @@ export async function POST(req: NextRequest) {
       const predictionExists = !!(await Predictions.exists({ tournament_id }));
       if (!predictionExists) {
         const agents = await Users.find({ role: "AGENT" });
-
+        const agentSuccess = Array(agents.length).fill(false);
         if (agents.length === 0) {
           console.error("No AI agents found");
           return NextResponse.json({ message: "No AI agents found" });
         }
 
         for (const auction_id of tournament.auction_ids) {
-          const auction = await Auctions.findOne({ auction_id: auction_id });
+          const auction = await Auctions.findOne({ _id: auction_id });
+          if (!auction) {
+            console.error("Auction not found");
+            return NextResponse.json({ message: "Auction not found" });
+          }
           const description = auction!.description.join(" ");
 
-          const vertexAI = getVertexAI(app);
+          const vertexAI = getAI(app, {
+            backend: new VertexAIBackend("global"),
+          });
 
           //initialize model and schema
-          const jsonSchema = Schema.object({
-            properties: {
-              predictedPrice: Schema.number(),
-              reasoning: Schema.string(),
-            },
-          });
+
           const model = getGenerativeModel(vertexAI, {
-            model: "gemini-2.0-flash-lite",
-            generationConfig: {
-              responseMimeType: "application/json",
-              responseSchema: jsonSchema,
-            },
+            model: process.env.GEMINI_MODEL_NAME || "gemini-2.5-flash-lite",
+            tools: [{ googleSearch: {} }],
           });
           const predictionValues: number[] = [];
           for (const agent of agents) {
@@ -68,7 +66,7 @@ export async function POST(req: NextRequest) {
               //check if agent has already submitted a prediction
               const existingPrediction = await Predictions.findOne({
                 auction_id: auction_id,
-                tournament_id: tournament_id,
+                tournament_id: tournament._id,
                 "user.userId": agent._id,
               });
 
@@ -114,15 +112,20 @@ export async function POST(req: NextRequest) {
                 }
 
                 //get the structured response object
-                const response = JSON.parse(
-                  result.response.candidates[0].content.parts[0].text!
-                );
+                const response = result.response.text();
+                const regex = /\[(\d+)\]/;
+                const match = response.match(regex);
+                if (!match) {
+                  console.error("No predictedPrice found");
+                  continue;
+                }
+                const predictedPrice = match[1];
 
                 const prediction = await Predictions.create({
-                  auction_id: auction!.auction_id,
-                  tournament_id: tournament_id,
-                  predictedPrice: response.predictedPrice,
-                  reasoning: response.reasoning,
+                  auction_id: auction!._id,
+                  tournament_id: tournament._id,
+                  predictedPrice: predictedPrice,
+                  reasoning: response,
                   predictionType: "free_play",
                   wagerAmount: 0,
                   user: {
@@ -136,7 +139,31 @@ export async function POST(req: NextRequest) {
                   prize: 0,
                 });
 
-                predictionValues.push(response.predictedPrice);
+                const groundingMetadata =
+                  result.response.candidates?.[0]?.groundingMetadata;
+                if (
+                  groundingMetadata !== undefined &&
+                  Object.keys(groundingMetadata).length !== 0
+                ) {
+                  const webSearchQueries = groundingMetadata?.webSearchQueries;
+                  const renderedContent =
+                    groundingMetadata?.searchEntryPoint?.renderedContent;
+
+                  const groundingChunks = groundingMetadata?.groundingChunks;
+
+                  //create grounding metadata for archival
+                  await GroundingMetadata.create({
+                    prediction_id: prediction._id,
+                    webSearchQueries: webSearchQueries,
+                    searchEntryPoint: {
+                      renderedContent: renderedContent,
+                    },
+                    groundingChunks: groundingChunks,
+                  });
+                }
+
+                predictionValues.push(Number(predictedPrice));
+                agentSuccess[agents.indexOf(agent)] = true;
               } else {
                 console.error("Failed to get a response from Vertex AI");
               }
@@ -147,12 +174,33 @@ export async function POST(req: NextRequest) {
           }
         }
         for (const agent of agents) {
-          tournament.users.push({
-            userId: agent._id,
-            fullName: agent.fullName,
-            username: agent.username,
-            role: agent.role,
-          });
+          //check if agent is already in the tournament
+          //mostly for when the prompt above encounters an error
+          // if (
+          //   !tournament.users.some(
+          //     (user) => user.userId.toString() === agent._id.toString()
+          //   )
+          // ) {
+          //   tournament.users.push({
+          //     userId: agent._id,
+          //     fullName: agent.fullName,
+          //     username: agent.username,
+          //     role: agent.role,
+          //   });
+          // }
+          if (
+            agentSuccess[agents.indexOf(agent)] &&
+            !tournament.users.some(
+              (user) => user.userId.toString() === agent._id.toString()
+            )
+          ) {
+            tournament.users.push({
+              userId: agent._id,
+              fullName: agent.fullName,
+              username: agent.username,
+              role: agent.role,
+            });
+          }
         }
       }
       tournament.isActive = true;

@@ -32,6 +32,7 @@ import { Badge } from "@/app/ui/components/badge";
 import { CarData } from "@/app/dashboard/auctions/page";
 import ResponsivePagination from "react-responsive-pagination";
 import { Prediction } from "@/app/models/prediction.model";
+import { User } from "@/app/models/user.model";
 //import "react-responsive-pagination/themes/classic.css";
 import "react-responsive-pagination/themes/minimal-light-dark.css";
 import {
@@ -40,6 +41,8 @@ import {
   getPredictions,
   deleteAgentPrediction,
   editAuctionWithId,
+  getUnsuccessfulAgents,
+  repromptAgentPrediction,
 } from "@/app/lib/data";
 import {
   Car,
@@ -54,6 +57,8 @@ import {
   Calendar,
   CircleCheck,
   Clock,
+  Redo,
+  Check,
 } from "lucide-react";
 import { Label } from "../../components/label";
 import { DateTime } from "luxon";
@@ -67,7 +72,8 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/app/ui/components/dialog";
-
+import { AgentProperties } from "@/app/lib/interfaces";
+import { set } from "mongoose";
 interface AuctionsPageProps {
   auctionData: CarData[];
   currentPage: number;
@@ -92,6 +98,21 @@ interface EditDetails {
   status: string | null;
 }
 
+interface Agent {
+  _id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  balance: number;
+  isActive: boolean;
+  isBanned: boolean;
+  provider: string;
+  about: string;
+  createdAt: Date;
+  updatedAt: Date;
+  role: string;
+  agentProperties?: AgentProperties;
+}
 const AuctionsPage: React.FC<AuctionsPageProps> = ({
   auctionData: auctionData,
   currentTab,
@@ -111,18 +132,26 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   const [auctionLoadingStates, setAuctionLoadingStates] = useState<{
     [key: string]: string;
   }>({});
+  const [agentLoadingStates, setAgentLoadingStates] = useState<{
+    [key: string]: string;
+  }>({});
   const [editAuction, setEditAuction] = useState<boolean>(false);
+  const [deleteAuction, setDeleteAuction] = useState<boolean>(false);
   const [editLoading, setEditLoading] = useState<boolean>(false);
   const [viewingPredictions, setViewingPredictions] = useState<boolean>(false);
+  const [rePrompt, setRePrompt] = useState<boolean>(false);
   const [currentAuction, setCurrentAuction] = useState<CarData | null>();
   const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [refreshPrediction, setRefreshPrediction] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [sort, setSort] = useState({
     keyToSort: "auction_id",
     direction: "asc",
   });
   const [predictionLoading, setPredictionLoading] = useState<boolean>(false);
+  const [agentLoading, setAgentLoading] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>("");
   const [editAuctionDetails, setEditAuctionDetails] = useState<EditDetails>({
     image: "",
@@ -214,9 +243,69 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
   };
   async function handleViewPrediction(auction: CarData) {
     //get predictions from auction_id
+    if (currentAuction && currentAuction._id === auction._id) {
+      setViewingPredictions(true);
+    } else {
+      setCurrentAuction(auction);
+      setPredictionLoading(true);
+      setViewingPredictions(true);
+    }
+  }
+
+  async function handleDeleteAuction(auction: CarData) {
     setCurrentAuction(auction);
-    setPredictionLoading(true);
-    setViewingPredictions(true);
+    setDeleteAuction(true);
+  }
+
+  async function handleViewRePromptAuction(auction: CarData) {
+    setCurrentAuction(auction);
+    setRePrompt(true);
+    setAgentLoading(true);
+
+    try {
+      const response = await getUnsuccessfulAgents(auction._id);
+      setAgents(response.agents);
+
+      for (const agent of response.agents) {
+        setAgentLoadingStates((prevStates) => ({
+          ...prevStates,
+          [agent._id.toString()]: "unsuccessful",
+        }));
+      }
+    } catch (e) {
+      console.log(e);
+      alert("An error occured while getting agents");
+    } finally {
+      setAgentLoading(false);
+    }
+  }
+
+  async function handleToggleInactive(e: any) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    if (!currentAuction) {
+      alert("No auction selected");
+      return;
+    }
+    try {
+      await updateAuctionStatus(currentAuction._id, false);
+    } catch (e) {
+      console.log(e);
+      alert("An error occured while disabling auction");
+    } finally {
+      setRefreshToggle(!refreshToggle);
+      setAuctionLoadingStates((prevStates) => ({
+        ...prevStates,
+        [currentAuction._id]: "off",
+      }));
+      setActiveAuctions((prevStates) => ({
+        ...prevStates,
+        [currentAuction._id]: false,
+      }));
+      setIsSubmitting(false);
+      setDeleteAuction(false);
+      setCurrentAuction(null);
+    }
   }
 
   async function handleEditAuction(auction: CarData) {
@@ -264,6 +353,37 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
       console.error(e);
     }
   }
+
+  async function handleRepromptAgent(agent: Agent) {
+    try {
+      if (!currentAuction) return;
+      setAgentLoadingStates((prevStates) => ({
+        ...prevStates,
+        [agent._id]: "loading",
+      }));
+      const response = await repromptAgentPrediction(
+        currentAuction._id,
+        agent._id
+      );
+      if (response.status === "success") {
+        setAgentLoadingStates((prevStates) => ({
+          ...prevStates,
+          [agent._id]: "success",
+        }));
+      } else {
+        setAgentLoadingStates((prevStates) => ({
+          ...prevStates,
+          [agent._id]: "unsuccessful",
+        }));
+      }
+    } catch (e) {
+      console.error(e);
+      setAgentLoadingStates((prevStates) => ({
+        ...prevStates,
+        [agent._id]: "unsuccessful",
+      }));
+    }
+  }
   async function handleStatusToggle(id: string) {
     const auction = auctionData.find((x) => x._id === id);
 
@@ -292,7 +412,8 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
       if (!activeAuctions[id]) {
         //TODO: merge the two functions into one
         await updateAuctionStatus(id, !activeAuctions[id]);
-        await promptAgentPredictions(id);
+        //call prompt function but don't await
+        promptAgentPredictions(id);
       }
     } catch (error) {
       alert("An error has occured while enabling the auction.");
@@ -357,21 +478,22 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                   Platform Auctions
                 </TabsTrigger>
               </TabsList>
-              {isLoading && currentTab === "external" ? (
-                <div className="flex justify-center items-center h-[618px]">
-                  <BeatLoader color="#F2CA16" />
-                </div>
-              ) : (
-                <TabsContent value="external">
-                  <Card className="bg-[#13202D] border-[#1E2A36]">
-                    <CardHeader>
-                      <CardTitle>External Car Feed</CardTitle>
-                      <CardDescription>
-                        Cars available from external feed. Add them to your
-                        platform.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
+
+              <TabsContent value="external">
+                <Card className="bg-[#13202D] border-[#1E2A36]">
+                  <CardHeader>
+                    <CardTitle>External Car Feed</CardTitle>
+                    <CardDescription>
+                      Cars available from external feed. Add them to your
+                      platform.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoading && currentTab === "external" ? (
+                      <div className="flex items-center justify-center">
+                        <BeatLoader color="#F2CA16" />
+                      </div>
+                    ) : (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {auctionData.map((auction) => (
                           <Card
@@ -398,15 +520,24 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                               </Badge>
                             </div>
                             <CardContent className="p-4">
-                              <h3 className="text-xl max-md:text-lg font-bold mb-1 truncate">
+                              {auction.year && auction.make && auction.model ? (
+                                <h3 className="text-xl max-md:text-lg font-bold mb-1 truncate">
+                                  {auction.year} {auction.make} {auction.model}
+                                </h3>
+                              ) : (
+                                <h3 className="text-xl max-md:text-lg font-bold mb-1 truncate">
+                                  {auction.title}
+                                </h3>
+                              )}
+                              {/* <h3 className="text-xl max-md:text-lg font-bold mb-1 truncate">
                                 {auction.year} {auction.make} {auction.model}
-                              </h3>
+                              </h3> */}
                               <p className="text-sm text-gray-400">
                                 {auction.auction_id}
                               </p>
                               <a
                                 href={auction.page_url}
-                                className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600 text-sm max-md:text-xs mb-3"
+                                className="underline text-blue-600 whitespace-nowrap hover:text-blue-800 visited:text-purple-600 text-sm max-md:text-xs mb-3"
                               >
                                 {auction.page_url}
                               </a>
@@ -479,8 +610,9 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                           </Card>
                         ))}
                       </div>
+                    )}
 
-                      {/* {filteredExternalCars.length === 0 && (
+                    {/* {filteredExternalCars.length === 0 && (
                 <div className="text-center py-8">
                   <Car className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-xl font-bold mb-2">No Cars Found</h3>
@@ -489,143 +621,67 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                   </p>
                 </div>
               )} */}
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      {/* <div className="text-sm text-gray-400">
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    {/* <div className="text-sm text-gray-400">
                 Showing {filteredExternalCars.length} of{" "}
                 {MOCK_EXTERNAL_CARS.length} cars
               </div> */}
-                      {/* <Button variant="outline" className="flex items-center gap-2">
+                    {/* <Button variant="outline" className="flex items-center gap-2">
                   <RefreshCcw className="h-4 w-4" />
                   Refresh Feed
                 </Button> */}
-                    </CardFooter>
-                  </Card>
-                </TabsContent>
-              )}
-              {isLoading && currentTab === "platform" ? (
-                <div className="flex justify-center items-center h-[618px]">
-                  <BeatLoader color="#F2CA16" />
-                </div>
-              ) : (
-                <TabsContent value="platform">
-                  <Card className="bg-[#13202D] border-[#1E2A36]">
-                    <CardHeader>
-                      <CardTitle>Platform Cars</CardTitle>
-                      <CardDescription>
-                        Manage cars that are currently on your platform
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="block md:hidden space-y-4">
-                        {auctionData &&
-                          auctionData.map((auction, index: number) => (
-                            <div
-                              key={index}
-                              className="bg-[#13202D] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
-                            >
-                              <div className="flex w-full gap-2">
-                                <div className="w-[75%]">
-                                  <p className="text-xs text-gray-400">Car</p>
-                                  <div className="flex items-center gap-3">
-                                    <div>
-                                      <div className="text-xs">
-                                        {auction.year} {auction.make}{" "}
-                                        {auction.model}
-                                      </div>
-                                      {/* <div className="text-sm text-gray-400">
+                  </CardFooter>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="platform">
+                <Card className="bg-[#13202D] border-[#1E2A36]">
+                  <CardHeader>
+                    <CardTitle>Platform Cars</CardTitle>
+                    <CardDescription>
+                      Manage cars that are currently on your platform
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoading && currentTab === "platform" ? (
+                      <div className="flex justify-center items-center">
+                        <BeatLoader color="#F2CA16" />
+                      </div>
+                    ) : (
+                      <>
+                        <div className="block md:hidden space-y-4">
+                          {auctionData &&
+                            auctionData.map((auction, index: number) => (
+                              <div
+                                key={index}
+                                className="bg-[#1E2A36] border-2 border-[#1E2A36] rounded-xl p-4 space-y-2"
+                              >
+                                <div className="flex w-full gap-2">
+                                  <div className="w-[75%]">
+                                    <p className="text-xs text-gray-400">Car</p>
+                                    <div className="flex items-center gap-3">
+                                      <div>
+                                        {auction.year &&
+                                        auction.make &&
+                                        auction.model ? (
+                                          <div className="text-xs">
+                                            {auction.year} {auction.make}{" "}
+                                            {auction.model}{" "}
+                                          </div>
+                                        ) : (
+                                          <div className="text-xs">
+                                            {auction.title}
+                                          </div>
+                                        )}
+
+                                        {/* <div className="text-sm text-gray-400">
                                   {car.description.substring(0, 30)}...
                                 </div> */}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                                <div className="w-[25%]">
-                                  <div className="w-12 h-12 rounded-md bg-gray-800 overflow-hidden">
-                                    {auction.image ? (
-                                      <Image
-                                        src={auction.image}
-                                        alt={`${auction.year} ${auction.make} ${auction.model}`}
-                                        title={`${auction.year} ${auction.make} ${auction.model}`}
-                                        className="w-full h-full object-cover"
-                                        objectFit="cover"
-                                        width={100}
-                                        height={100}
-                                      />
-                                    ) : (
-                                      <div className="w-full h-full flex items-center justify-center">
-                                        <ImageOff className="w-6 h-6 text-gray-500" />
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex w-full gap-2">
-                                <div className="w-[50%]">
-                                  <p className="text-xs text-gray-400">
-                                    Current Bid
-                                  </p>
-                                  <p className="text-white text-sm font-mono">
-                                    ${auction.price.toLocaleString()}
-                                  </p>
-                                </div>
-                                <div className="w-[50%]">
-                                  <p className="text-xs text-gray-400">
-                                    Status
-                                  </p>
-                                  <Badge
-                                    className={
-                                      auction.isActive
-                                        ? "bg-green-100 text-green-800"
-                                        : "bg-red-100 text-red-800"
-                                    }
-                                  >
-                                    {auction.isActive ? "Active" : "Ended"}
-                                  </Badge>
-                                </div>
-                              </div>
-                              <div></div>
-
-                              <div className="flex justify-end space-x-2 pt-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  title="Edit Car"
-                                  className=""
-                                  onClick={() => handleEditAuction(auction)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  title="View Predictions"
-                                  className="text-yellow-500"
-                                  onClick={() => handleViewPrediction(auction)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-
-                      <div className="hidden md:block overflow-x-auto w-full">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Car</TableHead>
-                              <TableHead>End Date</TableHead>
-                              <TableHead>Current Bid</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead>Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {auctionData.map((auction) => (
-                              <TableRow key={auction.auction_id}>
-                                <TableCell>
-                                  <div className="flex items-center gap-3">
+                                  <div className="w-[25%]">
                                     <div className="w-12 h-12 rounded-md bg-gray-800 overflow-hidden">
                                       {auction.image ? (
                                         <Image
@@ -643,69 +699,203 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                                         </div>
                                       )}
                                     </div>
-                                    <div>
-                                      <div className="font-medium truncate">
-                                        {auction.year} {auction.make}{" "}
-                                        {auction.model}
-                                      </div>
-                                      {/* <div className="text-sm text-gray-400">
-                                  {car.description.substring(0, 30)}...
-                                </div> */}
-                                    </div>
                                   </div>
-                                </TableCell>
-                                <TableCell className="font-medium">
-                                  {DateTime.fromJSDate(
-                                    new Date(auction.deadline)
-                                  ).toLocaleString(DateTime.DATETIME_FULL)}{" "}
-                                  (
-                                  {formatTimeLeft(
-                                    new Date(auction.deadline).toString()
-                                  )}
-                                  )
-                                </TableCell>
-                                <TableCell className="font-mono">
-                                  ${auction.price.toLocaleString()}
-                                </TableCell>
-
-                                <TableCell>
-                                  {/* TODO: Change to using status from attributes */}
-                                  <Badge
-                                    className={
-                                      auction.isActive
-                                        ? "bg-green-100 text-green-800"
-                                        : "bg-red-100 text-red-800"
-                                    }
-                                  >
-                                    {auction.isActive ? "Active" : "Ended"}
-                                  </Badge>
-                                </TableCell>
-
-                                <TableCell>
-                                  <div className="flex items-center gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      title="Edit Car"
-                                      className=""
-                                      onClick={() => handleEditAuction(auction)}
-                                    >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      title="View Predictions"
-                                      className="text-yellow-500"
-                                      onClick={() =>
-                                        handleViewPrediction(auction)
+                                </div>
+                                <div className="flex w-full gap-2">
+                                  <div className="w-[50%]">
+                                    <p className="text-xs text-gray-400">
+                                      Current Bid
+                                    </p>
+                                    <p className="text-white text-sm font-mono">
+                                      ${auction.price.toLocaleString()}
+                                    </p>
+                                  </div>
+                                  <div className="w-[50%]">
+                                    <p className="text-xs text-gray-400">
+                                      Status
+                                    </p>
+                                    <Badge
+                                      className={
+                                        auction.isActive
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-red-100 text-red-800"
                                       }
                                     >
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
+                                      {auction.isActive ? "Active" : "Ended"}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div></div>
 
-                                    {/* <Button
+                                <div className="flex justify-end space-x-2 pt-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    title="Edit Car"
+                                    className=""
+                                    onClick={() => handleEditAuction(auction)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    title="View Predictions"
+                                    className="text-yellow-500"
+                                    onClick={() =>
+                                      handleViewPrediction(auction)
+                                    }
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    title="Reprompt Agent Prediction"
+                                    className="text-yellow-500"
+                                    onClick={() =>
+                                      handleViewRePromptAuction(auction)
+                                    }
+                                  >
+                                    <Redo className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+
+                        <div className="hidden md:block overflow-x-auto w-full">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Car</TableHead>
+                                <TableHead>End Date</TableHead>
+                                <TableHead>Current Bid</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {auctionData.map((auction) => (
+                                <TableRow key={auction.auction_id}>
+                                  <TableCell>
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-12 h-12 rounded-md bg-gray-800 overflow-hidden">
+                                        {auction.image ? (
+                                          <Image
+                                            src={auction.image}
+                                            alt={`${auction.year} ${auction.make} ${auction.model}`}
+                                            title={`${auction.year} ${auction.make} ${auction.model}`}
+                                            className="w-full h-full object-cover"
+                                            objectFit="cover"
+                                            width={100}
+                                            height={100}
+                                          />
+                                        ) : (
+                                          <div className="w-full h-full flex items-center justify-center">
+                                            <ImageOff className="w-6 h-6 text-gray-500" />
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div>
+                                        {auction.year &&
+                                        auction.make &&
+                                        auction.model ? (
+                                          <div className="font-medium truncate">
+                                            {auction.year} {auction.make}{" "}
+                                            {auction.model}
+                                          </div>
+                                        ) : (
+                                          <div className="font-medium truncate">
+                                            {auction.title}
+                                          </div>
+                                        )}
+
+                                        {/* <div className="text-sm text-gray-400">
+                                  {car.description.substring(0, 30)}...
+                                </div> */}
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="font-medium">
+                                    {DateTime.fromJSDate(
+                                      new Date(auction.deadline)
+                                    ).toLocaleString(
+                                      DateTime.DATETIME_FULL
+                                    )}{" "}
+                                    (
+                                    {formatTimeLeft(
+                                      new Date(auction.deadline).toString()
+                                    )}
+                                    )
+                                  </TableCell>
+                                  <TableCell className="font-mono">
+                                    ${auction.price.toLocaleString()}
+                                  </TableCell>
+
+                                  <TableCell>
+                                    {/* TODO: Change to using status from attributes */}
+                                    <Badge
+                                      className={
+                                        auction.isActive
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-red-100 text-red-800"
+                                      }
+                                    >
+                                      {auction.isActive ? "Active" : "Ended"}
+                                    </Badge>
+                                  </TableCell>
+
+                                  <TableCell>
+                                    <div className="flex items-center gap-1">
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Edit Car"
+                                        className=""
+                                        onClick={() =>
+                                          handleEditAuction(auction)
+                                        }
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="View Predictions"
+                                        className="text-yellow-500"
+                                        onClick={() =>
+                                          handleViewPrediction(auction)
+                                        }
+                                      >
+                                        <Eye className="h-4 w-4" />
+                                      </Button>
+
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Delete Car"
+                                        className="text-red-500"
+                                        onClick={() =>
+                                          handleDeleteAuction(auction)
+                                        }
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Reprompt Agent Prediction"
+                                        className="text-yellow-500"
+                                        onClick={() =>
+                                          handleViewRePromptAuction(auction)
+                                        }
+                                      >
+                                        <Redo className="h-4 w-4" />
+                                      </Button>
+                                      {/* <Button
                                 variant="ghost"
                                 size="icon"
                                 title="Edit Game Timing"
@@ -713,29 +903,30 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                               >
                                 <Calendar className="h-4 w-4" />
                               </Button> */}
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-
-                      {auctionData.length === 0 && (
-                        <div className="text-center py-8">
-                          <Car className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-xl font-bold mb-2">
-                            No Cars Found
-                          </h3>
-                          <p className="text-gray-400">
-                            No cars match your search criteria
-                          </p>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              )}
+
+                        {auctionData.length === 0 && (
+                          <div className="text-center py-8">
+                            <Car className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-xl font-bold mb-2">
+                              No Cars Found
+                            </h3>
+                            <p className="text-gray-400">
+                              No cars match your search criteria
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
             </Tabs>
             <Dialog
               open={viewingPredictions}
@@ -1032,6 +1223,108 @@ const AuctionsPage: React.FC<AuctionsPageProps> = ({
                       <span>Save Changes</span>
                     )}
                   </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={rePrompt} onOpenChange={setRePrompt}>
+              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                <DialogHeader>
+                  <DialogTitle className="text-lg max-md:text-md">
+                    Reprompt Agent Prediction
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-300 max-md:text-sm">
+                    In case an agent&apos;s prediction was unsuccessful due to
+                    the response not having the proper format to get the final
+                    price.
+                  </DialogDescription>
+                </DialogHeader>
+                {agentLoading ? (
+                  <div className="flex justify-center items-center w-full mt-4">
+                    <BeatLoader color="#F2CA16" />
+                  </div>
+                ) : (
+                  <div className="py-4">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="">Agent Name</TableHead>
+                          <TableHead className="flex items-center justify-center">
+                            Action
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {agents.map((agent) => (
+                          <TableRow key={agent._id.toString()}>
+                            <TableCell className="font-medium">
+                              {agent.username}
+                            </TableCell>
+                            <TableCell className="flex items-center justify-center">
+                              {agentLoadingStates[agent._id.toString()] ===
+                              "loading" ? (
+                                <BeatLoader color="#F2CA16" size="0.5rem" />
+                              ) : agentLoadingStates[agent._id.toString()] ===
+                                "success" ? (
+                                <Check className="h-4 w-4" color="green" />
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  title="Reprompt Prediction for Agent"
+                                  className="text-yellow-500"
+                                  onClick={() => handleRepromptAgent(agent)}
+                                >
+                                  <Redo className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+            <Dialog open={deleteAuction} onOpenChange={setDeleteAuction}>
+              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                <DialogHeader>
+                  <DialogTitle className="text-red-700 text-lg max-md:text-md">
+                    Toggle Auction to Inactive
+                  </DialogTitle>
+                  <DialogDescription className="max-md:text-sm">
+                    Are you sure you want to set{" "}
+                    <span className="font-semibold text-red-700">
+                      {currentAuction?.year} {currentAuction?.make}{" "}
+                      {currentAuction?.model}
+                    </span>{" "}
+                    to inactive?
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="p-2 m-2 text-sm">
+                  <p className="text-lg max-md:text-md font-bold text-red-700 text-center">
+                    Warning
+                  </p>
+                  <p className={"text-justify max-md:text-sm"}>
+                    {
+                      "By setting this auction to inactive, they will no longer be accessible in the Velocity Market App's auctions section."
+                    }
+                  </p>
+                  <p className={"text-justify max-md:text-sm"}>
+                    {"However, predictions will be retained."}
+                  </p>
+                </div>
+                <DialogFooter className="flex-row justify-end space-x-2">
+                  <form onSubmit={handleToggleInactive}>
+                    <Button
+                      type="submit"
+                      className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Toggling..." : "Toggle Inactive"}
+                    </Button>
+                  </form>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

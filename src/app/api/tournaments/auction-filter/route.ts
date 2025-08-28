@@ -74,6 +74,7 @@ export async function GET(req: NextRequest) {
           $project: {
             _id: 1,
             auction_id: 1,
+            title: 1,
             attributes: 1,
             description: 1,
             images_list: 1,

@@ -59,6 +59,7 @@ export const getCarsWithFilter = async (props: getCarsWithFilterProps) => {
         cars: list.cars.map((data: any) => ({
           _id: data._id,
           auction_id: data.auction_id,
+          title: data.title,
           description: [...data.description],
           images_list: [...data.images_list],
           listing_details: [...data.listing_details],
@@ -123,6 +124,7 @@ export const getTournamentAuctions = async (
         auctions: list.auctions.map((data: any) => ({
           _id: data._id,
           auction_id: data.auction_id,
+          title: data.title,
           description: [...data.description],
           images_list: [...data.images_list],
           listing_details: [...data.listing_details],
@@ -257,6 +259,34 @@ export const getPredictions = async (auction_id: string) => {
       return data;
     } else {
       console.error(`Failed to fetch predictions for ${auction_id}`);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const getTotalPredictionCount = async () => {
+  try {
+    const response = await fetch(`/api/predictions/count`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.total;
+    } else {
+      console.error(`Failed to fetch total prediction count`);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const getAllPredictions = async () => {
+  try {
+    const response = await fetch(`/api/predictions`, { method: "GET" });
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      console.error(`Failed to fetch all predictions`);
     }
   } catch (e) {
     console.error(e);
@@ -478,7 +508,9 @@ export const getTournamentsWithSearch = async (props: SearchProps) => {
   }
 };
 
-export const changeActiveStatusForTournament = async (tournament_id: any) => {
+export const changeActiveStatusForTournament = async (
+  tournament_id: string
+) => {
   const res = await fetch(`/api/tournaments/toggle-active`, {
     method: "POST",
     headers: {
@@ -546,7 +578,7 @@ export const searchTournaments = async (searchWord: string) => {
 
 // compute tournament results
 
-export const computeTournamentResults = async (tournament_id: number) => {
+export const computeTournamentResults = async (tournament_id: string) => {
   const res = await fetch(`/api/tournaments/${tournament_id}/compute`, {
     method: "PUT",
   });
@@ -642,13 +674,22 @@ export const getWagersWithSearch = async (searchString: string) => {
 };
 
 // get wagers on Date
-export const getWagersOnDate = async (date: string) => {
-  const res = await fetch(`/api/wagers/day?date=${date}`);
+// export const getWagersOnDate = async (date: string) => {
+//   const res = await fetch(`/api/wagers/day?date=${date}`);
+//   if (res.status === 200) {
+//     const data = await res.json();
+//     return data;
+//   }
+//   console.error("Failed to fetch wagers!");
+// };
+
+export const getPredictionsOnDate = async (date: string) => {
+  const res = await fetch(`/api/predictions/dayCount?predictionDate=${date}`);
   if (res.status === 200) {
     const data = await res.json();
     return data;
   }
-  console.error("Failed to fetch wagers!");
+  console.error("Failed to fetch predictions!");
 };
 
 export const refundWager = async (wager_id: string) => {
@@ -707,6 +748,54 @@ export const deleteAgentPrediction = async (id: string) => {
 
   if (!res.ok) {
     throw new Error("Failed to delete prediction");
+  }
+};
+
+export const getUnsuccessfulAgents = async (
+  auction_id: string,
+  tournament_id?: string
+) => {
+  const res = await fetch(
+    `/api/agents?auction_id=${auction_id}${
+      tournament_id ? `&tournament_id=${tournament_id}` : ""
+    }`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch unsuccessful agents");
+  }
+  const data = await res.json();
+  return data;
+};
+
+export const repromptAgentPrediction = async (
+  auction_id: string,
+  agent_id: string,
+  tournament_id?: string
+) => {
+  const res = await fetch(
+    `/api/prompt/reprompt?auction_id=${auction_id}&agent_id=${agent_id}${
+      tournament_id ? `&tournament_id=${tournament_id}` : ""
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to prompt Vertex AI");
+  } else {
+    const data = await res.json();
+    return data;
   }
 };
 

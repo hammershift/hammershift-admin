@@ -11,6 +11,9 @@ import {
   getTournamentsWithSearch,
   computeTournamentResults,
   getTournamentPredictions,
+  getUnsuccessfulAgents,
+  repromptAgentPrediction,
+  deleteAgentPrediction,
 } from "@/app/lib/data";
 import {
   Card,
@@ -50,6 +53,8 @@ import {
   Trash2,
   Trophy,
   X,
+  Redo,
+  Check,
 } from "lucide-react";
 import { Button } from "@/app/ui/components/button";
 import { Label } from "@/app/ui/components/label";
@@ -73,7 +78,8 @@ import {
 import LoadingModal from "@/app/ui/components/LoadingModal";
 import AlertModal from "@/app/ui/components/AlertModal";
 import { Prediction } from "@/app/models/prediction.model";
-
+import { AgentProperties } from "@/app/lib/interfaces";
+import { CarData } from "../auctions/page";
 interface TournamentUser {
   userId: string;
   fullName: string;
@@ -123,6 +129,7 @@ interface TournamentAuctionData {
 interface TournamentAuctionData {
   _id: string;
   auction_id: string;
+  title: string;
   description: string[];
   price: number;
   year: string;
@@ -138,6 +145,22 @@ interface TournamentAuctionData {
   deadline: Date;
 }
 
+interface Agent {
+  _id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  balance: number;
+  isActive: boolean;
+  isBanned: boolean;
+  provider: string;
+  about: string;
+  createdAt: Date;
+  updatedAt: Date;
+  role: string;
+  agentProperties?: AgentProperties;
+}
+
 const TournamentsPage = () => {
   const [tournamentData, setTournamentData] = useState<TournamentData[]>([]);
   const [searchValue, setSearchValue] = useState<string>("");
@@ -145,7 +168,7 @@ const TournamentsPage = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalTournaments, setTotalTournaments] = useState(0);
-  const [displayCount, setDisplayCount] = useState(5);
+  const [displayCount, setDisplayCount] = useState(10);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -245,7 +268,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
     endTime: null,
     auction_ids: [],
     users: [],
-    maxUsers: 0,
+    maxUsers: 20,
     createdAt: null,
   };
   const [showAddModal, setShowAddModal] = useState(false);
@@ -257,6 +280,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [alertMessage, setAlertMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeletePredictionModal, setShowDeletePredictionModal] =
+    useState(false);
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [showComputeModal, setShowComputeModal] = useState(false);
   const [showWinnersModal, setShowWinnersModal] = useState(false);
@@ -298,6 +323,18 @@ const TournamentTable: React.FC<TournamentProps> = ({
   const [filteredPredictions, setFilteredPredictions] = useState<Prediction[]>(
     []
   );
+  const [selectedPrediction, setSelectedPrediction] = useState<Prediction>();
+  const [refreshPrediction, setRefreshPrediction] = useState<boolean>(false);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [currentAuction, setCurrentAuction] = useState<TournamentAuctionData>();
+  const [currentTournamentAuctions, setCurrentTournamentAuctions] = useState<
+    TournamentAuctionData[]
+  >([]);
+  const [agentLoadingStates, setAgentLoadingStates] = useState<{
+    [key: string]: string;
+  }>({});
+  const [showRePrompt, setShowRePrompt] = useState<boolean>(false);
+  const [agentLoading, setAgentLoading] = useState<boolean>(false);
 
   const [viewAuction, setViewAuction] =
     useState<TournamentAuctionData | null>();
@@ -358,7 +395,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
       setViewAuction(selectedAuctions[0]);
       fetchTournamentPredictions(selectedAuctions[0]);
     }
-  }, [selectedAuctions]);
+  }, [selectedAuctions, refreshPrediction]);
 
   useEffect(() => {
     if (viewAuction != null && currentPredictions.length > 0) {
@@ -519,7 +556,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
           body: JSON.stringify({
             ...newTournament,
             banner: selectedAuctions[0].image,
-            auction_ids: selectedAuctions.map((a) => a.auction_id),
+            auction_ids: selectedAuctions.map((a) => a._id),
             type: currentTournamentType,
           }),
         });
@@ -570,7 +607,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
             headers: { "Content-type": "application/json" },
             body: JSON.stringify({
               ...selectedTournament,
-              auction_ids: selectedAuctions.map((a) => a.auction_id),
+              auction_ids: selectedAuctions.map((a) => a._id),
             }),
           }
         );
@@ -626,9 +663,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
     setIsSubmitting(true);
     setErrorMessage("");
     try {
-      const response = await computeTournamentResults(
-        selectedTournament!.tournament_id
-      );
+      const response = await computeTournamentResults(selectedTournament!._id);
       if (response.ok) {
         const newTournament = await response.json();
         setSelectedTournament(newTournament.data);
@@ -661,9 +696,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
       );
     else setLoadingMessage("Activating tournament...");
     try {
-      const response = await changeActiveStatusForTournament(
-        tournament?.tournament_id
-      );
+      const response = await changeActiveStatusForTournament(tournament?._id);
       if (!response.isSuccessful) {
         console.error("Error changing active status for tournament");
       } else {
@@ -677,6 +710,107 @@ const TournamentTable: React.FC<TournamentProps> = ({
     setIsSubmitting(false);
     setShowLoadingModal(false);
   };
+
+  const handleRepromptAgent = async (agent: Agent) => {
+    try {
+      if (!currentAuction || !selectedTournament) return;
+      setAgentLoadingStates((prevStates) => ({
+        ...prevStates,
+        [agent._id]: "loading",
+      }));
+      const response = await repromptAgentPrediction(
+        currentAuction._id,
+        agent._id,
+        selectedTournament._id
+      );
+      if (response.status === "success") {
+        setAgentLoadingStates((prevStates) => ({
+          ...prevStates,
+          [agent._id]: "success",
+        }));
+      } else {
+        setAgentLoadingStates((prevStates) => ({
+          ...prevStates,
+          [agent._id]: "unsuccessful",
+        }));
+      }
+    } catch (e) {
+      console.error(e);
+      setAgentLoadingStates((prevStates) => ({
+        ...prevStates,
+        [agent._id]: "unsuccessful",
+      }));
+    }
+  };
+
+  const handleViewRepromptAuction = async (tournament: TournamentData) => {
+    setShowRePrompt(true);
+    setAgentLoading(true);
+    setSelectedTournament(tournament);
+
+    //get auctions from tournament first
+    try {
+      const auctions = await getSelectedTournamentAuctions(
+        tournament.auction_ids
+      );
+      if (auctions.length > 0) {
+        setCurrentAuction(auctions[0]);
+        setCurrentTournamentAuctions(auctions);
+      } else {
+        throw new Error("No auctions found for this tournament");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeletePrediction = async (e: any) => {
+    e.preventDefault();
+    if (!selectedPrediction) return;
+    setIsSubmitting(true);
+    try {
+      await deleteAgentPrediction(selectedPrediction._id.toString());
+      setRefreshPrediction(!refreshPrediction);
+      setShowDeletePredictionModal(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleShowDeletePredictionModal = async (prediction: Prediction) => {
+    setShowDeletePredictionModal(true);
+    setSelectedPrediction(prediction);
+  };
+
+  useEffect(() => {
+    async function fetchUnsuccessfulAgents() {
+      try {
+        setAgentLoading(true);
+        setAgentLoadingStates({});
+        if (currentAuction && selectedTournament) {
+          const response = await getUnsuccessfulAgents(
+            currentAuction._id,
+            selectedTournament._id
+          );
+          setAgents(response.agents);
+
+          for (const agent of response.agents) {
+            setAgentLoadingStates((prevStates) => ({
+              ...prevStates,
+              [agent._id.toString()]: "unsuccessful",
+            }));
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setAgentLoading(false);
+      }
+    }
+    fetchUnsuccessfulAgents();
+  }, [currentAuction, selectedTournament]);
 
   useEffect(() => {
     setErrorMessage("");
@@ -1143,6 +1277,17 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className={"text-yellow-500"}
+                                      title={"Reprompt Agents for Tournament"}
+                                      onClick={() => {
+                                        handleViewRepromptAuction(tournament);
+                                      }}
+                                    >
+                                      <Redo className="h-4 w-4" />
+                                    </Button>
                                   </div>
                                 </TableCell>
                               )}
@@ -1171,8 +1316,8 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     Provide information for new tournament
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
+                <div className="md:grid md:grid-cols-2 md:gap-4">
+                  <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                     <Label className="text-right max-md:text-xs">
                       Tournament Name
                     </Label>
@@ -1188,6 +1333,58 @@ const TournamentTable: React.FC<TournamentProps> = ({
                       onChange={handleNewTournamentChange}
                     />
                   </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">
+                      Tournament Type
+                    </Label>
+                    <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                      <Select
+                        value={currentTournamentType || ""}
+                        onValueChange={(value: string) => {
+                          setEmptyInputError(false);
+                          setTournamentInputError(false);
+                          setCurrentTournamentType(value);
+                        }}
+                        name="role"
+                      >
+                        <SelectTrigger
+                          className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                            emptyInputError && currentTournamentType == ""
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                        >
+                          <SelectValue
+                            className="max-md:text-xs"
+                            placeholder="Select tournament type"
+                          />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                          <SelectItem value="free_play">Free Play</SelectItem>
+                          {/* <SelectItem value="standard">Standard</SelectItem>
+                            <SelectItem value="both">Both</SelectItem> */}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid gap-4">
+                  {/* <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
+                    <Label className="text-right max-md:text-xs">
+                      Tournament Name
+                    </Label>
+                    <Input
+                      className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                        emptyInputError && newTournament?.name == ""
+                          ? "border-red-500"
+                          : ""
+                      }`}
+                      name="name"
+                      type="text"
+                      value={newTournament?.name || ""}
+                      onChange={handleNewTournamentChange}
+                    />
+                  </div> */}
                   <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
                     <Label className="text-right max-md:text-xs">
                       Description
@@ -1243,7 +1440,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-4">
+                  {/* <div className="md:grid md:grid-cols-2 md:gap-4">
                     <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                       <Label className="text-right max-md:text-xs">
                         {"Buy-in Fee"}
@@ -1290,7 +1487,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                         onChange={handleNewTournamentChange}
                       />
                     </div>
-                  </div>
+                  </div> */}
                   <div className="md:grid md:grid-cols-2 md:gap-4">
                     <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                       <Label className="text-right max-md:text-xs">
@@ -1307,69 +1504,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                         value={newTournament?.maxUsers || 20}
                         onChange={handleNewTournamentChange}
                       />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label className="text-right max-md:text-xs">
-                        Tournament Type
-                      </Label>
-                      <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
-                        <Select
-                          value={currentTournamentType || ""}
-                          onValueChange={(value: string) => {
-                            setEmptyInputError(false);
-                            setTournamentInputError(false);
-                            setCurrentTournamentType(value);
-                          }}
-                          name="role"
-                        >
-                          <SelectTrigger
-                            className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
-                              emptyInputError && currentTournamentType == ""
-                                ? "border-red-500"
-                                : ""
-                            }`}
-                          >
-                            <SelectValue
-                              className="max-md:text-xs"
-                              placeholder="Select tournament type"
-                            />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                            <SelectItem value="free_play">Free Play</SelectItem>
-                            {/* <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="both">Both</SelectItem> */}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {/* <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
-                        <Select
-                          value={currentTournamentType || ""}
-                          onValueChange={(value: string) => {
-                            setEmptyInputError(false);
-                            setTournamentInputError(false);
-                            setCurrentTournamentType(value);
-                          }}
-                          name="role"
-                        >
-                          <SelectTrigger
-                            className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
-                              emptyInputError && currentTournamentType == ""
-                                ? "border-red-500"
-                                : ""
-                            }`}
-                          >
-                            <SelectValue
-                              className="max-md:text-xs"
-                              placeholder="Select tournament type"
-                            />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                            <SelectItem value="free_play">Free Play</SelectItem>
-                            <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="both">Both</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div> */}
                     </div>
                   </div>
                   <div className="grid max-md:grid-cols-8 grid-cols-6 items-center gap-4">
@@ -1522,22 +1656,63 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
-                      <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
-                        <Label className="text-right max-md:text-xs">
-                          Tournament Name
-                        </Label>
-                        <Input
-                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                            emptyInputError && selectedTournament?.name == ""
-                              ? "border-red-500"
-                              : ""
-                          }`}
-                          name="name"
-                          type="text"
-                          value={selectedTournament?.name || ""}
-                          onChange={handleSelectedTournamentChange}
-                        />
+                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                        <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                          <Label className="text-right max-md:text-xs">
+                            Tournament Name
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError && selectedTournament?.name == ""
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="name"
+                            type="text"
+                            value={selectedTournament?.name || ""}
+                            onChange={handleSelectedTournamentChange}
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right max-md:text-xs">
+                            Tournament Type
+                          </Label>
+                          <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                            <Select
+                              value={selectedTournament?.type || ""}
+                              onValueChange={(value: string) => {
+                                //can't edit this
+                              }}
+                              disabled
+                              name="role"
+                            >
+                              <SelectTrigger
+                                className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                                  emptyInputError &&
+                                  selectedTournament?.type == ""
+                                    ? "border-red-500"
+                                    : ""
+                                }`}
+                              >
+                                <SelectValue
+                                  className="max-md:text-xs"
+                                  placeholder="Select tournament type"
+                                />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                                <SelectItem value="free_play">
+                                  Free Play
+                                </SelectItem>
+                                {/* <SelectItem value="standard">
+                                  Standard
+                                </SelectItem>
+                                <SelectItem value="both">Both</SelectItem> */}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                       </div>
+
                       <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
                         <Label className="text-right max-md:text-xs">
                           Description
@@ -1606,7 +1781,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           />
                         </div>
                       </div>
-                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                      {/* <div className="md:grid md:grid-cols-2 md:gap-4">
                         <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                           <Label className="text-right max-md:text-xs">
                             {"Buy-in Fee"}
@@ -1645,7 +1820,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             onChange={handleSelectedTournamentChange}
                           />
                         </div>
-                      </div>
+                      </div> */}
                       <div className="md:grid md:grid-cols-2 md:gap-4">
                         <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                           <Label className="text-right max-md:text-xs">
@@ -1663,44 +1838,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             value={selectedTournament?.maxUsers || 20}
                             onChange={handleSelectedTournamentChange}
                           />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label className="text-right max-md:text-xs">
-                            Tournament Type
-                          </Label>
-                          <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
-                            <Select
-                              value={selectedTournament?.type || ""}
-                              onValueChange={(value: string) => {
-                                //can't edit this
-                              }}
-                              disabled
-                              name="role"
-                            >
-                              <SelectTrigger
-                                className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
-                                  emptyInputError &&
-                                  selectedTournament?.type == ""
-                                    ? "border-red-500"
-                                    : ""
-                                }`}
-                              >
-                                <SelectValue
-                                  className="max-md:text-xs"
-                                  placeholder="Select tournament type"
-                                />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                                <SelectItem value="free_play">
-                                  Free Play
-                                </SelectItem>
-                                {/* <SelectItem value="standard">
-                                  Standard
-                                </SelectItem>
-                                <SelectItem value="both">Both</SelectItem> */}
-                              </SelectContent>
-                            </Select>
-                          </div>
                         </div>
                       </div>
                       <div className="grid max-md:grid-cols-8 grid-cols-6 items-center gap-4">
@@ -1875,23 +2012,64 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
-                      <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
-                        <Label className="text-right max-md:text-xs">
-                          Tournament Name
-                        </Label>
-                        <Input
-                          className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
-                            emptyInputError && selectedTournament?.name == ""
-                              ? "border-red-500"
-                              : ""
-                          }`}
-                          name="name"
-                          type="text"
-                          value={selectedTournament?.name || ""}
-                          onChange={handleSelectedTournamentChange}
-                          disabled
-                        />
+                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                        <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
+                          <Label className="text-right max-md:text-xs">
+                            Tournament Name
+                          </Label>
+                          <Input
+                            className={`col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm ${
+                              emptyInputError && selectedTournament?.name == ""
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                            name="name"
+                            type="text"
+                            value={selectedTournament?.name || ""}
+                            onChange={handleSelectedTournamentChange}
+                            disabled
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right max-md:text-xs">
+                            Tournament Type
+                          </Label>
+                          <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
+                            <Select
+                              value={selectedTournament?.type || ""}
+                              onValueChange={(value: string) => {
+                                //can't edit this
+                              }}
+                              disabled
+                              name="role"
+                            >
+                              <SelectTrigger
+                                className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
+                                  emptyInputError &&
+                                  selectedTournament?.type == ""
+                                    ? "border-red-500"
+                                    : ""
+                                }`}
+                              >
+                                <SelectValue
+                                  className="max-md:text-xs"
+                                  placeholder="Select tournament type"
+                                />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                                <SelectItem value="free_play">
+                                  Free Play
+                                </SelectItem>
+                                {/* <SelectItem value="standard">
+                                  Standard
+                                </SelectItem>
+                                <SelectItem value="both">Both</SelectItem> */}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                       </div>
+
                       <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
                         <Label className="text-right max-md:text-xs">
                           Description
@@ -1960,7 +2138,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                           />
                         </div>
                       </div>
-                      <div className="md:grid md:grid-cols-2 md:gap-4">
+                      {/* <div className="md:grid md:grid-cols-2 md:gap-4">
                         <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                           <Label className="text-right max-md:text-xs">
                             {"Buy-in Fee"}
@@ -1999,7 +2177,7 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             disabled
                           />
                         </div>
-                      </div>
+                      </div> */}
                       <div className="md:grid md:grid-cols-2 md:gap-4">
                         <div className="grid grid-cols-4 items-center gap-4 max-md:pb-4">
                           <Label className="text-right max-md:text-xs">
@@ -2018,44 +2196,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                             onChange={handleSelectedTournamentChange}
                             disabled
                           />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label className="text-right max-md:text-xs">
-                            Tournament Type
-                          </Label>
-                          <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36] max-md:text-sm">
-                            <Select
-                              value={selectedTournament?.type || ""}
-                              onValueChange={(value: string) => {
-                                //can't edit this
-                              }}
-                              disabled
-                              name="role"
-                            >
-                              <SelectTrigger
-                                className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs ${
-                                  emptyInputError &&
-                                  selectedTournament?.type == ""
-                                    ? "border-red-500"
-                                    : ""
-                                }`}
-                              >
-                                <SelectValue
-                                  className="max-md:text-xs"
-                                  placeholder="Select tournament type"
-                                />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#1E2A36] max-md:text-sm">
-                                <SelectItem value="free_play">
-                                  Free Play
-                                </SelectItem>
-                                {/* <SelectItem value="standard">
-                                  Standard
-                                </SelectItem>
-                                <SelectItem value="both">Both</SelectItem> */}
-                              </SelectContent>
-                            </Select>
-                          </div>
                         </div>
                       </div>
                       <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
@@ -2096,18 +2236,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 </SelectTrigger>
                                 <SelectContent className="bg-[#1E2A36] max-md:text-sm">
                                   {selectedAuctions.map((selectedAuction) => {
-                                    // const currentAuctionId =
-                                    //   selectedAuction.auction_id;
-                                    // console.log(
-                                    //   `Auction id here: ${currentAuctionId}`
-                                    // );
-
-                                    // console.log({ availableAuctionData });
-                                    // const auction = availableAuctionData.find(
-                                    //   (auction) =>
-                                    //     auction.auction_id === currentAuctionId
-                                    // );
-                                    // console.log({ auction });
                                     return (
                                       <SelectItem
                                         key={selectedAuction.auction_id}
@@ -2129,63 +2257,6 @@ const TournamentTable: React.FC<TournamentProps> = ({
                         </div>
                       ) : (
                         <div className="p-2 min-h-[60px]">
-                          {/* {selectedAuctions.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {selectedAuctions.map((selectedAuction) => {
-                                const currentAuctionId =
-                                  selectedAuction.auction_id;
-                                const auction = availableAuctionData.find(
-                                  (auction) =>
-                                    auction.auction_id === currentAuctionId
-                                );
-                                if (auction)
-                                  return (
-                                    <div
-                                      key={currentAuctionId}
-                                      className="flex items-center p-3 rounded-md border cursor-pointer transition-colors bg-[#1E2A36] border-[#FFFFFF] hover:bg-[#1E2A36]/80"
-                                    >
-                                      <div className="grid grid-cols-4">
-                                        <div className="col-span-3 flex-1 min-w-0">
-                                          <div className="max-md:text-xs text-sm truncate">
-                                            {`${auction.year} ${auction.make} ${auction.model}`}
-                                          </div>
-                                          <div className="max-md:text-xs text-sm text-gray-400 truncate">
-                                            Current Bid: $
-                                            {(
-                                              auction.price || 0
-                                            ).toLocaleString()}
-                                          </div>
-                                          <div className="max-md:text-xs text-sm text-gray-400 truncate">
-                                            Ends In:{" "}
-                                            {formatDate(auction.deadline)}
-                                          </div>
-                                        </div>
-                                        {auction.image ? (
-                                          <Image
-                                            src={auction.image}
-                                            alt={`${auction.year} ${auction.make} ${auction.model}`}
-                                            title={`${auction.year} ${auction.make} ${auction.model}`}
-                                            className="w-full h-full object-cover"
-                                            objectFit="cover"
-                                            width={100}
-                                            height={100}
-                                          />
-                                        ) : (
-                                          <div className="w-full h-full flex items-center justify-center">
-                                            <ImageOff className="w-6 h-6 text-gray-500" />
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                else return "";
-                              })}
-                            </div>
-                          ) : (
-                            <p className="text-gray-400 text-sm">
-                              No auctions selected
-                            </p>
-                          )} */}
                           {(() => {
                             const auction = selectedAuctions.find(
                               (a) => a.auction_id === viewAuction?.auction_id
@@ -2247,8 +2318,21 @@ const TournamentTable: React.FC<TournamentProps> = ({
                                 return (
                                   <div
                                     key={index}
-                                    className="flex items-center justify-between rounded-lg bg-[#1E2A36] p-4"
+                                    className="flex items-center justify-between rounded-lg bg-[#1E2A36] p-4 relative"
                                   >
+                                    {prediction.user.role === "AGENT" && (
+                                      <button
+                                        className="absolute top-0 right-0 p-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs"
+                                        title="Delete Prediction"
+                                        onClick={() =>
+                                          handleShowDeletePredictionModal(
+                                            prediction
+                                          )
+                                        }
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    )}
                                     <div className="flex items-center gap-4">
                                       <div
                                         className={`max-md:h-7 max-md:w-7 h-10 w-10 rounded-full ${
@@ -2334,6 +2418,43 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     </div>
                     <DialogFooter className="flex-row justify-end space-x-2">
                       <form onSubmit={handleTournamentDelete}>
+                        <Button
+                          type="submit"
+                          className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Deleting..." : "Delete"}
+                        </Button>
+                      </form>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Dialog
+                  open={showDeletePredictionModal}
+                  onOpenChange={setShowDeletePredictionModal}
+                >
+                  <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-lg w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-red-700 text-lg max-md:text-md">
+                        Delete Prediction
+                      </DialogTitle>
+                      <DialogDescription className="max-md:text-sm">
+                        Are you sure you want to delete this prediction?
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="p-2 m-2 text-sm">
+                      <p className="text-lg max-md:text-md font-bold text-red-700 text-center">
+                        Warning
+                      </p>
+                      <p className={"text-justify max-md:text-sm"}>
+                        {
+                          "By deleting this prediction, it will no longer be accessible in the Velocity Market App's Tournament Dashboard"
+                        }
+                      </p>
+                    </div>
+                    <DialogFooter className="flex-row justify-end space-x-2">
+                      <form onSubmit={handleDeletePrediction}>
                         <Button
                           type="submit"
                           className="bg-red-700 text-[#0C1924] hover:bg-red-700/90"
@@ -2554,9 +2675,18 @@ const TournamentTable: React.FC<TournamentProps> = ({
 
                           <div className="grid grid-cols-4">
                             <div className="col-span-3 flex-1 min-w-0">
-                              <div className="max-md:text-xs text-sm truncate">
+                              {auction.year && auction.make && auction.model ? (
+                                <div className="max-md:text-xs text-sm truncate">
+                                  {`${auction.year} ${auction.make} ${auction.model}`}
+                                </div>
+                              ) : (
+                                <div className="max-md:text-xs text-sm truncate">
+                                  {auction.title}
+                                </div>
+                              )}
+                              {/* <div className="max-md:text-xs text-sm truncate">
                                 {`${auction.year} ${auction.make} ${auction.model}`}
-                              </div>
+                              </div> */}
                               <div className="max-md:text-xs text-sm text-gray-400 truncate">
                                 Current Bid: $
                                 {(auction.price || 0).toLocaleString()}
@@ -2613,6 +2743,115 @@ const TournamentTable: React.FC<TournamentProps> = ({
                     </Button>
                   </form>
                 </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={showRePrompt} onOpenChange={setShowRePrompt}>
+              <DialogContent className="bg-[#13202D] border-[#1E2A36] max-w-6xl w-[95%] max-h-[90vh] overflow-y-auto rounded-xl">
+                <DialogHeader>
+                  <DialogTitle className="text-lg max-md:text-md">
+                    Reprompt Agent Prediction
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-300 max-md:text-sm">
+                    In case an agent&apos;s prediction was unsuccessful due to
+                    the response not having the proper format to get the final
+                    price.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid max-md:grid-cols-4 grid-cols-8 items-center gap-4">
+                  <Label className="max-md:text-xs">
+                    Auctions ({currentTournamentAuctions.length})
+                  </Label>
+                  <div className="max-md:hidden col-span-3"></div>
+                  <div className="relative max-md:col-span-3 col-span-4 max-md:text-sm group">
+                    {/* <div className="col-span-3 bg-[#1E2A36] border-[#1E2A36]"> */}
+                    {currentTournamentAuctions.length > 0 &&
+                      currentAuction != null && (
+                        <Select
+                          value={currentAuction.auction_id || ""}
+                          onValueChange={(value: string) => {
+                            setCurrentAuction(
+                              currentTournamentAuctions.find(
+                                (auction) => auction.auction_id == value
+                              )
+                            );
+                          }}
+                          name="role"
+                        >
+                          <SelectTrigger
+                            className={`bg-[#1E2A36] border-[#1E2A36] max-md:text-xs
+                        }`}
+                          >
+                            <SelectValue
+                              className="max-md:text-xs"
+                              placeholder="Select auction"
+                            />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#1E2A36] max-md:text-sm">
+                            {currentTournamentAuctions.map(
+                              (selectedAuction) => {
+                                return (
+                                  <SelectItem
+                                    key={selectedAuction.auction_id}
+                                    value={selectedAuction.auction_id}
+                                    className="truncate max-md:max-w-[250px] text-ellipsis overflow-hidden"
+                                  >
+                                    {`${selectedAuction.year} ${selectedAuction.make} ${selectedAuction.model}`}
+                                  </SelectItem>
+                                );
+                              }
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )}
+                  </div>
+                </div>
+
+                {agentLoading ? (
+                  <div className="flex justify-center items-center w-full mt-4">
+                    <BeatLoader color="#F2CA16" />
+                  </div>
+                ) : (
+                  <div className="py-4">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="">Agent Name</TableHead>
+                          <TableHead className="flex items-center justify-center">
+                            Action
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {agents.map((agent) => (
+                          <TableRow key={agent._id.toString()}>
+                            <TableCell className="font-medium">
+                              {agent.username}
+                            </TableCell>
+                            <TableCell className="flex items-center justify-center">
+                              {agentLoadingStates[agent._id.toString()] ===
+                              "loading" ? (
+                                <BeatLoader color="#F2CA16" size="0.5rem" />
+                              ) : agentLoadingStates[agent._id.toString()] ===
+                                "success" ? (
+                                <Check className="h-4 w-4" color="green" />
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  title="Reprompt Prediction for Agent"
+                                  className="text-yellow-500"
+                                  onClick={() => handleRepromptAgent(agent)}
+                                >
+                                  <Redo className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </DialogContent>
             </Dialog>
           </div>

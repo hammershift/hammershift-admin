@@ -13,7 +13,7 @@ const Agents = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalAgents, setTotalAgents] = useState(0);
-  const [displayCount, setDisplayCount] = useState(3);
+  const [displayCount, setDisplayCount] = useState(10);
 
   const fetchData = async () => {
     setIsLoading(true);

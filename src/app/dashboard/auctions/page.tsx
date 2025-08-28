@@ -8,6 +8,7 @@ import { getCarsWithFilter } from "../../lib/data";
 export interface CarData {
   _id: string;
   auction_id: string;
+  title: string;
   description: string[];
   price: number;
   year: string;
@@ -84,7 +85,10 @@ const Auctions = () => {
       auctionData={carData}
       currentPage={currentPage}
       currentTab={currentTab}
-      setCurrentTab={setCurrentTab}
+      setCurrentTab={(tab: string) => {
+        setCurrentPage(1);
+        setCurrentTab(tab);
+      }}
       totalPages={totalPages}
       isLoading={isLoading}
       refreshToggle={refreshToggle}
