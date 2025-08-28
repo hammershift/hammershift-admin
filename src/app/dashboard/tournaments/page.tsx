@@ -764,11 +764,12 @@ const TournamentTable: React.FC<TournamentProps> = ({
     }
   };
 
-  const handleDeletePrediction = async () => {
+  const handleDeletePrediction = async (e: any) => {
+    e.preventDefault();
     if (!selectedPrediction) return;
     setIsSubmitting(true);
     try {
-      await deleteAgentPrediction(selectedPrediction._id.toHexString());
+      await deleteAgentPrediction(selectedPrediction._id.toString());
       setRefreshPrediction(!refreshPrediction);
       setShowDeletePredictionModal(false);
     } catch (e) {
