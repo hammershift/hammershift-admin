@@ -73,7 +73,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({
   const [agentInputErrorMessage, setAgentInputErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const defaultInstruction =
-    "You are given a description of a vehicle and you must predict its final selling price. You must also provide a reason for your prediction. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'";
+    "You are given a description of a vehicle and you must predict its final selling price. You must also provide a reason for your prediction, and you must place the final selling price inside brackets ([]) without any spaces inside for parsing. As much as possible, use Google Search to supplement your research on the final price. If you cannot predict the price of the vehicle, please respond with 'I am sorry, but I cannot predict the price of this vehicle.'";
 
   const handleNewAgentChange = (e: any) => {
     setEmptyInputError(false);
