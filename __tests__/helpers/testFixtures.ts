@@ -6,6 +6,7 @@ import Tournaments from "@/app/models/tournament.model";
 import Predictions from "@/app/models/prediction.model";
 import Transaction from "@/app/models/transaction.model";
 import Admins from "@/app/models/admin.model";
+import Comments from "@/app/models/comment.model";
 import bcrypt from "bcrypt";
 
 /**
@@ -176,6 +177,25 @@ export async function createTestTransaction(userId: Types.ObjectId, overrides: a
     ...overrides,
   });
   return await transaction.save();
+}
+
+export async function createTestComment(overrides: any = {}) {
+  const comment = new Comments({
+    _id: new Types.ObjectId(),
+    comment: "This is a test comment",
+    pageID: "test-page-123",
+    pageType: "auction",
+    user: {
+      userId: new Types.ObjectId().toString(),
+      username: "testuser",
+      profilePicture: "",
+    },
+    likes: [],
+    dislikes: [],
+    createdAt: new Date(),
+    ...overrides,
+  });
+  return await comment.save();
 }
 
 /**

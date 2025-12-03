@@ -61,6 +61,9 @@ const transactionSchema = new mongoose.Schema({
     type: String,
     enum: ['processing', 'success', 'failed'],
   },
+  note: {
+    type: String,
+  },
 });
 
 // Add indexes for query optimization

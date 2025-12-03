@@ -1,13 +1,16 @@
-import { MongoMemoryServer } from "mongodb-memory-server";
+import { MongoMemoryReplSet } from "mongodb-memory-server";
 import mongoose from "mongoose";
 
-let mongoServer: MongoMemoryServer;
+let mongoServer: MongoMemoryReplSet;
 
 /**
- * Connect to the in-memory database
+ * Connect to the in-memory database with replica set support
+ * (Required for MongoDB transactions)
  */
 export async function connectTestDb() {
-  mongoServer = await MongoMemoryServer.create();
+  mongoServer = await MongoMemoryReplSet.create({
+    replSet: { count: 1, storageEngine: 'wiredTiger' }
+  });
   const mongoUri = mongoServer.getUri();
 
   await mongoose.connect(mongoUri, {

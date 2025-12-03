@@ -30,21 +30,24 @@ export async function POST(req: NextRequest) {
 
     // Execute refund within a transaction
     const result = await withTransaction(async (session) => {
-      // Find and update wager
-      const updatedWager = await Wagers.findOneAndUpdate(
-        { _id: toObjectId(wager_id) },
-        { $set: { deleteReason: "Admin Refund", refunded: true } },
-        { new: true, session }
-      );
+      // Find wager first
+      const wager = await Wagers.findById(toObjectId(wager_id)).session(session);
 
-      if (!updatedWager) {
+      if (!wager) {
         throw new Error("Wager not found");
       }
 
       // Check if already refunded
-      if (updatedWager.refunded) {
+      if (wager.refunded) {
         throw new Error("Wager has already been refunded");
       }
+
+      // Update wager
+      const updatedWager = await Wagers.findByIdAndUpdate(
+        wager._id,
+        { $set: { deleteReason: "Admin Refund", refunded: true } },
+        { new: true, session }
+      );
 
       // Find user
       const user = await Users.findById(updatedWager.user._id).session(session);

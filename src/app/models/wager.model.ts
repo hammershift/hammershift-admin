@@ -14,6 +14,8 @@ const wagersSchema = new mongoose.Schema(
       },
     },
     isActive: { type: Boolean, default: true },
+    refunded: { type: Boolean, default: false },
+    deleteReason: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date },
   },

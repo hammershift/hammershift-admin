@@ -8,6 +8,13 @@ const uri = process.env.MONGODB_URI;
 const dbName = process.env.DB_NAME;
 
 const connectToDB = async () => {
+  // In test environment, skip connection if already connected
+  if (process.env.NODE_ENV === 'test') {
+    if (mongoose.connection.readyState === 1) {
+      return; // Already connected
+    }
+  }
+
   try {
     await mongoose.connect(uri, {
       dbName: dbName,
