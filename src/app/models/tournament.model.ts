@@ -163,6 +163,15 @@ const tournamentSchema = new Schema(
   { collection: "tournaments", timestamps: true }
 );
 
+// Add indexes for query optimization
+tournamentSchema.index({ tournament_id: 1 }, { unique: true });
+tournamentSchema.index({ isActive: 1 });
+tournamentSchema.index({ haveWinners: 1 });
+tournamentSchema.index({ startTime: 1 });
+tournamentSchema.index({ endTime: 1 });
+tournamentSchema.index({ "users.userId": 1 });
+tournamentSchema.index({ createdAt: -1 });
+
 tournamentSchema.plugin(aggregatePaginate);
 tournamentSchema.plugin(paginate);
 

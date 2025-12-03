@@ -1,52 +1,102 @@
-import clientPromise from '@/app/lib/mongoDB';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import { getServerSession } from "next-auth";
-import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from "mongodb";
+import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/app/lib/authMiddleware";
+import { withTransaction, toObjectId } from "@/app/lib/dbHelpers";
+import { validateRequestBody, refundWagerSchema } from "@/app/lib/validation";
+import connectToDB from "@/app/lib/mongoose";
+import Wagers from "@/app/models/wager.model";
+import Users from "@/app/models/user.model";
+import Transaction from "@/app/models/transaction.model";
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  // Require admin authorization
+  const authResult = await requireAuth(["owner", "admin", "moderator"]);
+  if ("error" in authResult) {
+    return authResult.error;
   }
 
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const { wager_id } = await req.json();
-
-    //edit refunded field to true and add delete reason
-    const updatedWager = await db.collection("wagers").findOneAndUpdate(
-      { _id: new ObjectId(wager_id) },
-      { $set: { deleteReason: "Admin Refund", refunded: true } },
-      { returnDocument: "after" }
+  // Validate request body
+  const validation = await validateRequestBody(req.clone(), refundWagerSchema);
+  if ("error" in validation) {
+    return NextResponse.json(
+      { message: validation.error },
+      { status: 400 }
     );
+  }
 
-    const user = await db.collection('users').findOne({ _id: new ObjectId(updatedWager?.user._id) });
+  const { wager_id } = validation.data;
 
-    const updatedBalance = (user?.balance || 0) + updatedWager?.wagerAmount;
+  try {
+    await connectToDB();
 
-    //update user's balance
-    await db.collection('users').updateOne({ _id: user?._id }, { $set: { balance: updatedBalance } });
+    // Execute refund within a transaction
+    const result = await withTransaction(async (session) => {
+      // Find and update wager
+      const updatedWager = await Wagers.findOneAndUpdate(
+        { _id: toObjectId(wager_id) },
+        { $set: { deleteReason: "Admin Refund", refunded: true } },
+        { new: true, session }
+      );
 
-    //create refund transaction
-    await db.collection('transactions').insertOne({
-      userID: user?._id,
-      wagerID: updatedWager?._id,
-      auctionID: updatedWager?.auctionID,
-      transactionType: 'refund',
-      amount: updatedWager?.wagerAmount,
-      type: '+',
-      transactionDate: new Date(),
-    })
+      if (!updatedWager) {
+        throw new Error("Wager not found");
+      }
+
+      // Check if already refunded
+      if (updatedWager.refunded) {
+        throw new Error("Wager has already been refunded");
+      }
+
+      // Find user
+      const user = await Users.findById(updatedWager.user._id).session(session);
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Calculate new balance
+      const updatedBalance = (user.balance || 0) + updatedWager.wagerAmount;
+
+      // Update user's balance
+      await Users.findByIdAndUpdate(
+        user._id,
+        { $set: { balance: updatedBalance } },
+        { session }
+      );
+
+      // Create refund transaction
+      const transaction = new Transaction({
+        userID: user._id,
+        wagerID: updatedWager._id,
+        auctionID: updatedWager.auctionID,
+        transactionType: "refund",
+        amount: updatedWager.wagerAmount,
+        type: "+",
+        status: "success",
+        transactionDate: new Date(),
+      });
+
+      await transaction.save({ session });
+
+      return {
+        wager: updatedWager,
+        newBalance: updatedBalance,
+        transaction,
+      };
+    });
 
     return NextResponse.json(
-      { message: 'Refund processed successfully' }, 
+      {
+        message: "Refund processed successfully",
+        data: result,
+      },
       { status: 200 }
     );
-
-  } catch (error) {
-    console.error('Error processing refund:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    console.error("Error processing refund:", error);
+    return NextResponse.json(
+      {
+        message: error.message || "Internal server error",
+      },
+      { status: error.message ? 400 : 500 }
+    );
   }
 }

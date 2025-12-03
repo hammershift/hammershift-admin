@@ -48,6 +48,16 @@ const predictionsSchema = new Schema(
   }
 );
 
+// Add indexes for query optimization
+predictionsSchema.index({ auction_id: 1 });
+predictionsSchema.index({ tournament_id: 1 });
+predictionsSchema.index({ auction_id: 1, tournament_id: 1 });
+predictionsSchema.index({ "user.userId": 1 });
+predictionsSchema.index({ auction_id: 1, "user.userId": 1 });
+predictionsSchema.index({ isActive: 1 });
+predictionsSchema.index({ "user.role": 1 });
+predictionsSchema.index({ createdAt: -1 });
+
 const Predictions = models.Prediction || model("Prediction", predictionsSchema);
 
 export default Predictions;

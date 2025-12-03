@@ -1,139 +1,220 @@
-import clientPromise from "@/app/lib/mongoDB";
+import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/app/lib/authMiddleware";
+import { withTransaction, toObjectId, isValidObjectId } from "@/app/lib/dbHelpers";
+import { validateRequestBody, updateWagerSchema, objectIdSchema } from "@/app/lib/validation";
 import connectToDB from "@/app/lib/mongoose";
 import Wagers from "@/app/models/wager.model";
-import { NextRequest, NextResponse } from "next/server";
-import { ObjectId } from "mongodb";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/options";
+import Users from "@/app/models/user.model";
+import Transaction from "@/app/models/transaction.model";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-    try {
-        const client = await clientPromise;
-        const db = client.db();
+  // Require admin authorization
+  const authResult = await requireAuth(["owner", "admin", "moderator"]);
+  if ("error" in authResult) {
+    return authResult.error;
+  }
 
-        const wager_id = req.nextUrl.searchParams.get("wager_id");
-        const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
-        const limit = Number(req.nextUrl.searchParams.get("limit"));
-        const date = req.nextUrl.searchParams.get("date");
+  try {
+    await connectToDB();
 
-        if (date) {
-            const wagersOnThatDay = await db
-                .collection("wagers")
-                .find({ createdAt: { $gte: new Date(date) } });
-            const wagersOnThatDayArray = await wagersOnThatDay.toArray();
-            if (wagersOnThatDay) {
-                return NextResponse.json(
-                    {
-                        total: wagersOnThatDayArray.length,
-                        wagers: wagersOnThatDayArray,
-                    },
-                    { status: 200 }
-                );
-            } else {
-                return NextResponse.json(
-                    { message: "Cannot find Wagers" },
-                    { status: 404 }
-                );
-            }
-        }
+    const wager_id = req.nextUrl.searchParams.get("wager_id");
+    const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
+    const limit = Number(req.nextUrl.searchParams.get("limit")) || 50;
+    const date = req.nextUrl.searchParams.get("date");
 
-        // api/wagers?wager_id=657bd345cf53f5078c72bbc8 to get a specific wager
-        if (wager_id) {
-            const wager = await db.collection("wagers").findOne({
-                $and: [{ _id: new ObjectId(wager_id) }],
-            });
-            if (wager) {
-                return NextResponse.json(wager, { status: 200 });
-            } else {
-                return NextResponse.json(
-                    { message: "Cannot find Wager" },
-                    { status: 404 }
-                );
-            }
-        }
-        // api/wagers to get all wagers
-        const wagers = await db
-            .collection("wagers")
-            .find({ isActive: true })
-            .limit(limit)
-            .skip(offset);
-
-        const wagersArray = await wagers.toArray();
-        if (wagers) {
-            return NextResponse.json(
-                { total: wagersArray.length, wagers: wagersArray },
-                { status: 200 }
-            );
-        } else {
-            return NextResponse.json(
-                { message: "Cannot find Wagers" },
-                { status: 404 }
-            );
-        }
-    } catch (error) {
-        console.error(error);
+    // Get wagers by date
+    if (date) {
+      const startDate = new Date(date);
+      if (isNaN(startDate.getTime())) {
         return NextResponse.json(
-            { message: "Internal server error" },
-            { status: 500 }
+          { message: "Invalid date format" },
+          { status: 400 }
         );
+      }
+
+      const wagers = await Wagers.find({
+        createdAt: { $gte: startDate },
+      }).sort({ createdAt: -1 });
+
+      return NextResponse.json(
+        {
+          total: wagers.length,
+          wagers,
+        },
+        { status: 200 }
+      );
     }
+
+    // Get a specific wager by ID
+    if (wager_id) {
+      if (!isValidObjectId(wager_id)) {
+        return NextResponse.json(
+          { message: "Invalid wager ID format" },
+          { status: 400 }
+        );
+      }
+
+      const wager = await Wagers.findById(toObjectId(wager_id));
+
+      if (!wager) {
+        return NextResponse.json(
+          { message: "Wager not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(wager, { status: 200 });
+    }
+
+    // Get all active wagers with pagination
+    const wagers = await Wagers.find({ isActive: true })
+      .sort({ createdAt: -1 })
+      .skip(offset)
+      .limit(limit);
+
+    const total = await Wagers.countDocuments({ isActive: true });
+
+    return NextResponse.json(
+      {
+        total,
+        wagers,
+        offset,
+        limit,
+      },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        message: error.message || "Internal server error",
+      },
+      { status: 500 }
+    );
+  }
 }
 
-// edit wager
 export async function PUT(req: NextRequest) {
-    //check for authorization
-    const session = await getServerSession(authOptions);
-    if (session?.user.role !== "owner" && session?.user.role !== "admin") {
-        console.log("User is Authorized!");
-        return NextResponse.json(
-            {
-                message:
-                    "Unauthorized! Your role does not have access to this function",
-            },
-            { status: 400 }
+  // Require admin authorization
+  const authResult = await requireAuth(["owner", "admin"]);
+  if ("error" in authResult) {
+    return authResult.error;
+  }
+
+  try {
+    await connectToDB();
+
+    const wager_id = req.nextUrl.searchParams.get("wager_id");
+
+    if (!wager_id) {
+      return NextResponse.json(
+        { message: "Wager ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidObjectId(wager_id)) {
+      return NextResponse.json(
+        { message: "Invalid wager ID format" },
+        { status: 400 }
+      );
+    }
+
+    // Validate request body
+    const validation = await validateRequestBody(req.clone(), updateWagerSchema);
+    if ("error" in validation) {
+      return NextResponse.json(
+        { message: validation.error },
+        { status: 400 }
+      );
+    }
+
+    const updateData = validation.data;
+
+    // Check if wager exists
+    const existingWager = await Wagers.findById(toObjectId(wager_id));
+    if (!existingWager) {
+      return NextResponse.json(
+        { message: "Wager not found" },
+        { status: 404 }
+      );
+    }
+
+    // If the wager amount or status is being changed, this requires a transaction
+    const needsTransaction = updateData.wagerAmount !== undefined ||
+                            (updateData.isActive === false && existingWager.isActive);
+
+    if (needsTransaction) {
+      // Use transaction for financial operations
+      const result = await withTransaction(async (session) => {
+        const updatedWager = await Wagers.findByIdAndUpdate(
+          toObjectId(wager_id),
+          { $set: updateData },
+          { new: true, session }
         );
-    }
 
-    try {
-        const client = await clientPromise;
-        const db = client.db();
-        const wager_id = req.nextUrl.searchParams.get("wager_id");
+        // If wager is being deactivated and user needs refund
+        if (updateData.isActive === false && existingWager.isActive && existingWager.wagerAmount > 0) {
+          const user = await Users.findById(existingWager.user._id).session(session);
 
-        const requestBody = await req.json();
-        const editData: { [key: string]: string | boolean | number } = {};
-        if (requestBody) {
-            Object.keys(requestBody).forEach((key) => {
-                editData[key] = requestBody[key] as string | boolean | number;
-            });
-        }
+          if (user) {
+            const newBalance = (user.balance || 0) + existingWager.wagerAmount;
 
-        // /api/wagers?wager_id=657ab7edd422075ea7871f65
-        if (wager_id) {
-            const wager = await db
-                .collection("wagers")
-                .findOneAndUpdate(
-                    { _id: new ObjectId(wager_id) },
-                    { $set: editData }
-                );
-
-            if (wager) {
-                return NextResponse.json(wager, { status: 200 });
-            } else {
-                return NextResponse.json(
-                    { message: "Cannot find Wager" },
-                    { status: 404 }
-                );
-            }
-        } else {
-            return NextResponse.json(
-                { message: "No ID has been provided" },
-                { status: 400 }
+            await Users.findByIdAndUpdate(
+              user._id,
+              { $set: { balance: newBalance } },
+              { session }
             );
+
+            // Create refund transaction
+            const transaction = new Transaction({
+              userID: user._id,
+              wagerID: existingWager._id,
+              auctionID: existingWager.auctionID,
+              transactionType: "refund",
+              amount: existingWager.wagerAmount,
+              type: "+",
+              status: "success",
+              transactionDate: new Date(),
+            });
+
+            await transaction.save({ session });
+          }
         }
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ message: "Internal server error" });
+
+        return updatedWager;
+      });
+
+      return NextResponse.json(
+        {
+          message: "Wager updated successfully",
+          wager: result,
+        },
+        { status: 200 }
+      );
+    } else {
+      // Simple update without transaction
+      const updatedWager = await Wagers.findByIdAndUpdate(
+        toObjectId(wager_id),
+        { $set: updateData },
+        { new: true }
+      );
+
+      return NextResponse.json(
+        {
+          message: "Wager updated successfully",
+          wager: updatedWager,
+        },
+        { status: 200 }
+      );
     }
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        message: error.message || "Internal server error",
+      },
+      { status: error.message ? 400 : 500 }
+    );
+  }
 }

@@ -1,199 +1,240 @@
-import clientPromise from "@/app/lib/mongoDB";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "../auth/[...nextauth]/options";
-import bcrypt from "bcrypt";
-import { ObjectId } from "mongodb";
+import { requireAuth } from "@/app/lib/authMiddleware";
+import { withTransaction, toObjectId, isValidObjectId } from "@/app/lib/dbHelpers";
+import { validateRequestBody, updateUserSchema } from "@/app/lib/validation";
 import connectToDB from "@/app/lib/mongoose";
 import Users from "@/app/models/user.model";
+import Transaction from "@/app/models/transaction.model";
 import { Role } from "@/app/lib/interfaces";
 
 export const dynamic = "force-dynamic";
 
-// to get users
 export async function GET(req: NextRequest) {
+  // Require admin authorization
+  const authResult = await requireAuth(["owner", "admin", "moderator"]);
+  if ("error" in authResult) {
+    return authResult.error;
+  }
+
   try {
     await connectToDB();
+
     const user_id = req.nextUrl.searchParams.get("user_id");
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
-    const limit = Number(req.nextUrl.searchParams.get("limit"));
+    const limit = Number(req.nextUrl.searchParams.get("limit")) || 50;
 
-    // api/users?user_id=<insert id> to get a specific user
+    // Get a specific user by ID
     if (user_id) {
-      const user = await Users.findOne(
-        { _id: new ObjectId(user_id) },
-        { projection: { password: 0 } }
-      );
-      if (user) {
-        return NextResponse.json(user, { status: 200 });
-      } else {
+      if (!isValidObjectId(user_id)) {
         return NextResponse.json(
-          { message: "Cannot find User" },
+          { message: "Invalid user ID format" },
+          { status: 400 }
+        );
+      }
+
+      const user = await Users.findById(toObjectId(user_id)).select("-password");
+
+      if (!user) {
+        return NextResponse.json(
+          { message: "User not found" },
           { status: 404 }
         );
       }
+
+      return NextResponse.json(user, { status: 200 });
     }
 
-    // api/users to get all users that are active and are not AI
+    // Get all active users (not agents)
     const users = await Users.find({
       isActive: true,
       role: Role.USER,
     })
-      .limit(limit)
-      .skip(offset);
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .skip(offset)
+      .limit(limit);
 
-    if (users) {
-      return NextResponse.json(
-        { total: users.length, users: users },
-        { status: 200 }
-      );
-    } else {
-      return NextResponse.json({ message: "No users found" }, { status: 404 });
-    }
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: "Internal server error" });
-  }
-}
+    const total = await Users.countDocuments({
+      isActive: true,
+      role: Role.USER,
+    });
 
-// FIXME: to create user URL: /api/users (NOT WORKING YET)
-export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (session?.user.role !== "owner" && session?.user.role !== "admin") {
     return NextResponse.json(
       {
-        message:
-          "Unauthorized! Your role does not have access to this function",
+        total,
+        users,
+        offset,
+        limit,
       },
-      { status: 400 }
+      { status: 200 }
     );
-  }
-  try {
-    await connectToDB();
-    const requestBody = await req.json();
-    const createData: { [key: string]: any } = {};
-    if (requestBody) {
-      Object.keys(requestBody).forEach((key) => {
-        createData[key] = requestBody[key] as string | boolean | number;
-      });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(createData.password, salt);
-    const user = new Users({ ...createData, password: hashedPassword });
-    user.save();
-
-    if (user) {
-      return NextResponse.json(
-        { message: "user has been created" },
-        { status: 200 }
-      );
-    } else {
-      return NextResponse.json(
-        { message: "Cannot create user" },
-        { status: 404 }
-      );
-    }
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: "Internal server error" });
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        message: error.message || "Internal server error",
+      },
+      { status: 500 }
+    );
   }
 }
 
-// to edit user URL: /api/users/edit?user_id=657ab7edd422075ea7871f65
 export async function PUT(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (session?.user.role !== "owner" && session?.user.role !== "admin") {
-    console.log("User is Authorized!");
-    return NextResponse.json(
-      {
-        message:
-          "Unauthorized! Your role does not have access to this function",
-      },
-      { status: 400 }
-    );
+  // Require admin authorization
+  const authResult = await requireAuth(["owner", "admin"]);
+  if ("error" in authResult) {
+    return authResult.error;
   }
 
   try {
     await connectToDB();
-    const user_id = req.nextUrl.searchParams.get("user_id");
 
-    const requestBody = await req.json();
-    const editData: { [key: string]: string | boolean | number } = {};
-    if (requestBody) {
-      Object.keys(requestBody).forEach((key) => {
-        editData[key] = requestBody[key] as string | boolean | number;
-      });
-    }
-
-    if (user_id) {
-      const user = await Users.findOneAndUpdate(
-        { _id: new ObjectId(user_id) },
-        { $set: editData },
-        {
-          returnDocument: "after",
-          projection: { password: 0 },
-        }
-      );
-      if (user) {
-        return NextResponse.json(user, { status: 200 });
-      } else {
-        return NextResponse.json(
-          { message: "Cannot find User" },
-          { status: 404 }
-        );
-      }
-    } else {
-      return NextResponse.json(
-        { message: "No ID has been provided" },
-        { status: 400 }
-      );
-    }
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: "Internal server error" });
-  }
-}
-
-// to delete user URL: /api/users?user_id=<user_id>
-export async function DELETE(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (session?.user.role !== "owner" && session?.user.role !== "admin") {
-    return NextResponse.json(
-      {
-        message:
-          "Unauthorized! Your role does not have access to this function",
-      },
-      { status: 403 }
-    );
-  }
-
-  try {
-    await connectToDB();
     const user_id = req.nextUrl.searchParams.get("user_id");
 
     if (!user_id) {
       return NextResponse.json(
-        { message: "No ID has been provided" },
+        { message: "User ID is required" },
         { status: 400 }
       );
     }
 
-    const result = await Users.deleteOne({ _id: new ObjectId(user_id) });
-
-    if (result.deletedCount === 1) {
+    if (!isValidObjectId(user_id)) {
       return NextResponse.json(
-        { message: "User deleted successfully" },
-        { status: 200 }
+        { message: "Invalid user ID format" },
+        { status: 400 }
       );
-    } else {
+    }
+
+    // Validate request body
+    const validation = await validateRequestBody(req.clone(), updateUserSchema);
+    if ("error" in validation) {
       return NextResponse.json(
-        { message: "User not found or already deleted" },
+        { message: validation.error },
+        { status: 400 }
+      );
+    }
+
+    const updateData = validation.data;
+
+    // Check if user exists
+    const existingUser = await Users.findById(toObjectId(user_id));
+    if (!existingUser) {
+      return NextResponse.json(
+        { message: "User not found" },
         { status: 404 }
       );
     }
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: "Internal server error" });
+
+    // If balance is being updated, use transaction
+    const needsTransaction = updateData.balance !== undefined;
+
+    if (needsTransaction && updateData.balance !== undefined) {
+      const result = await withTransaction(async (session) => {
+        const balanceDifference = updateData.balance - (existingUser.balance || 0);
+
+        const updatedUser = await Users.findByIdAndUpdate(
+          toObjectId(user_id),
+          { $set: updateData },
+          { new: true, session }
+        ).select("-password");
+
+        // Create transaction record for balance adjustment
+        if (balanceDifference !== 0) {
+          const transaction = new Transaction({
+            userID: existingUser._id,
+            transactionType: balanceDifference > 0 ? "deposit" : "withdraw",
+            amount: Math.abs(balanceDifference),
+            type: balanceDifference > 0 ? "+" : "-",
+            status: "success",
+            transactionDate: new Date(),
+          });
+
+          await transaction.save({ session });
+        }
+
+        return updatedUser;
+      });
+
+      return NextResponse.json(
+        {
+          message: "User updated successfully",
+          user: result,
+        },
+        { status: 200 }
+      );
+    } else {
+      // Simple update without transaction
+      const updatedUser = await Users.findByIdAndUpdate(
+        toObjectId(user_id),
+        { $set: updateData },
+        { new: true }
+      ).select("-password");
+
+      return NextResponse.json(
+        {
+          message: "User updated successfully",
+          user: updatedUser,
+        },
+        { status: 200 }
+      );
+    }
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        message: error.message || "Internal server error",
+      },
+      { status: error.message ? 400 : 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  // Require admin authorization
+  const authResult = await requireAuth(["owner", "admin"]);
+  if ("error" in authResult) {
+    return authResult.error;
+  }
+
+  try {
+    await connectToDB();
+
+    const user_id = req.nextUrl.searchParams.get("user_id");
+
+    if (!user_id) {
+      return NextResponse.json(
+        { message: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidObjectId(user_id)) {
+      return NextResponse.json(
+        { message: "Invalid user ID format" },
+        { status: 400 }
+      );
+    }
+
+    // Check if user exists
+    const user = await Users.findById(toObjectId(user_id));
+    if (!user) {
+      return NextResponse.json(
+        { message: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Delete the user
+    await Users.deleteOne({ _id: toObjectId(user_id) });
+
+    return NextResponse.json(
+      { message: "User deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        message: error.message || "Internal server error",
+      },
+      { status: 500 }
+    );
   }
 }

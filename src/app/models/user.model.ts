@@ -49,6 +49,13 @@ const userSchema = new Schema(
   { collection: "users", timestamps: true }
 );
 
+// Add indexes for query optimization
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ username: 1 }, { unique: true });
+userSchema.index({ role: 1 });
+userSchema.index({ isActive: 1, isBanned: 1 });
+userSchema.index({ createdAt: -1 });
+
 userSchema.plugin(aggregatePaginate);
 userSchema.plugin(paginate);
 

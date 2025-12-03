@@ -112,6 +112,14 @@ const auctionSchema = new Schema(
   { collection: "auctions", timestamps: true }
 );
 
+// Add indexes for query optimization
+auctionSchema.index({ auction_id: 1 }, { unique: true });
+auctionSchema.index({ isActive: 1 });
+auctionSchema.index({ ended: 1 });
+auctionSchema.index({ isActive: 1, ended: 1 });
+auctionSchema.index({ statusAndPriceChecked: 1 });
+auctionSchema.index({ createdAt: -1 });
+
 auctionSchema.plugin(aggregatePaginate);
 auctionSchema.plugin(paginate);
 

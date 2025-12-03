@@ -1,254 +1,165 @@
+import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/app/lib/authMiddleware";
+import { withTransaction, toObjectId, isValidObjectId } from "@/app/lib/dbHelpers";
+import { validateRequestBody, createTournamentSchema, updateTournamentSchema } from "@/app/lib/validation";
 import connectToDB from "@/app/lib/mongoose";
 import Tournaments from "@/app/models/tournament.model";
-import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "../auth/[...nextauth]/options";
-import { getServerSession } from "next-auth";
+import Users from "@/app/models/user.model";
+import Transaction from "@/app/models/transaction.model";
 import { Types } from "mongoose";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  // Require admin authorization
+  const authResult = await requireAuth(["owner", "admin", "moderator"]);
+  if ("error" in authResult) {
+    return authResult.error;
+  }
+
   try {
     await connectToDB();
+
     const tournament_id = req.nextUrl.searchParams.get("tournament_id");
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
-    const limit = Number(req.nextUrl.searchParams.get("limit"));
+    const limit = Number(req.nextUrl.searchParams.get("limit")) || 50;
 
+    // Get a specific tournament by tournament_id (numeric field)
     if (tournament_id) {
-      const tournament = await Tournaments.findOne({ tournament_id });
-      if (tournament) {
-        return NextResponse.json(tournament, { status: 200 });
-      } else {
+      const tournamentIdNum = parseInt(tournament_id);
+      if (isNaN(tournamentIdNum)) {
         return NextResponse.json(
-          { message: "Cannot find tournament" },
+          { message: "Invalid tournament ID format" },
+          { status: 400 }
+        );
+      }
+
+      const tournament = await Tournaments.findOne({ tournament_id: tournamentIdNum });
+
+      if (!tournament) {
+        return NextResponse.json(
+          { message: "Tournament not found" },
           { status: 404 }
         );
       }
+
+      return NextResponse.json(tournament, { status: 200 });
     }
 
-    // To get all tournaments
+    // Get all tournaments with pagination
     const tournaments = await Tournaments.find()
-      .sort({ createdAt: -1 }) //newest first
-      .limit(limit)
-      .skip(offset);
+      .sort({ createdAt: -1 })
+      .skip(offset)
+      .limit(limit);
 
-    // count all tournaments with isActive = true
-    // const tournamentsCount = await Tournaments
-    //     .countDocuments();
+    const total = await Tournaments.countDocuments();
 
-    if (tournaments) {
-      return NextResponse.json(
-        { total: tournaments.length, tournaments: tournaments },
-        { status: 200 }
-      );
-    } else {
-      return NextResponse.json(
-        { message: "Cannot post tournament" },
-        { status: 404 }
-      );
-    }
-  } catch (error) {
-    console.error(error);
     return NextResponse.json(
       {
-        message: "Internal server error",
-        error,
+        total,
+        tournaments,
+        offset,
+        limit,
+      },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        message: error.message || "Internal server error",
       },
       { status: 500 }
     );
   }
 }
 
-// to POST tournament data
-// sample request body:
-/*{
-    "title": "Random Collections Tournament"
-    "auctionID": ["65b06c9a5860b968d880c6e9", "65b309b0990459fcb7461e02", "65b309b1990459fcb7461e34", "65b309b1990459fcb7461e66", "65b38cc682288dfdce7db1c9" ],
-    "buyInFee": 50,
-    "startTime": "2024-02-05T07:34:45.337Z",
-    "endTime": "2024-02-10T07:34:45.337Z"
-}*/
 export async function POST(req: NextRequest) {
-  // check if user is authorized to access this function(owner, admin, moderator)
-  // TODO: uncomment this after testing
-  const session = await getServerSession(authOptions);
-  if (
-    session?.user.role !== "owner" &&
-    session?.user.role !== "admin" &&
-    session?.user.role !== "moderator"
-  ) {
-    return NextResponse.json(
-      {
-        message:
-          "Unauthorized! Your role does not have access to this function",
-      },
-      { status: 400 }
-    );
+  // Require admin authorization
+  const authResult = await requireAuth(["owner", "admin", "moderator"]);
+  if ("error" in authResult) {
+    return authResult.error;
   }
 
   try {
     await connectToDB();
-    const tournamentData = await req.json();
-    // check if there is a request body
-    if (!tournamentData) {
+
+    // Validate request body
+    const validation = await validateRequestBody(req.clone(), createTournamentSchema);
+    if ("error" in validation) {
       return NextResponse.json(
-        {
-          message: "Please complete request body",
-        },
-        {
-          status: 404,
-        }
+        { message: validation.error },
+        { status: 400 }
       );
     }
-    // const { auctionID, ...newTournamentData } = tournamentData;
 
-    if (tournamentData.type == "both") {
-    } else {
+    const tournamentData = validation.data;
+
+    // Validate all auction IDs exist
+    const invalidAuctionIds = tournamentData.auction_ids.filter(id => !isValidObjectId(id));
+    if (invalidAuctionIds.length > 0) {
+      return NextResponse.json(
+        { message: `Invalid auction IDs: ${invalidAuctionIds.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    // Create tournament in a transaction
+    const result = await withTransaction(async (session) => {
+      // Get the next tournament_id
       const latestTournament = await Tournaments.findOne()
         .sort({ tournament_id: -1 })
-        .select("tournament_id");
+        .select("tournament_id")
+        .session(session);
 
       const nextTournamentId = (latestTournament?.tournament_id || 0) + 1;
+
+      // Convert auction_ids to ObjectIds
+      const auctionObjectIds = tournamentData.auction_ids.map(id => new Types.ObjectId(id));
+
+      // Create new tournament
       const newTournament = new Tournaments({
         ...tournamentData,
         tournament_id: nextTournamentId,
         _id: new Types.ObjectId(),
+        auction_ids: auctionObjectIds,
+        users: [],
         createdAt: new Date(),
       });
-      await newTournament.save();
-    }
-    return NextResponse.json(
-      { message: "Tournament created" },
-      { status: 200 }
-    );
-    // let auctionsData: AuctionType[] = [];
-    // if (tournament && auctionID.length > 0) {
-    //   await Promise.all(
-    //     auctionID.map(async (id: string) => {
-    //       const updatedAuction: any = await db
-    //         .collection("auctions")
-    //         .findOneAndUpdate(
-    //           { _id: new ObjectId(id) },
-    //           {
-    //             $push: {
-    //               tournamentID: tournament.insertedId,
-    //             } as any,
-    //           },
-    //           { returnDocument: "after" }
-    //         );
-    //       if (updatedAuction !== null) {
-    //         auctionsData.push(updatedAuction);
-    //       }
-    //     })
-    //   );
 
-    //   if (auctionsData.length > 0) {
-    //     return NextResponse.json({ tournament, auctionsData }, { status: 200 });
-    //   } else {
-    //     return NextResponse.json(
-    //       { message: "Error in updating Auctions" },
-    //       { status: 404 }
-    //     );
-    //   }
-    // } else {
-    //   return NextResponse.json(
-    //     { message: "Cannot post tournament" },
-    //     { status: 404 }
-    //   );
-    // }
-  } catch (error) {
-    console.error(error);
+      await newTournament.save({ session });
+
+      return newTournament;
+    });
+
     return NextResponse.json(
       {
-        message: "Internal server error",
-        error,
+        message: "Tournament created successfully",
+        tournament: result,
       },
-      { status: 500 }
+      { status: 201 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        message: error.message || "Internal server error",
+      },
+      { status: error.message ? 400 : 500 }
     );
   }
 }
 
-// to PUT tournament data
 export async function PUT(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (
-    session?.user.role !== "owner" &&
-    session?.user.role !== "admin" &&
-    session?.user.role !== "moderator"
-  ) {
-    return NextResponse.json(
-      {
-        message:
-          "Unauthorized! Your role does not have access to this function",
-      },
-      { status: 400 }
-    );
+  // Require admin authorization
+  const authResult = await requireAuth(["owner", "admin", "moderator"]);
+  if ("error" in authResult) {
+    return authResult.error;
   }
-
-  console.log("User is Authorized!");
 
   try {
     await connectToDB();
+
     const tournament_id = req.nextUrl.searchParams.get("tournament_id");
 
-    const requestBody = await req.json();
-    const editData: { [key: string]: string | boolean | number } = {};
-    if (requestBody) {
-      Object.keys(requestBody).forEach((key) => {
-        editData[key] = requestBody[key] as string | boolean | number;
-      });
-    }
-
-    // api/tournaments?id=657ab7edd422075ea7871f65
-    if (tournament_id) {
-      const tournament = await Tournaments.findOneAndUpdate(
-        { tournament_id: tournament_id },
-        { $set: editData },
-        {
-          returnDocument: "after",
-        }
-      );
-      if (tournament) {
-        console.log("message: Tournament edited successfully");
-        return NextResponse.json(tournament, { status: 200 });
-      } else {
-        return NextResponse.json(
-          { message: "Cannot find tournament" },
-          { status: 404 }
-        );
-      }
-    } else {
-      return NextResponse.json(
-        { message: "No ID has been provided" },
-        { status: 400 }
-      );
-    }
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: "Internal server error" });
-  }
-}
-
-export async function DELETE(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-
-  if (
-    session?.user.role !== "owner" &&
-    session?.user.role !== "admin" &&
-    session?.user.role !== "moderator"
-  ) {
-    return NextResponse.json(
-      { message: "Unauthorized. Only owners can delete admins." },
-      { status: 400 }
-    );
-  }
-
-  try {
-    await connectToDB();
-
-    const { tournament_id } = await req.json();
-
-    console.log(tournament_id);
     if (!tournament_id) {
       return NextResponse.json(
         { message: "Tournament ID is required" },
@@ -256,8 +167,112 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    const tournamentIdNum = parseInt(tournament_id);
+    if (isNaN(tournamentIdNum)) {
+      return NextResponse.json(
+        { message: "Invalid tournament ID format" },
+        { status: 400 }
+      );
+    }
+
+    // Validate request body
+    const validation = await validateRequestBody(req.clone(), updateTournamentSchema);
+    if ("error" in validation) {
+      return NextResponse.json(
+        { message: validation.error },
+        { status: 400 }
+      );
+    }
+
+    const updateData = validation.data;
+
+    // Check if tournament exists
+    const existingTournament = await Tournaments.findOne({ tournament_id: tournamentIdNum });
+    if (!existingTournament) {
+      return NextResponse.json(
+        { message: "Tournament not found" },
+        { status: 404 }
+      );
+    }
+
+    // If prize pool is being updated, use transaction
+    const needsTransaction = false; // Tournaments don't have direct financial updates in this route
+
+    if (needsTransaction) {
+      const result = await withTransaction(async (session) => {
+        const updatedTournament = await Tournaments.findOneAndUpdate(
+          { tournament_id: tournamentIdNum },
+          { $set: updateData },
+          { new: true, session }
+        );
+
+        return updatedTournament;
+      });
+
+      return NextResponse.json(
+        {
+          message: "Tournament updated successfully",
+          tournament: result,
+        },
+        { status: 200 }
+      );
+    } else {
+      // Simple update without transaction
+      const updatedTournament = await Tournaments.findOneAndUpdate(
+        { tournament_id: tournamentIdNum },
+        { $set: updateData },
+        { new: true }
+      );
+
+      return NextResponse.json(
+        {
+          message: "Tournament updated successfully",
+          tournament: updatedTournament,
+        },
+        { status: 200 }
+      );
+    }
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        message: error.message || "Internal server error",
+      },
+      { status: error.message ? 400 : 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  // Require admin authorization
+  const authResult = await requireAuth(["owner", "admin", "moderator"]);
+  if ("error" in authResult) {
+    return authResult.error;
+  }
+
+  try {
+    await connectToDB();
+
+    const body = await req.json();
+    const { tournament_id } = body;
+
+    if (!tournament_id) {
+      return NextResponse.json(
+        { message: "Tournament ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const tournamentIdNum = parseInt(tournament_id);
+    if (isNaN(tournamentIdNum)) {
+      return NextResponse.json(
+        { message: "Invalid tournament ID format" },
+        { status: 400 }
+      );
+    }
+
+    // Check if tournament exists
     const existingTournament = await Tournaments.findOne({
-      tournament_id: parseInt(tournament_id),
+      tournament_id: tournamentIdNum,
     });
 
     if (!existingTournament) {
@@ -267,16 +282,28 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    await Tournaments.deleteOne({ tournament_id: parseInt(tournament_id) });
+    // Check if tournament has users (consider refunding them)
+    if (existingTournament.users && existingTournament.users.length > 0) {
+      return NextResponse.json(
+        {
+          message: "Cannot delete tournament with active users. Please refund users first or end the tournament.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Delete the tournament
+    await Tournaments.deleteOne({ tournament_id: tournamentIdNum });
 
     return NextResponse.json(
-      { message: "Tournament account deleted" },
+      { message: "Tournament deleted successfully" },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Error deleting tournament:", error);
+  } catch (error: any) {
     return NextResponse.json(
-      { message: "Internal server error", error },
+      {
+        message: error.message || "Internal server error",
+      },
       { status: 500 }
     );
   }
