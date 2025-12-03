@@ -1,0 +1,123 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint --if-present
+        continue-on-error: true
+
+      - name: Run tests
+        run: npm test
+        env:
+          NODE_ENV: test
+          MONGODB_URI: mongodb://localhost:27017
+          DB_NAME: test
+          NEXTAUTH_SECRET: test-secret-at-least-32-characters-long
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+        continue-on-error: true
+
+      - name: Generate coverage badge
+        if: github.ref == 'refs/heads/main'
+        run: |
+          COVERAGE=$(node -p "
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            coverage.total.statements.pct.toFixed(2);
+          ")
+          echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
+        continue-on-error: true
+
+      - name: Comment PR with coverage
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            const comment = `## Test Coverage Report
+
+            | Metric | Coverage |
+            |--------|----------|
+            | Statements | ${coverage.total.statements.pct}% |
+            | Branches | ${coverage.total.branches.pct}% |
+            | Functions | ${coverage.total.functions.pct}% |
+            | Lines | ${coverage.total.lines.pct}% |
+
+            ${coverage.total.statements.pct >= 70 ? '✅' : '⚠️'} Target: 70%
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+        continue-on-error: true
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+        env:
+          NODE_ENV: production
+          MONGODB_URI: ${{ secrets.MONGODB_URI || 'mongodb://localhost:27017' }}
+          DB_NAME: ${{ secrets.DB_NAME || 'test' }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret-at-least-32-characters-long' }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL || 'http://localhost:3000' }}
+
+      - name: Check build output
+        run: |
+          if [ -d ".next" ]; then
+            echo "✅ Build successful"
+            ls -la .next
+          else
+            echo "❌ Build failed - .next directory not found"
+            exit 1
+          fi
