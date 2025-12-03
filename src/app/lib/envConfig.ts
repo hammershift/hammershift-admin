@@ -108,10 +108,10 @@ const envSchemaRefined = envSchema
         data.FIREBASE_APP_ID,
       ];
 
-      const hasAnyFirebase = firebaseVars.some((v) => v !== undefined);
-      const hasAllFirebase = firebaseVars.every((v) => v !== undefined);
+      const hasAnyFirebase = firebaseVars.some((v) => v !== undefined && v !== 'test');
+      const hasAllFirebase = firebaseVars.every((v) => v !== undefined && v !== 'test');
 
-      // If Firebase is partially configured, that's okay in development
+      // If Firebase is partially configured, that's okay in development or test
       if (hasAnyFirebase && !hasAllFirebase && data.NODE_ENV === "production") {
         return false;
       }

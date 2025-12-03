@@ -35,10 +35,15 @@ jobs:
         run: npm test
         env:
           NODE_ENV: test
-          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_URI: mongodb://localhost:27017/test
           DB_NAME: test
-          NEXTAUTH_SECRET: test-secret-at-least-32-characters-long
+          NEXTAUTH_SECRET: test-secret-at-least-32-characters-long-for-ci
           NEXTAUTH_URL: http://localhost:3000
+          FIREBASE_API_KEY: test
+          FIREBASE_AUTH_DOMAIN: test.firebaseapp.com
+          FIREBASE_PROJECT_ID: test
+          FIREBASE_STORAGE_BUCKET: test.appspot.com
+          FIREBASE_APP_ID: test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -107,10 +112,15 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
-          MONGODB_URI: ${{ secrets.MONGODB_URI || 'mongodb://localhost:27017' }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI || 'mongodb://localhost:27017/test' }}
           DB_NAME: ${{ secrets.DB_NAME || 'test' }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret-at-least-32-characters-long' }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret-at-least-32-characters-long-for-ci' }}
           NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL || 'http://localhost:3000' }}
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY || 'test' }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN || 'test.firebaseapp.com' }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID || 'test' }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET || 'test.appspot.com' }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID || 'test' }}
 
       - name: Check build output
         run: |
