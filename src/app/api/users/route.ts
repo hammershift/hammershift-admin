@@ -129,7 +129,7 @@ export async function PUT(req: NextRequest) {
 
     if (needsTransaction && updateData.balance !== undefined) {
       const result = await withTransaction(async (session) => {
-        const balanceDifference = updateData.balance - (existingUser.balance || 0);
+        const balanceDifference = updateData.balance! - (existingUser.balance || 0);
 
         const updatedUser = await Users.findByIdAndUpdate(
           toObjectId(user_id),

@@ -31,7 +31,7 @@ export const GET = withRateLimit(
       // Get latest snapshot for period
       const latestSnapshot = await LeaderboardSnapshots.findOne({ period })
         .sort({ snapshot_at: -1 })
-        .lean();
+        .lean() as { snapshot_at: Date; [key: string]: any } | null;
 
       if (!latestSnapshot) {
         return NextResponse.json({

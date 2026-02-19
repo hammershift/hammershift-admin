@@ -92,7 +92,7 @@ export async function GET(
       user_id: userIdObj,
     })
       .sort({ snapshot_at: -1 })
-      .lean();
+      .lean() as { rank?: number; score?: number; [key: string]: any } | null;
 
     // Get badges
     const badges = await getUserBadges(userId);

@@ -31,11 +31,11 @@ const requestStore = new Map<string, RequestLog>();
 // Use unref() to allow Node.js to exit if this is the only thing running
 const cleanupInterval = setInterval(() => {
   const now = Date.now();
-  for (const [key, log] of requestStore.entries()) {
+  requestStore.forEach((log, key) => {
     if (now > log.resetTime) {
       requestStore.delete(key);
     }
-  }
+  });
 }, 10 * 60 * 1000);
 
 // Allow Node.js to exit even if interval is running (for tests)

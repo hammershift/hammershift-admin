@@ -119,7 +119,7 @@ export async function PUT(
 
         const hammerPrice = auction.attributes[0].value;
         if (hammerPrice && hammerPrice > 0) {
-          await scoreAuctionPredictions(auctionId, hammerPrice);
+          await scoreAuctionPredictions(auction._id, hammerPrice);
         }
       }
 
