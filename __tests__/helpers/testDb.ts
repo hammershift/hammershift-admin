@@ -2,19 +2,31 @@ import { MongoMemoryReplSet } from "mongodb-memory-server";
 import mongoose from "mongoose";
 
 let mongoServer: MongoMemoryReplSet;
+// Each connectTestDb() call gets its own database name so parallel workers
+// never share collections — even if they somehow connect to the same mongod instance.
+let currentDbName: string;
 
 /**
  * Connect to the in-memory database with replica set support
  * (Required for MongoDB transactions)
  */
 export async function connectTestDb() {
+  // Ensure any leftover connection from a previous test file (same worker) is gone
+  if (mongoose.connection.readyState !== 0) {
+    await mongoose.disconnect();
+  }
+
   mongoServer = await MongoMemoryReplSet.create({
     replSet: { count: 1, storageEngine: 'wiredTiger' }
   });
   const mongoUri = mongoServer.getUri();
 
+  // Unique db name per invocation — parallel workers use different databases
+  // so their transactions and collection locks never interfere with each other.
+  currentDbName = `hammershift-test-${process.pid}-${Date.now()}`;
+
   await mongoose.connect(mongoUri, {
-    dbName: "hammershift-test",
+    dbName: currentDbName,
   });
 }
 
@@ -23,7 +35,7 @@ export async function connectTestDb() {
  */
 export async function closeTestDb() {
   await mongoose.connection.dropDatabase();
-  await mongoose.connection.close();
+  await mongoose.disconnect(); // fully resets mongoose state so the next test file starts clean
   if (mongoServer) {
     await mongoServer.stop();
   }

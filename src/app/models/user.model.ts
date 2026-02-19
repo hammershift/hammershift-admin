@@ -23,6 +23,17 @@ export interface User extends Document {
   updatedAt: Date;
   role: string;
   agentProperties?: AgentProperties;
+  current_streak: number;
+  longest_streak: number;
+  last_prediction_at?: Date;
+  rank_title: "Rookie" | "Rising Star" | "Expert" | "Legend";
+  total_points: number;
+  email_preferences: {
+    marketing: boolean;
+    digests: boolean;
+    tournaments: boolean;
+    results: boolean;
+  };
 }
 
 const userSchema = new Schema(
@@ -43,6 +54,21 @@ const userSchema = new Schema(
         required: false,
       },
     },
+    current_streak: { type: Number, default: 0 },
+    longest_streak: { type: Number, default: 0 },
+    last_prediction_at: { type: Date, required: false },
+    rank_title: {
+      type: String,
+      enum: ["Rookie", "Rising Star", "Expert", "Legend"],
+      default: "Rookie",
+    },
+    total_points: { type: Number, default: 0 },
+    email_preferences: {
+      marketing: { type: Boolean, default: true },
+      digests: { type: Boolean, default: true },
+      tournaments: { type: Boolean, default: true },
+      results: { type: Boolean, default: true },
+    },
     createdAt: Date,
     updatedAt: Date,
   },
@@ -55,6 +81,8 @@ userSchema.index({ username: 1 }, { unique: true });
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1, isBanned: 1 });
 userSchema.index({ createdAt: -1 });
+userSchema.index({ total_points: -1 }); // For leaderboard queries
+userSchema.index({ last_prediction_at: -1 }); // For inactive user detection
 
 userSchema.plugin(aggregatePaginate);
 userSchema.plugin(paginate);

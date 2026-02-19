@@ -38,12 +38,15 @@ export async function createTestOwner(overrides: any = {}) {
   });
 }
 
+let userCounter = 0;
+
 export async function createTestUser(overrides: any = {}) {
+  const id = ++userCounter;
   const user = new Users({
     _id: new Types.ObjectId(),
-    username: "testuser",
+    username: `testuser${id}`,
     fullName: "Test User",
-    email: "user@test.com",
+    email: `user${id}@test.com`,
     balance: 1000,
     isActive: true,
     isBanned: false,

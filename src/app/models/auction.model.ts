@@ -62,6 +62,10 @@ export interface Auction extends Document {
   sort?: AuctionSort;
   statusAndPriceChecked: boolean;
   pot: number;
+  prediction_count: number;
+  avg_predicted_price?: number;
+  source_badge: "bat" | "cab";
+  status_display?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -91,6 +95,10 @@ const auctionSchema = new Schema(
     sort: sortSchema,
     statusAndPriceChecked: { type: Boolean, default: false },
     pot: { type: Number, default: 0 },
+    prediction_count: { type: Number, default: 0 },
+    avg_predicted_price: { type: Number, required: false },
+    source_badge: { type: String, enum: ["bat", "cab"], default: "bat" },
+    status_display: { type: String, required: false },
 
     // pot: { type: Number },
     // __v: { type: Number, default: 0 },
@@ -119,6 +127,8 @@ auctionSchema.index({ ended: 1 });
 auctionSchema.index({ isActive: 1, ended: 1 });
 auctionSchema.index({ statusAndPriceChecked: 1 });
 auctionSchema.index({ createdAt: -1 });
+auctionSchema.index({ prediction_count: -1 }); // For "most predicted" queries
+auctionSchema.index({ status_display: 1, "sort.deadline": 1 }); // For stale auction detection
 
 auctionSchema.plugin(aggregatePaginate);
 auctionSchema.plugin(paginate);
