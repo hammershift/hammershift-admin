@@ -110,9 +110,10 @@ export const GET = withCronAuth(async (req: NextRequest) => {
             }
 
             if (!recentReminder) {
-              // Calculate hours remaining
+              // Calculate hours remaining (sort.deadline is guaranteed by the query filter)
+              const deadline = auction.sort?.deadline?.getTime() ?? now;
               const hoursRemaining = Math.round(
-                (auction.sort.deadline.getTime() - now) / (1000 * 60 * 60)
+                (deadline - now) / (1000 * 60 * 60)
               );
 
               // Build auction title
