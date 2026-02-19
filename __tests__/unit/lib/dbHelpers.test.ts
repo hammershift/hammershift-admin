@@ -96,8 +96,8 @@ describe("Database Helpers", () => {
     });
 
     it("should handle multiple operations in transaction", async () => {
-      const user1 = await createTestUser({ username: "user1", balance: 1000 });
-      const user2 = await createTestUser({ username: "user2", balance: 500 });
+      const user1 = await createTestUser({ username: "user1", email: "user1@test.com", balance: 1000 });
+      const user2 = await createTestUser({ username: "user2", email: "user2@test.com", balance: 500 });
 
       await withTransaction(async (session) => {
         // Transfer money from user1 to user2
@@ -121,8 +121,8 @@ describe("Database Helpers", () => {
     });
 
     it("should rollback all operations on error", async () => {
-      const user1 = await createTestUser({ username: "user1", balance: 1000 });
-      const user2 = await createTestUser({ username: "user2", balance: 500 });
+      const user1 = await createTestUser({ username: "user3", email: "user3@test.com", balance: 1000 });
+      const user2 = await createTestUser({ username: "user4", email: "user4@test.com", balance: 500 });
 
       try {
         await withTransaction(async (session) => {
@@ -154,11 +154,11 @@ describe("Database Helpers", () => {
 
     it("should return result from callback", async () => {
       const result = await withTransaction(async (session) => {
-        const user = await createTestUser({ username: "testuser" });
+        const user = await createTestUser({ username: "testuser5", email: "testuser5@test.com" });
         return { userId: user._id.toString(), username: user.username };
       });
 
-      expect(result.username).toBe("testuser");
+      expect(result.username).toBe("testuser5");
       expect(mongoose.Types.ObjectId.isValid(result.userId)).toBe(true);
     });
   });

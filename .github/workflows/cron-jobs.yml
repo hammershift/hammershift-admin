@@ -1,0 +1,119 @@
+name: Cron Jobs
+
+on:
+  schedule:
+    # Leaderboard refresh - every Monday at 00:00 UTC
+    - cron: "0 0 * * 1"
+    # Weekly digest - every Monday at 13:00 UTC (9am ET)
+    - cron: "0 13 * * 1"
+    # Inactive users detection - daily at 02:00 UTC
+    - cron: "0 2 * * *"
+    # Stale auction cleanup - daily at 03:00 UTC
+    - cron: "0 3 * * *"
+    # Auction ending reminders - every 6 hours
+    - cron: "0 */6 * * *"
+  # Allow manual triggering of individual jobs
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "Which cron job to run"
+        required: true
+        type: choice
+        options:
+          - leaderboard-refresh
+          - weekly-digest
+          - inactive-users
+          - stale-auctions
+          - auction-reminders
+          - all
+
+jobs:
+  leaderboard-refresh:
+    name: Refresh Leaderboard Snapshots
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'leaderboard-refresh' || github.event.inputs.job == 'all') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 0 * * 1'
+    steps:
+      - name: Trigger leaderboard-refresh
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.APP_URL }}/api/cron/leaderboard-refresh" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "Response: $response"
+          if [ "$response" != "200" ] && [ "$response" != "207" ]; then
+            echo "::error::Leaderboard refresh failed with status $response"
+            exit 1
+          fi
+
+  weekly-digest:
+    name: Send Weekly Digest Emails
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'weekly-digest' || github.event.inputs.job == 'all') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 13 * * 1'
+    steps:
+      - name: Trigger weekly-digest
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.APP_URL }}/api/cron/weekly-digest" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "Response: $response"
+          if [ "$response" != "200" ]; then
+            echo "::error::Weekly digest failed with status $response"
+            exit 1
+          fi
+
+  inactive-users:
+    name: Detect and Reactivate Inactive Users
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'inactive-users' || github.event.inputs.job == 'all') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 2 * * *'
+    steps:
+      - name: Trigger inactive-users
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.APP_URL }}/api/cron/inactive-users" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "Response: $response"
+          if [ "$response" != "200" ]; then
+            echo "::error::Inactive users job failed with status $response"
+            exit 1
+          fi
+
+  stale-auctions:
+    name: Score Stale Auctions
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'stale-auctions' || github.event.inputs.job == 'all') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 3 * * *'
+    steps:
+      - name: Trigger stale-auctions
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.APP_URL }}/api/cron/stale-auctions" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "Response: $response"
+          if [ "$response" != "200" ]; then
+            echo "::error::Stale auctions job failed with status $response"
+            exit 1
+          fi
+
+  auction-reminders:
+    name: Send Auction Ending Reminders
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'auction-reminders' || github.event.inputs.job == 'all') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 */6 * * *'
+    steps:
+      - name: Trigger auction-reminders
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.APP_URL }}/api/cron/auction-reminders" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "Response: $response"
+          if [ "$response" != "200" ]; then
+            echo "::error::Auction reminders job failed with status $response"
+            exit 1
+          fi

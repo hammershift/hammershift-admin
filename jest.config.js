@@ -32,6 +32,10 @@ const customJestConfig = {
     },
   },
   testTimeout: 30000, // 30 seconds for database operations
+  // Each test file creates its own MongoMemoryReplSet; running files in parallel
+  // causes WiredTiger IX lock contention across workers. Sequential execution
+  // matches --runInBand behavior (363/363 pass) without changing test isolation.
+  maxWorkers: 1,
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

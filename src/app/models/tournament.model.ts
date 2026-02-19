@@ -35,6 +35,7 @@ export interface Tournament extends Document {
   auction_ids: string[];
   users: TournamentUser[];
   maxUsers: number;
+  scoring_version: "v1" | "v2";
   createdAt: Date;
 }
 
@@ -154,6 +155,11 @@ const tournamentSchema = new Schema(
     maxUsers: {
       type: Number,
       required: true,
+    },
+    scoring_version: {
+      type: String,
+      enum: ["v1", "v2"],
+      default: "v2",
     },
     // winners: {
     //   type: [TournamentWinner],

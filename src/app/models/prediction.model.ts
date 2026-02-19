@@ -13,6 +13,16 @@ export interface Prediction {
     username: string;
     role: string;
   };
+  score?: number;
+  rank?: number;
+  delta_from_actual?: number;
+  scored_at?: Date;
+  bonus_modifiers?: {
+    early_bird: boolean;
+    streak_bonus: boolean;
+    bullseye: boolean;
+    tournament_multiplier: boolean;
+  };
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -41,6 +51,16 @@ const predictionsSchema = new Schema(
     refunded: { type: Boolean, required: false, default: false },
     isActive: { type: Boolean, required: true, default: true },
     prize: { type: Number, required: false, default: 0 },
+    score: { type: Number, required: false },
+    rank: { type: Number, required: false },
+    delta_from_actual: { type: Number, required: false },
+    scored_at: { type: Date, required: false },
+    bonus_modifiers: {
+      early_bird: { type: Boolean, default: false },
+      streak_bonus: { type: Boolean, default: false },
+      bullseye: { type: Boolean, default: false },
+      tournament_multiplier: { type: Boolean, default: false },
+    },
   },
   {
     collection: "predictions",
@@ -57,6 +77,8 @@ predictionsSchema.index({ auction_id: 1, "user.userId": 1 });
 predictionsSchema.index({ isActive: 1 });
 predictionsSchema.index({ "user.role": 1 });
 predictionsSchema.index({ createdAt: -1 });
+predictionsSchema.index({ score: -1 }); // For leaderboard aggregation
+predictionsSchema.index({ scored_at: -1 }); // For result queries
 
 const Predictions = models.Prediction || model("Prediction", predictionsSchema);
 

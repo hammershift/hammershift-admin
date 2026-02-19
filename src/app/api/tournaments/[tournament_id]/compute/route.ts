@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
 import { Types } from "mongoose";
+import { scoreAuctionPredictions } from "@/app/lib/scoringEngine";
 
 interface Player {
   userId: Types.ObjectId;
@@ -107,6 +108,92 @@ export async function PUT(
     const auctionMap = new Map(
       auctions.map((auction) => [auction._id, auction])
     );
+
+    // Check scoring version and route accordingly
+    if (tournament.scoring_version === "v2") {
+      // ============ V2 SCORING PATH ============
+      // Score all predictions using v2 engine
+      for (const auctionId of tournament.auction_ids) {
+        const auction = auctionMap.get(auctionId);
+        if (!auction || auction.attributes[14].value === 3) continue; // Skip unsuccessful
+
+        const hammerPrice = auction.attributes[0].value;
+        if (hammerPrice && hammerPrice > 0) {
+          await scoreAuctionPredictions(auctionId, hammerPrice);
+        }
+      }
+
+      // Aggregate scores per user
+      const userScores = await Predictions.aggregate([
+        {
+          $match: {
+            tournament_id: tournament._id,
+            score: { $exists: true, $ne: null },
+          },
+        },
+        {
+          $group: {
+            _id: "$user.userId",
+            total_score: { $sum: "$score" },
+            fullName: { $first: "$user.fullName" },
+            username: { $first: "$user.username" },
+            role: { $first: "$user.role" },
+          },
+        },
+        { $sort: { total_score: -1 } },
+      ]);
+
+      // Distribute prizes using same logic as v1
+      const pot = 10 * tournament.auction_ids.length; // Free tournament
+      const distribution = [50, 30, 20];
+
+      for (let i = 0; i < Math.min(userScores.length, 3); i++) {
+        const user = userScores[i];
+        const rank = i + 1;
+        const points = (pot * (distribution[i] / 100));
+
+        await Points.create({
+          refId: tournament._id,
+          refCollection: "tournaments",
+          points,
+          rank,
+          user: {
+            userId: user._id,
+            fullName: user.fullName,
+            username: user.username,
+            role: user.role,
+          },
+        });
+
+        // Update tournament.users
+        const userIndex = tournament.users.findIndex((u) =>
+          u.userId.equals(user._id)
+        );
+        if (userIndex >= 0) {
+          tournament.users[userIndex].points = points;
+          tournament.users[userIndex].rank = rank;
+        }
+      }
+
+      tournament.haveWinners = true;
+      await tournament.save();
+
+      // Deactivate predictions
+      await Predictions.updateMany(
+        { tournament_id: tournament._id, isActive: true },
+        { $set: { isActive: false } }
+      );
+
+      return NextResponse.json(
+        {
+          data: tournament,
+          message: `Successfully computed scores for tournament ${tournament_id} using v2 scoring`,
+        },
+        { status: 201 }
+      );
+    }
+
+    // ============ V1 SCORING PATH (EXISTING LOGIC) ============
     //start computation of user scores
     const userScores = [];
     //console.log(tournament.users);
