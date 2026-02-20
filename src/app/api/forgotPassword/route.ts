@@ -57,11 +57,13 @@ export async function POST(req: NextRequest) {
       { message: "Password reset process has been initiated" },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Password reset error:", error);
     return NextResponse.json(
       {
         message:
           "An error occurred while processing the password reset request",
+        error: process.env.NODE_ENV === "development" ? error.message : undefined,
       },
       { status: 500 }
     );
