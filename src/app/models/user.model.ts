@@ -34,6 +34,8 @@ export interface User extends Document {
     tournaments: boolean;
     results: boolean;
   };
+  deposit_count: number;
+  preferred_payment_method: 'ach' | 'card';
 }
 
 const userSchema = new Schema(
@@ -68,6 +70,12 @@ const userSchema = new Schema(
       digests: { type: Boolean, default: true },
       tournaments: { type: Boolean, default: true },
       results: { type: Boolean, default: true },
+    },
+    deposit_count: { type: Number, default: 0 },
+    preferred_payment_method: {
+      type: String,
+      enum: ['ach', 'card'],
+      default: 'card',
     },
     createdAt: Date,
     updatedAt: Date,
