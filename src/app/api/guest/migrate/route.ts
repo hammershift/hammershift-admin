@@ -122,13 +122,13 @@ async function handlePOST(req: NextRequest): Promise<NextResponse> {
       await Predictions.create({
         auction_id: pred.auctionId,
         predictedPrice: pred.predictedPrice,
-        predictionType: 'STANDARD', // Guest predictions are standard type
+        predictionType: 'free', // Guest predictions are free type
         wagerAmount: 0, // Guest predictions have no wager
         user: {
           userId: user._id,
           fullName: user.fullName || user.username,
           username: user.username,
-          role: 'USER',
+          role: user.role || 'USER',
         },
         isActive: true,
         refunded: false,
