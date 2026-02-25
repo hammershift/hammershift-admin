@@ -34,6 +34,13 @@ export interface User extends Document {
     tournaments: boolean;
     results: boolean;
   };
+  phone: string | null;
+  notification_preferences: {
+    email_30min: boolean;
+    email_rank_drop: boolean;
+    push_30min: boolean;
+    sms_30min: boolean;
+  };
   deposit_count: number;
   preferred_payment_method: 'ach' | 'card';
 }
@@ -70,6 +77,13 @@ const userSchema = new Schema(
       digests: { type: Boolean, default: true },
       tournaments: { type: Boolean, default: true },
       results: { type: Boolean, default: true },
+    },
+    phone: { type: String, required: false },
+    notification_preferences: {
+      email_30min: { type: Boolean, default: true },
+      email_rank_drop: { type: Boolean, default: true },
+      push_30min: { type: Boolean, default: false },
+      sms_30min: { type: Boolean, default: false },
     },
     deposit_count: { type: Number, default: 0 },
     preferred_payment_method: {
