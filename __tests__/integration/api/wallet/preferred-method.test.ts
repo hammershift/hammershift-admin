@@ -68,4 +68,40 @@ describe('PATCH /api/wallet/preferred-method', () => {
     const response = await PATCH(request);
     expect(response.status).toBe(401);
   });
+
+  it('should return 404 if user not found', async () => {
+    (Users.findById as jest.Mock).mockResolvedValue(null);
+
+    const request = new NextRequest('http://localhost:3000/api/wallet/preferred-method', {
+      method: 'PATCH',
+      body: JSON.stringify({ method: 'ach' }),
+    });
+
+    const response = await PATCH(request);
+    expect(response.status).toBe(404);
+  });
+
+  it('should return 400 if method field is missing', async () => {
+    (Users.findById as jest.Mock).mockResolvedValue({ _id: mockSession.user.id });
+
+    const request = new NextRequest('http://localhost:3000/api/wallet/preferred-method', {
+      method: 'PATCH',
+      body: JSON.stringify({}), // No method field
+    });
+
+    const response = await PATCH(request);
+    expect(response.status).toBe(400);
+  });
+
+  it('should return 500 on database error', async () => {
+    (Users.findById as jest.Mock).mockRejectedValue(new Error('Database connection failed'));
+
+    const request = new NextRequest('http://localhost:3000/api/wallet/preferred-method', {
+      method: 'PATCH',
+      body: JSON.stringify({ method: 'ach' }),
+    });
+
+    const response = await PATCH(request);
+    expect(response.status).toBe(500);
+  });
 });
