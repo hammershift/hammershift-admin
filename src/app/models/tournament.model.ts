@@ -36,6 +36,7 @@ export interface Tournament extends Document {
   users: TournamentUser[];
   maxUsers: number;
   scoring_version: "v1" | "v2";
+  tier: 'rookie' | 'silver' | 'gold' | 'pro' | null;
   createdAt: Date;
 }
 
@@ -161,6 +162,11 @@ const tournamentSchema = new Schema(
       enum: ["v1", "v2"],
       default: "v2",
     },
+    tier: {
+      type: String,
+      enum: ['rookie', 'silver', 'gold', 'pro'],
+      required: false,
+    },
     // winners: {
     //   type: [TournamentWinner],
     //   default: [],
@@ -177,6 +183,7 @@ tournamentSchema.index({ startTime: 1 });
 tournamentSchema.index({ endTime: 1 });
 tournamentSchema.index({ "users.userId": 1 });
 tournamentSchema.index({ createdAt: -1 });
+tournamentSchema.index({ tier: 1 });
 
 tournamentSchema.plugin(aggregatePaginate);
 tournamentSchema.plugin(paginate);
