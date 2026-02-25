@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
             isPlatformTab === "true"
               ? { $or: [{ isActive: true }, { ended: true }] }
               : {
-                  isActive: { $exists: true },
+                  isActive: true,
                   "sort.deadline": {
                     $gte: now,
                   },
@@ -278,6 +278,7 @@ export async function GET(req: NextRequest) {
     } else {
       query = {
         attributes: { $all: [] },
+        isActive: true,
         "sort.deadline": {
           $gt: now,
         },
