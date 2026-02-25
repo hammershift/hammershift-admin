@@ -158,7 +158,7 @@ describe("User Stats API", () => {
     it("should return comprehensive user statistics", async () => {
       const user = await createTestUser({
         total_points: 500,
-        rank_title: "Expert",
+        ladder_tier: "gold",
       });
       const auction = await createTestAuction();
 
@@ -204,7 +204,7 @@ describe("User Stats API", () => {
       expect(response.status).toBe(200);
       expect(data.username).toBe(user.username);
       expect(data.total_points).toBe(500);
-      expect(data.rank_title).toBe("Expert");
+      expect(data.ladder_tier).toBe("gold");
       expect(data.predictions.total).toBe(3);
       expect(data.predictions.scored).toBe(3);
       expect(data.predictions.accuracy_pct).toBeGreaterThan(0);

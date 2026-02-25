@@ -27,7 +27,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       isActive: true,
       isBanned: false,
     })
-      .select('_id email username total_points current_streak rank_title createdAt')
+      .select('_id email username total_points current_streak ladder_tier createdAt')
       .limit(1000);
 
     let triggered = 0;
@@ -66,7 +66,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
           created_at: Math.floor(user.createdAt.getTime() / 1000),
           total_points: user.total_points,
           current_streak: user.current_streak,
-          rank_title: user.rank_title,
+          ladder_tier: user.ladder_tier,
         });
 
         // Fire weekly_digest_triggered event

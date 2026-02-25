@@ -105,7 +105,7 @@ export async function GET(
       username: user.username,
       full_name: user.fullName,
       total_points: user.total_points || 0,
-      rank_title: user.rank_title || "Rookie",
+      ladder_tier: user.ladder_tier || "rookie",
       predictions: {
         total: stats.total_predictions,
         scored: stats.scored_predictions,

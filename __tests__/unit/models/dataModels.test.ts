@@ -314,7 +314,7 @@ describe("Extended Models - User", () => {
       current_streak: 5,
       longest_streak: 10,
       last_prediction_at: new Date(),
-      rank_title: "Expert",
+      ladder_tier: "pro",
       total_points: 5000,
       email_preferences: {
         marketing: true,
@@ -326,7 +326,7 @@ describe("Extended Models - User", () => {
 
     expect(user.current_streak).toBe(5);
     expect(user.longest_streak).toBe(10);
-    expect(user.rank_title).toBe("Expert");
+    expect(user.ladder_tier).toBe("pro");
     expect(user.total_points).toBe(5000);
     expect(user.email_preferences.digests).toBe(false);
   });
@@ -343,12 +343,12 @@ describe("Extended Models - User", () => {
 
     expect(user.current_streak).toBe(0);
     expect(user.longest_streak).toBe(0);
-    expect(user.rank_title).toBe("Rookie");
+    expect(user.ladder_tier).toBe("rookie");
     expect(user.total_points).toBe(0);
     expect(user.email_preferences.marketing).toBe(true);
   });
 
-  it("should validate rank_title enum", async () => {
+  it("should validate ladder_tier enum", async () => {
     const userId = new mongoose.Types.ObjectId();
     await expect(
       Users.create({
@@ -357,7 +357,7 @@ describe("Extended Models - User", () => {
         fullName: "Test User 3",
         email: "test3@example.com",
         role: "USER",
-        rank_title: "InvalidRank",
+        ladder_tier: "InvalidTier",
       })
     ).rejects.toThrow();
   });
