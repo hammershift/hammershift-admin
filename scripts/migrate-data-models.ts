@@ -61,7 +61,7 @@ async function migrateUsers(): Promise<MigrationStats> {
       $or: [
         { current_streak: { $exists: false } },
         { longest_streak: { $exists: false } },
-        { rank_title: { $exists: false } },
+        { ladder_tier: { $exists: false } },
         { total_points: { $exists: false } },
         { email_preferences: { $exists: false } },
       ],
@@ -81,8 +81,8 @@ async function migrateUsers(): Promise<MigrationStats> {
         if (!user.longest_streak && user.longest_streak !== 0) {
           updates.longest_streak = 0;
         }
-        if (!user.rank_title) {
-          updates.rank_title = "Rookie";
+        if (!user.ladder_tier) {
+          updates.ladder_tier = "rookie";
         }
         if (!user.total_points && user.total_points !== 0) {
           updates.total_points = 0;
