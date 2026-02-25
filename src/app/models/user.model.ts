@@ -26,7 +26,7 @@ export interface User extends Document {
   current_streak: number;
   longest_streak: number;
   last_prediction_at?: Date;
-  rank_title: "Rookie" | "Rising Star" | "Expert" | "Legend";
+  ladder_tier: 'rookie' | 'silver' | 'gold' | 'pro';
   total_points: number;
   email_preferences: {
     marketing: boolean;
@@ -66,10 +66,10 @@ const userSchema = new Schema(
     current_streak: { type: Number, default: 0 },
     longest_streak: { type: Number, default: 0 },
     last_prediction_at: { type: Date, required: false },
-    rank_title: {
+    ladder_tier: {
       type: String,
-      enum: ["Rookie", "Rising Star", "Expert", "Legend"],
-      default: "Rookie",
+      enum: ['rookie', 'silver', 'gold', 'pro'],
+      default: 'rookie',
     },
     total_points: { type: Number, default: 0 },
     email_preferences: {
