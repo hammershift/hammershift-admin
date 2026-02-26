@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
     const limit = Number(req.nextUrl.searchParams.get("limit")) || 7;
     const searchedKeyword = req.nextUrl.searchParams.get("search");
     const isPlatformTab = req.nextUrl.searchParams.get("isPlatformTab");
+    const publicOnly = req.nextUrl.searchParams.get("publicOnly"); // New param for public website
     const tournamentID = req.nextUrl.searchParams.get("tournament_id");
     let completed = req.nextUrl.searchParams.get("completed") || [1];
     let era: string | string[] = req.nextUrl.searchParams.get("era") || "All";
@@ -91,8 +92,18 @@ export async function GET(req: NextRequest) {
           $match:
             isPlatformTab === "true"
               ? { $or: [{ isActive: true }, { ended: true }] }
-              : {
+              : publicOnly === "true"
+              ? {
                   isActive: true,
+                  "sort.deadline": {
+                    $gte: now,
+                  },
+                }
+              : {
+                  $or: [
+                    { isActive: { $ne: true } },
+                    { isActive: { $exists: false } }
+                  ],
                   "sort.deadline": {
                     $gte: now,
                   },
@@ -264,6 +275,7 @@ export async function GET(req: NextRequest) {
     //if you don't add a sort query, it automatically defaults to sorting by Newly Listed for now
     let query: any = {};
     if (isPlatformTab === "true") {
+      // Admin platform tab: show active OR ended
       query = {
         attributes: { $all: [] },
         $or: [
@@ -275,10 +287,23 @@ export async function GET(req: NextRequest) {
           },
         ],
       };
-    } else {
+    } else if (publicOnly === "true") {
+      // Public website: show ONLY active with future deadlines
       query = {
         attributes: { $all: [] },
         isActive: true,
+        "sort.deadline": {
+          $gt: now,
+        },
+      };
+    } else {
+      // Admin external tab: show NON-active with future deadlines
+      query = {
+        attributes: { $all: [] },
+        $or: [
+          { isActive: { $ne: true } },
+          { isActive: { $exists: false } }
+        ],
         "sort.deadline": {
           $gt: now,
         },
