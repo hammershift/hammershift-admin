@@ -301,6 +301,9 @@ export async function PUT(
 
     const distribution = [50, 30, 20];
     for (let i = 0; i < rankings.length; i++) {
+      // Only distribute prizes to top 3 ranks
+      if (i >= distribution.length) break;
+
       for (const user of rankings[i].users) {
         const points =
           (pot * (distribution[i] / 100)) / rankings[i].users.length;
@@ -321,9 +324,12 @@ export async function PUT(
           (x) => x.userId === user.userId
         );
 
-        tournament.users[userIndex].points = points;
-        tournament.users[userIndex].rank = i + 1;
-        tournament.users[userIndex].delta = user.delta;
+        // Only update if user found in tournament.users
+        if (userIndex >= 0) {
+          tournament.users[userIndex].points = points;
+          tournament.users[userIndex].rank = i + 1;
+          tournament.users[userIndex].delta = user.delta;
+        }
       }
     }
     //update all predictions for tournament, set isActive to false

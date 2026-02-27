@@ -2,10 +2,28 @@ import connectToDB from "@/app/lib/mongoose";
 import Admins, { Admin } from "@/app/models/admin.model";
 import { AggregatePaginateModel, PaginateModel } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/options";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Escape special regex characters to prevent NoSQL injection
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export async function GET(req: NextRequest) {
+  // Require admin authorization
+  const session = await getServerSession(authOptions);
+  if (!session?.user || !["owner", "admin", "moderator"].includes(session.user.role)) {
+    return NextResponse.json(
+      { message: "Unauthorized. Admin access required." },
+      { status: 401 }
+    );
+  }
+
   try {
     await connectToDB();
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
@@ -39,7 +57,8 @@ export async function GET(req: NextRequest) {
       //     },
       //   },
       // ]);
-      const regex = new RegExp(searchedKeyword, "i"); // Case-insensitive partial match
+      const escapedKeyword = escapeRegex(searchedKeyword);
+      const regex = new RegExp(escapedKeyword, "i"); // Case-insensitive partial match
 
       const aggregate = Admins.aggregate([
         {

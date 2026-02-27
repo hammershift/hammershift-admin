@@ -54,8 +54,9 @@ export async function checkBonusConditions(
   };
 
   // Early bird: > 48h before auction end
+  const auctionEndTime = auction.sort?.deadline || auction.end_time;
   const hoursBefore =
-    (new Date(auction.end_time).getTime() -
+    (new Date(auctionEndTime).getTime() -
       new Date(prediction.createdAt).getTime()) /
     (1000 * 60 * 60);
   modifiers.early_bird = hoursBefore > 48;

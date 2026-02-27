@@ -11,6 +11,15 @@ import { Types } from "mongoose";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  // Require admin authorization
+  const session = await getServerSession(authOptions);
+  if (!session?.user || !["owner", "admin", "moderator"].includes(session.user.role)) {
+    return NextResponse.json(
+      { message: "Unauthorized. Admin access required." },
+      { status: 401 }
+    );
+  }
+
   try {
     await connectToDB();
     const admin_id = req.nextUrl.searchParams.get("_id");
