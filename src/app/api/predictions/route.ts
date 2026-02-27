@@ -15,14 +15,14 @@ export async function GET(req: NextRequest) {
 
     if (tournament_id) {
       const predictions = await Predictions.find({
-        tournament_id: tournament_id,
+        tournament_id: new Types.ObjectId(tournament_id),
       }).sort({ createdAt: -1 });
       return NextResponse.json(predictions);
     }
 
     if (auction_id) {
       const predictions = await Predictions.find({
-        auction_id: auction_id,
+        auction_id: new Types.ObjectId(auction_id),
         tournament_id: {
           $exists: false,
         },
@@ -34,7 +34,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(predictions);
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ message: "Internal server error" });
+    return NextResponse.json(
+      { message: "Internal server error", error: e instanceof Error ? e.message : "Unknown error" },
+      { status: 500 }
+    );
   }
 }
 export async function DELETE(req: NextRequest) {
@@ -55,6 +58,9 @@ export async function DELETE(req: NextRequest) {
     }
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ message: "Internal server error" });
+    return NextResponse.json(
+      { message: "Internal server error", error: e instanceof Error ? e.message : "Unknown error" },
+      { status: 500 }
+    );
   }
 }
