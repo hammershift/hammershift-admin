@@ -1,0 +1,66 @@
+import { Document, Schema, model, models, Types } from 'mongoose';
+
+export interface PolygonMarket {
+  _id: Types.ObjectId;
+  auctionId: string;
+  contractAddress: string;
+
+  yesTokenId: string;
+  noTokenId: string;
+
+  status: 'PENDING' | 'ACTIVE' | 'RESOLVED' | 'DISPUTED';
+
+  totalVolume: number;
+  totalLiquidity: number;
+
+  hammerPrice?: number;
+  predictedPrice: number;
+  winningOutcome?: 'YES' | 'NO';
+  resolvedAt?: Date;
+  resolutionTxHash?: string;
+
+  totalFees: number;
+  makerRebatesPaid: number;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const PolygonMarketSchema = new Schema(
+  {
+    auctionId: { type: String, required: true, unique: true },
+    contractAddress: { type: String, required: true },
+
+    yesTokenId: { type: String, required: true },
+    noTokenId: { type: String, required: true },
+
+    status: {
+      type: String,
+      enum: ['PENDING', 'ACTIVE', 'RESOLVED', 'DISPUTED'],
+      default: 'PENDING'
+    },
+
+    totalVolume: { type: Number, default: 0 },
+    totalLiquidity: { type: Number, default: 0 },
+
+    hammerPrice: { type: Number },
+    predictedPrice: { type: Number, required: true },
+    winningOutcome: { type: String, enum: ['YES', 'NO'] },
+    resolvedAt: { type: Date },
+    resolutionTxHash: { type: String },
+
+    totalFees: { type: Number, default: 0 },
+    makerRebatesPaid: { type: Number, default: 0 },
+  },
+  {
+    collection: 'polygon_markets',
+    timestamps: true,
+  }
+);
+
+PolygonMarketSchema.index({ auctionId: 1 }, { unique: true });
+PolygonMarketSchema.index({ status: 1 });
+
+const PolygonMarketModel = models.PolygonMarket || model('PolygonMarket', PolygonMarketSchema);
+
+export default PolygonMarketModel;
