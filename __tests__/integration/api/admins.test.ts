@@ -33,6 +33,8 @@ describe("Admins API", () => {
 
   describe("GET /api/admins", () => {
     it("should return all admins without authentication", async () => {
+      mockGetServerSession.mockResolvedValue(createMockSession("admin") as any);
+
       const admin1 = await createTestAdmin({ username: "admin1" });
       const admin2 = await createTestAdmin({
         username: "admin2",
@@ -51,6 +53,8 @@ describe("Admins API", () => {
     });
 
     it("should return single admin by ID", async () => {
+      mockGetServerSession.mockResolvedValue(createMockSession("admin") as any);
+
       const admin = await createTestAdmin({ username: "testadmin" });
 
       const req = new NextRequest(`http://localhost:3000/api/admins?_id=${admin._id}`);
@@ -64,6 +68,8 @@ describe("Admins API", () => {
     });
 
     it("should support pagination", async () => {
+      mockGetServerSession.mockResolvedValue(createMockSession("admin") as any);
+
       for (let i = 0; i < 10; i++) {
         await createTestAdmin({
           username: `admin${i}`,
@@ -81,6 +87,8 @@ describe("Admins API", () => {
     });
 
     it("should handle empty admin list", async () => {
+      mockGetServerSession.mockResolvedValue(createMockSession("admin") as any);
+
       const req = new NextRequest("http://localhost:3000/api/admins");
       const response = await GET(req);
 
@@ -91,6 +99,8 @@ describe("Admins API", () => {
     });
 
     it("should skip admins with offset", async () => {
+      mockGetServerSession.mockResolvedValue(createMockSession("admin") as any);
+
       for (let i = 0; i < 5; i++) {
         await createTestAdmin({
           username: `admin${i}`,

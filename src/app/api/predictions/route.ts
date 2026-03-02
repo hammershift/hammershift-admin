@@ -46,16 +46,24 @@ export async function DELETE(req: NextRequest) {
 
     const prediction_id = req.nextUrl.searchParams.get("prediction_id");
 
-    if (prediction_id) {
-      await Predictions.deleteOne({
-        _id: new Types.ObjectId(prediction_id),
-      });
-      return NextResponse.json({
-        message: `Successfully deleted prediction ${prediction_id}`,
-      });
-    } else {
+    if (!prediction_id) {
       return NextResponse.json({ message: "Missing prediction_id" });
     }
+
+    // Validate ObjectId format before attempting to use it
+    if (!Types.ObjectId.isValid(prediction_id)) {
+      return NextResponse.json(
+        { message: "Internal server error" },
+        { status: 200 }
+      );
+    }
+
+    await Predictions.deleteOne({
+      _id: new Types.ObjectId(prediction_id),
+    });
+    return NextResponse.json({
+      message: `Successfully deleted prediction ${prediction_id}`,
+    });
   } catch (e) {
     console.error(e);
     return NextResponse.json(
