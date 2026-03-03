@@ -22,6 +22,8 @@ export interface PolygonMarket {
   totalFees: number;
   makerRebatesPaid: number;
 
+  adminId?: Types.ObjectId; // Admin who created the market
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,6 +53,8 @@ const PolygonMarketSchema = new Schema(
 
     totalFees: { type: Number, default: 0 },
     makerRebatesPaid: { type: Number, default: 0 },
+
+    adminId: { type: Schema.Types.ObjectId, ref: 'Admin' }, // Admin who created the market
   },
   {
     collection: 'polygon_markets',
