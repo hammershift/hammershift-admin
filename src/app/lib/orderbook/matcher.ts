@@ -3,6 +3,11 @@ import PolygonOrder from '@/app/models/PolygonOrder.model';
 import PolygonMarket from '@/app/models/PolygonMarket.model';
 import PolygonPosition from '@/app/models/PolygonPosition.model';
 import { calculateTradeFees } from './feeHandler';
+import {
+  emitOrderBookUpdate,
+  emitOrderMatched,
+  getOrderBookServer,
+} from '../websocket/orderBookServer';
 
 /**
  * Order Matching Engine for Polygon CLOB
@@ -104,7 +109,26 @@ export async function matchOrder(
       // Update maker order status
       await updateOrderAfterFill(makerOrder._id, fillSize);
 
+      // Emit order matched event via WebSocket
+      if (getOrderBookServer()) {
+        emitOrderMatched({
+          marketId,
+          orderId: takerOrder._id.toString(),
+          side: takerOrder.side,
+          outcome: takerOrder.outcome,
+          price: makerOrder.price,
+          size: fillSize,
+          timestamp: new Date(),
+        });
+      }
+
       // Update taker order (handled by caller)
+    }
+
+    // Emit updated order book snapshot after matching
+    if (fills.length > 0 && getOrderBookServer()) {
+      const updatedOrderBook = await getOrderBook(marketId, takerOrder.outcome, 10);
+      emitOrderBookUpdate(marketId, updatedOrderBook);
     }
 
     return {
@@ -331,6 +355,20 @@ export async function cancelOrder(orderId: Types.ObjectId): Promise<boolean> {
 
   order.status = 'CANCELLED';
   await order.save();
+
+  // Emit order cancelled event via WebSocket
+  if (getOrderBookServer()) {
+    const { emitOrderCancelled } = await import('../websocket/orderBookServer');
+    emitOrderCancelled({
+      marketId: order.marketId,
+      orderId: orderId.toString(),
+      userId: order.userId.toString(),
+    });
+
+    // Emit updated order book
+    const updatedOrderBook = await getOrderBook(order.marketId, order.outcome, 10);
+    emitOrderBookUpdate(order.marketId, updatedOrderBook);
+  }
 
   return true;
 }
