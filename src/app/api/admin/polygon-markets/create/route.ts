@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 import PolygonMarket from '@/app/models/PolygonMarket.model';
 import Auctions from '@/app/models/auction.model';
-import { auditLog } from '@/app/lib/auditLogger';
+import { createAuditLog, AuditActions, AuditResources } from '@/app/lib/auditLogger';
 import { z } from 'zod';
 import crypto from 'crypto';
 
@@ -67,15 +67,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 5. Validate market end date is before auction end date
+    // 5. Validate market end date is before auction deadline (if available)
     const marketEndDate = new Date(endDate);
-    const auctionEndDate = new Date(auction.end_time);
 
-    if (marketEndDate >= auctionEndDate) {
-      return NextResponse.json(
-        { error: 'Market end date must be before auction end date' },
-        { status: 400 }
-      );
+    if (auction.sort?.deadline) {
+      const auctionEndDate = new Date(auction.sort.deadline);
+
+      if (marketEndDate >= auctionEndDate) {
+        return NextResponse.json(
+          { error: 'Market end date must be before auction end date' },
+          { status: 400 }
+        );
+      }
     }
 
     // 6. Generate mock contract address and token IDs
@@ -92,7 +95,7 @@ export async function POST(req: NextRequest) {
       yesTokenId,
       noTokenId,
       status: 'PENDING',
-      predictedPrice: auction.predictedPrice || 0,
+      predictedPrice: auction.avg_predicted_price || 0,
       totalVolume: 0,
       totalLiquidity: initialLiquidity,
       totalFees: 0,
@@ -101,19 +104,24 @@ export async function POST(req: NextRequest) {
     });
 
     // 8. Create audit log entry
-    await auditLog({
-      action: 'polygon_market_created',
+    await createAuditLog({
       userId: session.user.id,
-      userEmail: session.user.email || '',
+      username: session.user.email || 'unknown',
+      userRole: session.user.role || 'admin',
+      action: 'polygon_market.created',
       resource: 'PolygonMarket',
       resourceId: market._id.toString(),
-      details: {
+      method: 'POST',
+      endpoint: '/api/admin/polygon-markets/create',
+      status: 'success',
+      metadata: {
         auctionId,
         question,
         endDate,
         marketId: market._id.toString(),
         contractAddress,
       },
+      req,
     });
 
     // 9. Return success response

@@ -16,13 +16,13 @@ export const config = {
   },
 };
 
-interface NextApiResponseWithSocket extends NextApiResponse {
+type NextApiResponseWithSocket = NextApiResponse & {
   socket: {
     server: HTTPServer & {
       io?: SocketIOServer;
     };
   };
-}
+};
 
 export default function handler(
   req: NextApiRequest,

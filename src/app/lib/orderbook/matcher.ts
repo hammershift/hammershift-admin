@@ -25,6 +25,7 @@ export interface MatchResult {
   fills: Fill[];
   remainingSize: number;
   totalFilled: number;
+  cancelled?: boolean;
   error?: string;
 }
 
@@ -68,6 +69,77 @@ export async function matchOrder(
       takerOrder.outcome,
       takerOrder.price
     );
+
+    // POST-ONLY: Check if order would cross spread
+    if (takerOrder.postOnly && opposingOrders.length > 0) {
+      const bestOpposingOrder = opposingOrders[0];
+      const wouldCross = takerOrder.side === 'BUY'
+        ? takerOrder.price >= bestOpposingOrder.price
+        : takerOrder.price <= bestOpposingOrder.price;
+
+      if (wouldCross) {
+        return {
+          success: false,
+          fills: [],
+          remainingSize: takerOrder.size,
+          totalFilled: 0,
+          error: 'Post-only order would cross spread',
+        };
+      }
+    }
+
+    // STOP-LOSS: Check if stop condition is met
+    if (takerOrder.orderType === 'STOP_LOSS' && takerOrder.stopPrice !== undefined && takerOrder.triggerCondition) {
+      if (opposingOrders.length === 0) {
+        return {
+          success: false,
+          fills: [],
+          remainingSize: takerOrder.size,
+          totalFilled: 0,
+          error: 'Stop-loss condition not met',
+        };
+      }
+
+      const marketPrice = opposingOrders[0].price;
+      const shouldTrigger = takerOrder.triggerCondition === 'GTE'
+        ? marketPrice >= takerOrder.stopPrice
+        : marketPrice <= takerOrder.stopPrice;
+
+      if (!shouldTrigger) {
+        return {
+          success: false,
+          fills: [],
+          remainingSize: takerOrder.size,
+          totalFilled: 0,
+          error: 'Stop-loss condition not met',
+        };
+      }
+      // If triggered, proceed with matching as market order
+    }
+
+    // FILL-OR-KILL: Pre-check if order can be filled completely
+    if (takerOrder.timeInForce === 'FOK') {
+      let availableSize = 0;
+      for (const makerOrder of opposingOrders) {
+        const canMatch = takerOrder.side === 'BUY'
+          ? takerOrder.price >= makerOrder.price
+          : takerOrder.price <= makerOrder.price;
+
+        if (!canMatch) break;
+        availableSize += makerOrder.remainingSize;
+        if (availableSize >= takerOrder.size) break;
+      }
+
+      if (availableSize < takerOrder.size) {
+        return {
+          success: false,
+          fills: [],
+          remainingSize: takerOrder.size,
+          totalFilled: 0,
+          error: 'FOK order cannot be filled completely',
+        };
+      }
+    }
 
     // Match against each opposing order
     for (const makerOrder of opposingOrders) {
@@ -131,11 +203,15 @@ export async function matchOrder(
       emitOrderBookUpdate(marketId, updatedOrderBook);
     }
 
+    // IMMEDIATE-OR-CANCEL: Mark any unfilled portion as cancelled
+    const isCancelled = takerOrder.timeInForce === 'IOC' && remainingSize > 0;
+
     return {
       success: true,
       fills,
       remainingSize,
       totalFilled: takerOrder.size - remainingSize,
+      cancelled: isCancelled || undefined,
     };
   } catch (error) {
     return {

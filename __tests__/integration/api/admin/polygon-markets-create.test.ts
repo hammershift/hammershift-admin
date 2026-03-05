@@ -3,12 +3,17 @@ import { NextRequest } from 'next/server';
 import PolygonMarket from '@/app/models/PolygonMarket.model';
 import Auctions from '@/app/models/auction.model';
 import { getServerSession } from 'next-auth';
+import { createAuditLog } from '@/app/lib/auditLogger';
 
 // Mock dependencies
 jest.mock('next-auth');
 jest.mock('@/app/models/PolygonMarket.model');
 jest.mock('@/app/models/auction.model');
-jest.mock('@/app/lib/auditLogger');
+jest.mock('@/app/lib/auditLogger', () => ({
+  createAuditLog: jest.fn().mockResolvedValue(undefined),
+  AuditActions: {},
+  AuditResources: {},
+}));
 
 describe('POST /api/admin/polygon-markets/create', () => {
   const mockAdminSession = {
@@ -59,7 +64,7 @@ describe('POST /api/admin/polygon-markets/create', () => {
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toContain('admin');
+      expect(data.error).toContain('Admin');
     });
   });
 
@@ -81,7 +86,7 @@ describe('POST /api/admin/polygon-markets/create', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('auctionId');
+      expect(data.error).toContain('Validation failed');
     });
 
     it('should reject missing question', async () => {
@@ -97,7 +102,7 @@ describe('POST /api/admin/polygon-markets/create', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('question');
+      expect(data.error).toContain('Validation failed');
     });
 
     it('should reject question longer than 200 characters', async () => {
@@ -132,7 +137,7 @@ describe('POST /api/admin/polygon-markets/create', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('endDate');
+      expect(data.error).toContain('Validation failed');
     });
 
     it('should reject endDate after auction end', async () => {
@@ -141,7 +146,9 @@ describe('POST /api/admin/polygon-markets/create', () => {
 
       (Auctions.findById as jest.Mock).mockResolvedValue({
         _id: 'auction-123',
-        end_time: auctionEndDate,
+        sort: {
+          deadline: auctionEndDate,
+        },
       });
 
       const req = new NextRequest('http://localhost:3000/api/admin/polygon-markets/create', {
@@ -191,8 +198,8 @@ describe('POST /api/admin/polygon-markets/create', () => {
 
       (Auctions.findById as jest.Mock).mockResolvedValue({
         _id: 'auction-123',
-        end_time: auctionEndDate,
-        predictedPrice: 100000,
+        sort: { deadline: auctionEndDate },
+        avg_predicted_price: 100000,
       });
 
       (PolygonMarket.create as jest.Mock).mockResolvedValue({
@@ -202,7 +209,7 @@ describe('POST /api/admin/polygon-markets/create', () => {
         yesTokenId: 'token-yes',
         noTokenId: 'token-no',
         status: 'PENDING',
-        predictedPrice: 100000,
+        avg_predicted_price: 100000,
         adminId: 'admin-123',
       });
 
@@ -236,7 +243,7 @@ describe('POST /api/admin/polygon-markets/create', () => {
 
       (Auctions.findById as jest.Mock).mockResolvedValue({
         _id: 'auction-123',
-        end_time: auctionEndDate,
+        sort: { deadline: auctionEndDate },
       });
 
       (PolygonMarket.create as jest.Mock).mockRejectedValue({

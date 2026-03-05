@@ -22,11 +22,24 @@ export async function GET(req: NextRequest) {
   try {
     await connectToDB();
 
+    // Pagination parameters
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;
     const limit = Number(req.nextUrl.searchParams.get("limit")) || 7;
+
+    // Search and filtering parameters
     const searchedKeyword = req.nextUrl.searchParams.get("search");
+
+    // Context parameters (see docs/API-PARAMETER-GUIDE.md for detailed explanation)
+    // isPlatformTab: Used by admin panel to distinguish between:
+    //   - true: "Platform Auctions" tab (shows active OR ended auctions)
+    //   - false/omit: "External Feed" tab (shows non-activated auctions)
     const isPlatformTab = req.nextUrl.searchParams.get("isPlatformTab");
-    const publicOnly = req.nextUrl.searchParams.get("publicOnly"); // New param for public website
+
+    // publicOnly: Used by public website to show only active auctions with future deadlines
+    // This is separate from isPlatformTab to maintain different filtering logic for public vs admin
+    const publicOnly = req.nextUrl.searchParams.get("publicOnly");
+
+    // Tournament context (special case for tournament-specific auctions)
     const tournamentID = req.nextUrl.searchParams.get("tournament_id");
     let completed = req.nextUrl.searchParams.get("completed") || [1];
     let era: string | string[] = req.nextUrl.searchParams.get("era") || "All";
@@ -69,10 +82,20 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // SEARCH is NOT used in combination with other filters EXCEPT completed filter (completed=true === status: 2 and vice versa)
-    //api/auctions/filter?search=911 Coupe or api/auctions/filter?search=911%20Coupe
-    //api/auctions/filter?search=911%20Coupe&completed=true
-    //(search queries are case insensitive) api/auctions/filter?search=land%20cruiser&completed=true
+    // ============================================================================
+    // SEARCH QUERY PATH (MongoDB Atlas Search)
+    // ============================================================================
+    // NOTE: Search uses MongoDB Atlas Search index "auctionSearchAutocomplete"
+    // and CANNOT be combined with other filters (make, category, etc.) due to
+    // how Atlas Search works with aggregation pipelines.
+    //
+    // Valid search queries:
+    //   - /api/auctions/filter?search=911 Coupe
+    //   - /api/auctions/filter?search=911%20Coupe&completed=true
+    //   - /api/auctions/filter?search=land%20cruiser (case insensitive)
+    //
+    // Search matches against the "attributes.value" field (make, model, year, etc.)
+    // ============================================================================
     const now = new Date();
     if (searchedKeyword) {
       const aggregate = Auctions.aggregate([
@@ -89,23 +112,32 @@ export async function GET(req: NextRequest) {
           },
         },
         {
+          // Context-based filtering (see docs/API-PARAMETER-GUIDE.md)
           $match:
             isPlatformTab === "true"
+              // ADMIN PLATFORM TAB: Show auctions that have been activated on the platform
+              // This includes both currently active auctions AND completed/ended auctions
+              // so admins can review historical data
               ? { $or: [{ isActive: true }, { ended: true }] }
               : publicOnly === "true"
+              // PUBLIC WEBSITE: Show only auctions that are currently live for predictions
+              // Must be: (1) activated on platform AND (2) deadline not yet passed
               ? {
                   isActive: true,
                   "sort.deadline": {
-                    $gte: now,
+                    $gte: now,  // Future deadlines only
                   },
                 }
+              // ADMIN EXTERNAL FEED (default): Show auctions NOT yet added to platform
+              // This includes auctions where isActive is false or doesn't exist (legacy data)
+              // Only show auctions with future deadlines (no stale listings)
               : {
                   $or: [
-                    { isActive: { $ne: true } },
-                    { isActive: { $exists: false } }
+                    { isActive: { $ne: true } },        // Explicitly not active
+                    { isActive: { $exists: false } }    // Field doesn't exist (old data)
                   ],
                   "sort.deadline": {
-                    $gte: now,
+                    $gte: now,  // Future deadlines only
                   },
                 },
         },
@@ -233,12 +265,24 @@ export async function GET(req: NextRequest) {
       location = location.split("$");
     }
 
-    //ALL filters can be used in combination with other filters including sort (filters and sort are case sensitive)
-    //use the delimiter "$" when filter mutiple makes, era, category or location
-    //use "%20" or " " for 2-word queries
-    //for ex. api/cars/filter?make=Porsche$Ferrari&location=New%20York$North%20Carolina&sort=Most%20Bids
-    //if you don't add a sort query, it automatically defaults to sorting by Newly Listed for now
+    // ============================================================================
+    // STANDARD FILTER PATH (non-search queries)
+    // ============================================================================
+    // Filters (make, category, era, location) can be used in combination with each other
+    // and with sort parameters.
+    //
+    // Multi-value filters use "$" as delimiter:
+    //   - /api/auctions/filter?make=Porsche$Ferrari
+    //   - /api/auctions/filter?location=New%20York$North%20Carolina
+    //
+    // Example combinations:
+    //   - /api/auctions/filter?make=Porsche$Ferrari&sort=Most%20Bids
+    //   - /api/auctions/filter?category=Sports%20Car&era=Modern&location=California
+    //
+    // NOTE: Filters are case-sensitive. Use exact values from database.
+    // ============================================================================
 
+    // Sort parameter processing
     if (sort) {
       switch (sort) {
         case "Newly Listed":
@@ -268,44 +312,50 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    //ALL filters can be used in combination with other filters including sort (filters and sort are case sensitive)
-    //use the delimiter "$" when filter mutiple makes, era, category or location
-    //use "%20" or " " for 2-word queries
-    //for ex. api/cars/filter?make=Porsche$Ferrari&location=New%20York$North%20Carolina&sort=Most%20Bids
-    //if you don't add a sort query, it automatically defaults to sorting by Newly Listed for now
+    // ============================================================================
+    // BUILD MONGODB QUERY
+    // ============================================================================
+    // The query structure combines:
+    //   1. Context filtering (isPlatformTab vs publicOnly)
+    //   2. Attribute filters (make, category, era, location)
+    //   3. Deadline constraints
+    //
+    // The `attributes.$all` array will be populated with filter conditions below
+    // ============================================================================
     let query: any = {};
+
     if (isPlatformTab === "true") {
-      // Admin platform tab: show active OR ended
+      // ADMIN PLATFORM TAB: Show activated auctions (active OR ended)
+      // Admins need to see both current and historical auctions for management
       query = {
-        attributes: { $all: [] },
+        attributes: { $all: [] },  // Will be populated with filters below
         $or: [
-          {
-            isActive: true,
-          },
-          {
-            ended: true,
-          },
+          { isActive: true },   // Currently accepting predictions
+          { ended: true },      // Completed auctions
         ],
       };
     } else if (publicOnly === "true") {
-      // Public website: show ONLY active with future deadlines
+      // PUBLIC WEBSITE: Show only live prediction opportunities
+      // Users should only see auctions they can currently predict on
       query = {
-        attributes: { $all: [] },
-        isActive: true,
+        attributes: { $all: [] },  // Will be populated with filters below
+        isActive: true,             // Must be activated
         "sort.deadline": {
-          $gt: now,
+          $gt: now,                 // Must have future deadline
         },
       };
     } else {
-      // Admin external tab: show NON-active with future deadlines
+      // ADMIN EXTERNAL FEED (default): Show auctions not yet on platform
+      // This is the "staging area" where admins review external auctions
+      // before activating them
       query = {
-        attributes: { $all: [] },
+        attributes: { $all: [] },  // Will be populated with filters below
         $or: [
-          { isActive: { $ne: true } },
-          { isActive: { $exists: false } }
+          { isActive: { $ne: true } },        // Explicitly not active
+          { isActive: { $exists: false } }    // Legacy data without field
         ],
         "sort.deadline": {
-          $gt: now,
+          $gt: now,  // Only show auctions with future deadlines
         },
       };
     }

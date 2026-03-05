@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
       {
         success: true,
         orders: orders.map((order) => ({
-          orderId: order._id.toString(),
+          orderId: String(order._id),
           marketId: order.marketId,
           side: order.side,
           outcome: order.outcome,

@@ -146,7 +146,8 @@ export function checkMMRateLimit(apiKeyId: string): { allowed: boolean; remainin
  */
 export function cleanupRateLimits(): void {
   const now = Date.now();
-  for (const [key, entry] of rateLimitMap.entries()) {
+  const entries = Array.from(rateLimitMap.entries());
+  for (const [key, entry] of entries) {
     if (now >= entry.resetAt) {
       rateLimitMap.delete(key);
     }

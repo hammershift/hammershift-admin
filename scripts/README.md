@@ -1,8 +1,182 @@
-# Data Models Migration Guide
+# Database Scripts - Complete Guide
 
 ## Overview
 
-This directory contains migration scripts for the Velocity Markets backend enhancement Phase 2 data models.
+This directory contains all database maintenance, diagnostic, and migration scripts for the HammerShift project.
+
+## Available Scripts
+
+| Script | npm Command | Purpose | Runtime | Modifies DB |
+|--------|-------------|---------|---------|-------------|
+| **db-health-check.ts** | `npm run db:health` | Fast health check | 10-30s | No |
+| **db-diagnostics.ts** | `npm run db:diagnostics` | Full integrity check | 1-5m | No |
+| **db-cleanup.ts** | `npm run db:cleanup` | Preview fixes | 30s-1m | No (dry-run) |
+| **db-cleanup.ts** | `npm run db:cleanup:execute` | Apply fixes | 1-3m | **Yes** |
+| **db-index-check.ts** | `npm run db:index-check` | Verify indexes | 30-90s | No |
+| **verify-data-consistency.ts** | `npm run db:verify-consistency` | Deep checks | 1-5m | No |
+| **verify-ladder-tier-migration.ts** | `npm run db:verify-migration` | Migration status | 10-30s | No |
+| **check-all-active.ts** | `npm run db:check-active` | List active auctions | 5-10s | No |
+| **migrate-data-models.ts** | `npm run db:migrate` | Run migrations | Varies | **Yes** |
+
+## Quick Start
+
+```bash
+# Install tsx (if not already installed)
+npm install --save-dev tsx
+
+# Configure environment
+cp .env.example .env.local
+# Edit .env.local with your MONGODB_URI
+
+# Run health check
+npm run db:health
+
+# Run full diagnostics
+npm run db:diagnostics
+```
+
+---
+
+## Diagnostic & Maintenance Scripts
+
+### 1. Health Check (db-health-check.ts)
+
+**Fast health monitoring for automated systems**
+
+```bash
+npm run db:health
+npm run db:health -- --json  # JSON output for monitoring
+```
+
+**Checks:**
+- Database connection
+- Collection counts
+- Active auction status
+- User-streak consistency
+- Duplicate detection
+- Orphaned records (sample)
+- Critical indexes
+
+**Exit Codes:** 0 (healthy), 1 (warning), 2 (critical)
+
+---
+
+### 2. Full Diagnostics (db-diagnostics.ts)
+
+**Comprehensive integrity check**
+
+```bash
+npm run db:diagnostics
+```
+
+**Checks 34+ integrity points:**
+- Auction data integrity (6 checks)
+- Prediction data integrity (5 checks)
+- User data integrity (6 checks)
+- Tournament data integrity (4 checks)
+- Streak data integrity (3 checks)
+- Badge data integrity (2 checks)
+- Index verification (8 collections)
+
+**Output:** Detailed report with critical/warning/info classification
+
+---
+
+### 3. Database Cleanup (db-cleanup.ts)
+
+**Automated fixes for common issues**
+
+```bash
+# Preview changes (dry-run, safe)
+npm run db:cleanup
+
+# Apply changes (CAREFUL!)
+npm run db:cleanup:execute
+```
+
+**Fixes:**
+- Stale active auctions
+- Incorrect prediction counts
+- Missing streak records
+- Streak inconsistencies
+- Orphaned predictions
+- Orphaned badges
+- Orphaned streaks
+
+**Safety:** Dry-run by default, requires `--execute` flag
+
+---
+
+### 4. Index Verification (db-index-check.ts)
+
+**Verify indexes and query performance**
+
+```bash
+npm run db:index-check
+```
+
+**Features:**
+- Lists all indexes per collection
+- Verifies required indexes exist
+- Tests common query patterns
+- Identifies collection scans
+- Reports execution times
+- Analyzes slow queries (if profiling enabled)
+
+---
+
+### 5. Consistency Verification (verify-data-consistency.ts)
+
+**Deep cross-collection consistency checks**
+
+```bash
+npm run db:verify-consistency
+```
+
+**Verifies:**
+- User ↔ Streak data sync
+- Prediction count accuracy
+- Tournament user predictions
+- Duplicate prediction detection
+- Orphaned references
+- User total points accuracy
+
+**Exit Codes:** 0 (pass), 1 (critical issues)
+
+---
+
+### 6. Migration Verification (verify-ladder-tier-migration.ts)
+
+**Verify rank_title → ladder_tier migration**
+
+```bash
+npm run db:verify-migration
+```
+
+**Checks:**
+- No legacy rank_title fields
+- All users have ladder_tier
+- All values are valid
+- Distribution analysis
+
+---
+
+### 7. Active Auctions (check-all-active.ts)
+
+**Quick visual check of active auctions**
+
+```bash
+npm run db:check-active
+```
+
+**Shows:**
+- All auctions with isActive: true
+- Deadline status (future ✅ vs past ❌)
+- Summary statistics
+
+---
+
+## Data Migration Scripts
 
 ## Migration Script: migrate-data-models.ts
 
@@ -258,9 +432,132 @@ After successful migration:
 4. → Proceed with Agent 2: Event & Scoring Systems
 5. → Proceed with Agent 3: Leaderboard & Gamification
 
+---
+
+## Common Tasks
+
+### Daily Monitoring
+```bash
+npm run db:health
+```
+
+### Weekly Maintenance
+```bash
+npm run db:check-active
+npm run db:diagnostics
+npm run db:cleanup              # Preview
+npm run db:cleanup:execute      # If safe to apply
+```
+
+### After Deployment
+```bash
+npm run db:verify-migration
+npm run db:verify-consistency
+npm run db:diagnostics
+```
+
+### Emergency Response
+```bash
+npm run db:health               # Quick assessment
+npm run db:diagnostics          # Full analysis
+npm run db:cleanup              # Preview fixes
+npm run db:cleanup:execute      # Apply fixes
+npm run db:diagnostics          # Verify resolution
+```
+
+---
+
+## Safety Guidelines
+
+### ✅ Always Safe to Run
+- `npm run db:health` - Read-only
+- `npm run db:diagnostics` - Read-only
+- `npm run db:check-active` - Read-only
+- `npm run db:index-check` - Read-only
+- `npm run db:verify-consistency` - Read-only
+- `npm run db:verify-migration` - Read-only
+
+### ⚠️ Preview First
+- `npm run db:cleanup` - Dry-run mode (safe)
+
+### 🚨 Requires Caution
+- `npm run db:cleanup:execute` - Modifies database
+- `npm run db:migrate` - Schema changes
+
+**Before running destructive operations:**
+1. ✅ Create database backup
+2. ✅ Run in dry-run mode first
+3. ✅ Review all changes
+4. ✅ Execute during low-traffic period
+5. ✅ Notify team
+6. ✅ Monitor application logs
+
+---
+
+## Documentation
+
+For detailed information, see:
+
+- **[DATABASE_MAINTENANCE.md](/docs/DATABASE_MAINTENANCE.md)** - Complete maintenance guide
+- **[DB_DIAGNOSTICS_SUMMARY.md](/docs/DB_DIAGNOSTICS_SUMMARY.md)** - Technical implementation
+- **[DB_TOOLS_QUICK_REFERENCE.md](/docs/DB_TOOLS_QUICK_REFERENCE.md)** - Quick commands
+- **[DB_ANALYSIS_REPORT.md](/DB_ANALYSIS_REPORT.md)** - Full analysis report
+
+---
+
+## Troubleshooting
+
+### "MONGODB_URI not set"
+```bash
+cp .env.example .env.local
+# Edit .env.local with your MongoDB connection string
+```
+
+### "tsx: command not found"
+```bash
+npm install --save-dev tsx
+```
+
+### "Permission denied"
+Check MongoDB user has read/write permissions.
+
+### Script hangs
+Check MongoDB Atlas cluster is responsive. May need to increase timeout for large collections.
+
+---
+
+## CI/CD Integration
+
+### GitHub Actions Example
+```yaml
+- name: Database Health Check
+  env:
+    MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  run: npm run db:health
+```
+
+### Cron Job Example
+```bash
+# Check health every 6 hours
+0 */6 * * * cd /path/to/hammershift-admin && npm run db:health
+```
+
+---
+
 ## Support
 
 For issues or questions:
+
+**Diagnostic Scripts:**
+- Check documentation: `/docs/DATABASE_MAINTENANCE.md`
+- Review quick reference: `/docs/DB_TOOLS_QUICK_REFERENCE.md`
+- Contact: Database Team
+
+**Migration Scripts:**
 - Check design doc: `/docs/plans/2026-02-12-backend-enhancement-design.md`
 - Review test cases: `/__tests__/unit/models/dataModels.test.ts`
 - Contact: Backend Team
+
+---
+
+**Last Updated:** February 27, 2026

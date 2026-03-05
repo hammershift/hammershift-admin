@@ -15,7 +15,14 @@ export interface PolygonOrder {
   remainingSize: number;
 
   status: 'OPEN' | 'PARTIAL' | 'FILLED' | 'CANCELLED';
-  orderType: 'LIMIT' | 'MARKET';
+  orderType: 'LIMIT' | 'MARKET' | 'STOP_LOSS';
+
+  // Advanced order type fields
+  timeInForce?: 'GTC' | 'FOK' | 'IOC'; // Good-til-Cancel (default), Fill-or-Kill, Immediate-or-Cancel
+  postOnly?: boolean; // Must add liquidity (maker-only)
+  stopPrice?: number; // Stop-Loss trigger price
+  triggerCondition?: 'GTE' | 'LTE'; // Stop-Loss trigger: Greater-Than-or-Equal, Less-Than-or-Equal
+  triggered?: boolean; // Stop-Loss has been triggered
 
   makerFee: number;
   takerFee: number;
@@ -48,9 +55,20 @@ const PolygonOrderSchema = new Schema(
     },
     orderType: {
       type: String,
-      enum: ['LIMIT', 'MARKET'],
+      enum: ['LIMIT', 'MARKET', 'STOP_LOSS'],
       default: 'LIMIT'
     },
+
+    // Advanced order type fields
+    timeInForce: {
+      type: String,
+      enum: ['GTC', 'FOK', 'IOC'],
+      default: 'GTC'
+    },
+    postOnly: { type: Boolean, default: false },
+    stopPrice: { type: Number, min: 0, max: 1 },
+    triggerCondition: { type: String, enum: ['GTE', 'LTE'] },
+    triggered: { type: Boolean, default: false },
 
     makerFee: { type: Number, default: 0 },
     takerFee: { type: Number, default: 0 },

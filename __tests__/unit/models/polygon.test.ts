@@ -43,7 +43,7 @@ describe('Polygon CLOB Models', () => {
       expect(sideEnum).toEqual(['BUY', 'SELL']);
       expect(outcomeEnum).toEqual(['YES', 'NO']);
       expect(statusEnum).toEqual(['OPEN', 'PARTIAL', 'FILLED', 'CANCELLED']);
-      expect(orderTypeEnum).toEqual(['LIMIT', 'MARKET']);
+      expect(orderTypeEnum).toEqual(['LIMIT', 'MARKET', 'STOP_LOSS']);
     });
   });
 

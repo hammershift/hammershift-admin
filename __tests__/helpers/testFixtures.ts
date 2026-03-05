@@ -7,6 +7,8 @@ import Predictions from "@/app/models/prediction.model";
 import Transaction from "@/app/models/transaction.model";
 import Admins from "@/app/models/admin.model";
 import Comments from "@/app/models/comment.model";
+import PolygonOrderModel from "@/app/models/PolygonOrder.model";
+import PolygonMarketModel from "@/app/models/PolygonMarket.model";
 import bcrypt from "bcrypt";
 
 /**
@@ -230,4 +232,51 @@ export function mockAuthRequest(method: string, url: string, body?: any) {
       return this;
     },
   } as any;
+}
+
+/**
+ * Polygon CLOB test fixtures
+ */
+export async function createTestPolygonMarket(auctionId: string, overrides: any = {}) {
+  const market = new PolygonMarketModel({
+    _id: new Types.ObjectId(),
+    auctionId,
+    contractAddress: "0x1234567890123456789012345678901234567890",
+    yesTokenId: "0",
+    noTokenId: "1",
+    status: "ACTIVE",
+    totalVolume: 0,
+    totalLiquidity: 0,
+    predictedPrice: 100000,
+    totalFees: 0,
+    makerRebatesPaid: 0,
+    ...overrides,
+  });
+  return await market.save();
+}
+
+export async function createTestPolygonOrder(
+  userId: Types.ObjectId,
+  marketId: string,
+  auctionId: string,
+  overrides: any = {}
+) {
+  const order = new PolygonOrderModel({
+    _id: new Types.ObjectId(),
+    marketId,
+    auctionId,
+    userId,
+    walletAddress: "0x" + "a".repeat(40),
+    side: "BUY",
+    outcome: "YES",
+    price: 0.5,
+    size: 100,
+    remainingSize: 100,
+    status: "OPEN",
+    orderType: "LIMIT",
+    makerFee: 0,
+    takerFee: 0,
+    ...overrides,
+  });
+  return await order.save();
 }

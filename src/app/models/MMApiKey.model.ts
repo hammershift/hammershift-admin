@@ -1,7 +1,7 @@
-import { Document, Schema, model, models, Types } from 'mongoose';
+import { Document, Schema, model, models, Types, Model } from 'mongoose';
 import crypto from 'crypto';
 
-export interface MMApiKey {
+export interface MMApiKey extends Document {
   _id: Types.ObjectId;
   userId: Types.ObjectId;
   apiKey: string; // Hashed
@@ -10,6 +10,13 @@ export interface MMApiKey {
   lastUsedAt?: Date;
   revokedAt?: Date;
   isActive: boolean;
+  updateLastUsed(): Promise<void>;
+}
+
+export interface MMApiKeyModel extends Model<MMApiKey> {
+  generateKey(): string;
+  hashKey(plainKey: string): Promise<string>;
+  validateKey(plainKey: string, hashedKey: string): Promise<boolean>;
 }
 
 const MMApiKeySchema = new Schema(
@@ -77,6 +84,6 @@ MMApiKeySchema.methods.updateLastUsed = async function (): Promise<void> {
   await this.save();
 };
 
-const MMApiKeyModel = models.MMApiKey || model('MMApiKey', MMApiKeySchema);
+const MMApiKeyModel = (models.MMApiKey || model<MMApiKey, MMApiKeyModel>('MMApiKey', MMApiKeySchema)) as MMApiKeyModel;
 
 export default MMApiKeyModel;

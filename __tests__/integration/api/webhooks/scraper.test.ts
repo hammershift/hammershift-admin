@@ -3,10 +3,15 @@ import { POST, GET } from '@/app/api/webhooks/scraper/route';
 import { setupTestDb, teardownTestDb, resetTestDb } from '../../../helpers/testDb';
 import PolygonMarketModel from '@/app/models/PolygonMarket.model';
 import { Types } from 'mongoose';
+import { ethers } from 'ethers';
 
 describe('Scraper Webhook API', () => {
   const VALID_SECRET = 'test-scraper-secret-12345';
   const originalEnv = process.env;
+
+  // Create test oracle wallet
+  const oracleWallet = ethers.Wallet.createRandom();
+  const attackerWallet = ethers.Wallet.createRandom();
 
   beforeAll(async () => {
     await setupTestDb();
@@ -22,12 +27,28 @@ describe('Scraper Webhook API', () => {
     jest.clearAllMocks();
     // Set valid secret for tests
     process.env.SCRAPER_SECRET = VALID_SECRET;
+    process.env.ORACLE_ADDRESS = oracleWallet.address;
   });
 
   afterEach(() => {
     // Restore env after each test
     process.env = { ...originalEnv, SCRAPER_SECRET: VALID_SECRET };
   });
+
+  /**
+   * Helper function to generate valid oracle signature
+   */
+  function generateSignature(auctionId: string, hammerPrice: number, nonce: number = 0): string {
+    const marketId = ethers.keccak256(ethers.toUtf8Bytes(auctionId));
+    const hammerPriceWei = ethers.parseUnits(hammerPrice.toString(), 6);
+
+    const messageHash = ethers.solidityPackedKeccak256(
+      ['bytes32', 'uint256', 'uint256'],
+      [marketId, hammerPriceWei, nonce]
+    );
+
+    return oracleWallet.signMessageSync(ethers.getBytes(messageHash));
+  }
 
   describe('GET /api/webhooks/scraper', () => {
     it('should return health check response', async () => {
@@ -46,14 +67,13 @@ describe('Scraper Webhook API', () => {
 
   describe('POST /api/webhooks/scraper', () => {
     describe('Authentication', () => {
-      it('should reject requests without signature header', async () => {
+      it('should reject requests without webhook secret header', async () => {
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           body: JSON.stringify({
-            auctionId: 'bat-12345',
+            auction_id: 'bat-12345',
             hammerPrice: 100000,
-            source: 'verified',
-            timestamp: Date.now(),
+            signature: generateSignature('bat-12345', 100000),
           }),
         });
 
@@ -109,6 +129,179 @@ describe('Scraper Webhook API', () => {
       });
     });
 
+    describe('Oracle Signature Verification', () => {
+      it('should reject requests without oracle signature', async () => {
+        const market = await PolygonMarketModel.create({
+          auctionId: 'bat-sig-test-1',
+          contractAddress: '0x123',
+          yesTokenId: 'yes-1',
+          noTokenId: 'no-1',
+          status: 'ACTIVE',
+          predictedPrice: 100000,
+        });
+
+        const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
+          method: 'POST',
+          headers: {
+            'X-Scraper-Secret': VALID_SECRET,
+          },
+          body: JSON.stringify({
+            auction_id: 'bat-sig-test-1',
+            hammerPrice: 125000,
+            // No signature field
+          }),
+        });
+
+        const response = await POST(req);
+
+        expect(response.status).toBe(400);
+        const data = await response.json();
+        expect(data.error).toBe('Missing oracle signature');
+      });
+
+      it('should accept valid oracle signature', async () => {
+        const market = await PolygonMarketModel.create({
+          auctionId: 'bat-sig-test-2',
+          contractAddress: '0x123',
+          yesTokenId: 'yes-1',
+          noTokenId: 'no-1',
+          status: 'ACTIVE',
+          predictedPrice: 100000,
+        });
+
+        const hammerPrice = 125000;
+        const signature = generateSignature('bat-sig-test-2', hammerPrice);
+
+        const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
+          method: 'POST',
+          headers: {
+            'X-Scraper-Secret': VALID_SECRET,
+          },
+          body: JSON.stringify({
+            auction_id: 'bat-sig-test-2',
+            hammerPrice,
+            signature,
+          }),
+        });
+
+        const response = await POST(req);
+
+        expect(response.status).toBe(200);
+        const data = await response.json();
+        expect(data.success).toBe(true);
+        expect(data.winningOutcome).toBe('YES');
+      });
+
+      it('should reject signature from non-oracle address', async () => {
+        const market = await PolygonMarketModel.create({
+          auctionId: 'bat-sig-test-3',
+          contractAddress: '0x123',
+          yesTokenId: 'yes-1',
+          noTokenId: 'no-1',
+          status: 'ACTIVE',
+          predictedPrice: 100000,
+        });
+
+        const hammerPrice = 125000;
+        const marketId = ethers.keccak256(ethers.toUtf8Bytes('bat-sig-test-3'));
+        const hammerPriceWei = ethers.parseUnits(hammerPrice.toString(), 6);
+
+        // Attacker signs the message
+        const messageHash = ethers.solidityPackedKeccak256(
+          ['bytes32', 'uint256', 'uint256'],
+          [marketId, hammerPriceWei, 0]
+        );
+        const attackerSignature = attackerWallet.signMessageSync(ethers.getBytes(messageHash));
+
+        const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
+          method: 'POST',
+          headers: {
+            'X-Scraper-Secret': VALID_SECRET,
+          },
+          body: JSON.stringify({
+            auction_id: 'bat-sig-test-3',
+            hammerPrice,
+            signature: attackerSignature,
+          }),
+        });
+
+        const response = await POST(req);
+
+        expect(response.status).toBe(401);
+        const data = await response.json();
+        expect(data.error).toBe('Invalid oracle signature');
+      });
+
+      it('should reject signature with wrong message data', async () => {
+        const market = await PolygonMarketModel.create({
+          auctionId: 'bat-sig-test-4',
+          contractAddress: '0x123',
+          yesTokenId: 'yes-1',
+          noTokenId: 'no-1',
+          status: 'ACTIVE',
+          predictedPrice: 100000,
+        });
+
+        // Oracle signs for $125k
+        const correctPrice = 125000;
+        const signature = generateSignature('bat-sig-test-4', correctPrice);
+
+        // Attacker tries to submit $1 with oracle's signature for $125k
+        const fakePrice = 1;
+
+        const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
+          method: 'POST',
+          headers: {
+            'X-Scraper-Secret': VALID_SECRET,
+          },
+          body: JSON.stringify({
+            auction_id: 'bat-sig-test-4',
+            hammerPrice: fakePrice,
+            signature, // Signature is for correctPrice, not fakePrice
+          }),
+        });
+
+        const response = await POST(req);
+
+        expect(response.status).toBe(401);
+        const data = await response.json();
+        expect(data.error).toBe('Invalid oracle signature');
+      });
+
+      it('should return 500 if ORACLE_ADDRESS not configured', async () => {
+        delete process.env.ORACLE_ADDRESS;
+
+        const market = await PolygonMarketModel.create({
+          auctionId: 'bat-sig-test-5',
+          contractAddress: '0x123',
+          yesTokenId: 'yes-1',
+          noTokenId: 'no-1',
+          status: 'ACTIVE',
+          predictedPrice: 100000,
+        });
+
+        const signature = generateSignature('bat-sig-test-5', 125000);
+
+        const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
+          method: 'POST',
+          headers: {
+            'X-Scraper-Secret': VALID_SECRET,
+          },
+          body: JSON.stringify({
+            auction_id: 'bat-sig-test-5',
+            hammerPrice: 125000,
+            signature,
+          }),
+        });
+
+        const response = await POST(req);
+
+        expect(response.status).toBe(500);
+        const data = await response.json();
+        expect(data.error).toBe('Server configuration error');
+      });
+    });
+
     describe('Validation', () => {
       it('should reject invalid hammer price (zero)', async () => {
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
@@ -153,16 +346,18 @@ describe('Scraper Webhook API', () => {
       });
 
       it('should return 404 if market not found', async () => {
+        const hammerPrice = 100000;
+        const signature = generateSignature('nonexistent-auction', hammerPrice);
+
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           headers: {
             'X-Scraper-Secret': VALID_SECRET,
           },
           body: JSON.stringify({
-            auctionId: 'nonexistent-auction',
-            hammerPrice: 100000,
-            source: 'verified',
-            timestamp: Date.now(),
+            auction_id: 'nonexistent-auction',
+            hammerPrice,
+            signature,
           }),
         });
 
@@ -187,16 +382,18 @@ describe('Scraper Webhook API', () => {
           resolvedAt: new Date(),
         });
 
+        const hammerPrice = 130000;
+        const signature = generateSignature('bat-12345', hammerPrice);
+
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           headers: {
             'X-Scraper-Secret': VALID_SECRET,
           },
           body: JSON.stringify({
-            auctionId: 'bat-12345',
-            hammerPrice: 130000,
-            source: 'verified',
-            timestamp: Date.now(),
+            auction_id: 'bat-12345',
+            hammerPrice,
+            signature,
           }),
         });
 
@@ -226,6 +423,8 @@ describe('Scraper Webhook API', () => {
         });
 
         const hammerPrice = 125000;
+        const signature = generateSignature('bat-12345-porsche', hammerPrice);
+
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           headers: {
@@ -234,15 +433,9 @@ describe('Scraper Webhook API', () => {
             'X-Oracle-Version': '1.0',
           },
           body: JSON.stringify({
-            auctionId: 'bat-12345-porsche',
+            auction_id: 'bat-12345-porsche',
             hammerPrice,
-            source: 'verified',
-            timestamp: Date.now(),
-            metadata: {
-              bids: 45,
-              comments: 123,
-              views: 5678,
-            },
+            signature,
           }),
         });
 
@@ -278,16 +471,18 @@ describe('Scraper Webhook API', () => {
           predictedPrice: 50000,
         });
 
+        const hammerPrice = 200000;
+        const signature = generateSignature('bat-99999-ferrari', hammerPrice);
+
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           headers: {
             'X-Scraper-Secret': VALID_SECRET,
           },
           body: JSON.stringify({
-            auctionId: 'bat-99999-ferrari',
-            hammerPrice: 200000, // 4x predicted
-            source: 'verified',
-            timestamp: Date.now(),
+            auction_id: 'bat-99999-ferrari',
+            hammerPrice, // 4x predicted
+            signature,
           }),
         });
 
@@ -313,16 +508,18 @@ describe('Scraper Webhook API', () => {
           predictedPrice: 75000,
         });
 
+        const hammerPrice = 75000;
+        const signature = generateSignature('bat-55555-corvette', hammerPrice);
+
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           headers: {
             'X-Scraper-Secret': VALID_SECRET,
           },
           body: JSON.stringify({
-            auctionId: 'bat-55555-corvette',
-            hammerPrice: 75000, // Exactly equal
-            source: 'verified',
-            timestamp: Date.now(),
+            auction_id: 'bat-55555-corvette',
+            hammerPrice, // Exactly equal
+            signature,
           }),
         });
 
@@ -350,16 +547,18 @@ describe('Scraper Webhook API', () => {
           predictedPrice: 150000,
         });
 
+        const hammerPrice = 120000;
+        const signature = generateSignature('bat-77777-mustang', hammerPrice);
+
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           headers: {
             'X-Scraper-Secret': VALID_SECRET,
           },
           body: JSON.stringify({
-            auctionId: 'bat-77777-mustang',
-            hammerPrice: 120000, // Below predicted
-            source: 'verified',
-            timestamp: Date.now(),
+            auction_id: 'bat-77777-mustang',
+            hammerPrice, // Below predicted
+            signature,
           }),
         });
 
@@ -383,16 +582,18 @@ describe('Scraper Webhook API', () => {
           predictedPrice: 200000,
         });
 
+        const hammerPrice = 50000;
+        const signature = generateSignature('bat-88888-camaro', hammerPrice);
+
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           headers: {
             'X-Scraper-Secret': VALID_SECRET,
           },
           body: JSON.stringify({
-            auctionId: 'bat-88888-camaro',
-            hammerPrice: 50000, // Much lower
-            source: 'verified',
-            timestamp: Date.now(),
+            auction_id: 'bat-88888-camaro',
+            hammerPrice, // Much lower
+            signature,
           }),
         });
 
@@ -415,16 +616,18 @@ describe('Scraper Webhook API', () => {
           predictedPrice: 80000,
         });
 
+        const hammerPrice = 90000;
+        const signature = generateSignature('bat-11111-pending', hammerPrice);
+
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           headers: {
             'X-Scraper-Secret': VALID_SECRET,
           },
           body: JSON.stringify({
-            auctionId: 'bat-11111-pending',
-            hammerPrice: 90000,
-            source: 'verified',
-            timestamp: Date.now(),
+            auction_id: 'bat-11111-pending',
+            hammerPrice,
+            signature,
           }),
         });
 
@@ -447,16 +650,18 @@ describe('Scraper Webhook API', () => {
           predictedPrice: 1000,
         });
 
+        const hammerPrice = 1;
+        const signature = generateSignature('bat-22222-cheap', hammerPrice);
+
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           headers: {
             'X-Scraper-Secret': VALID_SECRET,
           },
           body: JSON.stringify({
-            auctionId: 'bat-22222-cheap',
-            hammerPrice: 1, // Very small but valid
-            source: 'verified',
-            timestamp: Date.now(),
+            auction_id: 'bat-22222-cheap',
+            hammerPrice, // Very small but valid
+            signature,
           }),
         });
 
@@ -478,16 +683,18 @@ describe('Scraper Webhook API', () => {
           predictedPrice: 1000000,
         });
 
+        const hammerPrice = 25000000;
+        const signature = generateSignature('bat-33333-expensive', hammerPrice);
+
         const req = new NextRequest('http://localhost:3000/api/webhooks/scraper', {
           method: 'POST',
           headers: {
             'X-Scraper-Secret': VALID_SECRET,
           },
           body: JSON.stringify({
-            auctionId: 'bat-33333-expensive',
-            hammerPrice: 25000000, // $25M
-            source: 'verified',
-            timestamp: Date.now(),
+            auction_id: 'bat-33333-expensive',
+            hammerPrice, // $25M
+            signature,
           }),
         });
 
