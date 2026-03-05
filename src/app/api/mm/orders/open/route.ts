@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateMM, checkMMRateLimit } from '@/app/middleware/mmAuth';
 import PolygonOrder from '@/app/models/PolygonOrder.model';

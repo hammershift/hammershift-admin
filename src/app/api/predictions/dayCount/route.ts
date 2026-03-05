@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import connectToDB from "@/app/lib/mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import Predictions from "@/app/models/prediction.model";
