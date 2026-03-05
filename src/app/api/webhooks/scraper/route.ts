@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import PolygonMarketModel from '@/app/models/PolygonMarket.model';
 import connectToDB from '@/app/lib/mongoose';
 import { ethers } from 'ethers';
@@ -84,7 +85,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (webhookSignature !== secret) {
+    // Constant-time comparison to prevent timing attacks
+    const sigBuf = Buffer.from(webhookSignature);
+    const secretBuf = Buffer.from(secret);
+    const safeLength = Math.max(sigBuf.length, secretBuf.length);
+    const paddedSig = Buffer.concat([sigBuf, Buffer.alloc(safeLength - sigBuf.length)]);
+    const paddedSecret = Buffer.concat([secretBuf, Buffer.alloc(safeLength - secretBuf.length)]);
+    const signatureValid =
+      sigBuf.length === secretBuf.length &&
+      crypto.timingSafeEqual(paddedSig, paddedSecret);
+
+    if (!signatureValid) {
       console.warn('[Scraper Webhook] Invalid webhook signature');
       return NextResponse.json(
         { error: 'Invalid webhook signature' },

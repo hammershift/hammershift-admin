@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/options";
 import connectToDB from "@/app/lib/mongoose";
 import { app } from "@/app/lib/firebase";
 import { getAI, getGenerativeModel, VertexAIBackend } from "firebase/ai";
@@ -9,6 +11,11 @@ import Tournaments, { Tournament } from "@/app/models/tournament.model";
 import GroundingMetadata from "@/app/models/grounding_metadata.model";
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     await connectToDB();
     const body = await req.json();

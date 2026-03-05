@@ -2,6 +2,8 @@ import connectToDB from "@/app/lib/mongoose";
 import Predictions from "@/app/models/prediction.model";
 import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/options";
 export async function GET(req: NextRequest) {
   try {
     await connectToDB();
@@ -41,6 +43,11 @@ export async function GET(req: NextRequest) {
   }
 }
 export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     await connectToDB();
 

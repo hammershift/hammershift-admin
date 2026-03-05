@@ -106,7 +106,7 @@ export async function PUT(
     }
 
     const auctionMap = new Map(
-      auctions.map((auction) => [auction._id, auction])
+      auctions.map((auction) => [auction._id.toString(), auction])
     );
 
     // Check scoring version and route accordingly
@@ -114,7 +114,7 @@ export async function PUT(
       // ============ V2 SCORING PATH ============
       // Score all predictions using v2 engine
       for (const auctionId of tournament.auction_ids) {
-        const auction = auctionMap.get(auctionId);
+        const auction = auctionMap.get(auctionId.toString());
         if (!auction || auction.attributes[14].value === 3) continue; // Skip unsuccessful
 
         const hammerPrice = auction.attributes[0].value;
@@ -220,7 +220,7 @@ export async function PUT(
 
       // check how many predictions are below the final price
       for (let prediction of userPredictions) {
-        const auction = auctionMap.get(prediction.auction_id);
+        const auction = auctionMap.get(prediction.auction_id.toString());
         if (!auction) {
           return NextResponse.json(
             {
