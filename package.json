@@ -19,10 +19,12 @@
     "db:verify-migration": "tsx scripts/verify-ladder-tier-migration.ts",
     "db:check-active": "tsx scripts/check-all-active.ts",
     "db:migrate": "tsx scripts/migrate-data-models.ts",
-    "db:health": "tsx scripts/db-health-check.ts"
+    "db:health": "tsx scripts/db-health-check.ts",
+    "db:seed-markets": "tsx scripts/seed-markets.ts",
+    "db:seed-markets:dry-run": "tsx scripts/seed-markets.ts --dry-run"
   },
   "dependencies": {
-    "@auth/mongodb-adapter": "^2.0.9",
+    "@auth/mongodb-adapter": "^3.11.1",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.19",
@@ -46,7 +48,7 @@
     "mongoose": "^8.0.3",
     "mongoose-aggregate-paginate-v2": "^1.1.4",
     "mongoose-paginate-v2": "^1.9.0",
-    "next": "14.0.3",
+    "next": "^14.2.35",
     "next-auth": "^4.24.5",
     "obscenity": "^0.2.1",
     "otp-generator": "^4.0.1",
@@ -59,7 +61,11 @@
     "resend": "^6.9.2",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
+    "tar": "^7.5.10",
     "zod": "^3.22.4"
+  },
+  "overrides": {
+    "tar": "^7.5.10"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

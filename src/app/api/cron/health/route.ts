@@ -43,6 +43,12 @@ export async function GET() {
           schedule: '0 */6 * * *',
           description: 'Every 6 hours - Send reminders for auctions ending soon',
         },
+        {
+          name: 'auto-markets',
+          path: '/api/cron/auto-markets',
+          schedule: '0 */4 * * *',
+          description: 'Every 4 hours - Auto-generate prediction markets from trending auctions',
+        },
       ],
       dependencies: {
         required: [

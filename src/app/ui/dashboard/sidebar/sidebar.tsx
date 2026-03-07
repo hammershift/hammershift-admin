@@ -21,6 +21,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import velocityMarketsLogo from "../../../../../public/images/velocity-markets-logo.png";
 import userImg from "../../../../../public/images/user.svg";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
 
 const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
   const { data } = useSession();
@@ -50,6 +51,11 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           title: "Tournaments",
           path: "/dashboard/tournaments",
           icon: <EmojiEventsIcon />,
+        },
+        {
+          title: "Markets",
+          path: "/dashboard/markets",
+          icon: <ShowChartIcon />,
         },
         { title: "Users", path: "/dashboard/users", icon: <PersonIcon /> },
         {
