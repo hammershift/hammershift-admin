@@ -21,7 +21,8 @@
     "db:migrate": "tsx scripts/migrate-data-models.ts",
     "db:health": "tsx scripts/db-health-check.ts",
     "db:seed-markets": "tsx scripts/seed-markets.ts",
-    "db:seed-markets:dry-run": "tsx scripts/seed-markets.ts --dry-run"
+    "db:seed-markets:dry-run": "tsx scripts/seed-markets.ts --dry-run",
+    "db:seed-markets:force": "tsx scripts/seed-markets.ts --force"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.1",

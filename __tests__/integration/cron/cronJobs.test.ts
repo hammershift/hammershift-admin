@@ -53,15 +53,18 @@ describe('Cron Jobs Integration Tests', () => {
   });
 
   describe('Health Check', () => {
-    it('should return health status without authentication', async () => {
+    it('should return health status with cron authentication', async () => {
+      const { NextRequest } = await import('next/server');
       const { GET } = await import('@/app/api/cron/health/route');
 
-      const response = await GET();
+      // CRON_SECRET not set → verifyCronRequest returns true (dev mode)
+      const req = new NextRequest('http://localhost:3000/api/cron/health');
+      const response = await GET(req);
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.status).toBe('healthy');
-      expect(data.cron_jobs).toHaveLength(5);
+      expect(data.cron_jobs).toHaveLength(6);
       expect(data.cron_jobs[0].name).toBe('leaderboard-refresh');
     });
   });

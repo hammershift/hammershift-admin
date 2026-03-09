@@ -1,12 +1,16 @@
 import { Role } from "@/app/lib/interfaces";
 import connectToDB from "@/app/lib/mongoose";
 import Users, { User } from "@/app/models/user.model";
+import { requireAuth } from "@/app/lib/authMiddleware";
 import { AggregatePaginateModel, PaginateModel } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  const authResult = await requireAuth(["owner", "admin", "moderator"]);
+  if ("error" in authResult) return authResult.error;
+
   try {
     await connectToDB();
     const offset = Number(req.nextUrl.searchParams.get("offset")) || 0;

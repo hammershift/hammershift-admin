@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
+import { requireAuth } from "@/app/lib/authMiddleware";
 import { ObjectId } from "mongodb";
 import connectToDB from "@/app/lib/mongoose";
 import Users from "@/app/models/user.model";
@@ -11,6 +12,9 @@ import { Role } from "@/app/lib/interfaces";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  const authResult = await requireAuth(["owner", "admin", "moderator"]);
+  if ("error" in authResult) return authResult.error;
+
   try {
     await connectToDB();
     const agent_id = req.nextUrl.searchParams.get("agent_id");

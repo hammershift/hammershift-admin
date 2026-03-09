@@ -1,7 +1,8 @@
 import clientPromise from "@/app/lib/mongoDB";
 import { NextRequest, NextResponse } from "next/server";
+import { withRateLimit, RateLimitPresets } from "@/app/lib/rateLimiter";
 
-export async function POST(req: NextRequest) {
+export const POST = withRateLimit(RateLimitPresets.AUTH, async (req: NextRequest) => {
   try {
     const { otp } = await req.json();
 
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     // check OTP code record in the collection
     const otpCodeRecord = await db
-      .collection("password_reset_tokens")
+      .collection("admin_password_reset_tokens")
       .findOne({ otp });
     if (!otpCodeRecord) {
       return NextResponse.json(
@@ -28,6 +29,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // invalidate OTP so it cannot be reused
+    await db.collection("admin_password_reset_tokens").deleteOne({ otp });
+
     // if OTP code is valid
     return NextResponse.json(
       { message: "OTP code verified successfully" },
@@ -40,4 +44,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

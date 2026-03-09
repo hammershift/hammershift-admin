@@ -6,6 +6,7 @@ import connectToDB from "@/app/lib/mongoose";
 import Users from "@/app/models/user.model";
 import Transaction from "@/app/models/transaction.model";
 import { Role } from "@/app/lib/interfaces";
+import { createAuditLog, AuditActions, AuditResources } from "@/app/lib/auditLogger";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,7 @@ export async function PUT(req: NextRequest) {
   if ("error" in authResult) {
     return authResult.error;
   }
+  const { session: putSession } = authResult;
 
   try {
     await connectToDB();
@@ -154,6 +156,18 @@ export async function PUT(req: NextRequest) {
         return updatedUser;
       });
 
+      await createAuditLog({
+        userId: putSession.user.id,
+        username: putSession.user.username,
+        userRole: putSession.user.role,
+        action: AuditActions.USER_UPDATE,
+        resource: AuditResources.USER,
+        resourceId: user_id,
+        method: "PUT",
+        endpoint: "/api/users",
+        status: "success",
+      });
+
       return NextResponse.json(
         {
           message: "User updated successfully",
@@ -168,6 +182,18 @@ export async function PUT(req: NextRequest) {
         { $set: updateData },
         { new: true }
       ).select("-password");
+
+      await createAuditLog({
+        userId: putSession.user.id,
+        username: putSession.user.username,
+        userRole: putSession.user.role,
+        action: AuditActions.USER_UPDATE,
+        resource: AuditResources.USER,
+        resourceId: user_id,
+        method: "PUT",
+        endpoint: "/api/users",
+        status: "success",
+      });
 
       return NextResponse.json(
         {
@@ -193,6 +219,7 @@ export async function DELETE(req: NextRequest) {
   if ("error" in authResult) {
     return authResult.error;
   }
+  const { session: delSession } = authResult;
 
   try {
     await connectToDB();
@@ -224,6 +251,18 @@ export async function DELETE(req: NextRequest) {
 
     // Delete the user
     await Users.deleteOne({ _id: toObjectId(user_id) });
+
+    await createAuditLog({
+      userId: delSession.user.id,
+      username: delSession.user.username,
+      userRole: delSession.user.role,
+      action: AuditActions.USER_DELETE,
+      resource: AuditResources.USER,
+      resourceId: user_id,
+      method: "DELETE",
+      endpoint: "/api/users",
+      status: "success",
+    });
 
     return NextResponse.json(
       { message: "User deleted successfully" },

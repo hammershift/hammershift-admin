@@ -20,6 +20,8 @@ import PolygonMarketModel from '../src/app/models/PolygonMarket.model';
 
 const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || '';
 const DRY_RUN = process.argv.includes('--dry-run');
+// --force skips the future-deadline requirement (useful when auction data is stale in dev/test)
+const FORCE = process.argv.includes('--force');
 
 function roundToNearest500(value: number): number {
   return Math.round(value / 500) * 500;
@@ -39,20 +41,30 @@ async function seedMarkets() {
   console.log('='.repeat(48));
   if (DRY_RUN) console.log('\n[DRY RUN] No changes will be applied.\n');
 
-  console.log('Connecting to MongoDB...');
-  await mongoose.connect(MONGODB_URI);
-  console.log('Connected\n');
+  const dbName = process.env.DB_NAME || undefined;
+  console.log(`Connecting to MongoDB${dbName ? ` (db: ${dbName})` : ''}...`);
+  await mongoose.connect(MONGODB_URI, dbName ? { dbName } : {});
+  console.log('Connected to:', mongoose.connection.db!.databaseName, '\n');
 
   const now = new Date();
-  const auctions = await Auctions.find({
-    isActive: true,
-    'sort.deadline': { $gt: now },
-  })
-    .sort({ 'sort.deadline': 1 })
+  const query: any = { isActive: true };
+  if (!FORCE) {
+    query['sort.deadline'] = { $gt: now };
+  }
+
+  const auctions = await Auctions.find(query)
+    .sort({ 'sort.deadline': -1 })
     .limit(10)
     .lean() as any[];
 
-  console.log(`Found ${auctions.length} active auction(s) with future deadlines.\n`);
+  if (FORCE) {
+    console.log(`Found ${auctions.length} active auction(s) (deadline filter bypassed with --force).\n`);
+  } else {
+    console.log(`Found ${auctions.length} active auction(s) with future deadlines.\n`);
+    if (auctions.length === 0) {
+      console.log('TIP: If auction data is stale, run with --force to bypass the deadline check.\n');
+    }
+  }
 
   let created = 0;
   let skipped = 0;

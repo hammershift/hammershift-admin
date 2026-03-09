@@ -1,4 +1,3 @@
-// import connectToDB from "@/lib/mongoose";
 import Admins from "@/app/models/admin.model";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
@@ -7,13 +6,14 @@ import { authOptions } from "../auth/[...nextauth]/options";
 import { ObjectId } from "mongodb";
 import connectToDB from "@/app/lib/mongoose";
 import { Types } from "mongoose";
+import { createAuditLog, AuditActions, AuditResources } from "@/app/lib/auditLogger";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   // Require admin authorization
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["owner", "admin", "moderator"].includes(session.user.role)) {
+  if (!session?.user || !["owner", "admin"].includes(session.user.role)) {
     return NextResponse.json(
       { message: "Unauthorized. Admin access required." },
       { status: 401 }
@@ -91,10 +91,18 @@ export async function POST(req: NextRequest) {
     const newAdmin = new Admins(newAdminData);
     await newAdmin.save();
 
-    console.log("Received email:", email);
-    console.log("Received username:", username);
-    console.log("Received role:", role);
-    console.log("Created Admin:", newAdmin);
+    await createAuditLog({
+      userId: session.user._id ?? session.user.id,
+      username: session.user.username,
+      userRole: session.user.role,
+      action: AuditActions.ADMIN_CREATE,
+      resource: AuditResources.ADMIN,
+      resourceId: newAdminData._id.toString(),
+      method: "POST",
+      endpoint: "/api/admins",
+      status: "success",
+    });
+
     return NextResponse.json({ message: "Admin account created" });
   } catch (error) {
     return NextResponse.json({
@@ -121,7 +129,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     await connectToDB();
-    const { _id, first_name, last_name, email, username, password, role } =
+    const { _id, first_name, last_name, email, username, password, currentPassword, role } =
       await req.json();
 
     if (!_id) {
@@ -163,13 +171,43 @@ export async function PUT(req: NextRequest) {
       role,
     };
 
-    if (password || password != "") {
+    if (password && password !== "") {
+      const sessionUserId = session.user._id ?? session.user.id;
+      const isSelfUpdate = sessionUserId?.toString() === _id?.toString();
+      // Owners can reset any admin's password; self-service requires current password
+      if (isSelfUpdate) {
+        if (!currentPassword) {
+          return NextResponse.json(
+            { message: "Current password is required to change your own password" },
+            { status: 400 }
+          );
+        }
+        const passwordValid = await bcrypt.compare(currentPassword, existingAdmin.password);
+        if (!passwordValid) {
+          return NextResponse.json(
+            { message: "Current password is incorrect" },
+            { status: 401 }
+          );
+        }
+      }
       updateData.password = await bcrypt.hash(password, 10);
     }
 
     await Admins.updateOne({ _id }, { $set: updateData });
 
-    console.log("Updated Admin ID:", _id);
+    await createAuditLog({
+      userId: session.user._id ?? session.user.id,
+      username: session.user.username,
+      userRole: session.user.role,
+      action: AuditActions.ADMIN_UPDATE,
+      resource: AuditResources.ADMIN,
+      resourceId: _id,
+      method: "PUT",
+      endpoint: "/api/admins",
+      metadata: { updatedFields: Object.keys(updateData).filter(k => k !== 'password') },
+      status: "success",
+    });
+
     return NextResponse.json({ message: "Admin account updated" });
   } catch (error) {
     console.error("Error updating admin:", error);
@@ -211,7 +249,8 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ message: "Admin not found" }, { status: 404 });
     }
 
-    if (session.user._id === _id) {
+    const sessionUserId = session.user._id ?? session.user.id;
+    if (sessionUserId === _id) {
       return NextResponse.json(
         { message: "You cannot delete your own account." },
         { status: 403 }
@@ -219,6 +258,18 @@ export async function DELETE(req: NextRequest) {
     }
 
     await Admins.deleteOne({ _id });
+
+    await createAuditLog({
+      userId: sessionUserId,
+      username: session.user.username,
+      userRole: session.user.role,
+      action: AuditActions.ADMIN_DELETE,
+      resource: AuditResources.ADMIN,
+      resourceId: _id,
+      method: "DELETE",
+      endpoint: "/api/admins",
+      status: "success",
+    });
 
     return NextResponse.json(
       { message: "Admin account deleted" },

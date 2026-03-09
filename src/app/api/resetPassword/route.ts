@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     // verify OTP
     const otpRecord = await db
-      .collection("password_reset_tokens")
+      .collection("admin_password_reset_tokens")
       .findOne({ email, otp });
     if (!otpRecord || new Date() > new Date(otpRecord.expires)) {
       return NextResponse.json(
@@ -22,12 +22,17 @@ export async function POST(req: NextRequest) {
     }
 
     // hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // update password in admins collection
     await db
       .collection("admins")
       .updateOne({ email }, { $set: { password: hashedPassword } });
+
+    // invalidate the OTP
+    await db
+      .collection("admin_password_reset_tokens")
+      .deleteOne({ email, otp });
 
     return NextResponse.json(
       { message: "Password reset successfully." },

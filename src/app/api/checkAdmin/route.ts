@@ -1,9 +1,12 @@
-import clientPromise from "@/app/lib/mongoDB";
 import connectToDB from "@/app/lib/mongoose";
 import Admins from "@/app/models/admin.model";
+import { requireAuth } from "@/app/lib/authMiddleware";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  const authResult = await requireAuth(["owner", "admin", "moderator"]);
+  if ("error" in authResult) return authResult.error;
+
   const { username } = await req.json();
 
   try {

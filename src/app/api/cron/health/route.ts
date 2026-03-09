@@ -1,12 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { withCronAuth } from '@/app/lib/cronAuth';
 
 /**
  * Health Check Endpoint for Cron Jobs
  *
  * Returns the status and schedule of all configured cron jobs.
- * Does not require authentication - this is a public health check.
+ * Requires cron authentication via CRON_SECRET.
  */
-export async function GET() {
+export const GET = withCronAuth(async (_req: NextRequest) => {
   return NextResponse.json(
     {
       status: 'healthy',
@@ -66,4 +67,4 @@ export async function GET() {
     },
     { status: 200 }
   );
-}
+});

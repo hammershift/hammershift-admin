@@ -7,10 +7,19 @@ import {
   createTestAuction,
   createTestPrediction,
   createTestTournament,
+  createMockSession,
 } from "../../helpers/testFixtures";
 import Predictions from "@/app/models/prediction.model";
 import { Role } from "@/app/lib/interfaces";
 import { Types } from "mongoose";
+import { getServerSession } from "next-auth";
+
+// Mock next-auth so getServerSession doesn't call Next.js headers() in test environment
+jest.mock("next-auth", () => ({
+  getServerSession: jest.fn(),
+}));
+
+const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
 
 describe("Predictions API", () => {
   beforeAll(async () => {
@@ -288,6 +297,10 @@ describe("Predictions API", () => {
   });
 
   describe("DELETE /api/predictions", () => {
+    beforeEach(() => {
+      mockGetServerSession.mockResolvedValue(createMockSession("admin") as any);
+    });
+
     it("should delete prediction by ID without authentication", async () => {
       const user = await createTestUser();
       const auction = await createTestAuction();

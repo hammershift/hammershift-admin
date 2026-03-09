@@ -1,8 +1,9 @@
 import clientPromise from "@/app/lib/mongoDB";
 import { NextRequest, NextResponse } from "next/server";
-import otpGenerator from "otp-generator";
+import { randomInt } from "crypto";
+import { withRateLimit, RateLimitPresets } from "@/app/lib/rateLimiter";
 
-export async function POST(req: NextRequest) {
+export const POST = withRateLimit(RateLimitPresets.AUTH, async (req: NextRequest) => {
   try {
     const data = await req.json();
     const { email } = data;
@@ -21,17 +22,12 @@ export async function POST(req: NextRequest) {
     }
 
     // generate a new OTP
-    const newOtp = otpGenerator.generate(6, {
-      digits: true,
-      specialChars: false,
-      upperCaseAlphabets: false,
-      lowerCaseAlphabets: false,
-    });
+    const newOtp = String(randomInt(100000, 999999));
 
-    const newExpirationDate = new Date(new Date().getTime() + 1 * 60000);
+    const newExpirationDate = new Date(new Date().getTime() + 10 * 60 * 1000);
 
     // update the OTP in the db
-    await db.collection("password_reset_tokens").updateOne(
+    await db.collection("admin_password_reset_tokens").updateOne(
       { userId: user._id },
       {
         $set: { otp: newOtp, expires: newExpirationDate, email: user.email },
@@ -52,4 +48,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

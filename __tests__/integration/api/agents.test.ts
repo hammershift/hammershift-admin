@@ -35,6 +35,10 @@ describe("Agents API", () => {
   });
 
   describe("GET /api/agents", () => {
+    beforeEach(() => {
+      mockGetServerSession.mockResolvedValue(createMockSession("moderator"));
+    });
+
     it("should return all agents without authentication", async () => {
       const agent1 = await createTestAgent({ username: "agent1" });
       const agent2 = await createTestAgent({ username: "agent2", email: "agent2@test.com" });
