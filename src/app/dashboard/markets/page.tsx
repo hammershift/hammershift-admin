@@ -35,7 +35,7 @@ import {
 } from "@/app/ui/components/select";
 import { Textarea } from "@/app/ui/components/textarea";
 import { formatDate } from "@/app/helpers/utils";
-import { ExternalLink, Plus, TrendingUp } from "lucide-react";
+import { ExternalLink, Pencil, Plus, TrendingUp } from "lucide-react";
 
 interface MarketRow {
   _id: string;
@@ -45,6 +45,8 @@ interface MarketRow {
   auctionDeadline: string | null;
   status: "PENDING" | "ACTIVE" | "RESOLVED" | "DISPUTED";
   predictedPrice: number;
+  question?: string;
+  closesAt?: string;
   totalVolume: number;
   totalLiquidity: number;
   contractAddress: string;
@@ -90,6 +92,12 @@ export default function MarketsPage() {
   const [statusUpdating, setStatusUpdating] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
 
+  // Edit dialog state
+  const [editMarket, setEditMarket] = useState<MarketRow | null>(null);
+  const [editForm, setEditForm] = useState({ predictedPrice: "", question: "", closesAt: "" });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
   const fetchMarkets = async () => {
     try {
       const res = await fetch("/api/admin/polygon-markets");
@@ -130,12 +138,10 @@ export default function MarketsPage() {
     const predictedPrice = auction.avg_predicted_price || auction.sort?.price || 0;
     const autoQuestion = `Will the ${auction.title} sell for more than ${USDollar.format(predictedPrice)}?`.slice(0, 200);
 
-    // Set endDate to 2h before auction deadline
     let endDate = "";
     if (auction.sort?.deadline) {
       const deadline = new Date(auction.sort.deadline);
       const endDateObj = new Date(deadline.getTime() - 2 * 60 * 60 * 1000);
-      // datetime-local format: YYYY-MM-DDTHH:mm
       endDate = endDateObj.toISOString().slice(0, 16);
     }
 
@@ -188,6 +194,78 @@ export default function MarketsPage() {
       // non-fatal
     } finally {
       setStatusUpdating((prev) => ({ ...prev, [marketId]: false }));
+    }
+  };
+
+  const openEditDialog = (market: MarketRow) => {
+    setEditMarket(market);
+    setEditForm({
+      predictedPrice: String(market.predictedPrice || ""),
+      question: market.question || "",
+      closesAt: market.closesAt
+        ? new Date(market.closesAt).toISOString().slice(0, 16)
+        : market.auctionDeadline
+          ? new Date(market.auctionDeadline).toISOString().slice(0, 16)
+          : "",
+    });
+    setEditError(null);
+  };
+
+  const handleEditSave = async () => {
+    if (!editMarket) return;
+    setEditLoading(true);
+    setEditError(null);
+
+    const body: Record<string, unknown> = {};
+    const newPrice = parseFloat(editForm.predictedPrice);
+    if (!isNaN(newPrice) && newPrice > 0 && newPrice !== editMarket.predictedPrice) {
+      body.predictedPrice = newPrice;
+    }
+    if (editForm.question && editForm.question !== editMarket.question) {
+      body.question = editForm.question;
+    }
+    if (editForm.closesAt) {
+      const newDate = new Date(editForm.closesAt).toISOString();
+      if (newDate !== editMarket.closesAt) {
+        body.closesAt = newDate;
+      }
+    }
+
+    if (Object.keys(body).length === 0) {
+      setEditMarket(null);
+      setEditLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/polygon-markets/${editMarket._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setEditError(data.error || "Failed to update market");
+        return;
+      }
+      // Update local state
+      setMarkets((prev) =>
+        prev.map((m) =>
+          m._id === editMarket._id
+            ? {
+                ...m,
+                predictedPrice: data.market.predictedPrice ?? m.predictedPrice,
+                question: data.market.question ?? m.question,
+                closesAt: data.market.closesAt ?? m.closesAt,
+              }
+            : m
+        )
+      );
+      setEditMarket(null);
+    } catch {
+      setEditError("Network error");
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -276,21 +354,26 @@ export default function MarketsPage() {
                   <TableRow key={market._id}>
                     <TableCell className="max-w-[220px]">
                       <div className="line-clamp-2 font-medium">{market.auctionTitle}</div>
-                      {market.auctionPageUrl && (
-                        <a
-                          href={market.auctionPageUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-1 flex items-center gap-1 text-xs text-[#F2CA16] hover:underline"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          BaT
-                        </a>
-                      )}
-                      {market.autoGenerated && (
-                        <span className="mt-1 inline-block rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-300">
-                          auto
-                        </span>
+                      <div className="mt-1 flex items-center gap-2">
+                        {market.auctionPageUrl && (
+                          <a
+                            href={market.auctionPageUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-xs text-[#F2CA16] hover:underline"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            BaT
+                          </a>
+                        )}
+                        {market.autoGenerated && (
+                          <span className="inline-block rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-300">
+                            auto
+                          </span>
+                        )}
+                      </div>
+                      {market.question && (
+                        <div className="mt-1 text-xs text-gray-500 line-clamp-1">{market.question}</div>
                       )}
                     </TableCell>
                     <TableCell>
@@ -311,24 +394,35 @@ export default function MarketsPage() {
                       {market.createdAt ? formatDate(new Date(market.createdAt)) : "—"}
                     </TableCell>
                     <TableCell>
-                      {statusUpdating[market._id] ? (
-                        <BeatLoader size={6} color="#F2CA16" />
-                      ) : (
-                        <Select
-                          value={market.status}
-                          onValueChange={(val) => handleStatusChange(market._id, val)}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditDialog(market)}
+                          className="h-8 w-8 p-0 text-gray-400 hover:text-[#F2CA16]"
+                          title="Edit price, question, end date"
                         >
-                          <SelectTrigger className="w-32 bg-[#1E2A36]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="PENDING">PENDING</SelectItem>
-                            <SelectItem value="ACTIVE">ACTIVE</SelectItem>
-                            <SelectItem value="RESOLVED">RESOLVED</SelectItem>
-                            <SelectItem value="DISPUTED">DISPUTED</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        {statusUpdating[market._id] ? (
+                          <BeatLoader size={6} color="#F2CA16" />
+                        ) : (
+                          <Select
+                            value={market.status}
+                            onValueChange={(val) => handleStatusChange(market._id, val)}
+                          >
+                            <SelectTrigger className="w-32 bg-[#1E2A36]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="PENDING">PENDING</SelectItem>
+                              <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                              <SelectItem value="RESOLVED">RESOLVED</SelectItem>
+                              <SelectItem value="DISPUTED">DISPUTED</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -424,6 +518,94 @@ export default function MarketsPage() {
               className="bg-[#F2CA16] text-black hover:bg-[#F2CA16]/90"
             >
               {createLoading ? <BeatLoader size={8} color="black" /> : "Create Market"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Market Dialog */}
+      <Dialog open={!!editMarket} onOpenChange={(open) => !open && setEditMarket(null)}>
+        <DialogContent className="bg-[#13202D] sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Market</DialogTitle>
+          </DialogHeader>
+
+          {editMarket && (
+            <div className="space-y-4">
+              <div className="rounded bg-[#1E2A36] p-3">
+                <div className="text-sm font-medium">{editMarket.auctionTitle}</div>
+                <div className="mt-1 text-xs text-gray-400">ID: {editMarket._id}</div>
+              </div>
+
+              {editError && (
+                <div className="rounded border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+                  {editError}
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <Label>Predicted Price ($)</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  step={100}
+                  value={editForm.predictedPrice}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEditForm((prev) => ({ ...prev, predictedPrice: e.target.value }))
+                  }
+                  className="bg-[#1E2A36] font-mono"
+                  placeholder="e.g. 45000"
+                />
+                <p className="text-xs text-gray-500">
+                  Current: {USDollar.format(editMarket.predictedPrice)}
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Market Question</Label>
+                <Textarea
+                  value={editForm.question}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setEditForm((prev) => ({ ...prev, question: e.target.value }))
+                  }
+                  className="bg-[#1E2A36]"
+                  rows={3}
+                  maxLength={200}
+                />
+                <div className="text-right text-xs text-gray-500">
+                  {editForm.question.length}/200
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>End Date</Label>
+                <Input
+                  type="datetime-local"
+                  value={editForm.closesAt}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEditForm((prev) => ({ ...prev, closesAt: e.target.value }))
+                  }
+                  className="bg-[#1E2A36]"
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="mt-2">
+            <Button
+              variant="outline"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              onClick={() => setEditMarket(null)}
+              disabled={editLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEditSave}
+              disabled={editLoading}
+              className="bg-[#F2CA16] text-black hover:bg-[#F2CA16]/90"
+            >
+              {editLoading ? <BeatLoader size={8} color="black" /> : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
