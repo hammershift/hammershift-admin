@@ -50,7 +50,7 @@ export async function PATCH(
       update.predictedPrice = validation.data.predictedPrice;
       // Sync the question text with new price
       if (!validation.data.question) {
-        const existing = await PolygonMarket.findById(marketId).lean();
+        const existing = await PolygonMarket.findById(marketId).lean() as Record<string, unknown> | null;
         if (existing?.question) {
           // Replace dollar amount in question
           const formatted = new Intl.NumberFormat('en-US', {
@@ -59,7 +59,7 @@ export async function PATCH(
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
           }).format(validation.data.predictedPrice);
-          update.question = existing.question.replace(/\$[\d,]+/, formatted);
+          update.question = (existing.question as string).replace(/\$[\d,]+/, formatted);
         }
       }
     }
