@@ -13,6 +13,14 @@ export interface TournamentType {
   createdAt: string;
 }
 
+export interface EntryTierInput {
+  name: string;
+  buyInAmount: number;
+  prizeMultiplier: number;
+  maxEntries: number;
+  currentEntries: number;
+}
+
 export interface TournamentObjectType {
   title?: string;
   description?: string;
@@ -21,4 +29,9 @@ export interface TournamentObjectType {
   endTime?: string;
   tournamentEndTime?: string;
   auctionID?: string[];
+  rakePercent?: number;
+  scoring_version?: string;
+  entryTiers?: EntryTierInput[];
+  autoCreatedStatus?: string;
+  isAutoCreated?: boolean;
 }

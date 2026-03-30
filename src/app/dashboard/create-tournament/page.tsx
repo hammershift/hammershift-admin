@@ -16,7 +16,7 @@ import TournamentModal from "@/app/ui/dashboard/modals/TournamentModal";
 import AuctionModal from "@/app/ui/dashboard/modals/auction_modal";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
-import { TournamentObjectType } from "@/app/types/tournamentTypes";
+import { TournamentObjectType, EntryTierInput } from "@/app/types/tournamentTypes";
 import { set } from "mongoose";
 
 interface CarData {
@@ -232,7 +232,8 @@ const CreateTournamentsPage = () => {
   const [successfullyPosted, setSuccessfullyPosted] = useState(false); // if tournament is successfully posted
   const [unsuccessfulPosting, setUnsuccessfulPosting] = useState(false);
   const [tournamentObject, setTournamentObject] =
-    useState<TournamentObjectType>({});
+    useState<TournamentObjectType>({ autoCreatedStatus: 'approved', isAutoCreated: false, rakePercent: 10, scoring_version: 'v2' });
+  const [entryTiers, setEntryTiers] = useState<EntryTierInput[]>([]);
   const [totalAuctions, setTotalAuctions] = useState<number | null>(null);
   const [loadMoreButton, setLoadMoreButton] = useState(false);
   const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
@@ -276,7 +277,7 @@ const CreateTournamentsPage = () => {
     incomplete: "Please fill in all fields",
     startTime: "Please enter a valid start time",
     endTime: "Please enter a valid end time",
-    auctionID: "Please select 5 auctions",
+    auctionID: "Please select at least 1 auction (max 15)",
   };
 
   // adds 7 to displayCount
@@ -424,8 +425,8 @@ const CreateTournamentsPage = () => {
   // onChange of input, saves data to tournamentObject
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value: string | Date | number = e.target.value;
-    //turn to number type if buyInFee
-    if (e.target.name == "buyInFee") {
+    //turn to number type if buyInFee or rakePercent
+    if (e.target.name == "buyInFee" || e.target.name == "rakePercent") {
       value = Number(value);
     }
     if (e.target.name == "startTime" || e.target.name == "endTime") {
@@ -464,7 +465,7 @@ const CreateTournamentsPage = () => {
     } else if (
       tournamentObject.auctionID == undefined ||
       selectedData == null ||
-      selectedData?.length < 5
+      selectedData?.length < 1
     ) {
       setInputError("auctionID");
     } else {
@@ -524,7 +525,7 @@ const CreateTournamentsPage = () => {
         return prevSelectedData.filter((item) => item._id !== _id);
       }
       // add new data
-      if (prevSelectedData.length < 5) {
+      if (prevSelectedData.length < 15) {
         return [
           ...prevSelectedData,
           {
@@ -549,7 +550,7 @@ const CreateTournamentsPage = () => {
       if (auctionArray.includes(_id)) {
         auctionArray = auctionArray.filter((itemID) => itemID !== _id);
       } else {
-        if (auctionArray.length < 5) {
+        if (auctionArray.length < 15) {
           auctionArray.push(_id);
         }
       }
@@ -804,6 +805,38 @@ const CreateTournamentsPage = () => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
+              <label htmlFor="rakePercent">Rake % (0-50)</label>
+              <input
+                id="rakePercent"
+                name="rakePercent"
+                type="number"
+                min={0}
+                max={50}
+                placeholder="10"
+                defaultValue={10}
+                className="text-black px-2 py-1.5 flex-grow rounded"
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="scoring_version">Scoring Version</label>
+              <select
+                id="scoring_version"
+                name="scoring_version"
+                className="text-black px-2 py-1.5 flex-grow rounded"
+                defaultValue="v2"
+                onChange={(e) =>
+                  setTournamentObject((prev) => ({
+                    ...prev,
+                    scoring_version: e.target.value,
+                  }))
+                }
+              >
+                <option value="v1">V1 (Legacy)</option>
+                <option value="v2">V2 (Price is Right)</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
               <label htmlFor="tournamentEndTime">Tournament End Time</label>
               <div className="pl-2 opacity-50">
                 {tournamentEndTime != null
@@ -811,6 +844,104 @@ const CreateTournamentsPage = () => {
                   : "--"}
               </div>
             </div>
+          </div>
+          {/* Entry Tiers Section */}
+          <div className="w-full bg-white/5 rounded p-4 md:p-8 flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <div className="text-xl font-bold">Entry Tiers</div>
+              <button
+                type="button"
+                className="btn-yellow text-sm px-3 py-1"
+                onClick={() => {
+                  const newTiers = [...entryTiers, { name: 'New Tier', buyInAmount: 0, prizeMultiplier: 1, maxEntries: 100, currentEntries: 0 }];
+                  setEntryTiers(newTiers);
+                  setTournamentObject((prev) => ({ ...prev, entryTiers: newTiers }));
+                }}
+              >
+                + Add Tier
+              </button>
+            </div>
+            {entryTiers.length === 0 && (
+              <p className="text-sm opacity-50">No entry tiers. Add tiers for tiered buy-ins, or leave empty for single buy-in.</p>
+            )}
+            {entryTiers.map((tier, i) => (
+              <div key={i} className="bg-white/5 rounded p-3 flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">{tier.name || `Tier ${i + 1}`}</span>
+                  <button
+                    type="button"
+                    className="text-red-400 text-sm"
+                    onClick={() => {
+                      const newTiers = entryTiers.filter((_, idx) => idx !== i);
+                      setEntryTiers(newTiers);
+                      setTournamentObject((prev) => ({ ...prev, entryTiers: newTiers }));
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs opacity-70">Name</label>
+                    <input
+                      value={tier.name}
+                      onChange={(e) => {
+                        const newTiers = [...entryTiers];
+                        newTiers[i] = { ...newTiers[i], name: e.target.value };
+                        setEntryTiers(newTiers);
+                        setTournamentObject((prev) => ({ ...prev, entryTiers: newTiers }));
+                      }}
+                      className="text-black px-2 py-1 rounded text-sm"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs opacity-70">Buy-in ($)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={tier.buyInAmount}
+                      onChange={(e) => {
+                        const newTiers = [...entryTiers];
+                        newTiers[i] = { ...newTiers[i], buyInAmount: Number(e.target.value) };
+                        setEntryTiers(newTiers);
+                        setTournamentObject((prev) => ({ ...prev, entryTiers: newTiers }));
+                      }}
+                      className="text-black px-2 py-1 rounded text-sm"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs opacity-70">Prize Multiplier</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={tier.prizeMultiplier}
+                      onChange={(e) => {
+                        const newTiers = [...entryTiers];
+                        newTiers[i] = { ...newTiers[i], prizeMultiplier: Number(e.target.value) };
+                        setEntryTiers(newTiers);
+                        setTournamentObject((prev) => ({ ...prev, entryTiers: newTiers }));
+                      }}
+                      className="text-black px-2 py-1 rounded text-sm"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs opacity-70">Max Entries</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={tier.maxEntries}
+                      onChange={(e) => {
+                        const newTiers = [...entryTiers];
+                        newTiers[i] = { ...newTiers[i], maxEntries: Number(e.target.value) };
+                        setEntryTiers(newTiers);
+                        setTournamentObject((prev) => ({ ...prev, entryTiers: newTiers }));
+                      }}
+                      className="text-black px-2 py-1 rounded text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
           <div className="w-full bg-white/5 rounded p-4 md:p-8 flex flex-col gap-4">
             <div className="text-xl font-bold">List of Selected Auctions</div>
