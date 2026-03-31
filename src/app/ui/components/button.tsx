@@ -34,7 +34,7 @@ const buttonVariants = cva(
 );
 
 interface IProps {
-  className: string;
+  className?: string;
   variant?:
     | "default"
     | "destructive"

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useEffect } from "react";
+import React from "react";
 
 interface SidebarLinkProps {
   item: {
@@ -15,12 +15,16 @@ interface SidebarLinkProps {
 const SidebarLink: React.FC<SidebarLinkProps> = ({ item }) => {
   const currentPath = usePathname();
   const isActive = currentPath === item.path;
-  const linkStyles = `flex items-center gap-2 max-md:p-1 p-3 max-md:text-sm hover:bg-yellow-400 hover:text-black m-1 rounded ${
-    isActive ? "bg-gray-400 text-black" : ""
-  }`;
 
   return (
-    <Link href={item.path} className={linkStyles}>
+    <Link
+      href={item.path}
+      className={`flex items-center gap-2 max-md:p-1 p-3 max-md:text-sm m-1 rounded transition-colors ${
+        isActive
+          ? "border-l-2 border-[#F2CA16] bg-[#253D54] text-[#F2CA16]"
+          : "hover:bg-[#253D54] hover:text-[#F2CA16]"
+      }`}
+    >
       {item.icon}
       {item.title}
     </Link>

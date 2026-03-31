@@ -19,6 +19,14 @@ export interface TournamentUser {
   points?: number;
 }
 
+export interface EntryTier {
+  name: string;
+  buyInAmount: number;
+  prizeMultiplier: number;
+  maxEntries: number;
+  currentEntries: number;
+}
+
 export interface Tournament extends Document {
   _id: Types.ObjectId;
   tournament_id: number;
@@ -37,6 +45,15 @@ export interface Tournament extends Document {
   maxUsers: number;
   scoring_version: "v1" | "v2";
   tier: 'rookie' | 'silver' | 'gold' | 'pro' | null;
+  entryTiers: EntryTier[];
+  rakePercent: number;
+  calculatedPrizePool: number;
+  isAutoCreated: boolean;
+  autoCreatedStatus: 'pending_review' | 'approved' | 'rejected';
+  status: 'draft' | 'upcoming' | 'active' | 'completed' | 'cancelled';
+  bannerImageUrl: string;
+  cancelledAt: Date | null;
+  cancelReason: string;
   createdAt: Date;
 }
 
@@ -166,6 +183,52 @@ const tournamentSchema = new Schema(
       type: String,
       enum: ['rookie', 'silver', 'gold', 'pro'],
       required: false,
+    },
+    entryTiers: {
+      type: [{
+        name:            { type: String, required: true },
+        buyInAmount:     { type: Number, required: true, min: 0 },
+        prizeMultiplier: { type: Number, required: true, min: 0 },
+        maxEntries:      { type: Number, required: true, min: 1 },
+        currentEntries:  { type: Number, default: 0, min: 0 },
+      }],
+      default: [],
+    },
+    rakePercent: {
+      type: Number,
+      default: 10,
+      min: 0,
+      max: 50,
+    },
+    calculatedPrizePool: {
+      type: Number,
+      default: 0,
+    },
+    isAutoCreated: {
+      type: Boolean,
+      default: false,
+    },
+    autoCreatedStatus: {
+      type: String,
+      enum: ['pending_review', 'approved', 'rejected'],
+      default: 'approved',
+    },
+    status: {
+      type: String,
+      enum: ['draft', 'upcoming', 'active', 'completed', 'cancelled'],
+      default: 'upcoming',
+    },
+    bannerImageUrl: {
+      type: String,
+      default: '',
+    },
+    cancelledAt: {
+      type: Date,
+      default: null,
+    },
+    cancelReason: {
+      type: String,
+      default: '',
     },
     // winners: {
     //   type: [TournamentWinner],
