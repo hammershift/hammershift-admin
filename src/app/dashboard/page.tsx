@@ -3,6 +3,7 @@
 import DashboardStats from "@/app/ui/components/DashboardStats";
 import DashboardRevenueChart from "@/app/ui/components/DashboardRevenueChart";
 import DashboardActivityFeed from "@/app/ui/components/DashboardActivityFeed";
+import ScraperStatusWidget from "@/app/ui/components/ScraperStatusWidget";
 
 export default function Dashboard() {
   return (
@@ -29,8 +30,9 @@ export default function Dashboard() {
         <div className="xl:col-span-2">
           <DashboardRevenueChart />
         </div>
-        <div>
+        <div className="space-y-6">
           <DashboardActivityFeed />
+          <ScraperStatusWidget />
         </div>
       </div>
     </div>
