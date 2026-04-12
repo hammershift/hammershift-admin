@@ -49,8 +49,7 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: process.env.AUTH_SECRET,
   pages: {
-    signIn: "/auth/signin",
-    signOut: "/auth/logout",
+    signIn: "/",
   },
   callbacks: {
     async session({ session, token }) {
