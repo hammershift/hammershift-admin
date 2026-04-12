@@ -29,10 +29,8 @@ export const POST = withRateLimit(RateLimitPresets.AUTH, async (req: NextRequest
       );
     }
 
-    // invalidate OTP so it cannot be reused
-    await db.collection("admin_password_reset_tokens").deleteOne({ otp });
-
-    // if OTP code is valid
+    // OTP is valid — keep it in DB so /api/resetPassword can use it
+    // resetPassword will delete it after the password is actually changed
     return NextResponse.json(
       { message: "OTP code verified successfully" },
       { status: 200 }

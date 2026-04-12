@@ -1,4 +1,5 @@
 import clientPromise from "@/app/lib/mongoDB";
+import { sendOtpEmail } from "@/app/lib/mail";
 import { NextRequest, NextResponse } from "next/server";
 import { randomInt } from "crypto";
 import { withRateLimit, RateLimitPresets } from "@/app/lib/rateLimiter";
@@ -35,7 +36,14 @@ export const POST = withRateLimit(RateLimitPresets.AUTH, async (req: NextRequest
       { upsert: true }
     );
 
-    // TODO: Send the new OTP via email
+    const emailResult = await sendOtpEmail({ to: user.email as string, otp: newOtp });
+    if (!emailResult.success) {
+      console.error("Failed to resend OTP email:", emailResult.error);
+      return NextResponse.json(
+        { message: "Failed to send OTP email" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       { message: "A new OTP has been sent to your email" },

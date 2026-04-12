@@ -2,10 +2,10 @@ import { MongoClient } from 'mongodb';
 
 const options = {};
 
-let clientPromise: Promise<MongoClient>;
+let _clientPromise: Promise<MongoClient> | null = null;
 
 function getClientPromise(): Promise<MongoClient> {
-  if (clientPromise) return clientPromise;
+  if (_clientPromise) return _clientPromise;
 
   const uri = process.env.MONGODB_URI;
   if (!uri) {
@@ -17,21 +17,30 @@ function getClientPromise(): Promise<MongoClient> {
       const client = new MongoClient(uri, options);
       global._mongoClientPromise = client.connect();
     }
-    clientPromise = global._mongoClientPromise;
+    _clientPromise = global._mongoClientPromise;
   } else {
     const client = new MongoClient(uri, options);
-    clientPromise = client.connect();
+    _clientPromise = client.connect();
   }
 
-  return clientPromise;
+  return _clientPromise;
 }
 
-// Lazy proxy — evaluated at runtime, not at module import time
-const lazyClientPromise = new Proxy({} as Promise<MongoClient>, {
-  get(_target, prop) {
-    const real = getClientPromise();
-    return Reflect.get(real, prop, real);
+// clientPromise is a getter-based lazy init.
+// Usage: const client = await clientPromise;
+// The promise is only created when first accessed at runtime,
+// not at module import time (which would crash next build).
+const clientPromise: Promise<MongoClient> = {
+  then(resolve, reject) {
+    return getClientPromise().then(resolve, reject);
   },
-});
+  catch(onRejected) {
+    return getClientPromise().catch(onRejected);
+  },
+  finally(onFinally) {
+    return getClientPromise().finally(onFinally);
+  },
+  [Symbol.toStringTag]: 'LazyMongoClientPromise',
+} as Promise<MongoClient>;
 
-export default lazyClientPromise;
+export default clientPromise;
