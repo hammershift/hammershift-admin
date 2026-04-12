@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./ui/globals.css";
 import AuthProvider from "./context/AuthProvider";
-import { useSession } from "next-auth/react";
+
+// Force all pages to server-render on demand — no static prerendering.
+// This admin panel requires auth on every page; SSG is pointless and
+// crashes the build when MONGODB_URI isn't available at build time.
+export const dynamic = "force-dynamic";
 
 const inter = Inter({ subsets: ["latin"] });
 
