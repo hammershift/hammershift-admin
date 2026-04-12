@@ -8,7 +8,6 @@ import { signIn } from "next-auth/react";
 import PersonIcon from "@mui/icons-material/Person";
 import KeyIcon from "@mui/icons-material/Key";
 import velocityMarketsLogo from "../../../../../public/images/velocity-markets-logo.png";
-import GreenCheck from "../../../../../public/images/check-green.svg";
 import RedCancel from "../../../../../public/images/cancel-red.svg";
 import { BounceLoader } from "react-spinners";
 import ForgotPasswordModal from "../../dashboard/modals/forgot_password_modal";
@@ -18,7 +17,6 @@ const LoginPage = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [alert, setAlert] = useState<boolean>(false);
-  const [isUsernameValid, setIsUsernameValid] = useState<boolean>(false);
   const [isEmptyInput, setIsEmptyinput] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState("");
@@ -26,64 +24,18 @@ const LoginPage = () => {
     "enter email" | "enter otp" | "reset password" | "success"
   >("enter email");
 
-  const message = {
-    username: {
-      valid: "",
-      invalid: "Please enter a valid username",
-    },
-    password: {
-      valid: "",
-      invalid: "Please enter password",
-    },
-    both: {
-      valid: "",
-      invalid: "Please enter valid username & password",
-    },
-  };
-
-  //check if admin exists
-  const checkAdminExistence = async () => {
-    try {
-      const response = await fetch("/api/checkAdmin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username: username }),
-      });
-
-      const data = await response.json();
-
-      if (data.usernameExists == true) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      console.error("Error during user existence check:", error);
-      return false;
-    }
-  };
-
-  useEffect(() => {
-    const checkAndSetUsername = async () => {
-      const checkUsername = await checkAdminExistence();
-      setIsEmptyinput(false);
-      setIsUsernameValid(checkUsername);
-    };
-
-    checkAndSetUsername();
-  }, [username]);
-
   // login function
-  const handleSignIn = async (e: any) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    if (username == "" && password == "") {
+    setAlert(false);
+    setIsEmptyinput(false);
+
+    if (username.trim() === "" || password === "") {
       setIsEmptyinput(true);
-      console.log("username and password cannot be empty");
       return;
     }
+
+    setLoading(true);
     try {
       console.log(`Attempting to sign in with: ${username}`);
       const result = await signIn("credentials", {
@@ -387,31 +339,6 @@ const LoginPage = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
-              {username.length > 3 &&
-                (isUsernameValid ? (
-                  <div className="pl-1">
-                    <Image
-                      src={GreenCheck}
-                      alt="check"
-                      width={24}
-                      height={24}
-                      className="w-[24px], h-[24px]"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex gap-1.5 pt-2 items-center pl-2">
-                    <Image
-                      src={RedCancel}
-                      alt="check"
-                      width={16}
-                      height={16}
-                      className="w-[16px], h-[16px]"
-                    />
-                    <p className="text-xs text-red-500">
-                      {message.username.invalid}
-                    </p>
-                  </div>
-                ))}
             </div>
             <div className="m-1">
               <label>
@@ -426,7 +353,7 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              {isEmptyInput == true && (
+              {isEmptyInput && (
                 <div className="flex gap-1.5 pt-2 items-center pl-2">
                   <Image
                     src={RedCancel}
@@ -435,7 +362,7 @@ const LoginPage = () => {
                     height={16}
                     className="w-[16px], h-[16px]"
                   />
-                  <p className="text-xs text-red-500">{message.both.invalid}</p>
+                  <p className="text-xs text-red-500">Please enter username & password</p>
                 </div>
               )}
             </div>
@@ -450,10 +377,9 @@ const LoginPage = () => {
                 </u>
               </p>
               <button
-                className={`my-1 px-3 py-2 font-bold text-black rounded ${
-                  !isUsernameValid ? "bg-white/20" : "bg-[#F2CA16]"
-                }`}
+                className="my-1 px-3 py-2 font-bold text-black rounded bg-[#F2CA16] hover:bg-[#d4ad12] transition-colors"
                 onClick={handleSignIn}
+                disabled={loading}
               >
                 LOGIN
               </button>
