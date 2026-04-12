@@ -1,6 +1,5 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "@/app/lib/mongoDB";
 import { Admin, Credentials } from "@/app/types/adminTypes";
 import { ObjectId } from "mongodb";
@@ -9,7 +8,9 @@ import connectToDB from "@/app/lib/mongoose";
 import Admins from "@/app/models/admin.model";
 
 export const authOptions: NextAuthOptions = {
-  adapter: MongoDBAdapter(clientPromise),
+  // No adapter needed — using JWT strategy with credentials-only auth.
+  // MongoDBAdapter was causing build failures (Invalid URL during SSG)
+  // and is only required for OAuth account linking, which this panel doesn't use.
   session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60,
