@@ -1,26 +1,37 @@
 import { MongoClient } from 'mongodb';
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Invalid/Missing environment variable: "MONGODB_URI');
-}
-
-const uri = process.env.MONGODB_URI;
 const options = {};
 
-let client;
 let clientPromise: Promise<MongoClient>;
 
-if (process.env.NODE_ENV === 'development') {
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
-    console.log('MongoDB connected in development mode');
+function getClientPromise(): Promise<MongoClient> {
+  if (clientPromise) return clientPromise;
+
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
-  console.log('MongoDB connected in production mode');
+
+  if (process.env.NODE_ENV === 'development') {
+    if (!global._mongoClientPromise) {
+      const client = new MongoClient(uri, options);
+      global._mongoClientPromise = client.connect();
+    }
+    clientPromise = global._mongoClientPromise;
+  } else {
+    const client = new MongoClient(uri, options);
+    clientPromise = client.connect();
+  }
+
+  return clientPromise;
 }
 
-export default clientPromise;
+// Lazy proxy — evaluated at runtime, not at module import time
+const lazyClientPromise = new Proxy({} as Promise<MongoClient>, {
+  get(_target, prop) {
+    const real = getClientPromise();
+    return Reflect.get(real, prop, real);
+  },
+});
+
+export default lazyClientPromise;
