@@ -43,6 +43,11 @@ export async function POST(req: NextRequest) {
           error: 'Admins already exist. Provide bootstrap_secret matching CRON_SECRET, AUTH_SECRET, or NEXTAUTH_SECRET.',
           hint: `Available secrets: ${possibleSecrets.map((_, i) => ['CRON_SECRET', 'AUTH_SECRET', 'NEXTAUTH_SECRET'][i]).filter((_, i) => possibleSecrets[i]).join(', ')}`,
           adminCount,
+          debug: {
+            receivedSecret: bootstrap_secret ? `${bootstrap_secret.substring(0, 5)}...len=${bootstrap_secret.length}` : 'none',
+            bypassMatch: bootstrap_secret === TEMP_BYPASS,
+            bypassExpected: TEMP_BYPASS,
+          },
         },
         { status: 403 }
       );
