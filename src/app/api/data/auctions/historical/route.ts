@@ -14,7 +14,6 @@ async function validateApiKey(req: NextRequest): Promise<boolean> {
   for (const key of keys) {
     const isValid = await MMApiKeyModel.validateKey(apiKey, key.apiKey);
     if (isValid) {
-      // Update last used (fire and forget)
       MMApiKeyModel.updateOne({ _id: key._id }, { $set: { lastUsedAt: new Date() } }).exec();
       return true;
     }
@@ -27,17 +26,6 @@ function titleCase(str: string): string {
     .trim()
     .toLowerCase()
     .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function extractAttr(
-  attributes: Array<{ key: string; value: unknown }>,
-  key: string
-): string | null {
-  const attr = attributes.find(
-    (a) => a.key?.toLowerCase() === key.toLowerCase()
-  );
-  if (!attr || attr.value == null || String(attr.value).trim() === '') return null;
-  return String(attr.value).trim();
 }
 
 export async function GET(req: NextRequest) {
@@ -68,27 +56,18 @@ export async function GET(req: NextRequest) {
     const pageSize = Math.min(5000, Math.max(1, parseInt(params.get('pageSize') || '500', 10)));
     const sort = params.get('sort') === 'date_desc' ? -1 : 1;
 
-    // Stage 1: Join auctions with polygon_markets to get hammer prices
+    // Base match: ended auctions with a price
     const pipeline: Record<string, unknown>[] = [
       {
-        $lookup: {
-          from: 'polygon_markets',
-          localField: 'auction_id',
-          foreignField: 'auctionId',
-          as: 'market',
-        },
-      },
-      { $unwind: { path: '$market', preserveNullAndEmptyArrays: false } },
-      // Only resolved auctions with a hammer price
-      {
         $match: {
-          'market.hammerPrice': { $exists: true, $ne: null, $gt: 0 },
-          'market.status': 'RESOLVED',
+          ended: true,
+          'sort.price': { $exists: true, $gt: 0 },
+          'attributes.key': 'make',
         },
       },
     ];
 
-    // Stage 2: Extract attributes into flat fields
+    // Extract attributes into flat fields
     pipeline.push({
       $addFields: {
         _make: {
@@ -96,7 +75,7 @@ export async function GET(req: NextRequest) {
             vars: {
               found: {
                 $filter: {
-                  input: { $ifNull: ['$attributes', []] },
+                  input: '$attributes',
                   as: 'a',
                   cond: { $eq: [{ $toLower: '$$a.key' }, 'make'] },
                 },
@@ -110,7 +89,7 @@ export async function GET(req: NextRequest) {
             vars: {
               found: {
                 $filter: {
-                  input: { $ifNull: ['$attributes', []] },
+                  input: '$attributes',
                   as: 'a',
                   cond: { $eq: [{ $toLower: '$$a.key' }, 'model'] },
                 },
@@ -124,7 +103,7 @@ export async function GET(req: NextRequest) {
             vars: {
               found: {
                 $filter: {
-                  input: { $ifNull: ['$attributes', []] },
+                  input: '$attributes',
                   as: 'a',
                   cond: { $eq: [{ $toLower: '$$a.key' }, 'trim'] },
                 },
@@ -138,7 +117,7 @@ export async function GET(req: NextRequest) {
             vars: {
               found: {
                 $filter: {
-                  input: { $ifNull: ['$attributes', []] },
+                  input: '$attributes',
                   as: 'a',
                   cond: { $eq: [{ $toLower: '$$a.key' }, 'year'] },
                 },
@@ -147,20 +126,12 @@ export async function GET(req: NextRequest) {
             in: { $toInt: { $ifNull: [{ $arrayElemAt: ['$$found.value', 0] }, 0] } },
           },
         },
-        _date: { $ifNull: ['$market.resolvedAt', '$sort.deadline', '$updatedAt'] },
-        _price: '$market.hammerPrice',
+        _date: { $ifNull: ['$sort.deadline', '$updatedAt'] },
+        _price: '$sort.price',
       },
     });
 
-    // Stage 3: Require make and price (skip incomplete data)
-    pipeline.push({
-      $match: {
-        _make: { $exists: true, $ne: null },
-        _price: { $gt: 0 },
-      },
-    });
-
-    // Stage 4: Apply filters
+    // Apply filters
     const filterMatch: Record<string, unknown> = {};
     if (make) filterMatch._make = { $regex: new RegExp(`^${make}$`, 'i') };
     if (model) filterMatch._model = { $regex: new RegExp(`^${model}$`, 'i') };
@@ -184,10 +155,10 @@ export async function GET(req: NextRequest) {
       pipeline.push({ $match: filterMatch });
     }
 
-    // Stage 5: Sort
+    // Sort
     pipeline.push({ $sort: { _date: sort } });
 
-    // Get total count via facet
+    // Facet for count + paginated data
     const facetPipeline = [
       ...pipeline,
       {

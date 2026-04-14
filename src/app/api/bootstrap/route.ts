@@ -24,31 +24,17 @@ export async function POST(req: NextRequest) {
     const adminCount = await Admins.countDocuments();
 
     // Allow bootstrap if: no admins exist, OR a valid bootstrap secret is provided
-    // Check against all possible secrets in the runtime environment
     const possibleSecrets = [
       process.env.CRON_SECRET,
       process.env.AUTH_SECRET,
       process.env.NEXTAUTH_SECRET,
     ].filter(Boolean);
 
-    // TEMPORARY ONE-TIME BYPASS — remove after account creation
-    const TEMP_BYPASS = 'rickdeacon-bootstrap-2026';
-    const hasValidSecret = bootstrap_secret && (
-      possibleSecrets.some(s => s === bootstrap_secret) || bootstrap_secret === TEMP_BYPASS
-    );
+    const hasValidSecret = bootstrap_secret && possibleSecrets.some(s => s === bootstrap_secret);
 
     if (adminCount > 0 && !hasValidSecret) {
       return NextResponse.json(
-        {
-          error: 'Admins already exist. Provide bootstrap_secret matching CRON_SECRET, AUTH_SECRET, or NEXTAUTH_SECRET.',
-          hint: `Available secrets: ${possibleSecrets.map((_, i) => ['CRON_SECRET', 'AUTH_SECRET', 'NEXTAUTH_SECRET'][i]).filter((_, i) => possibleSecrets[i]).join(', ')}`,
-          adminCount,
-          debug: {
-            receivedSecret: bootstrap_secret ? `${bootstrap_secret.substring(0, 5)}...len=${bootstrap_secret.length}` : 'none',
-            bypassMatch: bootstrap_secret === TEMP_BYPASS,
-            bypassExpected: TEMP_BYPASS,
-          },
-        },
+        { error: 'Admins already exist. Provide a valid bootstrap_secret.' },
         { status: 403 }
       );
     }
