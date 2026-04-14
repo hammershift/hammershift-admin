@@ -28,6 +28,38 @@ function titleCase(str: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+// Extract a string attribute value from the attributes array
+function attrVal(key: string) {
+  return {
+    $let: {
+      vars: {
+        el: {
+          $first: {
+            $filter: { input: '$attributes', as: 'a', cond: { $eq: ['$$a.key', key] } },
+          },
+        },
+      },
+      in: '$$el.value',
+    },
+  };
+}
+
+// Extract an integer attribute value with safe conversion
+function attrValInt(key: string) {
+  return {
+    $let: {
+      vars: {
+        el: {
+          $first: {
+            $filter: { input: '$attributes', as: 'a', cond: { $eq: ['$$a.key', key] } },
+          },
+        },
+      },
+      in: { $convert: { input: '$$el.value', to: 'int', onError: 0, onNull: 0 } },
+    },
+  };
+}
+
 export async function GET(req: NextRequest) {
   try {
     const authorized = await validateApiKey(req);
@@ -56,134 +88,90 @@ export async function GET(req: NextRequest) {
     const pageSize = Math.min(5000, Math.max(1, parseInt(params.get('pageSize') || '500', 10)));
     const sort = params.get('sort') === 'date_desc' ? -1 : 1;
 
-    // Base match: ended auctions with a price
+    // Stage 1: Match ended auctions with price and make attribute
     const pipeline: Record<string, unknown>[] = [
       {
         $match: {
           ended: true,
-          'sort.price': { $exists: true, $gt: 0 },
+          'sort.price': { $gt: 0 },
           'attributes.key': 'make',
         },
       },
+      // Stage 2: Slim down docs before sort (critical for 32MB sort limit)
+      { $project: { attributes: 1, 'sort.price': 1, 'sort.deadline': 1, updatedAt: 1 } },
     ];
 
-    // Extract attributes into flat fields
-    pipeline.push({
-      $addFields: {
-        _make: {
-          $let: {
-            vars: {
-              found: {
-                $filter: {
-                  input: '$attributes',
-                  as: 'a',
-                  cond: { $eq: [{ $toLower: '$$a.key' }, 'make'] },
-                },
-              },
-            },
-            in: { $arrayElemAt: ['$$found.value', 0] },
-          },
-        },
-        _model: {
-          $let: {
-            vars: {
-              found: {
-                $filter: {
-                  input: '$attributes',
-                  as: 'a',
-                  cond: { $eq: [{ $toLower: '$$a.key' }, 'model'] },
-                },
-              },
-            },
-            in: { $arrayElemAt: ['$$found.value', 0] },
-          },
-        },
-        _trim: {
-          $let: {
-            vars: {
-              found: {
-                $filter: {
-                  input: '$attributes',
-                  as: 'a',
-                  cond: { $eq: [{ $toLower: '$$a.key' }, 'trim'] },
-                },
-              },
-            },
-            in: { $arrayElemAt: ['$$found.value', 0] },
-          },
-        },
-        _year: {
-          $let: {
-            vars: {
-              found: {
-                $filter: {
-                  input: '$attributes',
-                  as: 'a',
-                  cond: { $eq: [{ $toLower: '$$a.key' }, 'year'] },
-                },
-              },
-            },
-            in: { $convert: { input: { $ifNull: [{ $arrayElemAt: ['$$found.value', 0] }, 0] }, to: 'int', onError: 0, onNull: 0 } },
-          },
-        },
-        _date: { $ifNull: ['$sort.deadline', '$updatedAt'] },
-        _price: '$sort.price',
-      },
-    });
+    // Stage 3: Extract attributes needed for filtering before the facet
+    // Only extract what's needed for filters at this stage
+    const needsPreExtract = make || model || trim || yearMin || yearMax || priceMin || priceMax;
+    if (needsPreExtract) {
+      const addFields: Record<string, unknown> = {};
+      if (make) addFields._make = attrVal('make');
+      if (model) addFields._model = attrVal('model');
+      if (trim) addFields._trim = attrVal('trim');
+      if (yearMin || yearMax) addFields._year = attrValInt('year');
+      pipeline.push({ $addFields: addFields });
 
-    // Apply filters
-    const filterMatch: Record<string, unknown> = {};
-    if (make) filterMatch._make = { $regex: new RegExp(`^${make}$`, 'i') };
-    if (model) filterMatch._model = { $regex: new RegExp(`^${model}$`, 'i') };
-    if (trim) filterMatch._trim = { $regex: new RegExp(trim, 'i') };
-    if (yearMin || yearMax) {
-      filterMatch._year = {};
-      if (yearMin) (filterMatch._year as Record<string, number>).$gte = yearMin;
-      if (yearMax) (filterMatch._year as Record<string, number>).$lte = yearMax;
-    }
-    if (priceMin || priceMax) {
-      filterMatch._price = {};
-      if (priceMin) (filterMatch._price as Record<string, number>).$gte = priceMin;
-      if (priceMax) (filterMatch._price as Record<string, number>).$lte = priceMax;
-    }
-    if (from || to) {
-      filterMatch._date = {};
-      if (from) (filterMatch._date as Record<string, Date>).$gte = new Date(from);
-      if (to) (filterMatch._date as Record<string, Date>).$lte = new Date(to);
-    }
-    if (Object.keys(filterMatch).length > 0) {
+      // Apply filters
+      const filterMatch: Record<string, unknown> = {};
+      if (make) filterMatch._make = { $regex: new RegExp(`^${make}$`, 'i') };
+      if (model) filterMatch._model = { $regex: new RegExp(`^${model}$`, 'i') };
+      if (trim) filterMatch._trim = { $regex: new RegExp(trim, 'i') };
+      if (yearMin || yearMax) {
+        filterMatch._year = {};
+        if (yearMin) (filterMatch._year as Record<string, number>).$gte = yearMin;
+        if (yearMax) (filterMatch._year as Record<string, number>).$lte = yearMax;
+      }
+      if (priceMin || priceMax) {
+        filterMatch['sort.price'] = {};
+        if (priceMin) (filterMatch['sort.price'] as Record<string, number>).$gte = priceMin;
+        if (priceMax) (filterMatch['sort.price'] as Record<string, number>).$lte = priceMax;
+      }
       pipeline.push({ $match: filterMatch });
     }
 
-    // Sort
-    pipeline.push({ $sort: { _date: sort } });
+    // Date range filter (on sort.deadline)
+    if (from || to) {
+      const dateFilter: Record<string, Date> = {};
+      if (from) dateFilter.$gte = new Date(from);
+      if (to) dateFilter.$lte = new Date(to);
+      pipeline.push({ $match: { 'sort.deadline': dateFilter } });
+    }
 
-    // Facet for count + paginated data
-    const facetPipeline = [
-      ...pipeline,
-      {
-        $facet: {
-          metadata: [{ $count: 'total' }],
-          data: [
-            { $skip: (page - 1) * pageSize },
-            { $limit: pageSize },
-            {
-              $project: {
-                _id: 0,
-                date: { $dateToString: { format: '%Y-%m-%d', date: '$_date' } },
-                price: { $toInt: '$_price' },
-                make: '$_make',
-                model: '$_model',
-                trim: '$_trim',
-                year: '$_year',
-              },
+    // Stage 4: Sort (on slim docs after filtering)
+    pipeline.push({ $sort: { 'sort.deadline': sort } });
+
+    // Stage 5: Facet — count + paginate, then extract remaining attributes inside data branch
+    pipeline.push({
+      $facet: {
+        metadata: [{ $count: 'total' }],
+        data: [
+          { $skip: (page - 1) * pageSize },
+          { $limit: pageSize },
+          {
+            $addFields: {
+              _make: attrVal('make'),
+              _model: attrVal('model'),
+              _trim: attrVal('trim'),
+              _year: attrValInt('year'),
             },
-          ],
-        },
+          },
+          {
+            $project: {
+              _id: 0,
+              date: { $dateToString: { format: '%Y-%m-%d', date: { $ifNull: ['$sort.deadline', '$updatedAt'] } } },
+              price: { $toInt: '$sort.price' },
+              make: '$_make',
+              model: '$_model',
+              trim: '$_trim',
+              year: '$_year',
+            },
+          },
+        ],
       },
-    ];
+    });
 
-    const [result] = await db.collection('auctions').aggregate(facetPipeline).toArray();
+    const [result] = await db.collection('auctions').aggregate(pipeline).toArray();
     const total = result.metadata[0]?.total || 0;
     const data = (result.data as Array<Record<string, unknown>>).map((row) => ({
       date: row.date as string,
