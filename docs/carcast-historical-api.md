@@ -9,7 +9,7 @@ This document describes the external API for consuming historical BringATrailer 
 ## Base URL
 
 ```
-Production: https://main.d3bje0ak6q49bm.amplifyapp.com
+Production: https://admin.velocity-markets.com
 ```
 
 ---
@@ -25,7 +25,7 @@ Keys use the `mm_` prefix and are validated against bcrypt-hashed records in the
 **Via admin panel API** (requires admin session):
 
 ```bash
-curl -X POST https://main.d3bje0ak6q49bm.amplifyapp.com/api/admin/api-keys \
+curl -X POST https://admin.velocity-markets.com/api/admin/api-keys \
   -H "Content-Type: application/json" \
   -H "Cookie: <admin-session-cookie>" \
   -d '{"name": "carcast-prod"}'
@@ -54,7 +54,7 @@ x-api-key: mm_abc123...xyz
 ### Revoking a Key
 
 ```bash
-curl -X DELETE "https://main.d3bje0ak6q49bm.amplifyapp.com/api/admin/api-keys?id=<keyId>" \
+curl -X DELETE "https://admin.velocity-markets.com/api/admin/api-keys?id=<keyId>" \
   -H "Cookie: <admin-session-cookie>"
 ```
 
@@ -151,7 +151,7 @@ import requests
 import pandas as pd
 
 API_KEY = "mm_your_key_here"
-BASE_URL = "https://main.d3bje0ak6q49bm.amplifyapp.com"
+BASE_URL = "https://admin.velocity-markets.com"
 
 def fetch_historical(make=None, model=None, page_size=5000):
     """Fetch all historical auction data, paginated."""
