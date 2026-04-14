@@ -123,7 +123,7 @@ export async function GET(req: NextRequest) {
                 },
               },
             },
-            in: { $toInt: { $ifNull: [{ $arrayElemAt: ['$$found.value', 0] }, 0] } },
+            in: { $convert: { input: { $ifNull: [{ $arrayElemAt: ['$$found.value', 0] }, 0] }, to: 'int', onError: 0, onNull: 0 } },
           },
         },
         _date: { $ifNull: ['$sort.deadline', '$updatedAt'] },
