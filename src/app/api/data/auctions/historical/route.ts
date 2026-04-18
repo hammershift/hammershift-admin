@@ -78,6 +78,7 @@ export async function GET(req: NextRequest) {
     const make = params.get('make');
     const model = params.get('model');
     const trim = params.get('trim');
+    const sold = params.get('sold'); // "true", "false", or null (all)
     const yearMin = params.get('yearMin') ? parseInt(params.get('yearMin')!, 10) : null;
     const yearMax = params.get('yearMax') ? parseInt(params.get('yearMax')!, 10) : null;
     const priceMin = params.get('priceMin') ? parseFloat(params.get('priceMin')!) : null;
@@ -88,23 +89,28 @@ export async function GET(req: NextRequest) {
     const pageSize = Math.min(5000, Math.max(1, parseInt(params.get('pageSize') || '500', 10)));
     const sort = params.get('sort') === 'date_desc' ? -1 : 1;
 
-    // Stage 1: Match ended auctions with price and make attribute
+    // Stage 1: Match ALL ended auctions with a make attribute
+    const baseMatch: Record<string, unknown> = {
+      ended: true,
+      'attributes.key': 'make',
+    };
+
+    // Filter by sold status if requested
+    if (sold === 'true') {
+      baseMatch.status_display = 'closed';
+      baseMatch['sort.price'] = { $gt: 0 };
+    } else if (sold === 'false') {
+      baseMatch.status_display = 'unsuccessful';
+    }
+
     const pipeline: Record<string, unknown>[] = [
-      {
-        $match: {
-          ended: true,
-          'sort.price': { $gt: 0 },
-          'attributes.key': 'make',
-        },
-      },
+      { $match: baseMatch },
       // Stage 2: Slim down docs before sort (critical for 32MB sort limit)
-      { $project: { attributes: 1, 'sort.price': 1, 'sort.deadline': 1, updatedAt: 1 } },
+      { $project: { attributes: 1, 'sort.price': 1, 'sort.deadline': 1, updatedAt: 1, status_display: 1 } },
     ];
 
     // Stage 3: Extract attributes needed for filtering before the facet
-    // Only extract what's needed for filters at this stage
-    const needsPreExtract = make || model || trim || yearMin || yearMax || priceMin || priceMax;
-    if (needsPreExtract) {
+    if (make || model || trim || yearMin || yearMax) {
       const addFields: Record<string, unknown> = {};
       if (make) addFields._make = attrVal('make');
       if (model) addFields._model = attrVal('model');
@@ -122,15 +128,18 @@ export async function GET(req: NextRequest) {
         if (yearMin) (filterMatch._year as Record<string, number>).$gte = yearMin;
         if (yearMax) (filterMatch._year as Record<string, number>).$lte = yearMax;
       }
-      if (priceMin || priceMax) {
-        filterMatch['sort.price'] = {};
-        if (priceMin) (filterMatch['sort.price'] as Record<string, number>).$gte = priceMin;
-        if (priceMax) (filterMatch['sort.price'] as Record<string, number>).$lte = priceMax;
-      }
       pipeline.push({ $match: filterMatch });
     }
 
-    // Date range filter (on sort.deadline)
+    // Price filter (only applies when filtering for sold auctions or specific price ranges)
+    if (priceMin || priceMax) {
+      const priceFilter: Record<string, number> = {};
+      if (priceMin) priceFilter.$gte = priceMin;
+      if (priceMax) priceFilter.$lte = priceMax;
+      pipeline.push({ $match: { 'sort.price': priceFilter } });
+    }
+
+    // Date range filter
     if (from || to) {
       const dateFilter: Record<string, Date> = {};
       if (from) dateFilter.$gte = new Date(from);
@@ -154,17 +163,19 @@ export async function GET(req: NextRequest) {
               _model: attrVal('model'),
               _trim: attrVal('trim'),
               _year: attrValInt('year'),
+              _sold: { $eq: ['$status_display', 'closed'] },
             },
           },
           {
             $project: {
               _id: 0,
               date: { $dateToString: { format: '%Y-%m-%d', date: { $ifNull: ['$sort.deadline', '$updatedAt'] } } },
-              price: { $toInt: '$sort.price' },
+              price: { $cond: { if: { $gt: ['$sort.price', 0] }, then: { $toInt: '$sort.price' }, else: null } },
               make: '$_make',
               model: '$_model',
               trim: '$_trim',
               year: '$_year',
+              sold: '$_sold',
             },
           },
         ],
@@ -175,11 +186,12 @@ export async function GET(req: NextRequest) {
     const total = result.metadata[0]?.total || 0;
     const data = (result.data as Array<Record<string, unknown>>).map((row) => ({
       date: row.date as string,
-      price: row.price as number,
+      price: row.price as number | null,
       make: titleCase(String(row.make || '')),
       model: titleCase(String(row.model || '')),
       trim: row.trim ? titleCase(String(row.trim)) : null,
       year: (row.year as number) || null,
+      sold: row.sold as boolean,
     }));
 
     return NextResponse.json({
