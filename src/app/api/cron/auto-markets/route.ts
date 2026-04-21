@@ -37,10 +37,13 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
     const canCreate = Math.min(MAX_PER_DAY - todayCount, MAX_PER_RUN);
 
-    // Candidate query — active auctions with >48h remaining
+    // Candidate query — live auctions with >48h remaining.
+    // Note: we intentionally do NOT filter on isActive. The scraper writes
+    // new auctions with isActive=false; the only records with isActive=true
+    // are historical/manually-flagged docs and all already ended. Using
+    // `ended: false` is the correct "is this auction currently live" check.
     const minDeadline = new Date(Date.now() + 48 * 60 * 60 * 1000);
     const candidates = await Auctions.find({
-      isActive: true,
       ended: { $ne: true },
       'sort.deadline': { $gt: minDeadline },
       'sort.bids': { $gte: 2 },
