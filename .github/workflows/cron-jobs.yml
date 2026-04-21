@@ -12,6 +12,8 @@ on:
     - cron: "0 3 * * *"
     # Auction ending reminders - every 6 hours
     - cron: "0 */6 * * *"
+    # Auto-create Polygon markets for trending auctions - every 4 hours
+    - cron: "0 */4 * * *"
   # Allow manual triggering of individual jobs
   workflow_dispatch:
     inputs:
@@ -25,6 +27,7 @@ on:
           - inactive-users
           - stale-auctions
           - auction-reminders
+          - auto-markets
           - all
 
 jobs:
@@ -115,5 +118,23 @@ jobs:
           echo "Response: $response"
           if [ "$response" != "200" ]; then
             echo "::error::Auction reminders job failed with status $response"
+            exit 1
+          fi
+
+  auto-markets:
+    name: Auto-Create Polygon Markets
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'auto-markets' || github.event.inputs.job == 'all') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 */4 * * *'
+    steps:
+      - name: Trigger auto-markets
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.APP_URL }}/api/cron/auto-markets" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "Response: $response"
+          if [ "$response" != "200" ]; then
+            echo "::error::Auto-markets job failed with status $response"
             exit 1
           fi
