@@ -54,6 +54,7 @@ export interface Tournament extends Document {
   bannerImageUrl: string;
   cancelledAt: Date | null;
   cancelReason: string;
+  settledAt: Date | null;
   createdAt: Date;
 }
 
@@ -229,6 +230,10 @@ const tournamentSchema = new Schema(
     cancelReason: {
       type: String,
       default: '',
+    },
+    settledAt: {
+      type: Date,
+      default: null,
     },
     // winners: {
     //   type: [TournamentWinner],
