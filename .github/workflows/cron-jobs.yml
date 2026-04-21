@@ -14,6 +14,8 @@ on:
     - cron: "0 */6 * * *"
     # Auto-create Polygon markets for trending auctions - every 4 hours
     - cron: "0 */4 * * *"
+    # Close expired tournaments - daily at 04:00 UTC (runs after stale-auctions at 03:00)
+    - cron: "0 4 * * *"
   # Allow manual triggering of individual jobs
   workflow_dispatch:
     inputs:
@@ -28,6 +30,7 @@ on:
           - stale-auctions
           - auction-reminders
           - auto-markets
+          - close-tournaments
           - all
 
 jobs:
@@ -136,5 +139,23 @@ jobs:
           echo "Response: $response"
           if [ "$response" != "200" ]; then
             echo "::error::Auto-markets job failed with status $response"
+            exit 1
+          fi
+
+  close-tournaments:
+    name: Close Expired Tournaments
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'close-tournaments' || github.event.inputs.job == 'all') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 4 * * *'
+    steps:
+      - name: Trigger close-tournaments
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.APP_URL }}/api/cron/close-tournaments" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "Response: $response"
+          if [ "$response" != "200" ]; then
+            echo "::error::close-tournaments job failed with status $response"
             exit 1
           fi
