@@ -32,6 +32,7 @@ import {
 } from "@/app/ui/components/table";
 import {
   Tabs,
+  TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/app/ui/components/tabs";
@@ -164,6 +165,9 @@ export default function WaitlistClient() {
   const [toast, setToast] = useState<Toast | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const listCtrlRef = useRef<AbortController | null>(null);
+  const detailCtrlRef = useRef<AbortController | null>(null);
+
   // Debounce the search input.
   useEffect(() => {
     const id = setTimeout(() => {
@@ -191,6 +195,9 @@ export default function WaitlistClient() {
   }, []);
 
   const loadList = useCallback(async () => {
+    listCtrlRef.current?.abort();
+    const ctrl = new AbortController();
+    listCtrlRef.current = ctrl;
     setLoading(true);
     setError(null);
     try {
@@ -202,6 +209,7 @@ export default function WaitlistClient() {
       if (debouncedQ) params.set("q", debouncedQ);
       const res = await fetch(`/api/waitlist?${params.toString()}`, {
         cache: "no-store",
+        signal: ctrl.signal,
       });
       if (!res.ok) {
         const txt = await res.text();
@@ -209,33 +217,32 @@ export default function WaitlistClient() {
       }
       const json = (await res.json()) as ListResponse;
       setData(json);
-      // Drop selections that aren't on the current page anymore.
-      const visible = new Set(json.data.map((e) => e.email));
-      setSelected((prev) => {
-        const next = new Set<string>();
-        prev.forEach((email) => {
-          if (visible.has(email)) next.add(email);
-        });
-        return next;
-      });
     } catch (e: unknown) {
+      if ((e as Error).name === "AbortError") return;
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
     } finally {
-      setLoading(false);
+      if (listCtrlRef.current === ctrl) setLoading(false);
     }
   }, [filter, page, pageSize, debouncedQ]);
 
   useEffect(() => {
     loadList();
+    return () => listCtrlRef.current?.abort();
   }, [loadList]);
 
   const loadDetail = useCallback(async (id: string) => {
+    detailCtrlRef.current?.abort();
+    const ctrl = new AbortController();
+    detailCtrlRef.current = ctrl;
     setDetailLoading(true);
     setDetailError(null);
     setDetail(null);
     try {
-      const res = await fetch(`/api/waitlist/${id}`, { cache: "no-store" });
+      const res = await fetch(`/api/waitlist/${id}`, {
+        cache: "no-store",
+        signal: ctrl.signal,
+      });
       if (!res.ok) {
         const txt = await res.text();
         throw new Error(`HTTP ${res.status}: ${txt || "detail failed"}`);
@@ -243,10 +250,11 @@ export default function WaitlistClient() {
       const json = (await res.json()) as DetailResponse;
       setDetail(json);
     } catch (e: unknown) {
+      if ((e as Error).name === "AbortError") return;
       const msg = e instanceof Error ? e.message : String(e);
       setDetailError(msg);
     } finally {
-      setDetailLoading(false);
+      if (detailCtrlRef.current === ctrl) setDetailLoading(false);
     }
   }, []);
 
@@ -482,11 +490,12 @@ export default function WaitlistClient() {
       )}
 
       {/* Tabs + search */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Tabs
-          value={filter}
-          onValueChange={(v: string) => setFilter(v as Filter)}
-        >
+      <Tabs
+        value={filter}
+        onValueChange={(v: string) => setFilter(v as Filter)}
+        className="space-y-4"
+      >
+        <div className="flex flex-wrap items-center gap-3">
           <TabsList
             style={{ backgroundColor: "#13202D", borderColor: "#2A3A4A" }}
           >
@@ -495,47 +504,48 @@ export default function WaitlistClient() {
             <TabsTrigger value="flagged">Flagged</TabsTrigger>
             <TabsTrigger value="all">All</TabsTrigger>
           </TabsList>
-        </Tabs>
-        <Input
-          placeholder="Search by email…"
-          value={q}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setQ(e.target.value)
-          }
-          className="w-72"
-          style={{
-            backgroundColor: "#13202D",
-            borderColor: "#2A3A4A",
-            color: "#fff",
-          }}
-        />
-        <div className="flex items-center gap-2 ml-auto">
-          <span className="text-xs" style={{ color: "#94A3B8" }}>
-            Page size
-          </span>
-          <Select
-            value={String(pageSize)}
-            onValueChange={(v: string) => setPageSize(Number(v))}
-          >
-            <SelectTrigger
-              className="w-24"
-              style={{
-                backgroundColor: "#13202D",
-                borderColor: "#2A3A4A",
-                color: "#fff",
-              }}
+          <Input
+            placeholder="Search by email…"
+            value={q}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setQ(e.target.value)
+            }
+            className="w-72"
+            style={{
+              backgroundColor: "#13202D",
+              borderColor: "#2A3A4A",
+              color: "#fff",
+            }}
+          />
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-xs" style={{ color: "#94A3B8" }}>
+              Page size
+            </span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(v: string) => setPageSize(Number(v))}
             >
-              <SelectValue placeholder="Page size" />
-            </SelectTrigger>
-            <SelectContent
-              style={{ backgroundColor: "#13202D", borderColor: "#2A3A4A" }}
-            >
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
+              <SelectTrigger
+                className="w-24"
+                style={{
+                  backgroundColor: "#13202D",
+                  borderColor: "#2A3A4A",
+                  color: "#fff",
+                }}
+              >
+                <SelectValue placeholder="Page size" />
+              </SelectTrigger>
+              <SelectContent
+                style={{ backgroundColor: "#13202D", borderColor: "#2A3A4A" }}
+              >
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
+
+        <TabsContent value={filter} className="mt-0 space-y-4">
 
       {/* Bulk action bar */}
       {selected.size > 0 && (
@@ -810,6 +820,8 @@ export default function WaitlistClient() {
           </TableBody>
         </Table>
       </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Pagination */}
       {data && (
