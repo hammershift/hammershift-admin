@@ -1,4 +1,4 @@
-import { callFrontendInternal } from '@/app/lib/frontendInternal';
+import { callFrontendInternal, extractError } from '@/app/lib/frontendInternal';
 
 describe('callFrontendInternal', () => {
   const originalFetch = global.fetch;
@@ -60,5 +60,25 @@ describe('callFrontendInternal', () => {
     await callFrontendInternal('/x', {}, { timeoutMs: 250 });
     const optsArg = mockFetch.mock.calls[0][1];
     expect(optsArg.signal).toBeDefined();
+  });
+});
+
+describe('extractError', () => {
+  it('returns "unknown" for null/undefined', () => {
+    expect(extractError(null)).toBe('unknown');
+    expect(extractError(undefined)).toBe('unknown');
+  });
+  it('returns "unknown" for non-object body', () => {
+    expect(extractError('plain text')).toBe('unknown');
+    expect(extractError(42)).toBe('unknown');
+  });
+  it('returns "unknown" when error key is null', () => {
+    expect(extractError({ error: null })).toBe('unknown');
+  });
+  it('returns the error string when present', () => {
+    expect(extractError({ error: 'smtp down' })).toBe('smtp down');
+  });
+  it('stringifies non-string error values', () => {
+    expect(extractError({ error: 500 })).toBe('500');
   });
 });

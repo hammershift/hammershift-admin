@@ -45,3 +45,16 @@ export async function callFrontendInternal<T = any>(
 
   return { ok: res.ok, status: res.status, body };
 }
+
+/**
+ * Extract a human-readable error string from an InternalResponse body.
+ * Handles null/undefined/missing-property cases and degrades gracefully on
+ * unexpected shapes. Used by waitlist routes to surface frontend errors.
+ */
+export function extractError(body: unknown): string {
+  if (body && typeof body === 'object' && 'error' in body) {
+    const v = (body as { error?: unknown }).error;
+    return v == null ? 'unknown' : String(v);
+  }
+  return 'unknown';
+}

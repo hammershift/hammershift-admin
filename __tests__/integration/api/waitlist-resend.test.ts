@@ -8,6 +8,7 @@ jest.mock('next-auth', () => ({ getServerSession: jest.fn() }));
 const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
 const mockInternal = jest.fn();
 jest.mock('@/app/lib/frontendInternal', () => ({
+  ...jest.requireActual('@/app/lib/frontendInternal'),
   callFrontendInternal: (...args: any[]) => mockInternal(...args),
 }));
 jest.mock('@/app/lib/auditLogger', () => ({ createAuditLog: jest.fn() }));

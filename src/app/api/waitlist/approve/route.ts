@@ -2,18 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectToDB from '@/app/lib/mongoose';
 import { requireAuth } from '@/app/lib/authMiddleware';
-import { callFrontendInternal } from '@/app/lib/frontendInternal';
+import { callFrontendInternal, extractError } from '@/app/lib/frontendInternal';
 import { createAuditLog } from '@/app/lib/auditLogger';
 
 export const dynamic = 'force-dynamic';
-
-function extractError(body: unknown): string {
-  if (body && typeof body === 'object' && 'error' in body) {
-    const v = (body as { error?: unknown }).error;
-    return v == null ? 'unknown' : String(v);
-  }
-  return 'unknown';
-}
 
 /**
  * POST /api/waitlist/approve

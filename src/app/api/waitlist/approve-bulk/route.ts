@@ -3,21 +3,13 @@ import mongoose from 'mongoose';
 import crypto from 'crypto';
 import connectToDB from '@/app/lib/mongoose';
 import { requireAuth } from '@/app/lib/authMiddleware';
-import { callFrontendInternal } from '@/app/lib/frontendInternal';
+import { callFrontendInternal, extractError } from '@/app/lib/frontendInternal';
 import { createAuditLog } from '@/app/lib/auditLogger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 min — bulk loop with 10s timeout × up to 200 emails worst case
 
 const MAX_BULK = 200;
-
-function extractError(body: unknown): string {
-  if (body && typeof body === 'object' && 'error' in body) {
-    const v = (body as { error?: unknown }).error;
-    return v == null ? 'unknown' : String(v);
-  }
-  return 'unknown';
-}
 
 /**
  * POST /api/waitlist/approve-bulk

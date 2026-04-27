@@ -9,8 +9,10 @@ jest.mock('next-auth', () => ({ getServerSession: jest.fn() }));
 const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
 
 // Mock the frontend internal helper. We don't want to make real HTTP calls.
+// Keep the real `extractError` since it's a pure helper now co-located in this module.
 const mockInternal = jest.fn();
 jest.mock('@/app/lib/frontendInternal', () => ({
+  ...jest.requireActual('@/app/lib/frontendInternal'),
   callFrontendInternal: (...args: any[]) => mockInternal(...args),
 }));
 
