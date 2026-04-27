@@ -43,4 +43,22 @@ describe('callFrontendInternal', () => {
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ error: 'Not approved' });
   });
+
+  it('passes an AbortSignal to fetch (default timeout)', async () => {
+    const mockFetch = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
+    global.fetch = mockFetch as any;
+    await callFrontendInternal('/x', {});
+    const optsArg = mockFetch.mock.calls[0][1];
+    expect(optsArg.signal).toBeDefined();
+    // AbortSignal.timeout produces a real AbortSignal instance:
+    expect(optsArg.signal.constructor.name).toBe('AbortSignal');
+  });
+
+  it('honors caller-provided timeoutMs override', async () => {
+    const mockFetch = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
+    global.fetch = mockFetch as any;
+    await callFrontendInternal('/x', {}, { timeoutMs: 250 });
+    const optsArg = mockFetch.mock.calls[0][1];
+    expect(optsArg.signal).toBeDefined();
+  });
 });
