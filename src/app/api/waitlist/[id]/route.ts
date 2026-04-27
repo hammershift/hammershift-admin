@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
  *    sorted by createdAt desc, ipHash redacted on each
  */
 
-function redact<T extends Record<string, any>>(doc: T | null): T | null {
+function redact<T extends Record<string, unknown>>(doc: T | null): T | null {
   if (!doc) return null;
   const { ipHash: _ip, ...rest } = doc;
   return rest as T;
