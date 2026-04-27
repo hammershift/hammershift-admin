@@ -7,8 +7,17 @@ import { callFrontendInternal } from '@/app/lib/frontendInternal';
 import { createAuditLog } from '@/app/lib/auditLogger';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 300; // 5 min — bulk loop with 10s timeout × up to 200 emails worst case
 
 const MAX_BULK = 200;
+
+function extractError(body: unknown): string {
+  if (body && typeof body === 'object' && 'error' in body) {
+    const v = (body as { error?: unknown }).error;
+    return v == null ? 'unknown' : String(v);
+  }
+  return 'unknown';
+}
 
 /**
  * POST /api/waitlist/approve-bulk
@@ -24,18 +33,33 @@ const MAX_BULK = 200;
  *
  * Body: { emails: string[] }
  * Response: { batchId, total, approved, alreadyApproved, notFound, inviteErrors }
+ *
+ * Response counters:
+ *  - approved: emails for which issue-magic-link returned ok (includes idempotent re-sends)
+ *  - alreadyApproved: emails that already had invitedAt set (independent of send outcome)
+ *  - notFound: emails with no waitlist_entries row
+ *  - inviteErrors: per-email send failures
+ *
+ * Note: an already-approved email whose magic-link send fails contributes to
+ * alreadyApproved AND inviteErrors but NOT approved.
  */
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(['owner', 'admin']);
   if ('error' in auth) return auth.error;
   const { session } = auth;
 
+  const startedAtMs = Date.now();
+
   const body = await req.json().catch(() => ({}));
-  const emails: string[] = Array.isArray(body?.emails)
-    ? body.emails
-        .map((e: unknown) => String(e || '').trim().toLowerCase())
-        .filter((e: string) => e.length > 0)
-    : [];
+  const emails: string[] = Array.from(
+    new Set(
+      Array.isArray(body?.emails)
+        ? body.emails
+            .map((e: unknown) => String(e ?? '').trim().toLowerCase())
+            .filter((e: string) => e.length > 0)
+        : [],
+    ),
+  );
 
   if (emails.length === 0) {
     return NextResponse.json({ error: 'emails[] required' }, { status: 400 });
@@ -96,15 +120,28 @@ export async function POST(req: NextRequest) {
       if (!r.ok) {
         inviteErrors.push({
           email,
-          error: `${r.status}: ${(r.body as any)?.error || 'unknown'}`,
+          error: `${r.status}: ${extractError(r.body)}`,
         });
       } else {
         approved++;
       }
-    } catch (e: any) {
-      inviteErrors.push({ email, error: e?.message || String(e) });
+    } catch (e: unknown) {
+      inviteErrors.push({
+        email,
+        error: e instanceof Error ? e.message : String(e),
+      });
     }
   }
+
+  console.log('[waitlist:bulk_approved]', {
+    batchId,
+    total: emails.length,
+    approved,
+    alreadyApproved,
+    notFound: notFound.length,
+    inviteErrors: inviteErrors.length,
+    durationMs: Date.now() - startedAtMs,
+  });
 
   await createAuditLog({
     userId: session.user.id,

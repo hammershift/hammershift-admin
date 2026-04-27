@@ -7,6 +7,14 @@ import { createAuditLog } from '@/app/lib/auditLogger';
 
 export const dynamic = 'force-dynamic';
 
+function extractError(body: unknown): string {
+  if (body && typeof body === 'object' && 'error' in body) {
+    const v = (body as { error?: unknown }).error;
+    return v == null ? 'unknown' : String(v);
+  }
+  return 'unknown';
+}
+
 /**
  * POST /api/waitlist/approve
  *
@@ -63,10 +71,10 @@ export async function POST(req: NextRequest) {
     });
     inviteSent = r.ok;
     if (!r.ok) {
-      inviteError = `${r.status}: ${(r.body as any)?.error || 'unknown'}`;
+      inviteError = `${r.status}: ${extractError(r.body)}`;
     }
-  } catch (e: any) {
-    inviteError = e?.message || String(e);
+  } catch (e: unknown) {
+    inviteError = e instanceof Error ? e.message : String(e);
   }
 
   await createAuditLog({

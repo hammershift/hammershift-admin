@@ -145,6 +145,19 @@ describe('POST /api/waitlist/approve-bulk', () => {
     expect(body.approved).toBe(1);
   });
 
+  it('dedupes input emails (case-insensitive) and processes each unique email once', async () => {
+    mockGetServerSession.mockResolvedValue(createMockSession('admin') as any);
+    const db = mongoose.connection.db!;
+    await db.collection('waitlist_entries').insertOne({ email: 'a@x.com', referralCode: 'A', invitedAt: null });
+    mockInternal.mockResolvedValue({ ok: true, status: 200, body: { ok: true } });
+
+    const res = await POST(reqBody({ emails: ['A@x.com', 'a@x.com', '  a@x.com  '] }));
+    const body = await res.json();
+    expect(body.total).toBe(1);
+    expect(body.approved).toBe(1);
+    expect(mockInternal).toHaveBeenCalledTimes(1);
+  });
+
   it('idempotent: alreadyApproved counted, invitedAt not bumped, magic-link still sent', async () => {
     mockGetServerSession.mockResolvedValue(createMockSession('admin') as any);
     const db = mongoose.connection.db!;
