@@ -22,6 +22,7 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import LiveTvIcon from "@mui/icons-material/LiveTv";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
+import OutboxIcon from "@mui/icons-material/Outbox";
 
 //images
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -133,6 +134,15 @@ const Sidebar = ({ closeSidebar }: { closeSidebar: () => void }) => {
           path: "/dashboard/comments",
           icon: <CommentIcon />,
         },
+        ...((role === "owner" || role === "admin")
+          ? [
+              {
+                title: "Waitlist",
+                path: "/dashboard/waitlist",
+                icon: <OutboxIcon />,
+              },
+            ]
+          : []),
       ],
     },
     {
