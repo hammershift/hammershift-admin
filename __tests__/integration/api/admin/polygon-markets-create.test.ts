@@ -32,6 +32,14 @@ describe('POST /api/admin/polygon-markets/create', () => {
     },
   };
 
+  const mockOwnerSession = {
+    user: {
+      id: 'owner-789',
+      email: 'owner@test.com',
+      role: 'owner',
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -65,6 +73,20 @@ describe('POST /api/admin/polygon-markets/create', () => {
 
       expect(response.status).toBe(403);
       expect(data.error).toContain('Admin');
+    });
+
+    it('should accept owner role (passes authz, fails at validation)', async () => {
+      (getServerSession as jest.Mock).mockResolvedValue(mockOwnerSession);
+
+      const req = new NextRequest('http://localhost:3000/api/admin/polygon-markets/create', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+
+      const response = await POST(req);
+      // Owner is authorized — the request progresses past authz and hits
+      // body validation, which rejects with 400 because the body is empty.
+      expect(response.status).toBe(400);
     });
   });
 

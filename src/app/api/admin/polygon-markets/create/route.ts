@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Authorization check (admin only)
-    if (session.user.role !== 'admin') {
+    // 2. Authorization check (admin or owner)
+    if (session.user.role !== 'admin' && session.user.role !== 'owner') {
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
