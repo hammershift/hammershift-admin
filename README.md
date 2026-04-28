@@ -34,3 +34,16 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Environment variables
+
+See `.env.example` for the full list. Variables introduced by the waitlist moderation console:
+
+| Var | Purpose |
+| --- | --- |
+| `INTERNAL_API_SECRET` | Shared secret sent as `x-internal-secret` when admin calls the frontend's `POST /api/waitlist/issue-magic-link`. Must match the value set on the frontend deployment. |
+| `FRONTEND_ORIGIN` | Origin used for those internal calls, e.g. `https://velocity-markets.com`. |
+
+Both are required for the waitlist approve / approve-bulk / resend routes to succeed; the helper at `src/app/lib/frontendInternal.ts` throws when either is missing.
+
+See `docs/waitlist-moderation.md` for the operator guide.
